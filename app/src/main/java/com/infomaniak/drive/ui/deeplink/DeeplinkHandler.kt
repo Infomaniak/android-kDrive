@@ -58,7 +58,6 @@ class DeeplinkHandler(registryOwner: SavedStateRegistryOwner) : SavedStateRegist
         })
     }
 
-
     override fun saveState(): Bundle {
         return bundleOf(HANDLED_DEEPLINK_STATE_KEY to deeplinkConsumed)
     }

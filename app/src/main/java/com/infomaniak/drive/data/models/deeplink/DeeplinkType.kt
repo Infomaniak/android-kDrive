@@ -62,11 +62,13 @@ sealed interface DeeplinkType : Parcelable {
             override suspend fun ensureHasAccess(): Collaborate = this
         }
 
-        data class Drive(override var userId: Int? = null, override val driveId: Int, val roleFolder: RoleFolder) :
-            DeeplinkAction {
+        data class Drive(
+            override var userId: Int? = null,
+            override val driveId: Int,
+            val roleFolder: RoleFolder
+        ) : DeeplinkAction {
             override val isHandled: Boolean
                 get() = roleFolder.isHandled
-
 
             override suspend fun ensureHasAccess(): DeeplinkType = roleFolder.ensureHasAccess()
 
