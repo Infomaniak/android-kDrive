@@ -996,7 +996,9 @@ class CloudStorageProvider : DocumentsProvider() {
         fun notifyProviderChanged(context: Context) {
             val authority = context.getString(R.string.CLOUD_STORAGE_AUTHORITY)
             val docBase = "content://$authority/document".toUri()
+            val rootsUri = DocumentsContract.buildRootsUri(authority)
             context.contentResolver.notifyChange(docBase, null)
+            context.contentResolver.notifyChange(rootsUri, null)
         }
 
         fun notifyRootsChanged(context: Context) {
