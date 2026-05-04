@@ -24,6 +24,7 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
@@ -35,11 +36,17 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.databinding.FragmentSettingsSecurityBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import splitties.init.appCtx
 
 class SecuritySettingsFragment : Fragment() {
 
     private var binding: FragmentSettingsSecurityBinding by safeBinding()
+
+    private var contentProviderToggleJob: Job? = null
+    private var ignoreContentProviderSwitchCallback = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentSettingsSecurityBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -63,10 +70,19 @@ class SecuritySettingsFragment : Fragment() {
                 isGone = true
             }
         }
+
+        ignoreContentProviderSwitchCallback = true
         contentProviderSwitch.isChecked = !CloudStorageProvider.isDisabled(appCtx)
+        ignoreContentProviderSwitchCallback = false
 
         contentProviderSwitch.setOnCheckedChangeListener { _, isChecked ->
-            CloudStorageProvider.setDisabled(appCtx, disabled = !isChecked)
+            if (ignoreContentProviderSwitchCallback) return@setOnCheckedChangeListener
+
+            contentProviderToggleJob?.cancel()
+            contentProviderToggleJob = viewLifecycleOwner.lifecycleScope.launch {
+                delay(500)
+                CloudStorageProvider.setDisabled(appCtx, disabled = !isChecked)
+            }
         }
 
         binding.root.enableEdgeToEdge()

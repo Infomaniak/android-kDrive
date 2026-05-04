@@ -130,14 +130,15 @@ class CloudStorageProvider : DocumentsProvider() {
         AccountUtils.getAllUsersSync().forEach { user ->
             cursor.addRoot(user.id.toString(), user.id.toString(), user.email)
 
-            cloudScope.launch {
-                context?.let {
-                    val okHttpClient = AccountUtils.getHttpClient(user.id)
-                    AccountUtils.updateCurrentUserAndDrives(it, fromCloudStorage = true, okHttpClient = okHttpClient)
+            if (!isProviderDisabled()){
+                cloudScope.launch {
+                    context?.let {
+                        val okHttpClient = AccountUtils.getHttpClient(user.id)
+                        AccountUtils.updateCurrentUserAndDrives(it, fromCloudStorage = true, okHttpClient = okHttpClient)
+                    }
                 }
             }
         }
-
         return cursor
     }
 
@@ -984,8 +985,18 @@ class CloudStorageProvider : DocumentsProvider() {
         }
 
         fun setDisabled(context: Context, disabled: Boolean) {
-            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit { putBoolean(KEY_PROVIDER_DISABLED, disabled) }
-            notifyRootsChanged(context)
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val old = prefs.getBoolean(KEY_PROVIDER_DISABLED, false)
+            if (old == disabled) return
+
+            prefs.edit { putBoolean(KEY_PROVIDER_DISABLED, disabled) }
+            notifyProviderChanged(context)
+        }
+
+        fun notifyProviderChanged(context: Context) {
+            val authority = context.getString(R.string.CLOUD_STORAGE_AUTHORITY)
+            val docBase = "content://$authority/document".toUri()
+            context.contentResolver.notifyChange(docBase, null)
         }
 
         fun notifyRootsChanged(context: Context) {
