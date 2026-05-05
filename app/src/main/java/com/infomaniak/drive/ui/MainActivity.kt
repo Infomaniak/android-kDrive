@@ -121,7 +121,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import com.infomaniak.core.legacy.R as RCore
 
@@ -349,7 +348,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun observeCurrentUserAvatar() {
-        AccountUtils.currentUserAvatar.observe(this){
+        AccountUtils.currentUserFlow.observe(this) {
             setBottomNavigationUserAvatar(this@MainActivity)
         }
     }

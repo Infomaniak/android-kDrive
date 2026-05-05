@@ -67,17 +67,15 @@ class MenuFragment : Fragment() {
 
         menuUploadFileInProgressView.setFolderId(folderId = OTHER_ROOT_ID)
 
-        val user = AccountUtils.currentUser ?: return@with
-
-        userName.text = user.displayName
-        userEmail.text = user.email
-        userImage.loadAvatar(id = user.id, avatarUrl = user.avatar, initials = user.getInitials())
-
-        AccountUtils.currentUserAvatar.observe(viewLifecycleOwner) { avatar ->
-            AccountUtils.currentUser?.let { user ->
-                userImage.loadAvatar(id = user.id, avatarUrl = avatar, initials = user.getInitials())
+        AccountUtils.currentUserFlow.observe(viewLifecycleOwner) { user ->
+            user?.let {
+                userName.text = it.displayName
+                userEmail.text = it.email
+                userImage.loadAvatar(id = it.id, avatarUrl = it.avatar, initials = it.getInitials())
             }
         }
+
+        val user = AccountUtils.currentUser ?: return@with
 
         if (DriveInfosController.hasSingleDrive(user.id)) {
             driveIcon.isGone = true
