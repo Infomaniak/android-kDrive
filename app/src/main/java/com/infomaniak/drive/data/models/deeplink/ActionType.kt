@@ -32,7 +32,7 @@ internal enum class ActionType(val type: String, val actionPattern: String) {
             )
             Drive -> DeeplinkAction.Drive(
                 driveId = parseId(GROUP_DRIVE_ID),
-                roleFolder = RoleFolder.from(
+                deeplinkFolderRole = DeeplinkFolderRole.from(
                     folderType = parseString(GROUP_ROLE),
                     folderProperties = parseOptionalString(GROUP_FOLDER_PROPERTIES) ?: "",
                 )

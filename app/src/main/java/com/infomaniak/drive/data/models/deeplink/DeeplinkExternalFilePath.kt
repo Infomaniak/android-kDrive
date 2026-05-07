@@ -21,10 +21,10 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-sealed interface ExternalFileType : Parcelable {
+sealed interface DeeplinkExternalFilePath : Parcelable {
     val sourceDriveId: Int
 
-    data class FilePreview(override val sourceDriveId: Int, val fileId: Int) : ExternalFileType {
+    data class FilePreview(override val sourceDriveId: Int, val fileId: Int) : DeeplinkExternalFilePath {
         constructor(match: MatchResult) : this(
             sourceDriveId = match.parseId(GROUP_DRIVE_ID),
             fileId = match.parseId(GROUP_FILE_ID),
@@ -35,7 +35,7 @@ sealed interface ExternalFileType : Parcelable {
         }
     }
 
-    data class Folder(override val sourceDriveId: Int, val folderId: Int) : ExternalFileType {
+    data class Folder(override val sourceDriveId: Int, val folderId: Int) : DeeplinkExternalFilePath {
         constructor(match: MatchResult) : this(
             sourceDriveId = match.parseId(GROUP_DRIVE_ID),
             folderId = match.parseId(GROUP_FOLDER_ID),
@@ -46,7 +46,8 @@ sealed interface ExternalFileType : Parcelable {
         }
     }
 
-    data class FilePreviewInFolder(override val sourceDriveId: Int, val folderId: Int, val fileId: Int) : ExternalFileType {
+    data class FilePreviewInFolder(override val sourceDriveId: Int, val folderId: Int, val fileId: Int) :
+        DeeplinkExternalFilePath {
         constructor(match: MatchResult) : this(
             sourceDriveId = match.parseId(GROUP_DRIVE_ID),
             folderId = match.parseId(GROUP_FOLDER_ID),
@@ -78,7 +79,7 @@ sealed interface ExternalFileType : Parcelable {
             "$START_OF_REGEX(?<$GROUP_PREVIEW_FILE_IN_FOLDER>${FilePreviewInFolder.PATTERN})$END_OF_REGEX",
         )
 
-        fun MatchResult?.extractExternalFileType(): ExternalFileType? {
+        fun MatchResult?.extractExternalFileType(): DeeplinkExternalFilePath? {
             return tryMatchFor(GROUP_PREVIEW_FILE, ::FilePreview)
                 ?: tryMatchFor(GROUP_FOLDER, ::Folder)
                 ?: tryMatchFor(GROUP_PREVIEW_FILE_IN_FOLDER, ::FilePreviewInFolder)

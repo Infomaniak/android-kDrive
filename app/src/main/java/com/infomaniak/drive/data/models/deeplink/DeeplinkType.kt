@@ -24,9 +24,9 @@ import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.models.deeplink.ExternalFileType.FilePreview
-import com.infomaniak.drive.data.models.deeplink.ExternalFileType.FilePreviewInFolder
-import com.infomaniak.drive.data.models.deeplink.ExternalFileType.Folder
+import com.infomaniak.drive.data.models.deeplink.DeeplinkExternalFilePath.FilePreview
+import com.infomaniak.drive.data.models.deeplink.DeeplinkExternalFilePath.FilePreviewInFolder
+import com.infomaniak.drive.data.models.deeplink.DeeplinkExternalFilePath.Folder
 import com.infomaniak.drive.ui.MainActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.parcelize.Parcelize
@@ -65,24 +65,24 @@ sealed interface DeeplinkType : Parcelable {
         data class Drive(
             override var userId: Int? = null,
             override val driveId: Int,
-            val roleFolder: RoleFolder
+            val deeplinkFolderRole: DeeplinkFolderRole
         ) : DeeplinkAction {
             override val isHandled: Boolean
-                get() = roleFolder.isHandled
+                get() = deeplinkFolderRole.isHandled
 
-            override suspend fun ensureHasAccess(): DeeplinkType = roleFolder.ensureHasAccess()
+            override suspend fun ensureHasAccess(): DeeplinkType = deeplinkFolderRole.ensureHasAccess()
 
-            private suspend fun RoleFolder.ensureHasAccess(): DeeplinkType = when (this) {
-                is RoleFolder.Favorites -> ensureHasAccess(fileId = fileId)
-                is RoleFolder.Files -> ensureHasAccess(fileId = fileType.fileId)
-                is RoleFolder.MyShares -> ensureHasAccess(fileId = fileId)
-                is RoleFolder.Recents -> ensureHasAccess(fileId = fileId)
-                is RoleFolder.SharedWithMe -> fileType.hasAccessTo()
-                is RoleFolder.Trash -> ensureHasAccess(fileId = folderId)
+            private suspend fun DeeplinkFolderRole.ensureHasAccess(): DeeplinkType = when (this) {
+                is DeeplinkFolderRole.Favorites -> ensureHasAccess(fileId = fileId)
+                is DeeplinkFolderRole.Files -> ensureHasAccess(fileId = filePath.fileId)
+                is DeeplinkFolderRole.MyShares -> ensureHasAccess(fileId = fileId)
+                is DeeplinkFolderRole.Recents -> ensureHasAccess(fileId = fileId)
+                is DeeplinkFolderRole.SharedWithMe -> externalFilePath.hasAccessTo()
+                is DeeplinkFolderRole.Trash -> ensureHasAccess(fileId = folderId)
                 else -> this@Drive
             }
 
-            private suspend fun ExternalFileType?.hasAccessTo(): DeeplinkType = when (this) {
+            private suspend fun DeeplinkExternalFilePath?.hasAccessTo(): DeeplinkType = when (this) {
                 is FilePreview -> ensureHasAccess(fileId, sharedWithMe = true)
                 is FilePreviewInFolder -> ensureHasAccess(fileId, sharedWithMe = true)
                 is Folder -> ensureHasAccess(fileId = folderId, sharedWithMe = true)
@@ -104,16 +104,14 @@ sealed interface DeeplinkType : Parcelable {
             }
 
             private suspend fun DeeplinkAction.hasAccessTo(fileId: Int?, sharedWithMe: Boolean = false): Boolean {
-                return fileId?.let { hasAccessTo(fileId, sharedWithMe) } ?: hasDrive(sharedWithMe)
-            }
-
-            private suspend fun DeeplinkAction.hasAccessTo(fileId: Int, sharedWithMe: Boolean = false): Boolean {
-                val userId = userId
-                return if (userId != null) {
-                    hasFile(fileId, userId = userId, driveId, sharedWithMe)
-                } else {
-                    getUserDriveWithFile(fileId, sharedWithMe)?.updateUser(deeplinkAction = this) != null
-                }
+                return fileId?.let {
+                    val userId = userId
+                    if (userId != null) {
+                        hasFile(fileId, userId = userId, driveId, sharedWithMe)
+                    } else {
+                        getUserDriveWithFile(fileId, sharedWithMe)?.updateUser(deeplinkAction = this) != null
+                    }
+                } ?: hasDrive(sharedWithMe)
             }
 
             private suspend fun hasFile(fileId: Int, userId: Int, driveId: Int, sharedWithMe: Boolean): Boolean {

@@ -21,8 +21,8 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-sealed class FileType(open val fileId: Int) : Parcelable {
-    data class File(override val fileId: Int) : FileType(fileId = fileId) {
+sealed class DeeplinkFilePath(open val fileId: Int) : Parcelable {
+    data class File(override val fileId: Int) : DeeplinkFilePath(fileId = fileId) {
         constructor(match: MatchResult) : this(
             fileId = match.parseId(GROUP_FILE_ID),
         )
@@ -33,7 +33,7 @@ sealed class FileType(open val fileId: Int) : Parcelable {
     }
 
     data class FilePreviewInFolder(val folderId: Int, override val fileId: Int) :
-        FileType(fileId = fileId) {
+        DeeplinkFilePath(fileId = fileId) {
         constructor(match: MatchResult) : this(
             folderId = match.parseId(GROUP_FOLDER_ID),
             fileId = match.parseId(GROUP_FILE_ID),
@@ -61,7 +61,7 @@ sealed class FileType(open val fileId: Int) : Parcelable {
             "$START_OF_REGEX(?<$GROUP_PREVIEW_IN_FOLDER>${FilePreviewInFolder.PATTERN})$END_OF_REGEX",
         )
 
-        fun MatchResult?.extractFileType(): FileType {
+        fun MatchResult?.extractFileType(): DeeplinkFilePath {
             return tryMatchFor(GROUP_FILE, ::File)
                 ?: tryMatchFor(GROUP_PREVIEW_IN_FOLDER, ::FilePreviewInFolder)
                 ?: throw InvalidFormatting()

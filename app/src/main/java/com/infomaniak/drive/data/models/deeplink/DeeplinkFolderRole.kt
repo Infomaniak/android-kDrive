@@ -21,38 +21,38 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-sealed interface RoleFolder : Parcelable {
+sealed interface DeeplinkFolderRole : Parcelable {
     val isHandled: Boolean
         get() = true
 
-    data class Category(val id: Int, val fileId: Int? = null) : RoleFolder {
+    data class Category(val id: Int, val fileId: Int? = null) : DeeplinkFolderRole {
         override val isHandled: Boolean get() = false
     }
 
-    data object Collaboratives : RoleFolder {
+    data object Collaboratives : DeeplinkFolderRole {
         override val isHandled: Boolean get() = false
     }
 
-    data class Files(val fileType: FileType) : RoleFolder
+    data class Files(val filePath: DeeplinkFilePath) : DeeplinkFolderRole
 
-    data class Recents(val fileId: Int?) : RoleFolder
+    data class Recents(val fileId: Int?) : DeeplinkFolderRole
 
-    data class SharedWithMe(val fileType: ExternalFileType?) : RoleFolder
+    data class SharedWithMe(val externalFilePath: DeeplinkExternalFilePath?) : DeeplinkFolderRole
 
-    data class SharedLinks(val fileId: Int?) : RoleFolder {
+    data class SharedLinks(val fileId: Int?) : DeeplinkFolderRole {
         override val isHandled: Boolean get() = false
     }
 
-    data class Favorites(val fileId: Int?) : RoleFolder
+    data class Favorites(val fileId: Int?) : DeeplinkFolderRole
 
-    data class MyShares(val fileId: Int?) : RoleFolder
+    data class MyShares(val fileId: Int?) : DeeplinkFolderRole
 
-    data class Trash(val folderId: Int?) : RoleFolder
+    data class Trash(val folderId: Int?) : DeeplinkFolderRole
 
     companion object {
         @Throws(InvalidFormatting::class)
-        fun from(folderType: String, folderProperties: String): RoleFolder {
-            return FolderType.from(folderType).build(folderProperties)
+        fun from(folderType: String, folderProperties: String): DeeplinkFolderRole {
+            return DeeplinkFolderType.from(folderType).build(folderProperties)
         }
     }
 }

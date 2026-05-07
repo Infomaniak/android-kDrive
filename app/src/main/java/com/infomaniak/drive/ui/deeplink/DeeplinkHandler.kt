@@ -42,7 +42,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 
-
 class DeeplinkHandler(registryOwner: SavedStateRegistryOwner) : SavedStateRegistry.SavedStateProvider {
 
     private var deeplinkConsumed: Boolean = false
@@ -79,23 +78,19 @@ class DeeplinkHandler(registryOwner: SavedStateRegistryOwner) : SavedStateRegist
     }
 
     private fun DeeplinkAction.Drive.handleDriveDeeplink(activity: MainActivity) {
-        with(activity) {
-            lifecycleScope.launch(context = Dispatchers.IO) {
-                DriveInfosController.getDrive(userId = userId, driveId = driveId, maintenance = false)
-                    ?.ensureRightUser()
-                    ?.let { navigateFromDriveDeeplink(this@handleDriveDeeplink) }
-            }
+        activity.lifecycleScope.launch(context = Dispatchers.IO) {
+            DriveInfosController.getDrive(userId = userId, driveId = driveId, maintenance = false)
+                ?.ensureRightUser()
+                ?.let { activity.navigateFromDriveDeeplink(this@handleDriveDeeplink) }
         }
     }
 
     private fun DeeplinkAction.Office.handleOnlyOfficeDeeplink(activity: MainActivity) {
-        with(activity) {
-            lifecycleScope.launch(context = Dispatchers.IO) {
-                DriveInfosController.getDrive(userId = userId, driveId = driveId, maintenance = false)
-                    ?.ensureRightUser()
-                    ?.run { FileController.getFileById(fileId = fileId, userDrive = UserDrive(userId = userId, driveId = id)) }
-                    ?.let { Dispatchers.Main { openOnlyOfficeActivity(it) } }
-            }
+        activity.lifecycleScope.launch(context = Dispatchers.IO) {
+            DriveInfosController.getDrive(userId = userId, driveId = driveId, maintenance = false)
+                ?.ensureRightUser()
+                ?.run { FileController.getFileById(fileId = fileId, userDrive = UserDrive(userId = userId, driveId = id)) }
+                ?.let { Dispatchers.Main { activity.openOnlyOfficeActivity(it) } }
         }
     }
 

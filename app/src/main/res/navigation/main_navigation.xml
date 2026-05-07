@@ -92,9 +92,9 @@
             android:id="@+id/action_fileListFragment_to_dropBoxResultBottomSheetDialog"
             app:destination="@id/dropBoxResultBottomSheetDialog" />
         <argument
-            android:name="fileType"
+            android:name="filePath"
             android:defaultValue="@null"
-            app:argType="com.infomaniak.drive.data.models.deeplink.FileType"
+            app:argType="com.infomaniak.drive.data.models.deeplink.DeeplinkFilePath"
             app:nullable="true" />
     </fragment>
 
@@ -895,9 +895,9 @@
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <argument
-            android:name="externalFileType"
+            android:name="externalFilePath"
             android:defaultValue="@null"
-            app:argType="com.infomaniak.drive.data.models.deeplink.ExternalFileType"
+            app:argType="com.infomaniak.drive.data.models.deeplink.DeeplinkExternalFilePath"
             app:nullable="true" />
         <action
             android:id="@+id/action_sharedWithMeFragment_to_sortFilesBottomSheetDialog"

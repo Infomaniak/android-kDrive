@@ -36,8 +36,8 @@ import com.infomaniak.drive.BuildConfig.DEBUG
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.deeplink.DeeplinkFolderRole
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
-import com.infomaniak.drive.data.models.deeplink.RoleFolder
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
@@ -140,25 +140,27 @@ class RootFilesFragment : BaseRootFolderFragment() {
     }
 
     private fun retrieveDeeplinkAction(deeplinkAction: DeeplinkAction.Drive): NavDirections? {
-        return with(deeplinkAction.roleFolder) {
+        return with(deeplinkAction.deeplinkFolderRole) {
             when (this) {
-                is RoleFolder.Favorites -> actionFilesFragmentToFavoritesFragment(
+                is DeeplinkFolderRole.Favorites -> actionFilesFragmentToFavoritesFragment(
                     userDrive = UserDrive(),
                     previewFileId = fileId ?: 0
                 )
-                is RoleFolder.MyShares -> actionFilesFragmentToMySharesFragment(
+                is DeeplinkFolderRole.MyShares -> actionFilesFragmentToMySharesFragment(
                     userDrive = UserDrive(),
                     previewFileId = fileId ?: 0
                 )
-                is RoleFolder.Recents -> actionFilesFragmentToRecentChangesFragment(previewFileId = fileId ?: 0)
-                is RoleFolder.SharedWithMe -> actionFilesFragmentToSharedWithMeFragment(
+                is DeeplinkFolderRole.Recents -> actionFilesFragmentToRecentChangesFragment(previewFileId = fileId ?: 0)
+                is DeeplinkFolderRole.SharedWithMe -> actionFilesFragmentToSharedWithMeFragment(
                     userDrive = UserDrive(),
-                    driveId = fileType?.sourceDriveId ?: 0,
-                    externalFileType = fileType
+                    driveId = externalFilePath?.sourceDriveId ?: 0,
+                    externalFilePath = externalFilePath
                 )
-                is RoleFolder.Trash -> actionFilesFragmentToTrashFragment(subfolderId = folderId ?: -1)
-                is RoleFolder.Files -> actionFilesFragmentToFileListFragment(fileType = fileType)
-                is RoleFolder.Category, is RoleFolder.Collaboratives, is RoleFolder.SharedLinks -> notHandled(deeplinkAction)
+                is DeeplinkFolderRole.Trash -> actionFilesFragmentToTrashFragment(subfolderId = folderId ?: -1)
+                is DeeplinkFolderRole.Files -> actionFilesFragmentToFileListFragment(filePath = filePath)
+                is DeeplinkFolderRole.Category, is DeeplinkFolderRole.Collaboratives, is DeeplinkFolderRole.SharedLinks -> notHandled(
+                    deeplinkAction
+                )
             }
         }
     }

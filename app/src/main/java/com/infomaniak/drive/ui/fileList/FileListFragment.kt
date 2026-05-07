@@ -73,7 +73,7 @@ import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.coil.ImageLoaderType
-import com.infomaniak.drive.data.models.deeplink.FileType
+import com.infomaniak.drive.data.models.deeplink.DeeplinkFilePath
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
@@ -137,7 +137,7 @@ open class FileListFragment : MultiSelectFragment(
     private var retryLoadingActivities = false
 
     open val fileIdToPreview: Int
-        get() = (navigationArgs.fileType as? FileType.FilePreviewInFolder)?.fileId ?: 0
+        get() = (navigationArgs.filePath as? DeeplinkFilePath.FilePreviewInFolder)?.fileId ?: 0
     open var previewManaged: Boolean = false
     protected val showLoadingTimer: CountDownTimer by lazy {
         createRefreshTimer { _binding?.let { it.swipeRefreshLayout.isRefreshing = true } }
@@ -199,10 +199,10 @@ open class FileListFragment : MultiSelectFragment(
     }
 
     private fun initFolder() {
-        val fileType = navigationArgs.fileType
+        val fileType = navigationArgs.filePath
         folderId = when (fileType) {
-            is FileType.File -> fileType.fileId
-            is FileType.FilePreviewInFolder -> fileType.folderId
+            is DeeplinkFilePath.File -> fileType.fileId
+            is DeeplinkFilePath.FilePreviewInFolder -> fileType.folderId
             else -> navigationArgs.folderId
         }
         folderName = fileType?.let { FileController.getFileById(folderId, userDrive)?.name } ?: navigationArgs.folderName

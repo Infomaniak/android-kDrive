@@ -52,7 +52,7 @@ class DeeplinkParserTest {
     @Test
     fun `parse deeplink Drive Favorites`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/favorites".mockUri()
-        val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Favorites(fileId = null))
+        val expected = DeeplinkAction.Drive(driveId = 140946, deeplinkFolderRole = DeeplinkFolderRole.Favorites(fileId = null))
         val deeplinkType = DeeplinkParser.parse(uri)
         assertEquals(expected, deeplinkType)
     }
@@ -60,7 +60,7 @@ class DeeplinkParserTest {
     @Test
     fun `parse deeplink Drive Favorites preview`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/favorites/preview/image/4818859".mockUri()
-        val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Favorites(fileId = 4818859))
+        val expected = DeeplinkAction.Drive(driveId = 140946, deeplinkFolderRole = DeeplinkFolderRole.Favorites(fileId = 4818859))
         val deeplinkType = DeeplinkParser.parse(uri)
         assertEquals(expected, deeplinkType)
     }
@@ -68,7 +68,11 @@ class DeeplinkParserTest {
     @Test
     fun `parse deeplink Drive File`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/files/4818791".mockUri()
-        val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Files(FileType.File(fileId = 4818791)))
+        val expected =
+            DeeplinkAction.Drive(
+                driveId = 140946,
+                deeplinkFolderRole = DeeplinkFolderRole.Files(DeeplinkFilePath.File(fileId = 4818791))
+            )
         val deeplinkType = DeeplinkParser.parse(uri)
         assertEquals(expected, deeplinkType)
     }
@@ -78,7 +82,12 @@ class DeeplinkParserTest {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/files/4818791/preview/video/4819045".mockUri()
         val expected = DeeplinkAction.Drive(
             driveId = 140946,
-            roleFolder = RoleFolder.Files(FileType.FilePreviewInFolder(folderId = 4818791, fileId = 4819045))
+            deeplinkFolderRole = DeeplinkFolderRole.Files(
+                DeeplinkFilePath.FilePreviewInFolder(
+                    folderId = 4818791,
+                    fileId = 4819045
+                )
+            )
         )
         val deeplinkType = DeeplinkParser.parse(uri)
         assertEquals(expected, deeplinkType)
@@ -87,7 +96,7 @@ class DeeplinkParserTest {
     @Test
     fun `parse deeplink Drive MyShare`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/my-shares".mockUri()
-        val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.MyShares(fileId = null))
+        val expected = DeeplinkAction.Drive(driveId = 140946, deeplinkFolderRole = DeeplinkFolderRole.MyShares(fileId = null))
         val deeplinkType = DeeplinkParser.parse(uri)
         assertEquals(expected, deeplinkType)
     }
@@ -95,7 +104,7 @@ class DeeplinkParserTest {
     @Test
     fun `parse deeplink Drive MyShare preview`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/my-shares/preview/text/4818798".mockUri()
-        val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.MyShares(fileId = 4818798))
+        val expected = DeeplinkAction.Drive(driveId = 140946, deeplinkFolderRole = DeeplinkFolderRole.MyShares(fileId = 4818798))
         val deeplinkType = DeeplinkParser.parse(uri)
         assertEquals(expected, deeplinkType)
     }
@@ -103,7 +112,7 @@ class DeeplinkParserTest {
     @Test
     fun `parse deeplink Drive Recents`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/recents".mockUri()
-        val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Recents(fileId = null))
+        val expected = DeeplinkAction.Drive(driveId = 140946, deeplinkFolderRole = DeeplinkFolderRole.Recents(fileId = null))
         val deeplinkType = DeeplinkParser.parse(uri)
         assertEquals(expected, deeplinkType)
     }
@@ -111,7 +120,7 @@ class DeeplinkParserTest {
     @Test
     fun `parse deeplink Drive Recents preview`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/recents/preview/text/4819050".mockUri()
-        val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Recents(fileId = 4819050))
+        val expected = DeeplinkAction.Drive(driveId = 140946, deeplinkFolderRole = DeeplinkFolderRole.Recents(fileId = 4819050))
         val deeplinkType = DeeplinkParser.parse(uri)
         assertEquals(expected, deeplinkType)
     }
@@ -119,7 +128,8 @@ class DeeplinkParserTest {
     @Test
     fun `parse deeplink Drive SharedWithMe`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/shared-with-me".mockUri()
-        val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.SharedWithMe(fileType = null))
+        val expected =
+            DeeplinkAction.Drive(driveId = 140946, deeplinkFolderRole = DeeplinkFolderRole.SharedWithMe(externalFilePath = null))
         val deeplinkType = DeeplinkParser.parse(uri)
         assertEquals(expected, deeplinkType)
     }
@@ -129,7 +139,12 @@ class DeeplinkParserTest {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/shared-with-me/140946/4623400".mockUri()
         val expected = DeeplinkAction.Drive(
             driveId = 140946,
-            roleFolder = RoleFolder.SharedWithMe(fileType = ExternalFileType.Folder(sourceDriveId = 140946, folderId = 4623400))
+            deeplinkFolderRole = DeeplinkFolderRole.SharedWithMe(
+                externalFilePath = DeeplinkExternalFilePath.Folder(
+                    sourceDriveId = 140946,
+                    folderId = 4623400
+                )
+            )
         )
         val deeplinkType = DeeplinkParser.parse(uri)
         assertEquals(expected, deeplinkType)
@@ -141,8 +156,12 @@ class DeeplinkParserTest {
             "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/shared-with-me/140946/4623400/preview/code/4624401".mockUri()
         val expected = DeeplinkAction.Drive(
             driveId = 140946,
-            roleFolder = RoleFolder.SharedWithMe(
-                fileType = ExternalFileType.FilePreviewInFolder(sourceDriveId = 140946, folderId = 4623400, fileId = 4624401)
+            deeplinkFolderRole = DeeplinkFolderRole.SharedWithMe(
+                externalFilePath = DeeplinkExternalFilePath.FilePreviewInFolder(
+                    sourceDriveId = 140946,
+                    folderId = 4623400,
+                    fileId = 4624401
+                )
             )
         )
         val deeplinkType = DeeplinkParser.parse(uri)
@@ -154,7 +173,12 @@ class DeeplinkParserTest {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/shared-with-me/1840145/preview/pdf/8".mockUri()
         val expected = DeeplinkAction.Drive(
             driveId = 140946,
-            roleFolder = RoleFolder.SharedWithMe(fileType = ExternalFileType.FilePreview(sourceDriveId = 1840145, fileId = 8))
+            deeplinkFolderRole = DeeplinkFolderRole.SharedWithMe(
+                externalFilePath = DeeplinkExternalFilePath.FilePreview(
+                    sourceDriveId = 1840145,
+                    fileId = 8
+                )
+            )
         )
         val deeplinkType = DeeplinkParser.parse(uri)
         assertEquals(expected, deeplinkType)
@@ -163,7 +187,7 @@ class DeeplinkParserTest {
     @Test
     fun `parse deeplink Drive Trash`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/trash".mockUri()
-        val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Trash(folderId = null))
+        val expected = DeeplinkAction.Drive(driveId = 140946, deeplinkFolderRole = DeeplinkFolderRole.Trash(folderId = null))
         val deeplinkType = DeeplinkParser.parse(uri)
         assertEquals(expected, deeplinkType)
     }
@@ -171,7 +195,7 @@ class DeeplinkParserTest {
     @Test
     fun `parse deeplink Drive Trash folder`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/trash/4819046".mockUri()
-        val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Trash(folderId = 4819046))
+        val expected = DeeplinkAction.Drive(driveId = 140946, deeplinkFolderRole = DeeplinkFolderRole.Trash(folderId = 4819046))
         val deeplinkType = DeeplinkParser.parse(uri)
         assertEquals(expected, deeplinkType)
     }
