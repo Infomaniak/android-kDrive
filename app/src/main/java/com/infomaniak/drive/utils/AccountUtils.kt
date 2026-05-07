@@ -99,8 +99,7 @@ object AccountUtils : CredentialManager() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val currentUserFlow: Flow<User?> = AppSettings.currentUserIdFlow.distinctUntilChanged().flatMapLatest { id ->
-        if (id != null && id > 0) userDatabase.userDao().findByIdFlow(id)
-        else flowOf(null)
+        if (id != null && id > 0) userDatabase.userDao().findByIdFlow(id) else flowOf(null)
     }
 
     private var currentDrive: Drive? = null

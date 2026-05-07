@@ -54,7 +54,6 @@ class MenuFragment : Fragment() {
 
     private var binding: FragmentMenuBinding by safeBinding()
 
-    private val mainViewModel: MainViewModel by activityViewModels()
     private val menuViewModel: MenuViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
