@@ -68,11 +68,9 @@ sealed class DeeplinkFilePath(open val fileId: Int) : Parcelable {
                 ?: throw InvalidFormatting()
         }
 
-        fun fromFile(file: DriveFile): FileType {
-            return when {
-                file.isFolder() -> File(fileId = file.id)
-                else -> FilePreviewInFolder(folderId = file.parentId, fileId = file.id)
-            }
+        fun fromFile(file: DriveFile): DeeplinkFilePath = when {
+            file.isFolder() -> File(fileId = file.id)
+            else -> FilePreviewInFolder(folderId = file.parentId, fileId = file.id)
         }
     }
 }

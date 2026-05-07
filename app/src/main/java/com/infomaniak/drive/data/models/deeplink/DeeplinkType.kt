@@ -21,12 +21,20 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
 import com.infomaniak.core.legacy.utils.clearStack
+import com.infomaniak.drive.BuildConfig.DEBUG
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.deeplink.DeeplinkExternalFilePath.FilePreview
 import com.infomaniak.drive.data.models.deeplink.DeeplinkExternalFilePath.FilePreviewInFolder
 import com.infomaniak.drive.data.models.deeplink.DeeplinkExternalFilePath.Folder
+import com.infomaniak.drive.data.models.deeplink.DeeplinkFolderRole.Favorites
+import com.infomaniak.drive.data.models.deeplink.DeeplinkFolderRole.Files
+import com.infomaniak.drive.data.models.deeplink.DeeplinkFolderRole.MyShares
+import com.infomaniak.drive.data.models.deeplink.DeeplinkFolderRole.Recents
+import com.infomaniak.drive.data.models.deeplink.DeeplinkFolderRole.Redirect
+import com.infomaniak.drive.data.models.deeplink.DeeplinkFolderRole.SharedWithMe
+import com.infomaniak.drive.data.models.deeplink.DeeplinkFolderRole.Trash
 import com.infomaniak.drive.ui.MainActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.parcelize.Parcelize
@@ -73,13 +81,13 @@ sealed interface DeeplinkType : Parcelable {
             override suspend fun ensureHasAccess(): DeeplinkType = deeplinkFolderRole.ensureHasAccess()
 
             private suspend fun DeeplinkFolderRole.ensureHasAccess(): DeeplinkType = when (this) {
-                is DeeplinkFolderRole.Favorites -> ensureHasAccess(fileId = fileId)
-                is DeeplinkFolderRole.Files -> ensureHasAccess(fileId = filePath.fileId)
-                is DeeplinkFolderRole.MyShares -> ensureHasAccess(fileId = fileId)
-                is DeeplinkFolderRole.Recents -> ensureHasAccess(fileId = fileId)
                 is DeeplinkFolderRole.Redirect -> attemptToConvertToDriveFile(fileId = fileId)
-                is DeeplinkFolderRole.SharedWithMe -> externalFilePath.hasAccessTo()
-                is DeeplinkFolderRole.Trash -> ensureHasAccess(fileId = folderId)
+                is Favorites -> ensureHasAccess(fileId = fileId)
+                is Files -> ensureHasAccess(fileId = filePath.fileId)
+                is MyShares -> ensureHasAccess(fileId = fileId)
+                is Recents -> ensureHasAccess(fileId = fileId)
+                is SharedWithMe -> externalFilePath.hasAccessTo()
+                is Trash -> ensureHasAccess(fileId = folderId)
                 else -> this@Drive
             }
 
@@ -94,7 +102,6 @@ sealed interface DeeplinkType : Parcelable {
         data class Office(override var userId: Int? = null, override val driveId: Int, val fileId: Int) : DeeplinkAction {
             override suspend fun ensureHasAccess(): DeeplinkType = ensureHasAccess(fileId)
         }
-
 
         companion object {
             @Throws(InvalidFormatting::class)

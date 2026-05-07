@@ -47,8 +47,11 @@ sealed interface DeeplinkExternalFilePath : Parcelable {
         }
     }
 
-    data class FilePreviewInFolder(override val sourceDriveId: Int, val folderId: Int, val fileId: Int) :
-        DeeplinkExternalFilePath {
+    data class FilePreviewInFolder(
+        override val sourceDriveId: Int,
+        val folderId: Int,
+        val fileId: Int
+    ) : DeeplinkExternalFilePath {
         constructor(match: MatchResult) : this(
             sourceDriveId = match.parseId(GROUP_DRIVE_ID),
             folderId = match.parseId(GROUP_FOLDER_ID),
@@ -86,13 +89,11 @@ sealed interface DeeplinkExternalFilePath : Parcelable {
                 ?: tryMatchFor(GROUP_PREVIEW_FILE_IN_FOLDER, ::FilePreviewInFolder)
         }
 
-        fun fromFile(file: File): ExternalFileType {
-            return with(file) {
-                when {
-                    isFolder() -> Folder(sourceDriveId = driveId, folderId = id)
-                    parentId != 0 -> FilePreviewInFolder(driveId, parentId, id)
-                    else -> FilePreview(sourceDriveId = driveId, fileId = id)
-                }
+        fun fromFile(file: File): DeeplinkExternalFilePath = with(file) {
+            when {
+                isFolder() -> Folder(sourceDriveId = driveId, folderId = id)
+                parentId != 0 -> FilePreviewInFolder(driveId, parentId, id)
+                else -> FilePreview(sourceDriveId = driveId, fileId = id)
             }
         }
     }
