@@ -24,7 +24,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
 import android.net.Uri
@@ -43,6 +42,7 @@ import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.get
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -55,21 +55,27 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
+import coil3.asDrawable
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.request.error
+import coil3.request.fallback
+import coil3.request.placeholder
+import coil3.request.transformations
+import coil3.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.applock.view.AppLockViewActivity
+import com.infomaniak.core.coil.ImageLoaderProvider.simpleImageLoader
 import com.infomaniak.core.common.doesFileExist
 import com.infomaniak.core.common.observe
 import com.infomaniak.core.inappreview.BaseInAppReviewManager
 import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
 import com.infomaniak.core.inappreview.view.ReviewAlertDialog
 import com.infomaniak.core.inappreview.view.ReviewAlertDialogData
-import com.infomaniak.core.legacy.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showIndefiniteSnackbar
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
@@ -636,14 +642,14 @@ class MainActivity : BaseActivity() {
                     .error(fallback)
                     .placeholder(R.drawable.ic_account)
                     .build()
-                val userAvatar = this@MainActivity.simpleImageLoader.execute(request).drawable
+                val userAvatar = this@MainActivity.simpleImageLoader.execute(request).image?.asDrawable(context.resources)
 
                 userAvatar?.let {
                     val selectedAvatar = generateSelectedAvatar(userAvatar)
                     val stateListDrawable = StateListDrawable()
                     stateListDrawable.addState(
                         intArrayOf(android.R.attr.state_checked),
-                        BitmapDrawable(resources, selectedAvatar)
+                        selectedAvatar.toDrawable(resources)
                     )
                     stateListDrawable.addState(intArrayOf(), userAvatar)
 
