@@ -29,7 +29,6 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -43,7 +42,6 @@ import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.databinding.FragmentMenuBinding
-import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.MenuViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
@@ -66,13 +64,7 @@ class MenuFragment : Fragment() {
 
         menuUploadFileInProgressView.setFolderId(folderId = OTHER_ROOT_ID)
 
-        AccountUtils.currentUserFlow.observe(viewLifecycleOwner) { user ->
-            user?.let {
-                userName.text = it.displayName
-                userEmail.text = it.email
-                userImage.loadAvatar(id = it.id, avatarUrl = it.avatar, initials = it.getInitials())
-            }
-        }
+        observeCurrentUser()
 
         val user = AccountUtils.currentUser ?: return@with
 
@@ -127,6 +119,14 @@ class MenuFragment : Fragment() {
         kSuiteProCard.isVisible = isKSuiteProFree
         if (isKSuiteProFree) {
             kSuiteProCard.setOnClick { openKSuiteUpgradeBottomSheet(MatomoName.OpenFromUserMenuCard.value, drive) }
+        }
+    }
+
+    private fun FragmentMenuBinding.observeCurrentUser() {
+        AccountUtils.currentConnectedUserFlow.observe(viewLifecycleOwner) { user ->
+            userName.text = user.displayName
+            userEmail.text = user.email
+            userImage.loadAvatar(id = user.id, avatarUrl = user.avatar, initials = user.getInitials())
         }
     }
 }

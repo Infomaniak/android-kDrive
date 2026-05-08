@@ -348,7 +348,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun observeCurrentUserAvatar() {
-        AccountUtils.currentUserFlow.observe(this) {
+        AccountUtils.currentConnectedUserFlow.observe(this) {
             setBottomNavigationUserAvatar(this@MainActivity)
         }
     }

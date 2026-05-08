@@ -51,6 +51,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.invoke
@@ -98,9 +99,9 @@ object AccountUtils : CredentialManager() {
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val currentUserFlow: Flow<User?> = AppSettings.currentUserIdFlow.distinctUntilChanged().flatMapLatest { id ->
+    val currentConnectedUserFlow: Flow<User> = AppSettings.currentUserIdFlow.distinctUntilChanged().flatMapLatest { id ->
         if (id != null && id > 0) userDatabase.userDao().findByIdFlow(id) else flowOf(null)
-    }
+    }.filterNotNull()
 
     private var currentDrive: Drive? = null
 
