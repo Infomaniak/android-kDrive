@@ -85,7 +85,7 @@ sealed interface DeeplinkType : Parcelable {
                 is Files -> ensureHasAccess(fileId = filePath.fileId)
                 is MyShares -> ensureHasAccess(fileId = fileId)
                 is Recents -> ensureHasAccess(fileId = fileId)
-                is Redirect -> attemptConvertToLocalFile(fileId) ?: attemptConvertToLocalSharedFile(fileId) ?: this@Drive
+                is Redirect -> attemptToRedirectLocally(fileId, false) ?: attemptToRedirectLocally(fileId, true) ?: this@Drive
                 is SharedWithMe -> externalFilePath.hasAccessTo()
                 is Trash -> ensureHasAccess(fileId = folderId)
                 else -> this@Drive
@@ -145,30 +145,24 @@ sealed interface DeeplinkType : Parcelable {
                 deeplinkAction.userId = it.userId
             }
 
-            private fun Drive.attemptConvertToLocalFile(fileId: Int): Drive? {
+            private fun Drive.attemptToRedirectLocally(fileId: Int, withSharedDrives: Boolean): Drive? {
                 if (DEBUG) require(deeplinkFolderRole is Redirect)
 
                 var newUserId: Int? = null
 
-                val deeplinkTargetFile = getDrives(sharedWithMe = false).firstNotNullOfOrNull { userDrive ->
+                val deeplinkTargetFile = getDrives(sharedWithMe = withSharedDrives).firstNotNullOfOrNull { userDrive ->
                     newUserId = userDrive.userId
                     FileController.getFileById(fileId, userDrive = userDrive)
                 }
 
                 return deeplinkTargetFile?.let { file ->
-                    val folderRole = Files(DeeplinkFilePath.fromFile(file))
+                    val folderRole = if (withSharedDrives) {
+                        SharedWithMe(DeeplinkExternalFilePath.fromFile(file))
+                    } else {
+                        Files(DeeplinkFilePath.fromFile(file))
+                    }
                     Drive(userId = newUserId, driveId = driveId, deeplinkFolderRole = folderRole)
                 }
-            }
-
-            private fun Drive.attemptConvertToLocalSharedFile(fileId: Int): Drive? {
-                if (DEBUG) require(deeplinkFolderRole is Redirect)
-                return getDrives(sharedWithMe = true)
-                    .firstNotNullOfOrNull { FileController.getFileById(fileId, userDrive = it) }
-                    ?.let { file ->
-                        val folderRole = SharedWithMe(DeeplinkExternalFilePath.fromFile(file))
-                        Drive(userId = userId, driveId = driveId, deeplinkFolderRole = folderRole)
-                    }
             }
         }
     }
