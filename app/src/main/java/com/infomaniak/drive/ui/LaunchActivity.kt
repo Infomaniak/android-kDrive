@@ -231,6 +231,14 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
     private suspend fun retrieveDeeplink(uri: Uri) {
         deeplinkType = DeeplinkParser.parse(uri).ensureHasAccess()
+        when(val type = deeplinkType) {
+            is DeeplinkAction.Collaborate -> type.userId?.let { AccountUtils.currentUserId = it }
+            is DeeplinkAction.Drive -> type.userId?.let { AccountUtils.currentUserId = it }
+            is DeeplinkAction.Office -> type.userId?.let { AccountUtils.currentUserId = it }
+            is DeeplinkType.Unmanaged -> Unit
+            else -> Unit
+        }
+        AccountUtils.requestCurrentUser()
         if (deeplinkType !is DeeplinkType.Unmanaged) trackDeepLink(MatomoName.Internal)
     }
 

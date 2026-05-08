@@ -24,6 +24,7 @@ import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.drive.BuildConfig.DEBUG
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.deeplink.DeeplinkExternalFilePath.FilePreview
 import com.infomaniak.drive.data.models.deeplink.DeeplinkExternalFilePath.FilePreviewInFolder
@@ -147,12 +148,18 @@ sealed interface DeeplinkType : Parcelable {
 
             private fun Drive.attemptConvertToLocalFile(fileId: Int): Drive? {
                 if (DEBUG) require(deeplinkFolderRole is Redirect)
-                return getDrives(sharedWithMe = false)
-                    .firstNotNullOfOrNull { FileController.getFileById(fileId, userDrive = it) }
-                    ?.let { file ->
-                        val folderRole = Files(DeeplinkFilePath.fromFile(file))
-                        Drive(userId = userId, driveId = driveId, deeplinkFolderRole = folderRole)
-                    }
+
+                var file: File? = null
+                val userDrive = getDrives(sharedWithMe = false).find { userDrive ->
+                    FileController.getFileById(fileId, userDrive = userDrive)?.let {
+                        file = it
+                    } != null
+                }
+
+                return file?.let { file ->
+                    val folderRole = Files(DeeplinkFilePath.fromFile(file))
+                    Drive(userId = userDrive?.userId, driveId = driveId, deeplinkFolderRole = folderRole)
+                }
             }
 
             private fun Drive.attemptConvertToLocalSharedFile(fileId: Int): Drive? {
