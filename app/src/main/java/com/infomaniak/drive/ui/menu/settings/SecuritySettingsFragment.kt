@@ -46,7 +46,6 @@ class SecuritySettingsFragment : Fragment() {
     private var binding: FragmentSettingsSecurityBinding by safeBinding()
 
     private var contentProviderToggleJob: Job? = null
-    private var ignoreContentProviderSwitchCallback = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentSettingsSecurityBinding.inflate(inflater, container, false).also { binding = it }.root
