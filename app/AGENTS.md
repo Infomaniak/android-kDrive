@@ -220,7 +220,7 @@ ls app/src/main/java/com/infomaniak/drive/extensions/
 
 ## Common Gotchas
 
-- **Realm transactions**: Always use `realm.executeTransactionAwait()` with coroutines
+- **Realm transactions**: Use `realm.executeTransaction { }` for writes; query with `realm.where(Model::class.java)`
 - **File operations**: All file I/O must use kDrive utilities in `utils/` package
 - **Background sync**: Requires `FOREGROUND_SERVICE_DATA_SYNC` permission for Android 14+
 - **Media permissions**: Android 13+ uses granular `READ_MEDIA_*` permissions
