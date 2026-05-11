@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,7 @@ import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -160,6 +161,16 @@ object FileController {
                 realm.copyFromRealm(it, 1)
             }
         }
+    }
+
+    suspend fun hasFile(fileId: Int, userDrive: UserDrive? = null): Boolean = forRealm(userDrive) {
+        where(File::class.java)
+            .equalTo(File::id.name, fileId)
+            .count() > 0
+    }
+
+    private suspend fun <R> forRealm(userDrive: UserDrive?, block: Realm.() -> R): R = Dispatchers.IO {
+        getRealmInstance(userDrive).use(block)
     }
 
     fun getFolderOfflineFilesCount(folderId: Int): Long {

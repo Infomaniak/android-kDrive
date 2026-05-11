@@ -88,13 +88,11 @@ import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.data.models.DeepLinkType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.models.file.SpecialFolder
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
 import com.infomaniak.drive.databinding.ActivityMainBinding
@@ -103,6 +101,7 @@ import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.deeplink.DeeplinkHandler
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
@@ -117,6 +116,7 @@ import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -180,6 +180,8 @@ class MainActivity : BaseActivity() {
 
     private var inAppUpdateSnackbar: Snackbar? = null
 
+    private val deeplinkHandler = DeeplinkHandler(registryOwner = this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -196,7 +198,6 @@ class MainActivity : BaseActivity() {
         setupFabs()
         setupDrivePermissions()
         handleShortcuts()
-        handleNavigateToDestinationFileId()
 
         initAppUpdateManager()
         initAppReviewManager()
@@ -224,6 +225,7 @@ class MainActivity : BaseActivity() {
         mainViewModel.loadRootFiles()
         myKSuiteViewModel.refreshMyKSuite()
         handleDeletionOfUploadedPhotos()
+        deeplinkHandler.handle(navigationArgs?.deeplinkType, this)
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -263,42 +265,6 @@ class MainActivity : BaseActivity() {
                 navController.popBackStack(item.itemId, false)
             }
         }
-    }
-
-    private fun handleNavigateToDestinationFileId() {
-        navigationArgs?.let {
-            if (it.deepLinkFileNotFound) {
-                binding.mainFab.apply {
-                    post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
-                }
-            } else {
-                if (it.destinationFileId > 0) {
-                    navigateToDestinationFileId(it.destinationFileId, it.destinationUserDrive, subfolderId = null)
-                } else {
-                    when (val deepLinkType = it.deepLinkType) {
-                        is DeepLinkType.SharedWithMe -> null//TODO()
-                        is DeepLinkType.Trash -> {
-                            navigateToDestinationFileId(
-                                destinationFileId = SpecialFolder.Trash.id,
-                                destinationUserDrive = UserDrive(driveId = deepLinkType.userDriveId),
-                                deepLinkType.folderId?.toInt()
-                            )
-                        }
-                        null -> null//TODO()
-                    }
-                }
-            }
-        }
-    }
-
-    private fun navigateToDestinationFileId(destinationFileId: Int, destinationUserDrive: UserDrive?, subfolderId: Int?) {
-        clickOnBottomBarFolders()
-        mainViewModel.navigateFileListTo(
-            navController,
-            destinationFileId,
-            destinationUserDrive ?: UserDrive(),
-            subfolderId
-        )
     }
 
     private fun setupFabs() = with(binding) {
@@ -705,6 +671,17 @@ class MainActivity : BaseActivity() {
 
     fun clickOnBottomBarFolders() {
         binding.bottomNavigation.findViewById<View>(R.id.rootFilesFragment).performClick()
+    }
+
+    fun showSnackbarWithFabAnchor(title: Int) {
+        binding.mainFab.apply {
+            post { showSnackbar(title = title, anchor = this) }
+        }
+    }
+
+    suspend fun navigateFromDriveDeeplink(deeplink: DeeplinkAction.Drive) {
+        Dispatchers.Main { clickOnBottomBarFolders() }
+        mainViewModel.navigateDeeplink.emit(deeplink)
     }
 
     companion object {

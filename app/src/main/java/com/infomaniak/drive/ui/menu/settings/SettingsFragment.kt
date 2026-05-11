@@ -42,7 +42,6 @@ import com.infomaniak.core.crossapplogin.back.CrossAppLogin
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
-import com.infomaniak.core.legacy.ui.WebViewActivity
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.openAppNotificationSettings
@@ -51,6 +50,7 @@ import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.network.AUTOLOG_URL
 import com.infomaniak.core.network.ApiEnvironment
 import com.infomaniak.core.network.TERMINATE_ACCOUNT_URL
+import com.infomaniak.core.webview.ui.WebViewActivity
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent

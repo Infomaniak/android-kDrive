@@ -186,6 +186,7 @@ dependencies {
     implementation(core.infomaniak.core.ui.compose.margin)
     implementation(core.infomaniak.core.ui.compose.materialthemefromxml)
     implementation(core.infomaniak.core.ui.view.edgetoedge)
+    implementation(core.infomaniak.core.webview)
 
     implementation(project(":Core:Legacy"))
 
@@ -241,6 +242,7 @@ dependencies {
 
     testImplementation(libs.kotlin.faker)
     testImplementation(libs.mock.web.server)
+    testImplementation(core.mockk.android)
     androidTestImplementation(libs.androidx.ui.automator)
 
     androidTestImplementation(libs.androidx.espresso.contrib) {
