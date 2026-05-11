@@ -29,7 +29,7 @@ internal fun MatchResult?.parseOptionalId(groupName: String): Int? {
 }
 
 @Throws(InvalidFormatting::class)
-internal fun MatchResult.parseId(groupName: String): Int = parseOptionalId(groupName) ?: throw InvalidFormatting()
+internal fun MatchResult?.parseId(groupName: String): Int = parseOptionalId(groupName) ?: throw InvalidFormatting()
 
 internal fun <T> MatchResult?.tryMatchFor(groupName: String, block: (MatchResult) -> T): T? {
     return runCatching { hasGroup(groupName)?.let(block) }.getOrNull()

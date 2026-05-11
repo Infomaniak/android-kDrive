@@ -161,6 +161,10 @@ class RootFilesFragment : BaseRootFolderFragment() {
                 is DeeplinkFolderRole.Category, is DeeplinkFolderRole.Collaboratives, is DeeplinkFolderRole.SharedLinks -> notHandled(
                     deeplinkAction
                 )
+                is DeeplinkFolderRole.Category,
+                is DeeplinkFolderRole.Collaboratives,
+                is DeeplinkFolderRole.Redirect,
+                is DeeplinkFolderRole.SharedLinks -> notHandled(deeplinkAction)
             }
         }
     }

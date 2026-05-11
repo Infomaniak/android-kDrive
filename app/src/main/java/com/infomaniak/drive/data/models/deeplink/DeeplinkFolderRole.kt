@@ -36,6 +36,10 @@ sealed interface DeeplinkFolderRole : Parcelable {
     data class Files(val filePath: DeeplinkFilePath) : DeeplinkFolderRole
 
     data class Recents(val fileId: Int?) : DeeplinkFolderRole
+    
+	data class Redirect(val fileId: Int) : DeeplinkFolderRole {
+        override val isHandled: Boolean get() = false
+    }
 
     data class SharedWithMe(val externalFilePath: DeeplinkExternalFilePath?) : DeeplinkFolderRole
 

@@ -546,3 +546,5 @@ private fun addNoDrivesBreadcrumbsToSentry() {
     }
 }
 //endregion
+
+inline fun <reified T : Any> Any.instanceOf(): T? = this as? T
