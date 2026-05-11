@@ -449,6 +449,9 @@
     </plurals>
     <string name="fileListTitle">Ficheiros</string>
     <string name="filePermissionTitle">Selecionar a permissão</string>
+    <string name="fileProviderExtensionDescription">Se esta opção estiver desativada, o kDrive deixará de estar disponível na aplicação Ficheiros e em aplicações de terceiros.</string>
+    <string name="fileProviderExtensionError">Desativou a visualização de ficheiros a partir do kDrive. Pode reativá-la nas definições da aplicação.</string>
+    <string name="fileProviderExtensionTitle">Mostrar nos Ficheiros</string>
     <string name="fileShareAddMessage">Adicionar uma mensagem para os convidados (opcional)</string>
     <string name="fileShareDetailsFileTitle">Partilha e permissões do ficheiro %s</string>
     <string name="fileShareDetailsFolderTitle">Partilha e permissões da pasta %s</string>
@@ -597,6 +600,7 @@
     <string name="searchNoFile">Sem resultados, por favor altere os seus critérios de pesquisa</string>
     <string name="searchTitle">Pesquisar</string>
     <string name="searchViewHint">Pesquisar um ficheiro…</string>
+    <string name="securityTitle">Segurança</string>
     <string name="selectDriveTitle">Selecionar um kDrive</string>
     <string name="selectFolderTitle">Selecionar uma pasta</string>
     <string name="selectMediaFoldersDescription">Selecione as pastas no seu dispositivo que devem ser guardadas automaticamente no seu kDrive.</string>

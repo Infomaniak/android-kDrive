@@ -449,6 +449,9 @@
     </plurals>
     <string name="fileListTitle">File</string>
     <string name="filePermissionTitle">Seleziona il diritto</string>
+    <string name="fileProviderExtensionDescription">Se questa opzione è disattivata, kDrive non sarà più disponibile nell’applicazione Files e nelle applicazioni di terzi.</string>
+    <string name="fileProviderExtensionError">Hai disattivato la visualizzazione dei file da kDrive. Puoi riattivarla nelle impostazioni dell’app.</string>
+    <string name="fileProviderExtensionTitle">Vedi in File</string>
     <string name="fileShareAddMessage">Aggiungi un messaggio agli invitati (facoltativo)</string>
     <string name="fileShareDetailsFileTitle">Condivisione e diritti del file %s</string>
     <string name="fileShareDetailsFolderTitle">Condivisione e diritti della cartella %s</string>
@@ -597,6 +600,7 @@
     <string name="searchNoFile">Nessun risultato. Utilizza altri criteri di ricerca</string>
     <string name="searchTitle">Ricerca</string>
     <string name="searchViewHint">Cerca un file…</string>
+    <string name="securityTitle">Sicurezza</string>
     <string name="selectDriveTitle">Selezionare un kDrive</string>
     <string name="selectFolderTitle">Selezionare una cartella</string>
     <string name="selectMediaFoldersDescription">Seleziona le cartelle sul tuo dispositivo che devono essere automaticamente salvate sul tuo kDrive.</string>

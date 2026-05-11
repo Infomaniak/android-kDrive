@@ -449,6 +449,9 @@
     </plurals>
     <string name="fileListTitle">Filer</string>
     <string name="filePermissionTitle">Vælg rettighed</string>
+    <string name="fileProviderExtensionDescription">Hvis denne indstilling deaktiveres, vil kDrive ikke længere være tilgængelig i Filer-applikationen og i tredjepartsapplikationer.</string>
+    <string name="fileProviderExtensionError">Du har deaktiveret visning af filer fra kDrive. Du kan aktivere det igen i appens indstillinger.</string>
+    <string name="fileProviderExtensionTitle">Vis i Filer</string>
     <string name="fileShareAddMessage">Tilføj en besked til gæster (valgfrit)</string>
     <string name="fileShareDetailsFileTitle">Deling og rettigheder for fil %s</string>
     <string name="fileShareDetailsFolderTitle">Deling og rettigheder for mappe %s</string>
@@ -597,6 +600,7 @@
     <string name="searchNoFile">Ingen resultater, tilpas dine søgekriterier</string>
     <string name="searchTitle">Søg</string>
     <string name="searchViewHint">Søg efter en fil …</string>
+    <string name="securityTitle">Sikkerhed</string>
     <string name="selectDriveTitle">Vælg en kDrive</string>
     <string name="selectFolderTitle">Vælg en mappe</string>
     <string name="selectMediaFoldersDescription">Vælg mapperne på din enhed, der skal gemmes automatisk i din kDrive.</string>

@@ -499,6 +499,9 @@
     </plurals>
     <string name="fileListTitle">Pliki</string>
     <string name="filePermissionTitle">Wybierz uprawnienie</string>
+    <string name="fileProviderExtensionDescription">Jeśli ta opcja jest wyłączona, kDrive nie będzie już dostępny w aplikacji Pliki ani w aplikacjach innych firm.</string>
+    <string name="fileProviderExtensionError">Wyłączyłeś wyświetlanie plików z kDrive. Możesz je ponownie włączyć w ustawieniach aplikacji.</string>
+    <string name="fileProviderExtensionTitle">Pokaż w Plikach</string>
     <string name="fileShareAddMessage">Dodaj wiadomość dla gości (opcjonalnie)</string>
     <string name="fileShareDetailsFileTitle">Plik %s - udostępnianie i uprawnienia</string>
     <string name="fileShareDetailsFolderTitle">Folder %s - udostępnianie i uprawnienia</string>
@@ -655,6 +658,7 @@
     <string name="searchNoFile">Brak wyników, zmień kryteria wyszukiwania</string>
     <string name="searchTitle">Szukaj</string>
     <string name="searchViewHint">Szukaj pliku…</string>
+    <string name="securityTitle">Bezpieczeństwo</string>
     <string name="selectDriveTitle">Wybierz kDrive</string>
     <string name="selectFolderTitle">Wybierz folder</string>
     <string name="selectMediaFoldersDescription">Wybierz foldery na Twoim urządzeniu, które powinny być automatycznie zapisywane w Twoim kDrive.</string>

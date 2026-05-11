@@ -449,6 +449,9 @@
     </plurals>
     <string name="fileListTitle">Archivos</string>
     <string name="filePermissionTitle">Seleccionar el derecho</string>
+    <string name="fileProviderExtensionDescription">Si se desactiva esta opción, kDrive dejará de estar disponible en la aplicación Archivos y en las aplicaciones de terceros.</string>
+    <string name="fileProviderExtensionError">Ha desactivado la visualización de archivos desde kDrive. Puede volver a activarla en la configuración de la aplicación.</string>
+    <string name="fileProviderExtensionTitle">Ver en Archivos</string>
     <string name="fileShareAddMessage">Añadir un mensaje para los invitados (opcional)</string>
     <string name="fileShareDetailsFileTitle">Uso compartido y derechos del archivo %s</string>
     <string name="fileShareDetailsFolderTitle">Uso compartido y derechos de la carpeta %s</string>
@@ -597,6 +600,7 @@
     <string name="searchNoFile">Ningún resultado. Cambia los criterios de búsqueda</string>
     <string name="searchTitle">Buscar</string>
     <string name="searchViewHint">Buscar un archivo…</string>
+    <string name="securityTitle">Seguridad</string>
     <string name="selectDriveTitle">Seleccionar un kDrive</string>
     <string name="selectFolderTitle">Seleccionar una carpeta</string>
     <string name="selectMediaFoldersDescription">Selecciona las carpetas de tu dispositivo de las que debe hacerse una copia de seguridad automática en tu kDrive.</string>
