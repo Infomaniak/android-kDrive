@@ -231,7 +231,19 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
     private suspend fun retrieveDeeplink(uri: Uri) {
         deeplinkType = DeeplinkParser.parse(uri).ensureHasAccess()
+        switchToDeeplinkTargetUser()
+
         if (deeplinkType !is DeeplinkType.Unmanaged) trackDeepLink(MatomoName.Internal)
+    }
+
+    private suspend fun switchToDeeplinkTargetUser() {
+        when (val type = deeplinkType) {
+            is DeeplinkAction.Collaborate, is DeeplinkAction.Drive, is DeeplinkAction.Office -> {
+                type.userId?.let { AccountUtils.currentUserId = it }
+                AccountUtils.requestCurrentUser()
+            }
+            else -> Unit
+        }
     }
 
     private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {

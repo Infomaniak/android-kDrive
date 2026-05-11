@@ -47,7 +47,13 @@ import io.sentry.Sentry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
@@ -91,6 +97,11 @@ object AccountUtils : CredentialManager() {
                 email = user?.email
             })
         }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val currentConnectedUserFlow: Flow<User> = AppSettings.currentUserIdFlow.distinctUntilChanged().flatMapLatest { id ->
+        if (id != null && id > 0) userDatabase.userDao().findByIdFlow(id) else flowOf(null)
+    }.filterNotNull()
 
     private var currentDrive: Drive? = null
 
