@@ -39,7 +39,7 @@ Modular Android application for kDrive cloud storage by Infomaniak. Uses MVVM ar
 ## Security & Secrets
 
 - Never commit `.env`, `local.properties`, or API keys to repository
-- Drive API tokens stored in Room database (encrypted)
+- Drive API tokens stored in Core's Room-backed user database
 - User files cached in Realm with offline support
 - Bug tracker credentials defined in build.gradle.kts (safe values only)
 

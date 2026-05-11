@@ -80,12 +80,12 @@ app/src/main/java/com/infomaniak/drive/
 ### API Calls
 
 - **DO**: Use repository pattern with Ktor
-    - Example: `data/api/ApiRepository.kt`
-    - Wrapper: `data/api/ApiService.kt`
+    - Entry point: `data/api/ApiRepository.kt`
 
 ### Realm Models
 
-- **DO**: Use `@RealmClass` annotation, open classes
+- **DO**: Define Realm models as `open class ... : RealmObject()`
+    - Use `@RealmClass` only where needed (for example, embedded Realm objects)
     - Example: `data/models/File.kt`
 - **DON'T**: Use Room for file data (Realm only)
 
@@ -117,7 +117,6 @@ app/src/main/java/com/infomaniak/drive/
 
 ### Data Repositories
 
-- API service: `data/api/ApiService.kt`
 - File repository: `data/api/ApiRepository.kt`
 - Cache manager: `data/cache/FileController.kt`
 
@@ -130,7 +129,7 @@ app/src/main/java/com/infomaniak/drive/
 
 ### Sync & Services
 
-- Sync adapter: `data/sync/SyncAdapter.kt`
+- Sync worker: `data/sync/MediaObserverWorker.kt`
 - Upload service: `data/services/UploadWorker.kt`
 
 ### String resources
