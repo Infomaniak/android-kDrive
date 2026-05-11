@@ -54,8 +54,8 @@ class AppSecuritySettingsActivity : AppCompatActivity() {
             isChecked = AppSettings.appSecurityLock
             setOnCheckedChangeListener { _, _ ->
                 // Reverse switch (before official parameter changed) by silent click
-                CloudStorageProvider.setDisabled(appCtx, isChecked)
                 silentlyReverseSwitch(this) { shouldLock ->
+                    CloudStorageProvider.setDisabled(appCtx, isChecked)
                     AppSettings.appSecurityLock = shouldLock
                     if (shouldLock) AppLockManager.unlock()
                 }
