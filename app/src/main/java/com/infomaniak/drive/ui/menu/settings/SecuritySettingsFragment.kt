@@ -59,7 +59,7 @@ class SecuritySettingsFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        appSecurity.apply {
+        appLock.apply {
             if (AppLockManager.hasBiometrics()) {
                 isVisible = true
                 setOnClickListener {
@@ -71,17 +71,14 @@ class SecuritySettingsFragment : Fragment() {
             }
         }
 
-        ignoreContentProviderSwitchCallback = true
-        contentProviderSwitch.isChecked = !CloudStorageProvider.isDisabled(appCtx)
-        ignoreContentProviderSwitchCallback = false
-
-        contentProviderSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (ignoreContentProviderSwitchCallback) return@setOnCheckedChangeListener
-
-            contentProviderToggleJob?.cancel()
-            contentProviderToggleJob = viewLifecycleOwner.lifecycleScope.launch {
-                delay(500)
-                CloudStorageProvider.setDisabled(appCtx, disabled = !isChecked)
+        contentProviderSwitch.apply {
+            isChecked = !CloudStorageProvider.isDisabled(appCtx)
+            setOnCheckedChangeListener { _, isChecked ->
+                contentProviderToggleJob?.cancel()
+                contentProviderToggleJob = viewLifecycleOwner.lifecycleScope.launch {
+                    delay(100)
+                    CloudStorageProvider.setDisabled(appCtx, disabled = !isChecked)
+                }
             }
         }
 
@@ -90,7 +87,7 @@ class SecuritySettingsFragment : Fragment() {
 
     override fun onResume() = with(binding) {
         super.onResume()
-        appSecurity.endText = getString(if (AppSettings.appSecurityLock) R.string.allActivated else R.string.allDisabled)
+        appLock.endText = getString(if (AppSettings.appSecurityLock) R.string.allActivated else R.string.allDisabled)
         val isContentProviderEnabled = !CloudStorageProvider.isDisabled(appCtx)
         if (contentProviderSwitch.isChecked != isContentProviderEnabled) {
             contentProviderSwitch.isChecked = isContentProviderEnabled
