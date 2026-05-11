@@ -82,6 +82,8 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     var lastItemCount: FileCount? = null
 
+    var isPreviewManaged: Boolean = false
+
     private val rootFilesUserDrive = MutableSharedFlow<UserDrive>(replay = 1)
 
     fun sortTypeIsInitialized() = ::sortType.isInitialized

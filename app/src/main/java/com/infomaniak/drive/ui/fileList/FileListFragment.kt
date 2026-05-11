@@ -138,7 +138,7 @@ open class FileListFragment : MultiSelectFragment(
 
     open val fileIdToPreview: Int
         get() = (navigationArgs.filePath as? DeeplinkFilePath.FilePreviewInFolder)?.fileId ?: 0
-    open var previewManaged: Boolean = false
+
     protected val showLoadingTimer: CountDownTimer by lazy {
         createRefreshTimer { _binding?.let { it.swipeRefreshLayout.isRefreshing = true } }
     }
@@ -330,7 +330,7 @@ open class FileListFragment : MultiSelectFragment(
         }
 
         observeNavigateFileListTo(mainViewModel, fileListViewModel)
-        fileIdToPreview.takeUnless { it == 0 || previewManaged }?.let { previewFile(it) }
+        fileIdToPreview.takeUnless { it == 0 || fileListViewModel.isPreviewManaged }?.let { previewFile(it) }
     }
 
     private fun setupToolbars() {
@@ -962,7 +962,7 @@ open class FileListFragment : MultiSelectFragment(
                 Utils.displayFile(mainViewModel, findNavController(), it, listOf(it))
             }
         }
-        previewManaged = true
+        fileListViewModel.isPreviewManaged = true
     }
 
     open fun onRestartItemsClicked() = Unit

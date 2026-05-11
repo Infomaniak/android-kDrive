@@ -125,7 +125,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     override fun previewFile(fileId: Int) {
         FileController.getFileById(fileId, userDrive)?.let { file ->
             openFileOrFolder(file)
-            previewManaged = true
+            fileListViewModel.isPreviewManaged = true
         }
     }
 
