@@ -125,7 +125,8 @@ app/src/main/java/com/infomaniak/drive/
 
 - File: `data/models/File.kt`
 - Drive: `data/models/Drive.kt`
-- User: `data/models/UiSettings.kt`
+- UI settings: `data/models/UiSettings.kt`
+- User (Core): `com.infomaniak.core.auth.models.user.User`
 
 ### Sync & Services
 
