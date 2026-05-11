@@ -642,6 +642,7 @@ class MainActivity : BaseActivity() {
                     .error(fallback)
                     .placeholder(R.drawable.ic_account)
                     .build()
+
                 val userAvatar = this@MainActivity.simpleImageLoader.execute(request).image?.asDrawable(context.resources)
 
                 userAvatar?.let {

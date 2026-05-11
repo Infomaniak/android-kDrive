@@ -85,7 +85,10 @@ sealed interface DeeplinkType : Parcelable {
                 is Files -> ensureHasAccess(fileId = filePath.fileId)
                 is MyShares -> ensureHasAccess(fileId = fileId)
                 is Recents -> ensureHasAccess(fileId = fileId)
-                is Redirect -> attemptToRedirectLocally(fileId, false) ?: attemptToRedirectLocally(fileId, true) ?: this@Drive
+                is Redirect -> {
+                    attemptToRedirectLocally(fileId, withSharedDrives = false)
+                        ?: attemptToRedirectLocally(fileId, withSharedDrives = true) ?: this@Drive
+                }
                 is SharedWithMe -> externalFilePath.hasAccessTo()
                 is Trash -> ensureHasAccess(fileId = folderId)
                 else -> this@Drive
