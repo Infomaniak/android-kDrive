@@ -279,22 +279,31 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun isChildDocument(parentDocumentId: String, documentId: String): Boolean {
-        // Root
+        // Roots and other virtual containers must only match documents that are actually
+        // inside their subtree; otherwise SAF relationship checks can be bypassed.
         val parentDocumentType = computeDocumentType(parentDocumentId)
-        if (parentDocumentType !is CloudDocumentType.FileOrFolder) return true
+        if (parentDocumentType !is CloudDocumentType.FileOrFolder) {
+            return isDocumentIdDescendantOf(parentDocumentId, documentId)
+        }
 
         // Folder from a Drive
-        val documentType = computeDocumentType(documentId)
-        if (documentType is CloudDocumentType.FileOrFolder) {
-            val parentFolderId = parentDocumentType.fileId
-            val fileId = documentType.fileId
-
-            return FileController.getRealmInstance(documentType.userDrive).use { realm ->
-                FileController.getFileProxyById(fileId, customRealm = realm)?.parentId == parentFolderId
-            }
-        } else {
-            return super.isChildDocument(parentDocumentId, documentId)
+        return when (val documentType = computeDocumentType(documentId)) {
+            is CloudDocumentType.FileOrFolder -> isChildDocument(parentDocumentType, documentType)
+            else -> super.isChildDocument(parentDocumentId, documentId)
         }
+    }
+
+    private fun isChildDocument(
+        parentDocumentType: CloudDocumentType.FileOrFolder,
+        documentType: CloudDocumentType.FileOrFolder,
+    ): Boolean = when {
+        parentDocumentType.userDrive == documentType.userDrive -> {
+            FileController.getRealmInstance(documentType.userDrive).use { realm ->
+                val folderProxy = FileController.getFileProxyById(documentType.fileId, customRealm = realm)
+                folderProxy?.parentId == parentDocumentType.fileId
+            }
+        }
+        else -> false
     }
 
     private fun DocumentCursor.addFiles(
@@ -859,6 +868,11 @@ class CloudStorageProvider : DocumentsProvider() {
             position++
         }
         job = cursor.job
+    }
+
+    private fun isDocumentIdDescendantOf(parentDocumentId: String, documentId: String): Boolean {
+        if (parentDocumentId == documentId) return false
+        return documentId.startsWith(parentDocumentId + SEPARATOR)
     }
 
     private fun computeDocumentType(documentId: String): CloudDocumentType {
