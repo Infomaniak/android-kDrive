@@ -427,11 +427,14 @@ private fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) 
         offsetOverlayedRipple.setOnClickListener { fragment.safeNavigate(R.id.switchDriveDialog) }
     }
 
+    val weakBinding = java.lang.ref.WeakReference(this)
     fragment.viewLifecycleOwner.lifecycle.addObserver(
         object : LifecycleEventObserver {
             override fun onStateChanged(source: LifecycleOwner, event: Event) {
                 when (event) {
-                    Event.ON_RESUME -> AccountUtils.getCurrentDrive()?.let(::setDriveHeader)
+                    Event.ON_RESUME -> weakBinding.get()?.let { binding ->
+                        AccountUtils.getCurrentDrive()?.let(binding::setDriveHeader)
+                    }
                     Event.ON_DESTROY -> source.lifecycle.removeObserver(this)
                     else -> Unit
                 }
