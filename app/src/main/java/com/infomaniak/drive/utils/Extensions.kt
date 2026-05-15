@@ -430,7 +430,11 @@ private fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) 
     fragment.viewLifecycleOwner.lifecycle.addObserver(
         object : LifecycleEventObserver {
             override fun onStateChanged(source: LifecycleOwner, event: Event) {
-                if (event == Event.ON_RESUME) AccountUtils.getCurrentDrive()?.let(::setDriveHeader)
+                when (event) {
+                    Event.ON_RESUME -> AccountUtils.getCurrentDrive()?.let(::setDriveHeader)
+                    Event.ON_DESTROY -> source.lifecycle.removeObserver(this)
+                    else -> Unit
+                }
             }
         },
     )
