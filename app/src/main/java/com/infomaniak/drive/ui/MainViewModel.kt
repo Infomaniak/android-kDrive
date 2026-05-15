@@ -83,6 +83,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
+import splitties.init.appCtx
 import java.util.Date
 
 class MainViewModel(
@@ -562,7 +563,8 @@ class MainViewModel(
 
     private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
         if (file.isOffline) {
-            ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
+            val destinationFile = IOFile("${newParent.getOfflineFile(appCtx)}/${file.name}")
+            ioFile.renameTo(destinationFile)
         } else {
             ioFile.delete()
         }
