@@ -41,7 +41,9 @@ class SelectRootFolderViewModel : ViewModel() {
     private var userDrive: UserDrive? = null
     private val realm by lazy { FileController.getRealmInstance(userDrive) }
 
-    val isNetworkAvailable = NetworkAvailability().isNetworkAvailable.distinctUntilChanged()
+    val isNetworkAvailable: StateFlow<Boolean> = NetworkAvailability().isNetworkAvailable
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
     var hasNetwork: Boolean = true
         private set
 
