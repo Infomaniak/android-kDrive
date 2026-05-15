@@ -113,7 +113,7 @@ class MainViewModel(
     val updateVisibleFiles = MutableLiveData<Boolean>()
     val isBulkDownloadRunning = MutableLiveData<Boolean>()
 
-    val isNetworkAvailable = NetworkAvailability(this@MainViewModel.getContext()).isNetworkAvailable.distinctUntilChanged()
+    val isNetworkAvailable = NetworkAvailability().isNetworkAvailable.distinctUntilChanged()
     var hasNetwork: Boolean = true
         private set
 
@@ -134,15 +134,6 @@ class MainViewModel(
     private var setCurrentFolderJob = Job()
 
     val deleteFilesFromGallery = SingleLiveEvent<List<Int>>()
-
-    init {
-        viewModelScope.launch {
-            isNetworkAvailable.collect {
-                onNetworkAvailabilityChanged(it)
-                hasNetwork = it
-            }
-        }
-    }
 
     private fun getContext() = getApplication<MainApplication>()
 
@@ -547,7 +538,8 @@ class MainViewModel(
         }
     }
 
-    private suspend fun onNetworkAvailabilityChanged(isNetworkAvailable: Boolean) {
+    suspend fun onNetworkAvailabilityChanged(isNetworkAvailable: Boolean) {
+        hasNetwork = isNetworkAvailable
         SentryLog.d("Internet availability", if (isNetworkAvailable) "Available" else "Unavailable")
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = "Network"

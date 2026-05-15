@@ -61,6 +61,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.isNetworkAvailable.collect { isNetworkAvailable ->
                 noNetworkCard.root.isGone = isNetworkAvailable != false
+                mainViewModel.onNetworkAvailabilityChanged(isNetworkAvailable)
             }
         }
 

@@ -216,6 +216,7 @@ dependencies {
 
     implementation(core.hilt.android)
     implementation(core.hilt.work)
+    debugImplementation(libs.leakcanary)
     ksp(core.hilt.compiler)
     ksp(core.hilt.androidx.compiler)
 
