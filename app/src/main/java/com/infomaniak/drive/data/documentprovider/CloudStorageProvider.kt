@@ -304,9 +304,11 @@ class CloudStorageProvider : DocumentsProvider() {
                     ?: return@use false
                 val folderProxy = FileController.getFileProxyById(documentType.fileId, customRealm = realm)
                     ?: return@use false
-                val isDirectChild = folderProxy.parentId == parentDocumentType.fileId
-                val isGrandChild = folderProxy.getRemotePath(userDrive).startsWith(parentFolderProxy.getRemotePath(userDrive))
-                return@use isDirectChild || isGrandChild
+
+                fun isDirectChild() = folderProxy.parentId == parentDocumentType.fileId
+                fun isGrandChild() = folderProxy.getRemotePath(userDrive).startsWith(parentFolderProxy.getRemotePath(userDrive))
+
+                return@use isDirectChild() || isGrandChild()
             }
         }
         else -> false
