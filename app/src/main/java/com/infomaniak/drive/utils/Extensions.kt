@@ -116,6 +116,7 @@ import handleActionDone
 import io.realm.RealmList
 import io.sentry.Sentry
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -427,7 +428,7 @@ private fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) 
         offsetOverlayedRipple.setOnClickListener { fragment.safeNavigate(R.id.switchDriveDialog) }
     }
 
-    val weakBinding = java.lang.ref.WeakReference(this)
+    val weakBinding = WeakReference(this)
     fragment.viewLifecycleOwner.lifecycle.addObserver(
         object : LifecycleEventObserver {
             override fun onStateChanged(source: LifecycleOwner, event: Event) {
