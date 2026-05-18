@@ -33,7 +33,7 @@ import com.infomaniak.core.ktor.toOutgoingContent
 import com.infomaniak.core.network.api.ApiController.gson
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponse
-import com.infomaniak.core.network.networking.HttpUtils.setHeaders
+import com.infomaniak.core.network.networking.HttpUtils.applyDefaultHeaders
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryLog
@@ -348,7 +348,7 @@ class UploadTask(
             // With `preparePost`, `execute`, and `bodyAsChannel()`, we are not getting the issue,
             // and the size seem to match, so it might be a ktor or OkHttp internal issue worth reporting.
             httpClient.preparePost(url) {
-                headers { setHeaders(contentType = null) }
+                headers { applyDefaultHeaders(contentType = null) }
                 retry { noRetry() }
                 setBody(preSkippedStream.toOutgoingContent(length = length))
                 onUpload { bytesSentTotal, contentLength ->
