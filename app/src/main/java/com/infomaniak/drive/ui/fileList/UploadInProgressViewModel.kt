@@ -163,7 +163,7 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
         return File(
             id = fileId,
             name = folder.name,
-            path = folder.getRemotePath(userDrive),
+            path = userDrive.driveName + folder.getRemotePath(userDrive), // The driveName is only useful for sharedWithMe
             type = folder.type,
             isFromUploads = true
         )
