@@ -29,6 +29,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.application
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -83,7 +84,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
-import splitties.init.appCtx
 import java.util.Date
 
 class MainViewModel(
@@ -566,7 +566,8 @@ class MainViewModel(
 
     private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
         if (file.isOffline) {
-            val destinationFile = IOFile("${newParent.getOfflineFile(appCtx)}/${file.name}")
+            val offlineFile = newParent.getOfflineFile(application) ?: return
+            val destinationFile = IOFile("$offlineFile/${file.name}")
             ioFile.renameTo(destinationFile)
         } else {
             ioFile.delete()
