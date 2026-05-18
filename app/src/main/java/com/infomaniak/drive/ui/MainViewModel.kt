@@ -298,7 +298,10 @@ class MainViewModel(
         if (apiResponse.isSuccess()) {
             FileController.getRealmInstance().use { currentDriveRealm ->
                 file.getStoredFile(getContext())?.let { ioFile ->
-                    if (ioFile.exists()) moveIfOfflineFileOrDelete(file, ioFile, newParent)
+                    val folderProxy = FileController.getFileById(currentDriveRealm, newParent.id)
+                    if (ioFile.exists() && folderProxy != null) {
+                        moveIfOfflineFileOrDelete(file, ioFile, folderProxy)
+                    }
                 }
 
                 FileController.updateFile(file.parentId, currentDriveRealm) { localFolder ->
