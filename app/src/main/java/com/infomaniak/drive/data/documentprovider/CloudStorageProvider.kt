@@ -90,6 +90,7 @@ class CloudStorageProvider : DocumentsProvider() {
     private val cloudScope = CoroutineScope(
         CoroutineName("CloudStorage") + Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     )
+
     private fun isProviderDisabled(): Boolean {
         val ctx = context ?: return true
         return isDisabled(ctx)
@@ -130,7 +131,7 @@ class CloudStorageProvider : DocumentsProvider() {
         AccountUtils.getAllUsersSync().forEach { user ->
             cursor.addRoot(user.id.toString(), user.id.toString(), user.email)
 
-            if (!isProviderDisabled()){
+            if (!isProviderDisabled()) {
                 cloudScope.launch {
                     context?.let {
                         val okHttpClient = AccountUtils.getHttpClient(user.id)
@@ -275,6 +276,42 @@ class CloudStorageProvider : DocumentsProvider() {
         cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to true)
         cursor.setNotificationUri(context?.contentResolver, uri)
         return cursor
+    }
+
+    override fun isChildDocument(parentDocumentId: String, documentId: String): Boolean {
+        // Roots and other virtual containers must only match documents that are actually
+        // inside their subtree; otherwise SAF relationship checks can be bypassed.
+        val parentDocumentType = computeDocumentType(parentDocumentId)
+        if (parentDocumentType !is CloudDocumentType.FileOrFolder) {
+            return isDocumentIdDescendantOf(parentDocumentId, documentId)
+        }
+
+        // Folder from a Drive
+        return when (val documentType = computeDocumentType(documentId)) {
+            is CloudDocumentType.FileOrFolder -> isChildDocument(parentDocumentType, documentType)
+            else -> super.isChildDocument(parentDocumentId, documentId)
+        }
+    }
+
+    private fun isChildDocument(
+        parentDocumentType: CloudDocumentType.FileOrFolder,
+        documentType: CloudDocumentType.FileOrFolder,
+    ): Boolean = when {
+        parentDocumentType.userDrive == documentType.userDrive -> {
+            val userDrive = documentType.userDrive
+            FileController.getRealmInstance(userDrive).use { realm ->
+                val parentFolderProxy = FileController.getFileProxyById(parentDocumentType.fileId, customRealm = realm)
+                    ?: return@use false
+                val folderProxy = FileController.getFileProxyById(documentType.fileId, customRealm = realm)
+                    ?: return@use false
+
+                fun isDirectChild() = folderProxy.parentId == parentDocumentType.fileId
+                fun isGrandChild() = folderProxy.getRemotePath(userDrive).startsWith(parentFolderProxy.getRemotePath(userDrive))
+
+                return@use isDirectChild() || isGrandChild()
+            }
+        }
+        else -> false
     }
 
     private fun DocumentCursor.addFiles(
@@ -839,6 +876,37 @@ class CloudStorageProvider : DocumentsProvider() {
             position++
         }
         job = cursor.job
+    }
+
+    private fun isDocumentIdDescendantOf(parentDocumentId: String, documentId: String): Boolean {
+        if (parentDocumentId == documentId) return false
+        return documentId.startsWith(parentDocumentId + SEPARATOR)
+    }
+
+    private fun computeDocumentType(documentId: String): CloudDocumentType {
+        val userId = getUserId(documentId)
+        if (documentId == userId) return CloudDocumentType.RootFolder
+
+        val fileFolderId = getFileIdFromDocumentId(documentId)
+        val isMySharesRoot = isSharedUri(documentId)
+                && fileFolderId == Utils.ROOT_ID
+                && documentId.split("/").getOrNull(1) == MY_SHARES_FOLDER_ID.toString()
+
+        if (isMySharesRoot) return CloudDocumentType.DriveFromMySharesFolder
+
+        return when (fileFolderId) {
+            SHARED_WITHME_FOLDER_ID -> CloudDocumentType.SharedWithMeFolder
+            MY_SHARES_FOLDER_ID -> CloudDocumentType.MySharesFolder
+            Utils.ROOT_ID -> CloudDocumentType.DriveFolder
+            else -> {
+                val userDrive = UserDrive(
+                    userId = userId.toInt(),
+                    driveId = getDriveFromDocId(documentId).id,
+                    sharedWithMe = comeFromSharedWithMe(documentId)
+                )
+                CloudDocumentType.FileOrFolder(fileFolderId, userDrive = userDrive)
+            }
+        }
     }
 
     /**
