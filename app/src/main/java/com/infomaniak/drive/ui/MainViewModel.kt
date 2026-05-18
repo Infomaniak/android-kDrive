@@ -29,6 +29,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.application
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -297,7 +298,10 @@ class MainViewModel(
         if (apiResponse.isSuccess()) {
             FileController.getRealmInstance().use { currentDriveRealm ->
                 file.getStoredFile(getContext())?.let { ioFile ->
-                    if (ioFile.exists()) moveIfOfflineFileOrDelete(file, ioFile, newParent)
+                    val folderProxy = FileController.getFileById(currentDriveRealm, newParent.id)
+                    if (ioFile.exists() && folderProxy != null) {
+                        moveIfOfflineFileOrDelete(file, ioFile, folderProxy)
+                    }
                 }
 
                 FileController.updateFile(file.parentId, currentDriveRealm) { localFolder ->
@@ -562,7 +566,9 @@ class MainViewModel(
 
     private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
         if (file.isOffline) {
-            ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
+            val offlineFile = newParent.getOfflineFile(application) ?: return
+            val destinationFile = IOFile("$offlineFile/${file.name}")
+            ioFile.renameTo(destinationFile)
         } else {
             ioFile.delete()
         }

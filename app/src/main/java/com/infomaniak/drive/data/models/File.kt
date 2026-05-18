@@ -301,10 +301,12 @@ open class File(
         val path = getRemotePath(userDrive)
 
         if (path.isEmpty()) return null
-        val folder = IOFile(rootFolder, path.substringBeforeLast("/"))
+
+        val child = if (isFolder()) path else path.substringBeforeLast("/")
+        val folder = IOFile(rootFolder, child)
 
         if (!folder.exists()) folder.mkdirs()
-        return IOFile(folder, name)
+        return if (isFolder()) folder else IOFile(folder, name)
     }
 
     fun getCacheFile(context: Context, userDrive: UserDrive = UserDrive()): IOFile {

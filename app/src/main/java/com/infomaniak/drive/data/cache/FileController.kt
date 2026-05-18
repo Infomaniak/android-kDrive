@@ -143,7 +143,7 @@ object FileController {
         val folder = file.localParent?.createSnapshot()?.firstOrNull { it.id > 0 }
         return when {
             folder == null -> ""
-            folder.id == ROOT_ID -> recPath.insert(0, "${userDrive.driveName ?: ""}/${file.name}").toString()
+            folder.id == ROOT_ID -> recPath.insert(0, "/${file.name}").toString()
             else -> generatePath(folder, userDrive, recPath.insert(0, "/${file.name}"))
         }
     }
