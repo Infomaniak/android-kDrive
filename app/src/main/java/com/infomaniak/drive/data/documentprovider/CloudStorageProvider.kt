@@ -890,7 +890,7 @@ class CloudStorageProvider : DocumentsProvider() {
         val fileFolderId = getFileIdFromDocumentId(documentId)
         val isMySharesRoot = isSharedUri(documentId)
                 && fileFolderId == Utils.ROOT_ID
-                && documentId.contains("$MY_SHARES_FOLDER_ID")
+                && documentId.split("/").getOrNull(1) == MY_SHARES_FOLDER_ID.toString()
 
         if (isMySharesRoot) return CloudDocumentType.DriveFromMySharesFolder
 
