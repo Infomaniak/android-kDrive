@@ -347,7 +347,7 @@ class UploadTask(
             // With `preparePost`, `execute`, and `bodyAsChannel()`, we are not getting the issue,
             // and the size seem to match, so it might be a ktor or OkHttp internal issue worth reporting.
             httpClient.preparePost(url) {
-                applyDefaultHeaders()
+                applyDefaultHeaders(null)
                 retry { noRetry() }
                 setBody(preSkippedStream.toOutgoingContent(length = length))
                 onUpload { bytesSentTotal, contentLength ->
