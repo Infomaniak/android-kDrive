@@ -51,7 +51,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.onUpload
 import io.ktor.client.plugins.retry
-import io.ktor.client.request.headers
 import io.ktor.client.request.preparePost
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -348,7 +347,7 @@ class UploadTask(
             // With `preparePost`, `execute`, and `bodyAsChannel()`, we are not getting the issue,
             // and the size seem to match, so it might be a ktor or OkHttp internal issue worth reporting.
             httpClient.preparePost(url) {
-                headers { applyDefaultHeaders(contentType = null) }
+                applyDefaultHeaders(null)
                 retry { noRetry() }
                 setBody(preSkippedStream.toOutgoingContent(length = length))
                 onUpload { bytesSentTotal, contentLength ->
