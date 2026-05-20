@@ -1,0 +1,2 @@
+- Fix move action issues for offline mode's files
+- Add full SAF support; fixed an issue where subfolders could not be created in kDrive from a third-party app
