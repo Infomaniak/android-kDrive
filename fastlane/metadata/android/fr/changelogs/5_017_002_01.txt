@@ -1,0 +1,2 @@
+- Correction des déplacements de fichiers en mode hors-ligne
+- Support global du SAF, correction de l'impossibilité de créer des sous-dossiers dans kDrive depuis une app tierce
