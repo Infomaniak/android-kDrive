@@ -33,6 +33,7 @@ import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityVideoBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.CONTROLLER_SHOW_TIMEOUT_MS
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getExoPlayer
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaItem
@@ -89,6 +90,7 @@ class VideoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(binding.root)
+        binding.root.enableEdgeToEdge(withPadding = true, withTop = false, withLeft = false, withRight = false)
 
         shouldExcludeFromRecents(!isDontKeepActivitiesEnabled())
 

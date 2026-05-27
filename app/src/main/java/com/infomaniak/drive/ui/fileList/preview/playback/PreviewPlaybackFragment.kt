@@ -34,6 +34,7 @@ import androidx.media3.ui.PlayerView
 import com.infomaniak.core.common.extensions.isDontKeepActivitiesEnabled
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentPreviewPlaybackBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
@@ -125,6 +126,8 @@ open class PreviewPlaybackFragment : PreviewFragment() {
             fileName.text = file.name
             root.setOnClickListener { toggleFullscreen() }
         }
+
+        playerView.enableEdgeToEdge(withPadding = true, withTop = false, withLeft = false, withRight = false)
 
         playerView.setOnClickListener {
             if ((it as PlayerView).isControllerFullyVisible) {
