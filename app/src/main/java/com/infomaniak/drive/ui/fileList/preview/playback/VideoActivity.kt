@@ -29,6 +29,7 @@ import androidx.core.view.isVisible
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.infomaniak.core.common.extensions.isDontKeepActivitiesEnabled
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityVideoBinding
@@ -128,7 +129,13 @@ class VideoActivity : AppCompatActivity() {
         intent.extras?.let { VideoActivityArgs.fromBundle(it) }?.fileId?.let { videoFileId ->
             if (videoFileId > 0) {
                 viewModel.loadFile(videoFileId)
-                exoPlayer.setMediaItem(getMediaItem(viewModel.currentFile!!, viewModel.offlineFile, viewModel.offlineIsComplete))
+                val currentFile = viewModel.currentFile ?: run {
+                    SentryLog.e(TAG, "Cannot load file")
+                    finish()
+                    return
+                }
+                exoPlayer.setMediaItem(getMediaItem(currentFile, viewModel.offlineFile, viewModel.offlineIsComplete))
+                exoPlayer.prepare()
             } else {
                 finish()
             }
@@ -137,5 +144,7 @@ class VideoActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_IS_PUBLIC_SHARED = "extra_is_public_shared"
+
+        private const val TAG = "VideoActivity"
     }
 }

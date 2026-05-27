@@ -127,7 +127,6 @@ object PlaybackUtils {
                 addAnalyticsListener(EventLogger())
                 setAudioAttributes(AudioAttributes.DEFAULT,  /* handleAudioFocus= */true)
                 playWhenReady = false
-                prepare()
             }
     }
 

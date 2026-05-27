@@ -172,6 +172,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
             getMediaItem(file, offlineFile, offlineIsComplete),
             (parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] ?: 0L,
         )
+        exoPlayer.prepare()
 
         binding.playerView.player = exoPlayer
         binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
