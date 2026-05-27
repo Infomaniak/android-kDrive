@@ -89,9 +89,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     var positionsForMedia: MutableMap<Int, Long> = mutableMapOf()
 
-    // If the user want to navigate back and something is playing, we don't want to start PIP
-    private var hasNavigateBack = false
-
     // This is not protected, otherwise it won't build because PublicSharePreviewSliderFragment needs it public for the interface
     // it implements
     val downloadPermissions: DrivePermissions = DrivePermissions(type = DrivePermissions.Type.DownloadingWithDownloadManager)
@@ -256,7 +253,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     }
 
     private fun navigateBack() {
-        hasNavigateBack = true
         findNavController().popBackStack()
     }
 
