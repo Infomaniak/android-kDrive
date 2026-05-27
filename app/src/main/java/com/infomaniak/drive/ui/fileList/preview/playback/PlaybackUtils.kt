@@ -62,7 +62,7 @@ import java.util.concurrent.Executor
 @UnstableApi
 object PlaybackUtils {
 
-    const val CONTROLLER_SHOW_TIMEOUT_MS = 2000
+    const val CONTROLLER_SHOW_TIMEOUT_MS = 4000
 
     private const val TAG = "PlaybackUtils"
 
