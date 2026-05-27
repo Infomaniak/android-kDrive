@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2025 Infomaniak Network SA
+ * Copyright (C) 2025-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.ExtensionType
@@ -61,6 +62,8 @@ import java.util.concurrent.Executor
 object PlaybackUtils {
 
     const val CONTROLLER_SHOW_TIMEOUT_MS = 2000
+
+    private const val TAG = "PlaybackUtils"
 
     var activePlayer: ExoPlayer? = null
     var mediaSession: MediaSession? = null
@@ -154,9 +157,16 @@ object PlaybackUtils {
     private fun getRunnable(callback: (MediaController) -> Unit): Runnable {
         return Runnable {
             if (mediaController == null) {
-                mediaController = mediaControllerFuture?.get()?.apply {
-                    callback(this)
-                }
+                runCatching { mediaControllerFuture?.get() }
+                    .onSuccess { controller ->
+                        if (controller != null) {
+                            mediaController = controller
+                            callback(controller)
+                        }
+                    }
+                    .onFailure {
+                        SentryLog.e(TAG, "Failed to get MediaController from PlaybackService")
+                    }
             } else {
                 callback(mediaController!!)
             }
