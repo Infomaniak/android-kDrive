@@ -434,12 +434,10 @@ class MainActivity : BaseActivity() {
 
     @OptIn(UnstableApi::class)
     private fun finishPIPActivity() {
-        lifecycleScope.launch {
-            if ((application as MainApplication).isVideoActivityInPIPMode) {
-                startActivity(Intent(this@MainActivity, VideoActivity::class.java).apply {
-                    flags = FLAG_ACTIVITY_REORDER_TO_FRONT
-                })
-            }
+        if ((application as MainApplication).isVideoActivityInPIPMode) {
+            startActivity(Intent(this@MainActivity, VideoActivity::class.java).apply {
+                flags = FLAG_ACTIVITY_REORDER_TO_FRONT
+            })
         }
     }
 
