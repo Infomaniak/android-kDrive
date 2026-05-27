@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@ import android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
 import android.net.Uri
@@ -46,6 +45,7 @@ import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.get
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -59,25 +59,34 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
+import coil3.asDrawable
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.request.error
+import coil3.request.fallback
+import coil3.request.placeholder
+import coil3.request.transformations
+import coil3.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.snackbar.Snackbar
+import com.infomaniak.core.applock.AppLockManager
+import com.infomaniak.core.applock.view.AppLockViewActivity
+import com.infomaniak.core.coil.ImageLoaderProvider.simpleImageLoader
+import com.infomaniak.core.common.doesFileExist
+import com.infomaniak.core.common.observe
 import com.infomaniak.core.inappreview.BaseInAppReviewManager
 import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
 import com.infomaniak.core.inappreview.view.ReviewAlertDialog
 import com.infomaniak.core.inappreview.view.ReviewAlertDialogData
-import com.infomaniak.core.legacy.applock.LockActivity
-import com.infomaniak.core.legacy.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showIndefiniteSnackbar
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.whenResultIsOk
-import com.infomaniak.core.observe
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MainApplication
@@ -89,14 +98,12 @@ import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
 import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.data.models.DeepLinkType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
 import com.infomaniak.drive.databinding.ActivityMainBinding
@@ -105,6 +112,7 @@ import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.deeplink.DeeplinkHandler
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.fileList.preview.playback.VideoActivity
 import com.infomaniak.drive.utils.AccountUtils
@@ -120,6 +128,7 @@ import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -183,6 +192,8 @@ class MainActivity : BaseActivity() {
 
     private var inAppUpdateSnackbar: Snackbar? = null
 
+    private val deeplinkHandler = DeeplinkHandler(registryOwner = this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -199,7 +210,6 @@ class MainActivity : BaseActivity() {
         setupFabs()
         setupDrivePermissions()
         handleShortcuts()
-        handleNavigateToDestinationFileId()
 
         initAppUpdateManager()
         initAppReviewManager()
@@ -207,9 +217,11 @@ class MainActivity : BaseActivity() {
         observeBulkDownloadRunning()
         observeDownloadCancellation()
         observeFailureDownloadWorkerOffline()
+        observeCurrentUserAvatar()
 
-        LockActivity.scheduleLockIfNeeded(
+        AppLockManager.scheduleLockIfNeeded(
             targetActivity = this,
+            lockActivityCls = AppLockViewActivity::class,
             isAppLockEnabled = { AppSettings.appSecurityLock }
         )
 
@@ -226,6 +238,7 @@ class MainActivity : BaseActivity() {
         mainViewModel.loadRootFiles()
         myKSuiteViewModel.refreshMyKSuite()
         handleDeletionOfUploadedPhotos()
+        deeplinkHandler.handle(navigationArgs?.deeplinkType, this)
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -265,42 +278,6 @@ class MainActivity : BaseActivity() {
                 navController.popBackStack(item.itemId, false)
             }
         }
-    }
-
-    private fun handleNavigateToDestinationFileId() {
-        navigationArgs?.let {
-            if (it.deepLinkFileNotFound) {
-                binding.mainFab.apply {
-                    post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
-                }
-            } else {
-                if (it.destinationFileId > 0) {
-                    navigateToDestinationFileId(it.destinationFileId, it.destinationUserDrive, subfolderId = null)
-                } else {
-                    when (val deepLinkType = it.deepLinkType) {
-                        is DeepLinkType.SharedWithMe -> null//TODO()
-                        is DeepLinkType.Trash -> {
-                            navigateToDestinationFileId(
-                                destinationFileId = TRASH_FILE_ID,
-                                destinationUserDrive = UserDrive(driveId = deepLinkType.userDriveId),
-                                deepLinkType.folderId?.toInt()
-                            )
-                        }
-                        null -> null//TODO()
-                    }
-                }
-            }
-        }
-    }
-
-    private fun navigateToDestinationFileId(destinationFileId: Int, destinationUserDrive: UserDrive?, subfolderId: Int?) {
-        clickOnBottomBarFolders()
-        mainViewModel.navigateFileListTo(
-            navController,
-            destinationFileId,
-            destinationUserDrive ?: UserDrive(),
-            subfolderId
-        )
     }
 
     private fun setupFabs() = with(binding) {
@@ -382,6 +359,12 @@ class MainActivity : BaseActivity() {
             }
     }
 
+    private fun observeCurrentUserAvatar() {
+        AccountUtils.currentConnectedUserFlow.observe(this) {
+            setBottomNavigationUserAvatar(this@MainActivity)
+        }
+    }
+
     private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown
     //endregion
 
@@ -460,51 +443,73 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun launchNextDeleteRequest() {
-        val filesUris = pendingFilesUrisQueue.firstOrNull() ?: return
+    private fun handleDeletionOfUploadedPhotos() = lifecycleScope.launch {
+        retrieveFilesUriToDelete()?.let { uris -> showDeleteFileConfirmation(uris) }
+    }
+
+    private suspend fun retrieveFilesUriToDelete(): List<Uri>? = withContext(Dispatchers.IO) {
+        takeIf { isDeleteEnable() && hasNoPendingUpload() }
+            ?.let { UploadFile.getAllUploadedFiles() }
+            ?.let { getFilesUriToDelete(it) }
+            ?.takeIf { it.size >= SYNCED_FILES_DELETION_FILES_AMOUNT }
+    }
+
+    private fun isDeleteEnable(): Boolean = UploadFile.getAppSyncSettings()?.deleteAfterSync ?: false
+
+    private fun hasNoPendingUpload(): Boolean = UploadFile.getCurrentUserPendingUploadsCount() == 0
+
+    private fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> {
+        val (filesToDelete, filesAlreadyDeleted) = uploadFiles.map(UploadFile::getUriObject)
+            .filter { it.ensureIsNotFileOrDocument() }
+            .partition(Uri::doesFileExist)
+
+        UploadFile.deleteAllFromUris(filesAlreadyDeleted)
+
+        return filesToDelete
+    }
+
+    private fun Uri.ensureIsNotFileOrDocument(): Boolean {
+        return (scheme != ContentResolver.SCHEME_FILE && !DocumentsContract.isDocumentUri(this@MainActivity, this))
+            .also {
+                if (!it) SentryLog.wtf(
+                    tag = "MainActivity",
+                    msg = "A file or document was marked as a media to upload $this," +
+                            "So to dev, keep the test ensureIsNotFileOrDocument and remove the sentry," +
+                            "else if this sentry is never sent in some years, you can remove the test ensureIsNotFileOrDocument "
+                )
+            }
+    }
+
+    private fun showDeleteFileConfirmation(uris: List<Uri>) {
+        deleteLocalMediaRequestDialog = Utils.createConfirmation(
+            context = this@MainActivity,
+            title = getString(R.string.modalDeletePhotosTitle),
+            message = getString(R.string.modalDeletePhotosNumericDescription, uris.size),
+            buttonText = getString(R.string.buttonDelete),
+            isDeletion = true,
+            onConfirmation = { onDeleteFileConfirmation(uris) }
+        )
+    }
+
+    fun onDeleteFileConfirmation(filesUriToDelete: List<Uri>) {
         if (SDK_INT >= 30) {
-            val deletionRequest = MediaStore.createDeleteRequest(contentResolver, filesUris)
-            filesDeletionResult.launch(IntentSenderRequest.Builder(deletionRequest.intentSender).build())
+            lifecycleScope.launch(Dispatchers.Default) {
+                pendingFilesUrisQueue.clear()
+                pendingFilesUrisQueue.addAll(filesUriToDelete.chunked(MEDIASTORE_DELETE_BATCH_LIMIT))
+                launchNextDeleteRequest()
+            }
+        } else {
+            mainViewModel.deleteSynchronizedFilesOnDevice(filesUriToDelete)
         }
     }
 
-    private fun handleDeletionOfUploadedPhotos() {
-
-        fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> = uploadFiles.mapNotNull { file ->
-            file.getUriObject().takeUnless { uri ->
-                uri.scheme == ContentResolver.SCHEME_FILE || DocumentsContract.isDocumentUri(this, uri)
-            }
+    private fun launchNextDeleteRequest() {
+        if (SDK_INT >= 30) {
+            pendingFilesUrisQueue.firstOrNull()
+                ?.let { runCatching { MediaStore.createDeleteRequest(contentResolver, it) }.getOrNull() }
+                ?.let { IntentSenderRequest.Builder(it.intentSender).build() }
+                ?.let(filesDeletionResult::launch)
         }
-
-        fun onConfirmation(filesUploadedRecently: List<UploadFile>, filesUriToDelete: List<Uri>) {
-            if (SDK_INT >= 30) {
-                lifecycleScope.launch {
-                    pendingFilesUrisQueue.clear()
-                    pendingFilesUrisQueue.addAll(filesUriToDelete.chunked(MEDIASTORE_DELETE_BATCH_LIMIT))
-                    launchNextDeleteRequest()
-                }
-            } else {
-                mainViewModel.deleteSynchronizedFilesOnDevice(filesUploadedRecently)
-            }
-        }
-
-        val syncSettings = UploadFile.getAppSyncSettings() ?: return
-        if (!syncSettings.deleteAfterSync) return
-        if (UploadFile.getCurrentUserPendingUploadsCount() != 0) return
-        val filesUploadedRecently = UploadFile.getAllUploadedFiles() ?: return
-        if (filesUploadedRecently.size < SYNCED_FILES_DELETION_FILES_AMOUNT) return
-        // We check that the filtered list of URIs is not empty before showing the dialog
-        // and sending the request to MediaStore; otherwise, it would cause a crash.
-        val filesUriToDelete = getFilesUriToDelete(filesUploadedRecently).takeIf { it.isNotEmpty() } ?: return
-
-        deleteLocalMediaRequestDialog = Utils.createConfirmation(
-            context = this,
-            title = getString(R.string.modalDeletePhotosTitle),
-            message = getString(R.string.modalDeletePhotosNumericDescription, filesUploadedRecently.size),
-            buttonText = getString(R.string.buttonDelete),
-            isDeletion = true,
-            onConfirmation = { onConfirmation(filesUploadedRecently, filesUriToDelete) }
-        )
     }
 
     private fun onDestinationChanged(destination: NavDestination, navigationArgs: Bundle?) {
@@ -657,14 +662,15 @@ class MainActivity : BaseActivity() {
                     .error(fallback)
                     .placeholder(R.drawable.ic_account)
                     .build()
-                val userAvatar = this@MainActivity.simpleImageLoader.execute(request).drawable
+
+                val userAvatar = this@MainActivity.simpleImageLoader.execute(request).image?.asDrawable(context.resources)
 
                 userAvatar?.let {
                     val selectedAvatar = generateSelectedAvatar(userAvatar)
                     val stateListDrawable = StateListDrawable()
                     stateListDrawable.addState(
                         intArrayOf(android.R.attr.state_checked),
-                        BitmapDrawable(resources, selectedAvatar)
+                        selectedAvatar.toDrawable(resources)
                     )
                     stateListDrawable.addState(intArrayOf(), userAvatar)
 
@@ -701,13 +707,31 @@ class MainActivity : BaseActivity() {
         binding.bottomNavigation.findViewById<View>(R.id.rootFilesFragment).performClick()
     }
 
+    fun showSnackbarWithFabAnchor(title: Int) {
+        binding.mainFab.apply {
+            post { showSnackbar(title = title, anchor = this) }
+        }
+    }
+
+    suspend fun navigateFromDriveDeeplink(deeplink: DeeplinkAction.Drive) {
+        Dispatchers.Main { clickOnBottomBarFolders() }
+        mainViewModel.navigateDeeplink.emit(deeplink)
+    }
+
     companion object {
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
 
-        // Maximum number of elements in the list supported by the mediastore when Uris are to be deleted.
-        // When you exceed this value, the system may not propagate dialog to delete the images,
-        // and when you exceed 10_000 you receive a `NullPointerException`.
-        private const val MEDIASTORE_DELETE_BATCH_LIMIT = 5_000
+        /**
+         * Maximum number of elements in the list supported by the mediastore when Uris are to be deleted.
+         * When you exceed this value, the system may not propagate dialog to delete the images,
+         * and when you exceed 10_000 you receive a `NullPointerException`.
+         *
+         * Note: if your app targets Build.VERSION_CODES.BAKLAVA and above, you can send a maximum of 2000 uris in each request.
+         * Attempting to send more than 2000 uris will result in a IllegalArgumentException.
+         * https://developer.android.com/reference/android/provider/MediaStore#createDeleteRequest(android.content.ContentResolver,%20java.util.Collection%3Candroid.net.Uri%3E)
+         *
+         */
+        private const val MEDIASTORE_DELETE_BATCH_LIMIT = 2_000
 
         private const val DEFAULT_APP_REVIEW_LAUNCHES = 20
         private const val MAX_APP_REVIEW_LAUNCHES = 100

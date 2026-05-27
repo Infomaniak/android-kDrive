@@ -1,0 +1,3 @@
+- Ajouter un paramètre permettant de supprimer les fichiers kDrive des autres applications (comme l'application « Fichiers »)
+- Prise en charge de tous les liens profonds
+- Correction d'un problème où les dates des photos n'étaient pas correctement définies lors du téléchargement avec un téléphone Xiaomi

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.infomaniak.core.legacy.utils.getFileName
+import com.infomaniak.core.file.getFileDatesWithFallback
+import com.infomaniak.core.file.getFileName
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.FileChunkSizeManager
@@ -38,7 +39,6 @@ import com.infomaniak.drive.databinding.DialogImportFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.SyncUtils.getFileDates
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.utils.getAvailableMemory
@@ -127,7 +127,7 @@ class ImportFilesDialog : DialogFragment() {
             }
         }
 
-        if (successCount > 0) appCtx.syncImmediately()
+        if (successCount > 0) appCtx.syncImmediately(isAutomaticTrigger = false)
         currentCoroutineContext().ensureActive()
         dismissAllowingStateLoss()
     }
@@ -157,14 +157,14 @@ class ImportFilesDialog : DialogFragment() {
         runCatching {
             SentryLog.i(TAG, "processCursorData: uri=$uri")
             val fileName = cursor.getFileName(uri)
-            val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
+            val (fileCreatedAt, fileModifiedAt) = cursor.getFileDatesWithFallback()
 
             outputFile = getOutputFile(uri, fileModifiedAt)
             ensureActive()
             uploadFile = UploadFile(
                 uri = outputFile.toUri().toString(),
                 driveId = navArgs.driveId,
-                fileCreatedAt = fileCreatedAt,
+                fileCreatedAt = fileCreatedAt ?: fileModifiedAt,
                 fileModifiedAt = fileModifiedAt,
                 fileName = fileName,
                 fileSize = outputFile.length(),

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,13 +35,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.infomaniak.core.common.utils.DownloadManagerUtils
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.ui.showToast
-import com.infomaniak.core.utils.DownloadManagerUtils
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -106,6 +106,8 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     val openWith get() = binding.openWith
 
+    private var hideActions: Boolean = false
+
     fun init(
         ownerFragment: Fragment,
         mainViewModel: MainViewModel,
@@ -113,6 +115,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         onItemClickListener: OnItemClickListener,
         selectFolderResultLauncher: ActivityResultLauncher<Intent>,
         isSharedWithMe: Boolean = false,
+        hideActions: Boolean,
     ) {
         this.isSharedWithMe = isSharedWithMe
         this.mainViewModel = mainViewModel
@@ -120,6 +123,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         this.onItemClickListener = onItemClickListener
         this.ownerFragment = ownerFragment
         this.selectFolderResultLauncher = selectFolderResultLauncher
+        this.hideActions = hideActions
         initOnClickListeners()
     }
 
@@ -152,7 +156,8 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         addFavorites.isVisible = rights.canUseFavorite == true && !isSharedWithMe
         availableOffline.isGone = isSharedWithMe // Is it still needed to add `|| currentFile.getOfflineFile(context) == null`
-        deleteFile.isVisible = rights.canDelete == true && !file.isImporting() && !isSharedWithMe
+        deleteFile.isVisible =
+            rights.canDelete == true && !file.isImporting() && (!isSharedWithMe || currentFile.createdByCurrentUser())
         downloadFile.isVisible = rights.canRead == true
         duplicateFile.isGone = rights.canRead == false
                 || isSharedWithMe
@@ -174,7 +179,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 && !file.isDisabled()
                 && !isSharedWithMe
 
-        if (currentFile.isFromActivities) {
+        if (hideActions) {
             quickActionsLayout.isGone = true
             actionListLayout.isGone = true
 
@@ -668,12 +673,11 @@ class FileInfoActionsView @JvmOverloads constructor(
                 if (downloadPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
                     val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
                     val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
-                    DownloadManagerUtils.scheduleDownload(
-                        context = this,
+                    DownloadManagerUtils.launchDownload(
                         url = ApiRoutes.getDownloadFileUrl(file),
                         name = fileName,
+                        userAgent = HttpUtils.getUserAgent,
                         userBearerToken = userBearerToken,
-                        extraHeaders = HttpUtils.getHeaders(),
                         onError = { showToast(title = it) }
                     )
                     onSuccess?.invoke()

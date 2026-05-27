@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.file.SpecialFolder.MyShares
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MySharesMultiSelectActionsBottomSheetDialog
@@ -42,6 +42,8 @@ class MySharesFragment : FileSubTypeListFragment() {
     override val noItemsRootTitle = R.string.mySharesNoFile
 
     private val navigationArgs: MySharesFragmentArgs by navArgs()
+    override val fileIdToPreview: Int get() = navigationArgs.previewFileId
+
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -96,7 +98,7 @@ class MySharesFragment : FileSubTypeListFragment() {
                     // forceClean because myShares is not paginated
                     populateFileList(
                         files = it?.first ?: ArrayList(),
-                        folderId = FileController.MY_SHARES_FILE_ID,
+                        folderId = MyShares.id,
                         forceClean = true,
                         isComplete = true,
                         realm = mainViewModel.realm,

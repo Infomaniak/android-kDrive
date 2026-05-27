@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2023-2025 Infomaniak Network SA
+ * Copyright (C) 2023-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,10 @@
  */
 package com.infomaniak.drive.data.cache
 
+import android.util.Log
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
+import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.network.networking.HttpClient
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository
@@ -27,9 +29,11 @@ import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.cache.FileController.saveRemoteFiles
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.FileAction
 import com.infomaniak.drive.data.models.FileActivityType
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.file.SpecialFolder.SharedWithMe
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
@@ -41,6 +45,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import java.util.Calendar
 
@@ -60,7 +65,10 @@ object FolderFilesProvider {
             val folderProxy = FileController.getFileById(realm, folderFilesProviderArgs.folderId)
             val sourceRestrictionType = folderFilesProviderArgs.sourceRestrictionType
             val needToLoadFromRemote = needToLoadFromRemote(sourceRestrictionType, folderProxy)
-
+            SentryLog.i(
+                TAG,
+                "getFiles with folder: ${folderProxy?.id}, sourceRestrictionType: $sourceRestrictionType, needToLoadFromRemote: $needToLoadFromRemote"
+            )
             val files = when {
                 needToLoadFromRemote && sourceRestrictionType != SourceRestrictionType.ONLY_FROM_LOCAL -> {
                     loadFromRemote(realm, folderProxy, folderFilesProviderArgs)
@@ -69,12 +77,32 @@ object FolderFilesProvider {
                     loadFromLocal(realm, folderProxy, folderFilesProviderArgs.withChildren, folderFilesProviderArgs.order)
                 }
                 else -> {
+                    SentryLog.i(TAG, "getFiles: files is null")
                     null
                 }
             }
+            SentryLog.i(TAG, "Load files finished")
             return files
         } finally {
             if (folderFilesProviderArgs.realm == null) realm.close()
+        }
+    }
+
+    suspend fun loadRootFiles(userDrive: UserDrive, hasNetwork: Boolean) = withContext(Dispatchers.IO) {
+        if (hasNetwork) {
+            runCatching {
+                getFiles(
+                    FolderFilesProviderArgs(
+                        folderId = ROOT_ID,
+                        isFirstPage = true,
+                        order = SortType.NAME_AZ,
+                        sourceRestrictionType = ONLY_FROM_REMOTE,
+                        userDrive = userDrive,
+                    )
+                )
+            }.cancellable().onFailure { throwable ->
+                SentryLog.e(TAG, "recursiveDownload failed", throwable)
+            }.getOrNull()
         }
     }
 
@@ -83,7 +111,7 @@ object FolderFilesProvider {
         onRecursionStart: (() -> Unit)? = null,
     ) {
         with(folderFilesProviderArgs) {
-            val rootFolder = File(id = FileController.SHARED_WITH_ME_FILE_ID, name = "/")
+            val rootFolder = File(id = SharedWithMe.id, name = "/")
             val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
 
             FileController.getRealmInstance(userDrive).use { realm ->
@@ -108,7 +136,7 @@ object FolderFilesProvider {
         rootFolder: File? = null,
         onRecursionStart: (() -> Unit)? = null,
     ) {
-        val folderId = if (isRoot) FileController.SHARED_WITH_ME_FILE_ID else folderFilesProviderArgs.folderId
+        val folderId = if (isRoot) SharedWithMe.id else folderFilesProviderArgs.folderId
         val apiResponse = if (isRoot) {
             ApiRepository.getSharedWithMeFiles(
                 okHttpClient = okHttpClient,
@@ -157,7 +185,7 @@ object FolderFilesProvider {
         realm: Realm,
         folderId: Int,
         userDrive: UserDrive,
-        sortType: File.SortType,
+        sortType: SortType,
         isFirstPage: Boolean = true,
         transaction: (files: ArrayList<File>) -> Unit,
         okHttpClient: OkHttpClient? = null,
@@ -211,6 +239,7 @@ object FolderFilesProvider {
         folderFilesProviderArgs: FolderFilesProviderArgs,
     ): FolderFilesProviderResult? = with(Dispatchers.IO) {
 
+        SentryLog.i(TAG, "loadFromRemote")
         val userDrive = folderFilesProviderArgs.userDrive
         val (okHttpClient, driveId) = runBlocking { AccountUtils.getHttpClient(userDrive.userId) } to userDrive.driveId
 
@@ -327,8 +356,9 @@ object FolderFilesProvider {
         realm: Realm,
         folderProxy: File?,
         withChildren: Boolean,
-        order: File.SortType
+        order: SortType
     ): FolderFilesProviderResult? {
+        SentryLog.i(TAG, "loadFromLocal")
         val localFolderWithoutChildren = folderProxy?.let { realm.copyFromRealm(it, 1) } ?: return null
         val sortedFolderFiles = if (withChildren) FileController.getLocalSortedFolderFiles(folderProxy, order) else arrayListOf()
         return FolderFilesProviderResult(folder = localFolderWithoutChildren, folderFiles = sortedFolderFiles, isComplete = true)
@@ -355,13 +385,14 @@ object FolderFilesProvider {
         cursor: String? = folderProxy.cursor,
         returnResponse: ArrayMap<Int, FileAction> = arrayMapOf(),
     ): Map<out Int, FileAction> {
+        SentryLog.i(TAG, "loadActivitiesFromFolderRec with folderId ${folderProxy.id} cursor: ${cursor != null}")
         val realm = folderProxy.realm
         val apiResponse = ApiRepository.getListingFiles(
             okHttpClient = okHttpClient,
             driveId = userDrive.driveId,
             parentId = folderProxy.id,
             cursor = cursor,
-            order = File.SortType.NAME_AZ,
+            order = SortType.NAME_AZ,
         )
 
         if (!apiResponse.isSuccess()) return returnResponse
@@ -372,6 +403,7 @@ object FolderFilesProvider {
 
         if (apiResponseData != null && apiResponseData.actions.isNotEmpty()) {
             val actionsFiles = apiResponseData.actionsFiles.associateBy(File::id)
+            SentryLog.i(TAG, "loadActivitiesFromFolderRec: actions ${apiResponseData.actions.count()}")
             apiResponseData.actions.asReversed().forEach { fileActivity ->
                 fileActivity.applyFileAction(realm, actionsFiles, returnResponse, folderProxy)
             }
@@ -387,6 +419,7 @@ object FolderFilesProvider {
         }
 
         return if (apiResponse.hasMoreAndCursorExists) {
+            SentryLog.i(TAG, "loadActivitiesFromFolderRec: loading next page")
             // Loading the next page, then the cursor is required
             loadActivitiesFromFolderRec(
                 activitiesJob = activitiesJob,
@@ -397,6 +430,7 @@ object FolderFilesProvider {
                 returnResponse = returnResponse
             )
         } else {
+            SentryLog.i(TAG, "loadActivitiesFromFolderRec: no more pages")
             returnResponse
         }
     }
@@ -457,7 +491,7 @@ object FolderFilesProvider {
     data class FolderFilesProviderArgs(
         val folderId: FileId,
         val isFirstPage: Boolean = true,
-        val order: File.SortType = File.SortType.NAME_AZ,
+        val order: SortType = SortType.NAME_AZ,
         val realm: Realm? = null,
         val sourceRestrictionType: SourceRestrictionType = SourceRestrictionType.UNRESTRICTED,
         val userDrive: UserDrive = UserDrive(),

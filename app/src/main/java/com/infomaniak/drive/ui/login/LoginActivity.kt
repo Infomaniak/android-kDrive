@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,23 +38,26 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.infomaniak.core.Xor
 import com.infomaniak.core.auth.TokenAuthenticator.Companion.changeAccessToken
 import com.infomaniak.core.auth.models.user.User
-import com.infomaniak.core.cancellable
-import com.infomaniak.core.ui.compose.basics.CallableState
+import com.infomaniak.core.common.Xor
+import com.infomaniak.core.common.cancellable
+import com.infomaniak.core.common.extensions.clearStack
+import com.infomaniak.core.common.observe
+import com.infomaniak.core.crossapplogin.back.CrossAppLoginFacade
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
-import com.infomaniak.core.extensions.clearStack
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.Utils.lockOrientationForSmallScreens
+import com.infomaniak.core.network.api.InternalTranslatedErrorCode
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.network.networking.HttpClient
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.formatError
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.core.observe
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
+import com.infomaniak.core.ui.compose.basics.CallableState
 import com.infomaniak.drive.CREATE_ACCOUNT_CANCEL_HOST
 import com.infomaniak.drive.CREATE_ACCOUNT_SUCCESS_HOST
 import com.infomaniak.drive.CREATE_ACCOUNT_URL
@@ -107,9 +110,15 @@ class LoginActivity : ComponentActivity() {
                 when {
                     translatedError?.isNotBlank() == true -> showError(translatedError)
                     authCode?.isNotBlank() == true -> authenticateUser(authCode)
-                    else -> showError(getString(R.string.anErrorHasOccurred))
+                    else -> {
+                        SentryLog.e(TAG, "WebViewLoginResult returned null data") { scope ->
+                            scope.setExtra("errorCode", data?.extras?.getString(InfomaniakLogin.ERROR_CODE_TAG))
+                        }
+                        showError(getString(R.string.anErrorHasOccurred))
+                    }
                 }
             } else {
+                SentryLog.i(TAG, "Webview returned with result code : $resultCode")
                 isLoginButtonLoading = false
                 isSignUpButtonLoading = false
             }
@@ -156,14 +165,14 @@ class LoginActivity : ComponentActivity() {
 
     private suspend fun handleLogin(loginRequest: CallableState<List<ExternalAccount>>): Nothing = repeatWhileActive {
         val accountsToLogin = loginRequest.awaitOneCall()
-        if (accountsToLogin.isEmpty()) openLoginWebView()
-        else connectAccounts(selectedAccounts = accountsToLogin)
+        if (accountsToLogin.isEmpty()) openLoginWebView() else connectAccounts(selectedAccounts = accountsToLogin)
     }
 
     private suspend fun connectAccounts(selectedAccounts: List<ExternalAccount>) {
         val loginResult = crossAppLoginViewModel.attemptLogin(selectedAccounts)
 
         with(loginResult) {
+            SentryLog.i(TAG, "Number of tokens found : ${tokens.count()}")
             tokens.forEachIndexed { index, token ->
                 authenticateUser(token, infomaniakLogin, withRedirection = index == tokens.lastIndex)
             }
@@ -185,6 +194,7 @@ class LoginActivity : ComponentActivity() {
     }
 
     private fun observeCrossLoginAccounts() {
+        @OptIn(CrossAppLoginFacade.UncheckedTokens::class)
         crossAppLoginViewModel.availableAccounts.observe(this) { accounts ->
             SentryLog.i(TAG, "Got ${accounts.count()} accounts from other apps")
         }
@@ -260,6 +270,7 @@ class LoginActivity : ComponentActivity() {
     private fun authenticateUser(authCode: String) {
         lifecycleScope.launch {
             runCatching {
+                SentryLog.i(TAG, "Getting the user token")
                 val tokenResult = infomaniakLogin.getToken(
                     okHttpClient = HttpClient.okHttpClient,
                     code = authCode,
@@ -269,10 +280,16 @@ class LoginActivity : ComponentActivity() {
                     is InfomaniakLogin.TokenResult.Success -> onGetTokenSuccess(tokenResult.apiToken)
                     is InfomaniakLogin.TokenResult.Error -> {
                         showError(getLoginErrorDescription(this@LoginActivity, tokenResult.errorStatus))
+                        SentryLog.e(TAG, "GetToken failed") { scope ->
+                            scope.setExtra("Error status", tokenResult.errorStatus.name)
+                        }
                     }
                 }
             }.onFailure { exception ->
-                if (exception is CancellationException) throw exception
+                if (exception is CancellationException) {
+                    SentryLog.i(TAG, "Throwing cancellation exception in AuthenticateUser")
+                    throw exception
+                }
                 SentryLog.e(TAG, "Failure on getToken", exception)
             }
         }
@@ -294,7 +311,7 @@ class LoginActivity : ComponentActivity() {
                     return@launch
                 }
                 is Xor.Second -> Dispatchers.Main {
-                    if (result.value.error?.description == ErrorCode.NO_DRIVE) {
+                    if (result.value.error?.code == ErrorCode.NO_DRIVE) {
                         launchNoDriveActivity()
                     } else {
                         showError(getString(result.value.translateError()))
@@ -316,6 +333,7 @@ class LoginActivity : ComponentActivity() {
     }
 
     private fun showError(error: String) {
+        SentryLog.i(TAG, "Showing error ($error) after login attempt")
         showSnackbar(error)
         isLoginButtonLoading = false
         isSignUpButtonLoading = false
@@ -355,17 +373,29 @@ class LoginActivity : ComponentActivity() {
                 .build()
             val userProfileResponse = ApiRepository.getUserProfile(okhttpClient)
 
-            if (userProfileResponse.result == ApiResponseStatus.ERROR) return Xor.Second(userProfileResponse)
+            if (userProfileResponse.result == ApiResponseStatus.ERROR) {
+                userProfileResponse.addSentryLogForApiError("getUserProfile")
+                return Xor.Second(userProfileResponse)
+            }
 
             val user = userProfileResponse.data?.apply {
                 this.apiToken = apiToken
                 this.organizations = ArrayList()
-            } ?: return Xor.Second(getErrorResponse(R.string.anErrorHasOccurred))
+            } ?: run {
+                SentryLog.e(TAG, "GetUserProfile returned null data") { scope ->
+                    scope.setExtra("userId", apiToken.userId.toString())
+                    scope.setExtra("apiResponse", userProfileResponse.toString())
+                }
+                return Xor.Second(getErrorResponse(R.string.anErrorHasOccurred))
+            }
 
             val allDrivesDataResponse = Dispatchers.IO { ApiRepository.getAllDrivesData(okhttpClient) }
 
             return when {
-                allDrivesDataResponse.result == ApiResponseStatus.ERROR -> Xor.Second(allDrivesDataResponse)
+                allDrivesDataResponse.result == ApiResponseStatus.ERROR -> {
+                    allDrivesDataResponse.addSentryLogForApiError("getAllDriveData")
+                    Xor.Second(allDrivesDataResponse)
+                }
                 allDrivesDataResponse.data?.drives?.any { it.isDriveUser() } == false -> Xor.Second(
                     ApiResponse<DriveInfo>(
                         result = ApiResponseStatus.ERROR,
@@ -384,10 +414,6 @@ class LoginActivity : ComponentActivity() {
             }
         }
 
-        private fun getErrorResponse(@StringRes text: Int): ApiResponse<Any> {
-            return ApiResponse(result = ApiResponseStatus.ERROR, translatedError = text)
-        }
-
         fun getLoginErrorDescription(context: Context, error: InfomaniakLogin.ErrorStatus): String {
             return context.getString(
                 when (error) {
@@ -396,6 +422,21 @@ class LoginActivity : ComponentActivity() {
                     else -> R.string.anErrorHasOccurred
                 }
             )
+        }
+
+        private fun ApiResponse<*>.addSentryLogForApiError(apiCallName: String) {
+            if (formatError() == InternalTranslatedErrorCode.UnknownError) {
+                SentryLog.e(TAG, "Unknown error in $apiCallName") { scope ->
+                    scope.setExtra("Error code", error?.code)
+                    scope.setExtra("Error description", error?.description)
+                    scope.setExtra("Error exception", error?.exception.toString())
+                    scope.setExtra("Api Error", error?.errors?.joinToString())
+                }
+            }
+        }
+
+        private fun getErrorResponse(@StringRes text: Int): ApiResponse<Any> {
+            return ApiResponse(result = ApiResponseStatus.ERROR, translatedError = text)
         }
     }
 }

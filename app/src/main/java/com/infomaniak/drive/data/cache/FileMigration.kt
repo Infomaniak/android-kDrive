@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,8 +56,8 @@ class FileMigration : RealmMigration {
                 if (hasField("canUseTag")) removeField("canUseTag")
                 if (hasField("tags")) removeField("tags")
                 if (hasField("isWaitingOffline")) removeField("isWaitingOffline")
-                if (!hasField(File::isFromSearch.name)) {
-                    addField(File::isFromSearch.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                if (!hasField("isFromSearch")) {
+                    addField("isFromSearch", Boolean::class.java, FieldAttribute.REQUIRED)
                 }
                 if (!hasField(File::isFromUploads.name)) {
                     addField(File::isFromUploads.name, Boolean::class.java, FieldAttribute.REQUIRED)
@@ -378,6 +378,12 @@ class FileMigration : RealmMigration {
 
             oldVersionTemp++
         }
+
+        if (oldVersionTemp == 10L) {
+            schema[File::class.java.simpleName]?.removeField("isFromActivities")
+            schema[File::class.java.simpleName]?.removeField("isFromSearch")
+            oldVersionTemp++
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -405,7 +411,7 @@ class FileMigration : RealmMigration {
     }
 
     companion object {
-        const val DB_VERSION = 10L // Must be bumped when the schema changes
+        const val DB_VERSION = 11L // Must be bumped when the schema changes
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 }

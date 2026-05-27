@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2025 Infomaniak Network SA
+  ~ Copyright (C) 2022-2026 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -65,6 +65,10 @@
             android:defaultValue="/"
             app:argType="string" />
         <argument
+            android:name="previewFileId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <action
@@ -94,6 +98,11 @@
             android:defaultValue="false"
             app:argType="boolean" />
         <argument
+            android:name="externalFilePath"
+            android:defaultValue="@null"
+            app:argType="com.infomaniak.drive.data.models.deeplink.DeeplinkExternalFilePath"
+            app:nullable="true" />
+        <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <action
@@ -120,6 +129,10 @@
         <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
+        <argument
+            android:name="previewFileId"
+            android:defaultValue="0"
+            app:argType="integer" />
         <action
             android:id="@+id/action_favoritesFragment_self"
             app:destination="@id/favoritesFragment" />
@@ -319,7 +332,7 @@
 
     <dialog
         android:id="@+id/selectPermissionBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.selectPermission.SelectPermissionBottomSheetDialog"
         android:label="SelectPermissionBottomSheetDialog"
         tools:layout="@layout/fragment_select_permission">
         <argument
@@ -336,6 +349,6 @@
             app:argType="com.infomaniak.drive.data.models.Permission" />
         <argument
             android:name="permissionsGroup"
-            app:argType="com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog$PermissionsGroup" />
+            app:argType="com.infomaniak.drive.ui.selectPermission.SelectPermissionBottomSheetDialog$PermissionsGroup" />
     </dialog>
 </navigation>

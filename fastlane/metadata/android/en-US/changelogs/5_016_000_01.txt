@@ -1,0 +1,4 @@
+- Fix 2FA screen not appearing when cold-starting the app
+- Add "Share logs" button
+- Show actions in files previews from activities screen
+- Diverse fix and improvements

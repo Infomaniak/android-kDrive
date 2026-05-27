@@ -21,14 +21,16 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import com.infomaniak.core.legacy.applock.LockActivity
-import com.infomaniak.core.legacy.applock.Utils.silentlyReverseSwitch
+import com.infomaniak.core.applock.AppLockHelper.silentlyReverseSwitch
+import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.databinding.ViewSwitchSettingsBinding
 import com.infomaniak.drive.twoFactorAuthManager
+import splitties.init.appCtx
 
 class AppSecuritySettingsActivity : AppCompatActivity() {
 
@@ -53,8 +55,9 @@ class AppSecuritySettingsActivity : AppCompatActivity() {
             setOnCheckedChangeListener { _, _ ->
                 // Reverse switch (before official parameter changed) by silent click
                 silentlyReverseSwitch(this) { shouldLock ->
+                    CloudStorageProvider.setDisabled(appCtx, isChecked)
                     AppSettings.appSecurityLock = shouldLock
-                    if (shouldLock) LockActivity.unlock()
+                    if (shouldLock) AppLockManager.unlock()
                 }
             }
         }

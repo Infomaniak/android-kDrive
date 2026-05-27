@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,6 +73,7 @@ import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.coil.ImageLoaderType
+import com.infomaniak.drive.data.models.deeplink.DeeplinkFilePath
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
@@ -135,6 +136,9 @@ open class FileListFragment : MultiSelectFragment(
     private var isUploading = false
     private var retryLoadingActivities = false
 
+    open val fileIdToPreview: Int
+        get() = (navigationArgs.filePath as? DeeplinkFilePath.FilePreviewInFolder)?.fileId ?: 0
+
     protected val showLoadingTimer: CountDownTimer by lazy {
         createRefreshTimer { _binding?.let { it.swipeRefreshLayout.isRefreshing = true } }
     }
@@ -143,10 +147,12 @@ open class FileListFragment : MultiSelectFragment(
     protected open var sortFiles: () -> Unit = SortFiles()
     protected open var enabledMultiSelectMode = true
     protected open var hideBackButtonWhenRoot: Boolean = true
-    protected open var showPendingFiles = true
+    protected open val showPendingFiles
+        get() = folderId != ROOT_ID || findNavController().currentDestination?.id == R.id.fileListFragment
     protected open var allowCancellation = true
     protected open val sortTypeUsage = SortTypeUsage.FILE_LIST
 
+    protected open val isActionMenuHidden = false
     var sizeOfOffline: Int = 0
 
     private val noItemsFoldersTitle: Int by lazy {
@@ -186,11 +192,20 @@ open class FileListFragment : MultiSelectFragment(
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        folderId = navigationArgs.folderId
-        folderName = navigationArgs.folderName
+        initFolder()
         _binding = FragmentFileListBinding.inflate(inflater, container, false)
 
         return binding.root
+    }
+
+    private fun initFolder() {
+        val fileType = navigationArgs.filePath
+        folderId = when (fileType) {
+            is DeeplinkFilePath.File -> fileType.fileId
+            is DeeplinkFilePath.FilePreviewInFolder -> fileType.folderId
+            else -> navigationArgs.folderId
+        }
+        folderName = fileType?.let { FileController.getFileById(folderId, userDrive)?.name } ?: navigationArgs.folderName
     }
 
     override fun initMultiSelectLayout(): MultiSelectLayoutBinding? = binding.multiSelectLayout
@@ -290,7 +305,6 @@ open class FileListFragment : MultiSelectFragment(
         }
 
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
-            showPendingFiles()
             when (findNavController().currentDestination?.id) {
                 R.id.searchFragment, R.id.sharedWithMeFragment -> Unit
                 else -> refreshActivities()
@@ -316,6 +330,7 @@ open class FileListFragment : MultiSelectFragment(
         }
 
         observeNavigateFileListTo(mainViewModel, fileListViewModel)
+        fileIdToPreview.takeUnless { it == 0 || fileListViewModel.isPreviewManaged }?.let { previewFile(it) }
     }
 
     private fun setupToolbars() {
@@ -386,7 +401,6 @@ open class FileListFragment : MultiSelectFragment(
     override fun onResume() {
         super.onResume()
         if (!isDownloading) refreshActivities()
-        showPendingFiles()
         updateVisibleProgresses()
     }
 
@@ -479,7 +493,7 @@ open class FileListFragment : MultiSelectFragment(
         setupToggleDisplayButton()
         setupListMode()
         setupSortButton()
-        binding.uploadFileInProgressView.setUploadFileInProgress(this, folderId)
+        if (showPendingFiles) binding.uploadFileInProgressView.setFolderId(folderId)
     }
 
     private fun setupToggleDisplayButton() {
@@ -524,9 +538,10 @@ open class FileListFragment : MultiSelectFragment(
             multiSelectManager = multiSelectManager,
             fileList = FileController.emptyList(mainViewModel.realm),
             lifecycle = viewLifecycleOwner.lifecycle,
+            isActionMenuHidden = isActionMenuHidden,
         ).apply {
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-            setHasStableIds(true)
+            setHasStableIds(this@FileListFragment !is SearchFragment)
 
             onEmptyList = { checkIfNoFiles() }
 
@@ -539,6 +554,7 @@ open class FileListFragment : MultiSelectFragment(
                 val bundle = FileInfoActionsBottomSheetDialogArgs(
                     fileId = fileObject.id,
                     userDrive = UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe),
+                    hideActions = this.isActionMenuHidden,
                     shouldShowSmallFab = navigationArgs.shouldShowSmallFab,
                 ).toBundle()
                 safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle, currentClassName = homeClassName())
@@ -683,14 +699,6 @@ open class FileListFragment : MultiSelectFragment(
         downloadFiles(true, false)
     }
 
-    private fun showPendingFiles() {
-        val isNotCurrentDriveRoot = folderId == ROOT_ID && findNavController().currentDestination?.id != R.id.fileListFragment
-        if (!showPendingFiles || isNotCurrentDriveRoot) return
-        fileListViewModel.getPendingFilesCount(folderId).observe(viewLifecycleOwner) { pendingFilesCount ->
-            binding.uploadFileInProgressView.updateUploadFileInProgress(pendingFilesCount)
-        }
-    }
-
     private fun setupDisplayMode(isListMode: Boolean) = with(binding) {
         fileRecyclerView.layoutManager = createLayoutManager(isListMode)
 
@@ -757,7 +765,6 @@ open class FileListFragment : MultiSelectFragment(
         isNewSort: Boolean,
         onFinish: ((FolderFilesResult?) -> Unit)? = null,
     ) {
-        showPendingFiles()
         fileListViewModel.getFiles(
             folderId,
             order = fileListViewModel.sortType,
@@ -907,7 +914,7 @@ open class FileListFragment : MultiSelectFragment(
 
     data class FolderFilesResult(
         val parentFolder: File? = null,
-        val files: ArrayList<File>,
+        val files: List<File>,
         val isComplete: Boolean,
         val isFirstPage: Boolean,
         val isNewSort: Boolean,
@@ -947,6 +954,15 @@ open class FileListFragment : MultiSelectFragment(
                 )
             }
         }
+    }
+
+    open fun previewFile(fileId: Int) {
+        FileController.getRealmInstance().use { realm ->
+            FileController.getFileById(realm = realm, fileId = fileId)?.let {
+                Utils.displayFile(mainViewModel, findNavController(), it, listOf(it))
+            }
+        }
+        fileListViewModel.isPreviewManaged = true
     }
 
     open fun onRestartItemsClicked() = Unit

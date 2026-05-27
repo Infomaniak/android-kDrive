@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024-2025 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.infomaniak.core.extensions.isNightModeEnabled
-import com.infomaniak.core.extensions.lightStatusBar
+import com.infomaniak.core.common.extensions.isNightModeEnabled
+import com.infomaniak.core.common.extensions.lightStatusBar
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.drive.MatomoDrive.trackScreen
@@ -99,7 +99,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     val previewPDFHandler by lazy {
         PreviewPDFHandler(
-            context = requireContext(),
             setPrintVisibility = { isGone ->
                 if (_binding == null) return@PreviewPDFHandler
                 setPrintButtonVisibility(isGone)

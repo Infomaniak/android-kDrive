@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,9 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.infomaniak.core.common.utils.FORMAT_DATE_CLEAR_MONTH
+import com.infomaniak.core.common.utils.format
+import com.infomaniak.core.common.utils.startOfTheDay
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.hideProgressCatching
@@ -43,9 +46,6 @@ import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.legacy.utils.startAppSettingsConfig
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.core.utils.FORMAT_DATE_CLEAR_MONTH
-import com.infomaniak.core.utils.format
-import com.infomaniak.core.utils.startOfTheDay
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPhotoSyncEvent
 import com.infomaniak.drive.R
@@ -69,6 +69,7 @@ import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.cancelPeriodicSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.views.SyncMediaSelectBottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
@@ -119,11 +120,13 @@ class SyncSettingsActivity : BaseActivity() {
         val oldCreateDatedSubFoldersValue = oldSyncSettings?.createDatedSubFolders == true
         val oldDeleteAfterSyncValue = oldSyncSettings?.deleteAfterSync == true
         val oldSaveOldPicturesValue = SavePicturesDate.SINCE_NOW
+        val oldOnlyWifiSyncMedia = oldSyncSettings?.onlyWifiSyncMedia == true
 
         syncSettingsViewModel.init(
             intervalTypeValue = oldIntervalTypeValue,
             syncFolderId = oldSyncSettings?.syncFolder,
             savePicturesDate = uiSettings.syncSettingsDate,
+            onlyWifiSyncMedia = oldOnlyWifiSyncMedia,
         )
 
         setupListeners(oldSyncVideoValue, oldCreateDatedSubFoldersValue, oldDeleteAfterSyncValue)
@@ -140,6 +143,7 @@ class SyncSettingsActivity : BaseActivity() {
         observeSaveOldPictures(oldSaveOldPicturesValue)
 
         observeSyncIntervalType(oldIntervalTypeValue)
+        initOnlyWifiSyncMedia(oldOnlyWifiSyncMedia)
 
         binding.root.enableEdgeToEdge(shouldConsumeInsets = true, withBottom = false) {
             binding.saveButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + it.bottom)
@@ -219,6 +223,10 @@ class SyncSettingsActivity : BaseActivity() {
 
         syncPeriodicity.setOnClickListener {
             SelectIntervalTypeBottomSheetDialog().show(supportFragmentManager, "SyncSettingsSelectIntervalTypeBottomSheetDialog")
+        }
+
+        syncOnlyWifi.setOnClickListener {
+            SyncMediaSelectBottomSheetDialog().show(supportFragmentManager, SyncMediaSelectBottomSheetDialog::class.simpleName)
         }
 
         saveButton.initProgress(this@SyncSettingsActivity)
@@ -333,6 +341,15 @@ class SyncSettingsActivity : BaseActivity() {
             if (syncSettingsViewModel.syncIntervalType.value != oldIntervalTypeValue) editNumber++
             changeSaveButtonStatus()
             syncPeriodicity.endText = getString(it.title).lowercase()
+        }
+    }
+
+    private fun initOnlyWifiSyncMedia(oldOnlyWifiSyncMedia: Boolean) {
+        syncSettingsViewModel.onlyWifiSyncMedia.observe(this) {
+            if (it != oldOnlyWifiSyncMedia) editNumber++ else editNumber--
+            changeSaveButtonStatus()
+            val descriptionResId = if (it) R.string.syncOnlyWifiTitle else R.string.syncWifiAndMobileDataTitle
+            binding.syncOnlyWifi.description = getString(descriptionResId)
         }
     }
 
@@ -466,7 +483,7 @@ class SyncSettingsActivity : BaseActivity() {
     private fun generateSyncSettings(): SyncSettings = with(binding) {
         val date = when (syncSettingsViewModel.saveOldPictures.value!!) {
             SavePicturesDate.SINCE_NOW -> Date()
-            SavePicturesDate.SINCE_FOREVER -> Date(0)
+            SavePicturesDate.SINCE_FOREVER -> Date(-62_135_597_361L)
             SavePicturesDate.SINCE_DATE -> syncSettingsViewModel.customDate.value ?: Date()
         }
         return SyncSettings(
@@ -476,7 +493,8 @@ class SyncSettingsActivity : BaseActivity() {
             syncFolder = syncSettingsViewModel.syncFolderId.value!!,
             syncVideo = syncVideo.isChecked,
             createDatedSubFolders = createDatedSubFolders.isChecked,
-            deleteAfterSync = deletePicturesAfterSync.isChecked
+            deleteAfterSync = deletePicturesAfterSync.isChecked,
+            onlyWifiSyncMedia = syncSettingsViewModel.onlyWifiSyncMedia.value ?: false,
         )
     }
 

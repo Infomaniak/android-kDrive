@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2025 Infomaniak Network SA
+  ~ Copyright (C) 2022-2026 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -15,8 +15,9 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingQuantity">
     <string name="aboutAppVersionTitle">Application kDrive</string>
+    <string name="aboutLibrariesTitle">Bibliothèques</string>
     <string name="aboutLicenseDescription">Licence publique générale GNU GPL, version 3</string>
     <string name="aboutLicenseTitle">Licence</string>
     <string name="aboutPrivacyTitle">Vie privée</string>
@@ -41,6 +42,7 @@
     <string name="allDateCustom">Personnalisé</string>
     <string name="allDeletedFilePattern">\'Supprimé le \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Désactivé</string>
+    <string name="allDriveBlockedDescription">Tous vos produits ont expiré. Veuillez les renouveler pour les gérer et accéder à leurs données.</string>
     <string name="allEmail">E-mail</string>
     <string name="allEmptyInputError">Ce champ ne peut pas être vide</string>
     <string name="allErrorFeatureNotAvailableInFdroid">Fonctionnalité indisponible depuis F-Droid</string>
@@ -153,7 +155,9 @@
     <string name="buttonPlayerPrev">Précédent</string>
     <string name="buttonPlayerRew">Reculer de quelques secondes</string>
     <string name="buttonRefresh">Actualiser</string>
+    <string name="buttonRemoveDriveAccess">Retirer l’accès au drive</string>
     <string name="buttonRemoveFavorites">Supprimer des favoris</string>
+    <string name="buttonRemoveUserFromShare">Supprimer le partage</string>
     <string name="buttonRename">Renommer</string>
     <string name="buttonRenew">Renouveler</string>
     <string name="buttonRetry">Réessayer</string>
@@ -196,14 +200,13 @@
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Recherche impossible, aucun drive n’a été sélectionné</string>
     <string name="commonDocumentsDescription">Cet espace appartient à %s et centralise les fichiers communs de votre organisation.</string>
     <string name="commonFolderDescription">Partagez ce dossier avec des utilisateurs du kDrive %s</string>
-    <string name="commonFolderTitle">Dossier commun</string>
+    <string name="commonFolderTitle">Dossier d’organisation</string>
     <string name="contentDescriptionIsSelected">Est sélectionné</string>
     <string name="convertToDropboxTitle">Convertir en boîte de dépôt %s</string>
     <string name="createCategoryTitle">Créer une catégorie</string>
     <string name="createCommonFolderAllUsersDescription">Tous les utilisateurs du kDrive %s auront automatiquement accès à ce dossier.</string>
-    <string name="createCommonFolderDescription">Avec qui souhaitez-vous partager ce dossier commun ?</string>
-    <string name="createCommonFolderSucces">Dossier commun créé avec succès</string>
-    <string name="createCommonFolderTitle">Créer un dossier commun</string>
+    <string name="createCommonFolderSuccess">Dossier d’organisation créé avec succès</string>
+    <string name="createCommonFolderTitle">Créer un dossier d’organisation</string>
     <string name="createDatedSubFoldersDescription">Créer automatiquement des sous dossiers avec le mois et l’année de la photo</string>
     <string name="createDatedSubFoldersTitle">Créer un dossier par mois</string>
     <string name="createDropBoxHint">Nom de la boîte de dépôt</string>
@@ -225,7 +228,7 @@
     <string name="createFolderSomeUsersTitle">Certains utilisateurs</string>
     <string name="createFolderTitle">Créer un dossier</string>
     <string name="createFolderValidUntilDescription">Une fois la date passée, les utilisateurs ne pourront plus transférer de fichiers.</string>
-    <string name="createPrivateFolderSucces">Dossier créé avec succès</string>
+    <string name="createPrivateFolderSuccess">Dossier créé avec succès</string>
     <string name="deleteMyAccount">Supprimer mon compte</string>
     <string name="deletePicturesDescription">L’application vous proposera régulièrement de supprimer les photos de votre appareil déjà synchronisées sur votre kDrive. Vous devrez systématiquement autoriser manuellement la suppression</string>
     <string name="deletePicturesTitle">Supprimer les photos</string>
@@ -259,6 +262,7 @@
     <string name="errorConflict">Un élément du même nom existe déjà à cet emplacement</string>
     <string name="errorDelete">Erreur lors de la suppression</string>
     <string name="errorDeviceStorage">Stockage de l’appareil insuffisant</string>
+    <string name="errorDownloadPermission">Vous devez ajouter au moins un fichier que vous avez la permission de télécharger</string>
     <string name="errorDropboxLimitExceeded">Vous avez atteint la limite de boite de dépôt.</string>
     <string name="errorDuplicate">Erreur lors de la duplication</string>
     <string name="errorExternalImportInProgress">Impossible d’effectuer l’action sur le dossier, une importation externe est en cours</string>
@@ -282,6 +286,7 @@
     <string name="errorSave">Erreur lors de l’enregistrement</string>
     <string name="errorShareAddUser">Ce fichier est déjà partagé avec cet utilisateur.</string>
     <string name="errorShareLink">Erreur lors de la création du lien</string>
+    <string name="errorStillUploading">L’élément est toujours en cours d’importation</string>
     <string name="errorWrongPassword">Mot de passe incorrect</string>
     <string name="favoritesNoFile">Aucun favori pour le moment</string>
     <string name="favoritesTitle">Favoris</string>
@@ -292,40 +297,40 @@
     <string name="fileActivityCollaborativeUserAccess">a déposé des fichiers dans la boite de dépôt</string>
     <string name="fileActivityCollaborativeUserCreate">a créé un dossier dans la boite de dépôt pour pouvoir déposer des fichiers</string>
     <string name="fileActivityCollaborativeUserDelete">a supprimé un dossier de la boite de dépôt dans lequel un user a déposé des fichiers</string>
-    <plurals name="fileActivityCommentCreate">
+    <plurals name="fileActivityCommentCreate" tools:ignore="ImpliedQuantity">
         <item quantity="one">a commenté le fichier suivant</item>
         <item quantity="other">a commenté %d fichiers</item>
     </plurals>
-    <plurals name="fileActivityFileCreate">
+    <plurals name="fileActivityFileCreate" tools:ignore="ImpliedQuantity">
         <item quantity="one">a importé le fichier suivant</item>
         <item quantity="other">a importé %d nouveaux fichiers</item>
     </plurals>
-    <plurals name="fileActivityFileRestore">
+    <plurals name="fileActivityFileRestore" tools:ignore="ImpliedQuantity">
         <item quantity="one">a restauré le fichier suivant</item>
         <item quantity="other">a restauré %d fichiers</item>
     </plurals>
-    <plurals name="fileActivityFileTrash">
+    <plurals name="fileActivityFileTrash" tools:ignore="ImpliedQuantity">
         <item quantity="one">a déplacé le fichier suivant dans la corbeille</item>
         <item quantity="other">a déplacé %d fichiers dans la corbeille</item>
     </plurals>
-    <plurals name="fileActivityFileUpdate">
+    <plurals name="fileActivityFileUpdate" tools:ignore="ImpliedQuantity">
         <item quantity="one">a modifié le fichier suivant</item>
         <item quantity="other">a modifié %d fichiers</item>
     </plurals>
-    <plurals name="fileActivityFolderCreate">
+    <plurals name="fileActivityFolderCreate" tools:ignore="ImpliedQuantity">
         <item quantity="one">a créé le dossier suivant</item>
         <item quantity="other">a créé %d nouveaux dossiers</item>
     </plurals>
-    <plurals name="fileActivityFolderRestore">
+    <plurals name="fileActivityFolderRestore" tools:ignore="ImpliedQuantity">
         <item quantity="one">a restauré le dossier suivant</item>
         <item quantity="other">a restauré %d dossiers</item>
     </plurals>
-    <plurals name="fileActivityFolderTrash">
+    <plurals name="fileActivityFolderTrash" tools:ignore="ImpliedQuantity">
         <item quantity="one">a déplacé le dossier suivant dans la corbeille</item>
         <item quantity="other">a déplacé %d dossiers dans la corbeille</item>
     </plurals>
     <string name="fileActivityOtherFiles">%d autres fichiers</string>
-    <plurals name="fileActivityUnknown">
+    <plurals name="fileActivityUnknown" tools:ignore="ImpliedQuantity">
         <item quantity="one">a effectué une action sur le fichier suivant</item>
         <item quantity="other">a effectué une action sur %d fichiers</item>
     </plurals>
@@ -381,11 +386,11 @@
     <string name="fileDetailsInfoContent">Contenu</string>
     <string name="fileDetailsInfoEmptyFolder">Dossier vide</string>
     <plurals name="fileDetailsInfoFile">
-        <item quantity="one">1 fichier</item>
+        <item quantity="one">%d fichier</item>
         <item quantity="other">%d fichiers</item>
     </plurals>
     <plurals name="fileDetailsInfoFolder">
-        <item quantity="one">1 dossier</item>
+        <item quantity="one">%d dossier</item>
         <item quantity="other">%d dossiers</item>
     </plurals>
     <string name="fileDetailsInfosAddedDateTitle">Ajout au drive</string>
@@ -397,15 +402,15 @@
     <string name="fileDetailsInfosTotalSizeTitle">Taille (avec les versions)</string>
     <string name="fileDetailsNoComments">Aucun commentaire pour le moment</string>
     <string name="fileInfoInputDuplicateFile">Nom de la copie</string>
-    <plurals name="fileListAddFavoritesConfirmationSnackbar">
+    <plurals name="fileListAddFavoritesConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier ajouté aux favoris avec succès</item>
         <item quantity="other">%d fichiers ajoutés aux favoris avec succès</item>
     </plurals>
-    <plurals name="fileListAddOfflineConfirmationSnackbar">
+    <plurals name="fileListAddOfflineConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier disponible hors ligne</item>
         <item quantity="other">%d fichiers disponibles hors ligne</item>
     </plurals>
-    <plurals name="fileListColorFolderConfirmationSnackbar">
+    <plurals name="fileListColorFolderConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un dossier coloré avec succès</item>
         <item quantity="other">%d dossiers colorés avec succès</item>
     </plurals>
@@ -415,18 +420,18 @@
     <string name="fileListDeletionDoneSnackbar">Suppressions terminées avec succès</string>
     <string name="fileListDeletionInProgressSnackbar">Suppressions en cours : %1$d/%2$d</string>
     <string name="fileListDeletionStartedSnackbar">Début des suppressions</string>
-    <plurals name="fileListDuplicationConfirmationSnackbar">
+    <plurals name="fileListDuplicationConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier dupliqué avec succès</item>
         <item quantity="other">%d fichiers dupliqués avec succès</item>
     </plurals>
     <string name="fileListMoveDoneSnackbar">Déplacements terminés avec succès</string>
-    <plurals name="fileListMoveFileConfirmationSnackbar">
+    <plurals name="fileListMoveFileConfirmationSnackbarAndroid">
         <item quantity="one">Un fichier a bien été déplacé dans %2$s</item>
         <item quantity="other">%1$d fichiers ont bien été déplacés dans %2$s</item>
     </plurals>
     <string name="fileListMoveInProgressSnackbar">Déplacements en cours : %1$d/%2$d</string>
     <string name="fileListMoveStartedSnackbar">Début des déplacements</string>
-    <plurals name="fileListMoveTrashConfirmationSnackbar">
+    <plurals name="fileListMoveTrashConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un élément déplacé dans la corbeille</item>
         <item quantity="other">%d éléments déplacés dans la corbeille</item>
     </plurals>
@@ -434,16 +439,19 @@
         <item quantity="one">%d sélectionné</item>
         <item quantity="other">%d sélectionnés</item>
     </plurals>
-    <plurals name="fileListRemoveFavoritesConfirmationSnackbar">
+    <plurals name="fileListRemoveFavoritesConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier retiré des favoris avec succès</item>
         <item quantity="other">%d fichiers retirés des favoris avec succès</item>
     </plurals>
-    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
+    <plurals name="fileListRemoveOfflineConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier retiré de la disponibilité hors ligne</item>
         <item quantity="other">%d fichiers retirés de la disponibilité hors ligne</item>
     </plurals>
     <string name="fileListTitle">Fichiers</string>
     <string name="filePermissionTitle">Sélectionner le droit</string>
+    <string name="fileProviderExtensionDescription">Si cette option est désactivée, kDrive ne sera plus disponible dans l’application Fichiers et dans les applications tierces.</string>
+    <string name="fileProviderExtensionError">Vous avez désactivé l’affichage des fichiers depuis kDrive. Vous pouvez le réactiver dans les paramètres de l’application.</string>
+    <string name="fileProviderExtensionTitle">Afficher dans Fichiers</string>
     <string name="fileShareAddMessage">Ajouter un message aux invités (facultatif)</string>
     <string name="fileShareDetailsFileTitle">Partage et droits du fichier %s</string>
     <string name="fileShareDetailsFolderTitle">Partage et droits du dossier %s</string>
@@ -472,7 +480,7 @@
     <string name="kDrivePdfViewer">Lecteur PDF de kDrive</string>
     <string name="lastEditsTitle">Dernières modifications</string>
     <string name="localizedFilenamePrivateTeamSpace">Mon dossier</string>
-    <string name="localizedFilenameTeamSpace">Dossiers communs</string>
+    <string name="localizedFilenameTeamSpace">Dossiers de l’organisation</string>
     <string name="locateButton">Localiser</string>
     <string name="maintenanceAsleepDescription">Pour réduire l’impact écologique, votre kDrive s’est mis en veille suite à une inactivité prolongée.\nRelancez-le pour retrouver l’accès à vos fichiers !</string>
     <string name="maintenanceAsleepTitle">Votre kDrive %s s’est offert une petite sieste !</string>
@@ -481,14 +489,14 @@
     <string name="manageCategoriesNoCategory">Aucune catégorie</string>
     <string name="manageCategoriesTitle">Gérer les catégories</string>
     <string name="manageDropboxTitle">Gérer la boîte de dépôt %s</string>
-    <plurals name="mediaFoldersSelected">
+    <plurals name="mediaFoldersSelected" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un dossier sélectionné</item>
         <item quantity="other">%d dossiers sélectionnés</item>
     </plurals>
     <string name="menuTitle">Menu</string>
     <string name="modalCommentAddTitle">Modifier un commentaire</string>
     <string name="modalCommentDeleteDescription">Souhaitez-vous vraiment supprimer votre commentaire ?</string>
-    <string name="modalCreateFileSucces">%s créé avec succès</string>
+    <string name="modalCreateFileSuccess">%s créé avec succès</string>
     <string name="modalCreateFileTitle">Créer un fichier</string>
     <string name="modalDeleteCategoryDescription">Souhaitez-vous supprimer définitivement la catégorie %s pour tous les utilisateurs du kDrive ?</string>
     <plurals name="modalDeleteDescription">
@@ -509,9 +517,10 @@
         <item quantity="other">Souhaitez-vous déplacer %d éléments dans la corbeille ?</item>
     </plurals>
     <string name="modalMoveTrashTitle">Déplacer dans la corbeille</string>
+    <string name="modalRemoveUserDriveAccessDescription">Voulez-vous vraiment supprimer l’accès de l’utilisateur %1$s au kDrive %2$s ?</string>
     <string name="modalTrashFileDescription">Souhaitez-vous vraiment déplacer %s dans la corbeille ?</string>
     <string name="modalTrashFilesDescription">Souhaitez-vous vraiment déplacer dans la corbeille les fichiers sélectionnés ?</string>
-    <string name="modalUserPermissionRemoveDescription">Souhaitez-vous vraiment supprimer l’accès de l’utilisateur %s ?</string>
+    <string name="modalUserPermissionRemoveDescription">Voulez-vous vraiment supprimer l’accès de l’utilisateur %s à ce fichier ?</string>
     <string name="modificationDateFilterTitle">Date de modification</string>
     <string name="mySharesNoFile">Aucun fichier partagé</string>
     <string name="mySharesTitle">Mes partages</string>
@@ -531,7 +540,7 @@
     <string name="notEnoughStorageDescription1">L’espace de stockage de votre kDrive est presque plein. Faites évoluer votre offre et débloquez de nouvelles fonctionnalités.</string>
     <string name="notEnoughStorageDescription2">L’espace de stockage de votre kDrive est presque plein. Contactez votre administrateur pour qu’il puisse faire évoluer votre offre.</string>
     <string name="notEnoughStorageUsed">utilisés</string>
-    <string name="notSupportedExtensionDescription">Souhaitez-vous créer une copie de votre fichier avec une extension compatible pour l’éditer en ligne ? Le fichier original %s restera inchangé.\u0020</string>
+    <string name="notSupportedExtensionDescription">Souhaitez-vous créer une copie de votre fichier avec une extension compatible pour l’éditer en ligne ? Le fichier original %s restera inchangé.</string>
     <string name="notSupportedExtensionTitle">L’extension %s n’est pas supportée pour l’édition en ligne</string>
     <string name="notificationCommentChannelName">Commentaires</string>
     <string name="notificationGeneralChannelName">Notifications générales</string>
@@ -560,7 +569,7 @@
     <string name="pdfIsLocked">Votre PDF est verrouillé</string>
     <string name="picturesNoFile">Aucune photo pour le moment</string>
     <plurals name="preparingToUpload">
-        <item quantity="one">Préparation de l’importation de 1 fichier</item>
+        <item quantity="one">Préparation de l’importation de %d fichier</item>
         <item quantity="other">Préparation de l’importation de %d fichiers</item>
     </plurals>
     <string name="previewDownloadIndication">Chargement en cours, merci de patienter…</string>
@@ -575,7 +584,6 @@
     <string name="publicShareOutdatedLinkTitle">Les fichiers ne sont plus disponibles</string>
     <string name="publicSharePasswordNeededDescription">Veuillez saisir le mot de passe qui vous a été fourni pour accéder au contenu.</string>
     <string name="publicSharePasswordNeededTitle">Contenu sécurisé</string>
-    <string name="publicSharePasswordNotSupportedDescription">Les liens protégés par mot de passe ne sont pas encore disponibles sur l’application mobile.</string>
     <string name="publicSharedLinkTitle">Lien de partage public</string>
     <string name="recentActivityMeTitle">Par moi</string>
     <string name="recentActivityMyTeam">Par mon équipe</string>
@@ -592,6 +600,7 @@
     <string name="searchNoFile">Aucun résultat, veuillez modifier vos critères de recherche</string>
     <string name="searchTitle">Rechercher</string>
     <string name="searchViewHint">Rechercher un fichier…</string>
+    <string name="securityTitle">Sécurité</string>
     <string name="selectDriveTitle">Sélectionner un kDrive</string>
     <string name="selectFolderTitle">Sélectionner un dossier</string>
     <string name="selectMediaFoldersDescription">Sélectionnez les dossiers de votre appareil qui doivent être sauvegardés automatiquement dans votre kDrive.</string>
@@ -627,6 +636,7 @@
     <string name="shareLinkTypeDocument">document</string>
     <string name="shareLinkTypeFile">fichier</string>
     <string name="shareLinkTypeFolder">dossier</string>
+    <string name="shareLogsButton">Partager les historiques du système</string>
     <string name="shareUserExternal">Utilisateur externe du kDrive</string>
     <string name="shareUserNotAccepted">L’utilisateur n’a pas encore accepté le partage et est un utilisateur externe du kDrive.</string>
     <plurals name="shareUsersCount">
@@ -643,7 +653,7 @@
     <string name="shortcutUploadShortDescription">Importer</string>
     <string name="snackBarCategoryDeleted">Catégorie supprimée avec succès</string>
     <string name="snackBarInvalidFileNameError">Le caractère \"%1$s\" du fichier %2$s n’est pas pris en charge pour la mise hors ligne</string>
-    <plurals name="snackBarUploadError">
+    <plurals name="snackBarUploadError" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier n’a pas pu être importé</item>
         <item quantity="other">%d fichiers n’ont pas pu être importés</item>
     </plurals>
@@ -673,6 +683,9 @@
     <string name="switchUserDescription">Consulter les kDrives de vos autres profils Infomaniak. Vous pouvez ajouter autant de profil d’utilisateurs que vous souhaitez.</string>
     <string name="syncConfigureDescription">Vos photos, vidéos et captures écran seront enregistrées automatiquement dans votre kDrive %s.</string>
     <string name="syncConfigureTitle">Sauvegardez vos souvenirs en lieu sûr</string>
+    <string name="syncOnlyWifiDescription">Les fichiers hors ligne seront synchronisés uniquement via le Wi-Fi</string>
+    <string name="syncOnlyWifiTitle">Via Wi-Fi uniquement</string>
+    <string name="syncPhotosOnlyWifiDescription">Les photos et les vidéos seront synchronisées uniquement via le Wi-Fi</string>
     <string name="syncSettingsButtonActiveSync">Activer la sauvegarde automatique</string>
     <string name="syncSettingsButtonSaveDate">Enregistrer</string>
     <string name="syncSettingsButtonSyncPeriodicity">Synchronisation</string>
@@ -693,6 +706,10 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Toutes les heures</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Toutes les 15 minutes</string>
     <string name="syncSettingsTitle">Sauvegarde des photos</string>
+    <string name="syncWifiAndMobileDataDescription">Des frais d’utilisation de données mobiles peuvent s’appliquer</string>
+    <string name="syncWifiAndMobileDataTitle">Via Wi-Fi et données mobiles</string>
+    <string name="syncWifiPicturesTitle">Synchroniser les photos et vidéos</string>
+    <string name="syncWifiSettingsTitle">Synchroniser les fichiers hors ligne</string>
     <string name="themeSettingsDarkLabel">Sombre</string>
     <string name="themeSettingsLightLabel">Clair</string>
     <string name="themeSettingsSystemDefaultLabel">Valeur par défaut du système</string>
@@ -704,7 +721,7 @@
     <string name="trashAutoClearDescription">La corbeille est nettoyée automatiquement tous les 30 jours.\nSouhaitez-vous augmenter ce délai ?</string>
     <string name="trashNoFile">Aucun fichier supprimé</string>
     <string name="trashTitle">Corbeille</string>
-    <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">
+    <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un élément supprimé définitivement</item>
         <item quantity="other">%d éléments supprimés définitivement</item>
     </plurals>
@@ -728,13 +745,13 @@
         <item quantity="other">%2$d importations ont échoué sur un total de %1$d</item>
     </plurals>
     <plurals name="uploadImportedOtherAmount">
-        <item quantity="one">+1 autre fichier</item>
+        <item quantity="one">+%d autre fichier</item>
         <item quantity="other">+%d autres fichiers</item>
     </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Annuler les imports</string>
     <string name="uploadInProgressCancelFileUploadTitle">Annuler %s ?</string>
     <string name="uploadInProgressNoFile">Aucune importation en cours</string>
-    <plurals name="uploadInProgressNumberFile">
+    <plurals name="uploadInProgressNumberFile" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier restant</item>
         <item quantity="other">%d fichiers restants</item>
     </plurals>
@@ -751,13 +768,15 @@
     <string name="uploadPausedTitle">Importation en pause</string>
     <string name="uploadPermissionError">Autorisations supplémentaires demandées</string>
     <string name="urlUserReportAndroid">https://feedback.userreport.com/62305caf-7dd2-4573-9422-bb0d255fe834/</string>
+    <string name="userDriveRemoveDescription">L’utilisateur n’aura plus accès à ce kDrive.</string>
     <string name="userInviteByEmail">Inviter par e-mail</string>
     <string name="userPermissionManage">Peut gérer</string>
     <string name="userPermissionManageDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression du fichier\nPartage avec d’autres utilisateurs</string>
     <string name="userPermissionNotAvailable">Non disponible pour les utilisateurs externes du kDrive</string>
     <string name="userPermissionRead">Peut consulter</string>
-    <string name="userPermissionReadDescription">Consultation uniquement\nTéléchargement\nAjout de commentaire</string>
+    <string name="userPermissionReadDescription">Consultation uniquement\nTéléchargement</string>
     <string name="userPermissionRemove">L’utilisateur n’aura plus accès à ce fichier.</string>
     <string name="userPermissionWrite">Peut modifier</string>
-    <string name="userPermissionWriteDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression du fichier</string>
+    <string name="userPermissionWriteDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression de fichier / dossier</string>
+    <string name="userPermissionWriteExternalDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichiers / dossiers\nSuppression de ses propres fichiers / dossiers</string>
 </resources>

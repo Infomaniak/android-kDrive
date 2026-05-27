@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,8 +133,6 @@ open class File(
      */
     var children: @WriteWith<FileRealmListParceler> RealmList<File> = RealmList(),
     var isComplete: Boolean = false,
-    var isFromActivities: Boolean = false,
-    var isFromSearch: Boolean = false,
     var isFromUploads: Boolean = false,
     var isMarkedAsOffline: Boolean = false,
     var isOffline: Boolean = false,
@@ -161,6 +159,11 @@ open class File(
     @Transient
     var publicShareUuid: String = ""
 
+    @IgnoredOnParcel
+    @Ignore
+    @Transient
+    var publicShareAuthToken: String? = null
+
     val revisedAtInMillis: Long inline get() = revisedAt * 1000
 
     fun initUid() {
@@ -181,7 +184,7 @@ open class File(
         return hasOnlyoffice || conversion?.whenOnlyoffice == true
     }
 
-    fun isDropBox() = getVisibilityType() == VisibilityType.IS_DROPBOX
+    fun isDropBox() = hasVisibilities(VisibilityType.IS_DROPBOX)
 
     fun isTrashed(): Boolean {
         return status?.contains("trash") == true
@@ -190,7 +193,7 @@ open class File(
     fun isPublicShared() = publicShareUuid.isNotBlank()
 
     fun isSharedWithMe(): Boolean {
-        return getVisibilityType() == VisibilityType.IS_SHARED_SPACE || getVisibilityType() == VisibilityType.IS_IN_SHARED_SPACE
+        return hasVisibilities(VisibilityType.IS_SHARED_SPACE, VisibilityType.IS_IN_SHARED_SPACE)
     }
 
     fun isPDF() = getFileType() == ExtensionType.PDF
@@ -299,10 +302,12 @@ open class File(
         val path = getRemotePath(userDrive)
 
         if (path.isEmpty()) return null
-        val folder = IOFile(rootFolder, path.substringBeforeLast("/"))
+
+        val child = if (isFolder()) path else path.substringBeforeLast("/")
+        val folder = IOFile(rootFolder, child)
 
         if (!folder.exists()) folder.mkdirs()
-        return IOFile(folder, name)
+        return if (isFolder()) folder else IOFile(folder, name)
     }
 
     fun getCacheFile(context: Context, userDrive: UserDrive = UserDrive()): IOFile {
@@ -335,6 +340,12 @@ open class File(
     }
 
     fun isCancelingImport() = externalImport?.status == FileExternalImportStatus.CANCELING.value
+
+    fun isChildOfCommonDirectory(): Boolean {
+        return hasVisibilities(VisibilityType.IS_IN_TEAM_SPACE_FOLDER, VisibilityType.IS_TEAM_SPACE_FOLDER)
+    }
+
+    fun hasVisibilities(vararg types: VisibilityType) = getVisibilityType() in types
 
     fun getWorkerTag() = "${id}_$driveId"
 
@@ -392,6 +403,8 @@ open class File(
     fun isAllowedToBeColored() = rights?.colorable ?: false
 
     fun hasCreationRight() = isFolder() && rights?.canCreateFile == true
+
+    fun createdByCurrentUser() = createdBy == AccountUtils.currentUserId
 
     // For applyFileActivity in FileController
     override fun equals(other: Any?): Boolean {

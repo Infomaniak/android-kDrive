@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,7 +103,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, !navigationArgs.hideActions)
+        requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = true)
 
         bottomSheetView.apply {
             init(
@@ -113,14 +113,13 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
                 onItemClickListener = this@PreviewSliderFragment,
                 selectFolderResultLauncher = selectFolderResultLauncher,
                 isSharedWithMe = userDrive.sharedWithMe,
+                hideActions = false,
             )
             updateCurrentFile(currentFile)
 
             previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
                 openWith.isGone = isDownloading
             }
-
-            setupActions(isVisible = !navigationArgs.hideActions)
         }
     }
 

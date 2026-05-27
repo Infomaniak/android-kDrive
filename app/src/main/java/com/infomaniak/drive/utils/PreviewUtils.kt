@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024-2025 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.JsonParser
 import com.infomaniak.core.auth.networking.HttpClient
-import com.infomaniak.core.extensions.isNightModeEnabled
-import com.infomaniak.core.extensions.lightStatusBar
+import com.infomaniak.core.common.extensions.isNightModeEnabled
+import com.infomaniak.core.common.extensions.lightStatusBar
 import com.infomaniak.core.network.utils.bodyAsStringOrNull
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
@@ -39,6 +39,7 @@ import com.infomaniak.drive.MatomoDrive.trackPdfActivityActionEvent
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.api.ApiRoutes.appendQueryParams
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
@@ -183,7 +184,12 @@ suspend fun downloadFile(
     isPublicShared: Boolean,
 ) {
     Dispatchers.IO { if (externalOutputFile.exists()) externalOutputFile.delete() }
-    val downloadUrl = ApiRoutes.getDownloadFileUrl(file) + if (file.isOnlyOfficePreview()) "?as=pdf" else ""
+    val baseDownloadUrl = ApiRoutes.getDownloadFileUrl(file)
+    val downloadUrl = if (file.isOnlyOfficePreview()) {
+        baseDownloadUrl.appendQueryParams(mapOf("as" to "pdf"))
+    } else {
+        baseDownloadUrl
+    }
     val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
     val okHttpClient = when {
         isPublicShared -> unauthenticatedHttpClient

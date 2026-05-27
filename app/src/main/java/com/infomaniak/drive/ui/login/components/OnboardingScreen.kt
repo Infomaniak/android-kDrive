@@ -37,8 +37,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.AccountsCheckingState
-import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.AccountsCheckingStatus
+import com.infomaniak.core.crossapplogin.back.CrossAppLoginFacade.AccountsCheckingState
+import com.infomaniak.core.crossapplogin.back.CrossAppLoginFacade.AccountsCheckingStatus
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.crossapplogin.front.components.CrossLoginBottomContent
 import com.infomaniak.core.crossapplogin.front.components.NoCrossAppLoginAccountsContent

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,11 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.core.legacy.utils.setPagination
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.file.SpecialFolder.RecentChanges
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.RecentChangesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
@@ -39,6 +40,9 @@ class RecentChangesFragment : FileSubTypeListFragment() {
     override val noItemsRootTitle = R.string.homeNoActivities
 
     private var isDownloadingChanges = false
+    private val navArgs by navArgs<RecentChangesFragmentArgs>()
+
+    override val fileIdToPreview: Int get() = navArgs.previewFileId
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
@@ -84,8 +88,8 @@ class RecentChangesFragment : FileSubTypeListFragment() {
     private fun observeRecentChanges() {
         recentChangesViewModel.recentChangesResults.observe(viewLifecycleOwner) { result ->
             populateFileList(
-                files = result?.files ?: arrayListOf(),
-                folderId = FileController.RECENT_CHANGES_FILE_ID,
+                files = result?.files ?: listOf(),
+                folderId = RecentChanges.id,
                 ignoreOffline = true,
                 isComplete = result?.isComplete ?: true,
                 realm = mainViewModel.realm,

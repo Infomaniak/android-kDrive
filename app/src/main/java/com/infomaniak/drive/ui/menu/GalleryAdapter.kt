@@ -26,7 +26,7 @@ import androidx.viewbinding.ViewBinding
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.infomaniak.core.legacy.utils.capitalizeFirstChar
 import com.infomaniak.core.legacy.views.LoaderAdapter
-import com.infomaniak.core.utils.format
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.ExtensionType

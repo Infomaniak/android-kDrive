@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,15 +27,15 @@ import androidx.core.net.toFile
 import androidx.work.Data
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.core.io.skipExactly
+import com.infomaniak.core.common.io.skipExactly
+import com.infomaniak.core.common.rateLimit
 import com.infomaniak.core.ktor.toOutgoingContent
 import com.infomaniak.core.network.api.ApiController.gson
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponse
-import com.infomaniak.core.network.networking.HttpUtils
-import com.infomaniak.core.network.networking.ManualAuthorizationRequired
+import com.infomaniak.core.network.networking.HttpUtils.applyDefaultHeaders
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.core.rateLimit
+import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository.uploadEmptyFile
 import com.infomaniak.drive.data.api.ApiRoutes.uploadChunkUrl
@@ -47,13 +47,10 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications.progressPendingIntent
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
-import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.onUpload
 import io.ktor.client.plugins.retry
-import io.ktor.client.request.headers
 import io.ktor.client.request.preparePost
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -80,6 +77,7 @@ import splitties.experimental.ExperimentalSplittiesApi
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
+import java.util.Date
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.minusAssign
@@ -93,6 +91,8 @@ class UploadTask(
     private val context: Context,
     private val uploadFile: UploadFile,
     private val setProgress: KSuspendFunction1<Data, Unit>,
+    private val notificationManagerCompat: NotificationManagerCompat,
+    private val uploadNotificationBuilder: NotificationCompat.Builder,
 ) {
 
     private val fileChunkSizeManager = FileChunkSizeManager()
@@ -104,18 +104,17 @@ class UploadTask(
         it.tryEmit(Unit)
     }
 
-    private lateinit var notificationManagerCompat: NotificationManagerCompat
-    private lateinit var uploadNotification: NotificationCompat.Builder
     private var uploadNotificationElapsedTime = ELAPSED_TIME
     private var uploadNotificationStartTime = 0L
 
     suspend fun start(): Boolean {
-        notificationManagerCompat = NotificationManagerCompat.from(context)
-
-        uploadNotification = context.uploadProgressNotification()
-        uploadNotification.apply {
+        uploadNotificationBuilder.apply {
             setContentTitle(uploadFile.fileName)
-            notificationManagerCompat.notifyCompat(context, CURRENT_UPLOAD_ID, build())
+            setOngoing(true)
+            setContentText(null)
+            setProgress(0, 0, false)
+            setSmallIcon(android.R.drawable.stat_sys_upload)
+            notificationManagerCompat.notifyCompat(CURRENT_UPLOAD_ID, this)
         }
 
         try {
@@ -146,7 +145,6 @@ class UploadTask(
             Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
         } catch (exception: UploadNotTerminated) {
             SentryLog.w(TAG, "upload not terminated", exception)
-            notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
         } catch (exception: QuotaExceededException) {
             if (UploadFile.getAppSyncSettings()?.driveId == uploadFile.driveId) {
@@ -156,8 +154,6 @@ class UploadTask(
         } catch (exception: Exception) {
             exception.printStackTrace()
             throw exception
-        } finally {
-            notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
         }
         return false
     }
@@ -171,7 +167,9 @@ class UploadTask(
                 directoryPath = uploadFile.remoteSubFolder,
                 fileName = uploadFile.fileName,
                 fileSize = uploadFile.fileSize,
-                conflictOption = uploadFile.uploadConflictOption()
+                conflictOption = uploadFile.uploadConflictOption(),
+                createdAt = uploadFile.fileCreatedAt,
+                lastModifiedAt = Date(uploadFile.getLastModified()),
             )
             uploadChunkUnchecked(inputStream, httpClient, url = url, length = uploadFile.fileSize)
         }
@@ -286,16 +284,14 @@ class UploadTask(
     }
 
     private suspend fun finishUpload(uri: Uri) {
-        uploadNotification.apply {
+        uploadNotificationBuilder.apply {
             setOngoing(false)
-            setContentText("100%")
             setSmallIcon(android.R.drawable.stat_sys_upload_done)
             setProgress(0, 0, false)
-            notificationManagerCompat.notifyCompat(context, CURRENT_UPLOAD_ID, build())
+            notificationManagerCompat.notifyCompat(CURRENT_UPLOAD_ID, this)
         }
         shareProgress(100, true)
         UploadFile.uploadFinished(uri)
-        notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
     }
 
     private suspend fun uploadChunk(
@@ -351,12 +347,7 @@ class UploadTask(
             // With `preparePost`, `execute`, and `bodyAsChannel()`, we are not getting the issue,
             // and the size seem to match, so it might be a ktor or OkHttp internal issue worth reporting.
             httpClient.preparePost(url) {
-                headers {
-                    @OptIn(ManualAuthorizationRequired::class)
-                    HttpUtils.getHeaders(contentType = null).forEach { (name, value) ->
-                        append(name, value)
-                    }
-                }
+                applyDefaultHeaders(null)
                 retry { noRetry() }
                 setBody(preSkippedStream.toOutgoingContent(length = length))
                 onUpload { bytesSentTotal, contentLength ->
@@ -409,7 +400,6 @@ class UploadTask(
                 }
             }
             val bodyResponse = String(bytes)
-            notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             val apiResponse = try {
                 gson.fromJson(bodyResponse, ApiResponse::class.java)!! // Might be empty when http 502 Bad gateway happens
             } catch (_: Exception) {
@@ -432,11 +422,11 @@ class UploadTask(
         currentCoroutineContext().ensureActive()
 
         if (uploadNotificationElapsedTime >= ELAPSED_TIME) {
-            uploadNotification.apply {
-                setContentIntent(uploadFile.progressPendingIntent(context))
+            uploadNotificationBuilder.apply {
+                setContentIntent(uploadFile.progressPendingIntent())
                 setContentText("${progress}%")
                 setProgress(100, progress, false)
-                notificationManagerCompat.notifyCompat(context, CURRENT_UPLOAD_ID, build())
+                notificationManagerCompat.notifyCompat(CURRENT_UPLOAD_ID, this)
                 uploadNotificationStartTime = System.currentTimeMillis()
                 uploadNotificationElapsedTime = 0L
             }
@@ -463,14 +453,12 @@ class UploadTask(
     }
 
     private fun UploadFile.prepareUploadSession(totalChunks: Int): String? {
-        val currentTimeMillis = System.currentTimeMillis()
-        val lastModifiedAt = if (fileModifiedAt.time > currentTimeMillis) currentTimeMillis else fileModifiedAt.time
         val sessionBody = UploadSession.StartSessionBody(
             conflict = uploadConflictOption(),
             createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1_000L,
             directoryId = remoteFolder,
             fileName = fileName,
-            lastModifiedAt = lastModifiedAt / 1_000L,
+            lastModifiedAt = getLastModified() / 1_000L,
             subDirectoryPath = remoteSubFolder ?: "",
             totalChunks = totalChunks,
             totalSize = fileSize,

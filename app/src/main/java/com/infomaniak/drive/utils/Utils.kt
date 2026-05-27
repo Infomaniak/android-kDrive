@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.infomaniak.core.legacy.utils.DownloadManagerUtils
+import com.infomaniak.core.common.utils.DownloadManagerUtils
 import com.infomaniak.core.legacy.utils.showKeyboard
 import com.infomaniak.core.legacy.utils.showToast
 import com.infomaniak.drive.R
@@ -216,7 +216,6 @@ object Utils {
                 fileId = selectedFile.id,
                 driveId = selectedFile.driveId,
                 isSharedWithMe = isSharedWithMe,
-                hideActions = selectedFile.isFromActivities,
             )
 
             R.id.previewSliderFragment to args.toBundle()
@@ -328,7 +327,7 @@ object Utils {
             BaseDownloadWorker.USER_ID to userDrive.userId,
             BaseDownloadWorker.DRIVE_ID to userDrive.driveId,
         )
-        val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
+        val networkType = if (AppSettings.onlyWifiSyncOffline) NetworkType.UNMETERED else NetworkType.CONNECTED
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(networkType)
             .setRequiresStorageNotLow(true)
@@ -358,7 +357,7 @@ object Utils {
             BaseDownloadWorker.USER_ID to userDrive.userId,
             BaseDownloadWorker.DRIVE_ID to userDrive.driveId,
         )
-        val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
+        val networkType = if (AppSettings.onlyWifiSyncOffline) NetworkType.UNMETERED else NetworkType.CONNECTED
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(networkType)
             .setRequiresStorageNotLow(true)

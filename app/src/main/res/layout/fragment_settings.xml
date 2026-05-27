@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2024 Infomaniak Network SA
+  ~ Copyright (C) 2022-2026 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -142,20 +142,19 @@
                         app:title="@string/notificationTitle" />
 
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
-                        android:id="@+id/appSecurity"
+                        android:id="@+id/security"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:endText="@string/allDisabled"
-                        app:itemAction="text"
-                        app:title="@string/appSecurityTitle" />
+                        app:itemAction="chevron"
+                        app:title="@string/securityTitle" />
 
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
-                        android:id="@+id/onlyWifiSync"
+                        android:id="@+id/fileSync"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:description="@string/settingsOnlyWifiSyncDescription"
-                        app:itemAction="toggle"
-                        app:title="@string/settingsOnlyWifiSyncTitle" />
+                        app:itemAction="chevron"
+                        app:title="@string/syncWifiSettingsTitle"
+                        tools:description="@string/syncOnlyWifiTitle" />
 
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                         android:id="@+id/about"
@@ -177,6 +176,16 @@
                         android:layout_height="wrap_content"
                         app:itemAction="chevron"
                         app:title="@string/deleteMyAccount" />
+
+                    <com.infomaniak.drive.ui.menu.settings.ItemSettingView
+                        android:id="@+id/crossAppDeviceId"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:description="-"
+                        app:itemAction="none"
+                        app:title="Cross app device ID" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>

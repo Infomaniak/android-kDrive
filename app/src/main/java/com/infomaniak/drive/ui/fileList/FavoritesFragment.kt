@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.file.SpecialFolder.Favorites
 import com.infomaniak.drive.ui.fileList.multiSelect.FavoritesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
@@ -43,6 +44,7 @@ class FavoritesFragment : FileListFragment() {
     override val noItemsRootTitle = R.string.favoritesNoFile
 
     private val navigationArgs: FavoritesFragmentArgs by navArgs()
+    override val fileIdToPreview: Int get() = navigationArgs.previewFileId
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
@@ -132,7 +134,7 @@ class FavoritesFragment : FileListFragment() {
                         val realmFiles = FileController.getRealmLiveFiles(
                             isFavorite = true,
                             order = fileListViewModel.sortType,
-                            parentId = FileController.FAVORITES_FILE_ID,
+                            parentId = Favorites.id,
                             realm = mainViewModel.realm,
                             withVisibilitySort = false
                         )

@@ -83,6 +83,13 @@
                     app:title="@string/aboutSourceCodeTitle" />
 
                 <com.infomaniak.drive.ui.menu.settings.ItemSettingView
+                    android:id="@+id/librariesLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:itemAction="chevron"
+                    app:title="@string/aboutLibrariesTitle" />
+
+                <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                     android:id="@+id/licenseLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -96,6 +103,14 @@
                     android:layout_height="wrap_content"
                     app:title="@string/aboutAppVersionTitle"
                     tools:description="V 4.0.0 build 1337" />
+
+                <com.infomaniak.drive.ui.menu.settings.ItemSettingView
+                    android:id="@+id/shareLogsButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:title="@string/shareLogsButton" />
+                
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </androidx.core.widget.NestedScrollView>

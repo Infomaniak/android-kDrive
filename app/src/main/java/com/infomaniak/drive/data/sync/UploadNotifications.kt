@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import com.infomaniak.core.legacy.utils.clearStack
+import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -35,36 +36,19 @@ import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.UPLOAD_SERVICE_ID
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
+import splitties.init.appCtx
 import java.util.UUID
 
 object UploadNotifications {
 
     const val NOTIFICATION_FILES_LIMIT = 5
 
-    fun getCurrentUploadNotification(context: Context, pendingCount: Int): NotificationCompat.Builder {
-        val pendingTitle = context.getString(R.string.uploadInProgressTitle)
-        val pendingDescription = context.resources.getQuantityString(
-            R.plurals.uploadInProgressNumberFile,
-            pendingCount,
-            pendingCount
+    fun prepareCurrentUploadNotification(): NotificationCompat.Builder {
+        return getNotificationBuilder(
+            title = appCtx.getString(R.string.uploadInProgressTitle),
+            contentIntent = buildLaunchActivityPendingIntent(UPLOAD_SERVICE_ID)
         )
-        val intent = Intent(context, LaunchActivity::class.java).clearStack()
-        val contentIntent = PendingIntent.getActivity(context, UPLOAD_SERVICE_ID, intent, PENDING_INTENT_FLAGS)
-        return getNotificationBuilder(context, pendingTitle, pendingDescription, contentIntent)
-    }
-
-    fun setupCurrentUploadNotification(context: Context, pendingCount: Int) {
-        val pendingTitle = context.getString(R.string.uploadInProgressTitle)
-        val pendingDescription = context.resources.getQuantityString(
-            R.plurals.uploadInProgressNumberFile,
-            pendingCount,
-            pendingCount
-        )
-        val intent = Intent(context, LaunchActivity::class.java).clearStack()
-        val contentIntent = PendingIntent.getActivity(context, UPLOAD_SERVICE_ID, intent, PENDING_INTENT_FLAGS)
-        showNotification(context, pendingTitle, pendingDescription, UPLOAD_SERVICE_ID, contentIntent)
     }
 
     fun UploadFile.networkErrorNotification(context: Context) {
@@ -89,7 +73,6 @@ object UploadNotifications {
         }
 
         showNotification(
-            context = context,
             title = context.getString(R.string.uploadErrorTitle),
             description = context.getString(description),
             notificationId = NotificationUtils.UPLOAD_STATUS_ID,
@@ -118,21 +101,19 @@ object UploadNotifications {
         val title = if (isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle
         val description = context.resources.getQuantityString(title, 1, drive?.name)
         showNotification(
-            context = context,
             title = context.getString(R.string.uploadInterruptedErrorTitle),
             description = description,
             notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = progressPendingIntent(context)
+            contentIntent = progressPendingIntent()
         )
     }
 
     fun UploadFile.foregroundServiceQuotaNotification(context: Context) {
         showNotification(
-            context = context,
             title = context.getString(R.string.uploadPausedTitle),
             description = context.getString(R.string.uploadPausedDescription),
             notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = progressPendingIntent(context),
+            contentIntent = progressPendingIntent(),
         )
     }
 
@@ -142,7 +123,6 @@ object UploadNotifications {
             Intent(context, MainActivity::class.java).clearStack(), PENDING_INTENT_FLAGS
         )
         showNotification(
-            context = context,
             title = context.getString(R.string.uploadErrorTitle),
             description = context.getString(R.string.uploadPermissionError),
             notificationId = NotificationUtils.UPLOAD_STATUS_ID,
@@ -187,11 +167,10 @@ object UploadNotifications {
         val titleResId = if (successCount > 0) R.string.allUploadFinishedTitle else R.string.uploadErrorTitle
 
         showNotification(
-            context = context,
             title = context.getString(titleResId),
             description = description,
             notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = progressPendingIntent(context),
+            contentIntent = progressPendingIntent(),
             locateButton = true,
         )
     }
@@ -214,7 +193,6 @@ object UploadNotifications {
 
     fun showCancelledByUserNotification(context: Context) {
         showNotification(
-            context = context,
             title = context.getString(R.string.uploadCancelTitle),
             description = context.getString(R.string.uploadCancelDescription),
             notificationId = NotificationUtils.UPLOAD_STATUS_ID
@@ -222,37 +200,37 @@ object UploadNotifications {
     }
 
     private fun showNotification(
-        context: Context,
         title: String,
         description: String,
         notificationId: Int,
         contentIntent: PendingIntent? = null,
         locateButton: Boolean = false
     ) {
-        val notificationManagerCompat = NotificationManagerCompat.from(context)
-        val notificationBuilder = getNotificationBuilder(context, title, description, contentIntent, locateButton)
-        notificationManagerCompat.notifyCompat(context, notificationId, notificationBuilder.build())
+        val notificationManagerCompat = NotificationManagerCompat.from(appCtx)
+        val notificationBuilder = getNotificationBuilder(title, contentIntent, locateButton).appendBigDescription(description)
+        notificationManagerCompat.notifyCompat(notificationId, notificationBuilder)
     }
 
     private fun getNotificationBuilder(
-        context: Context,
         title: String,
-        description: String,
         contentIntent: PendingIntent? = null,
         locateButton: Boolean = false
     ): NotificationCompat.Builder {
-        return context.uploadNotification().apply {
+        return appCtx.uploadNotification().apply {
             setTicker(title)
             setAutoCancel(true)
             setContentTitle(title)
-            setStyle(NotificationCompat.BigTextStyle().bigText(description))
             setContentIntent(contentIntent)
             if (locateButton) {
                 addAction(
-                    NotificationCompat.Action(R.drawable.ic_export, context.getString(R.string.locateButton), contentIntent)
+                    NotificationCompat.Action(R.drawable.ic_export, appCtx.getString(R.string.locateButton), contentIntent)
                 )
             }
         }
+    }
+
+    fun NotificationCompat.Builder.appendBigDescription(description: String): NotificationCompat.Builder {
+        return setStyle(NotificationCompat.BigTextStyle().bigText(description))
     }
 
     private fun UploadFile.uploadInterruptedNotification(
@@ -261,27 +239,29 @@ object UploadNotifications {
         @StringRes titleRes: Int = R.string.uploadInterruptedErrorTitle
     ) {
         showNotification(
-            context = context,
             title = context.getString(titleRes),
             description = context.getString(messageRes),
             notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = progressPendingIntent(context)
+            contentIntent = progressPendingIntent()
         )
     }
 
-    fun UploadFile.progressPendingIntent(context: Context): PendingIntent {
-        val intent = Intent(context, LaunchActivity::class.java).clearStack().apply {
-            putExtras(
-                LaunchActivityArgs(
-                    destinationUserId = userId,
-                    destinationDriveId = driveId,
-                    destinationRemoteFolderId = getDestinationFolderId(this@progressPendingIntent)
-                ).toBundle()
-            )
-        }
+    fun UploadFile.progressPendingIntent(): PendingIntent = buildLaunchActivityPendingIntent(
+        requestCode = NotificationUtils.UPLOAD_STATUS_ID,
+        args = LaunchActivityArgs(
+            destinationUserId = userId,
+            destinationDriveId = driveId,
+            destinationRemoteFolderId = getDestinationFolderId(this@progressPendingIntent)
+        )
+    )
 
-        return PendingIntent.getActivity(context, NotificationUtils.UPLOAD_STATUS_ID, intent, PENDING_INTENT_FLAGS)
-    }
+    private fun buildLaunchActivityPendingIntent(requestCode: Int, args: LaunchActivityArgs? = null): PendingIntent =
+        PendingIntent.getActivity(appCtx, requestCode, launchActivityIntent(args), PENDING_INTENT_FLAGS)
+
+    private fun launchActivityIntent(args: LaunchActivityArgs? = null) =
+        Intent(appCtx, LaunchActivity::class.java)
+            .clearStack()
+            .apply { args?.let { putExtras(args.toBundle()) } }
 
     fun Context.syncSettingsActivityPendingIntent(): PendingIntent {
         return PendingIntent.getActivity(

@@ -37,11 +37,11 @@ import com.infomaniak.drive.databinding.FragmentHomeBinding
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.setDriveHeader
 import com.infomaniak.drive.utils.setupDriveToolbar
-import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
@@ -86,8 +86,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 isEnabled = verticalOffset == 0
             }
         }
-
-        setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, homeUploadFileInProgressView)
+        homeUploadFileInProgressView.setFolderId(folderId = OTHER_ROOT_ID)
 
         binding.root.onApplyWindowInsetsListener { view, windowInsets ->
             view.updatePadding(left = windowInsets.left, top = windowInsets.top, right = windowInsets.right)

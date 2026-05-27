@@ -1,6 +1,6 @@
 [versions]
 androidJunit5 = "1.13.4.0"
-androidPdfview = "3.2.14"
+androidPdfview = "3.2.16"
 androidTest = "1.9.0"
 checkerFramework = "3.52.0"
 ddPlist = "1.28"
@@ -8,9 +8,8 @@ espresso = "3.7.0"
 exoplayer = "1.8.0"
 firebaseMessagingKtx = "24.1.2"
 googleServices = "4.4.4"
-gradle = "8.13.1"
 gravitySnapHelper = "2.2.2"
-gsSdk = "5.13.0"
+gsSdk = "5.17.5"
 junitJupiter = "5.13.4"
 kotlinFaker = "1.16.0"
 lifecycleProcess = "2.10.0"
@@ -40,7 +39,6 @@ exoplayer-media3-datasource = { module = "androidx.media3:media3-datasource-okht
 exoplayer-media3-session = { module = "androidx.media3:media3-session", version.ref = "exoplayer" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
-gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 gravity-snap-helper = { module = "com.github.rubensousa:gravitysnaphelper", version.ref = "gravitySnapHelper" }
 gs-sdk = { module = "com.geniusscansdk:gssdk", version.ref = "gsSdk" }
 kotlin-faker = { module = "io.github.serpro69:kotlin-faker", version.ref = "kotlinFaker" }
@@ -50,6 +48,7 @@ paho-mqtt-android = { module = "com.github.hannesa2:paho.mqtt.android", version.
 realm-android-adapters = { module = "com.github.realm:realm-android-adapters", version.ref = "realmAndroidAdapters" }
 realm-gradle-plugin = { module = "io.realm:realm-gradle-plugin", version.ref = "realmGradlePlugin" }
 touch-image-view = { module = "com.github.MikeOrtiz:TouchImageView", version.ref = "touchImageView" }
+
 # Unit tests
 android-test-core = { module = "de.mannodermaus.junit5:android-test-core", version.ref = "androidTest" }
 android-test-runner = { module = "de.mannodermaus.junit5:android-test-runner", version.ref = "androidTest" }
@@ -61,7 +60,6 @@ junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.re
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiter" }
 
 [plugins]
-android-application = { id = "com.android.application" }
 junit5 = { id = "de.mannodermaus.android-junit5" }
 kotlin-android = { id = "kotlin-android" }
 kotlin-kapt = { id = "kotlin-kapt" }

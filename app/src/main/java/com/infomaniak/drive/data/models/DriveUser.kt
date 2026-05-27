@@ -42,7 +42,8 @@ open class DriveUser(
 
     val role get() = enumValueOfOrNull<Role>(_role)
 
-    inline val isExternalUser get() = role == Role.EXTERNAL
+    override val isExternalUser
+        get() = role == Role.EXTERNAL
 
     constructor(user: User) : this() {
         id = user.id

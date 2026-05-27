@@ -26,6 +26,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.file.SpecialFolder.SharedWithMe
 import com.infomaniak.drive.utils.Utils
 import io.realm.Realm
 import io.realm.kotlin.toFlow
@@ -52,7 +53,7 @@ class SharedWithMeViewModel : ViewModel() {
     ) {
         sharedWithMeJob?.cancel()
         sharedWithMeJob = viewModelScope.launch(Dispatchers.IO) {
-            val folderId = if (parentId == Utils.ROOT_ID) FileController.SHARED_WITH_ME_FILE_ID else parentId
+            val folderId = if (parentId == Utils.ROOT_ID) SharedWithMe.id else parentId
             var dataNotAlreadyLoaded = true
 
             fun notifyUiToLoadData() {

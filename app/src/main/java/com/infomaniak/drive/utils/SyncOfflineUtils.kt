@@ -247,7 +247,7 @@ object SyncOfflineUtils {
                 userId = userDrive.userId,
             ).store()
 
-            context.syncImmediately()
+            context.syncImmediately(isAutomaticTrigger = false)
         }
     }
 

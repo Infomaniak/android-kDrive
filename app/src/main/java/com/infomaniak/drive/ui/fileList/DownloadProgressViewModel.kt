@@ -21,7 +21,7 @@ import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.infomaniak.core.cancellable
+import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRoutes

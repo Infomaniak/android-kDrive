@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui
 
 import android.app.Application
 import android.content.Context
+import android.net.Uri
 import android.provider.MediaStore
 import androidx.collection.MutableIntList
 import androidx.collection.mutableIntListOf
@@ -28,16 +29,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.application
 import androidx.lifecycle.liveData
-import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.infomaniak.core.auth.networking.HttpClient
-import com.infomaniak.core.cancellable
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.network.NetworkAvailability
 import com.infomaniak.core.network.models.ApiResponse
@@ -49,19 +48,17 @@ import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.cache.FileController.TRASH_FILE
-import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
 import com.infomaniak.drive.data.cache.FolderFilesProvider
-import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
+import com.infomaniak.drive.data.models.file.SpecialFolder.Trash
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.utils.AccountUtils
@@ -76,19 +73,17 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.find
 import io.realm.Realm
-import io.realm.kotlin.toFlow
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
 import java.util.Date
 
 class MainViewModel(
@@ -110,9 +105,8 @@ class MainViewModel(
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
     var currentPreviewFileList = LinkedHashMap<Int, File>()
 
-    private val _pendingUploadsCount = MutableLiveData<Int?>(null)
-
     val navigateFileListTo = SingleLiveEvent<FileListNavigationType>()
+    val navigateDeeplink = MutableStateFlow<DeeplinkAction.Drive?>(null)
 
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
@@ -192,20 +186,8 @@ class MainViewModel(
 
     fun loadRootFiles() {
         rootFilesJob.cancel()
-        rootFilesJob = viewModelScope.launch(Dispatchers.IO) {
-            if (hasNetwork) runCatching {
-                FolderFilesProvider.getFiles(
-                    FolderFilesProvider.FolderFilesProviderArgs(
-                        folderId = Utils.ROOT_ID,
-                        isFirstPage = true,
-                        order = SortType.NAME_AZ,
-                        sourceRestrictionType = ONLY_FROM_REMOTE,
-                        userDrive = UserDrive(),
-                    )
-                )
-            }.cancellable().onFailure { t ->
-                SentryLog.e(TAG, "recursiveDownload failed", t)
-            }.getOrNull()
+        rootFilesJob = viewModelScope.launch {
+            FolderFilesProvider.loadRootFiles(UserDrive(), hasNetwork)
         }
     }
 
@@ -214,11 +196,11 @@ class MainViewModel(
         navController.popBackStack(R.id.rootFilesFragment, false)
 
         if (fileId <= Utils.ROOT_ID) {
-            if (fileId == TRASH_FILE_ID) {
+            if (fileId == Trash.id) {
                 subfolderId?.let {
-                    navigateFileListTo.postValue(FileListNavigationType.Subfolder(TRASH_FILE, it))
+                    navigateFileListTo.postValue(FileListNavigationType.Subfolder(Trash.file, it))
                 } ?: run {
-                    navigateFileListTo.postValue(FileListNavigationType.Folder(TRASH_FILE))
+                    navigateFileListTo.postValue(FileListNavigationType.Folder(Trash.file))
                 }
             }
             return // Deeplinks could lead us to navigating to the true root
@@ -256,10 +238,14 @@ class MainViewModel(
     }
 
     fun getFileShare(fileId: Int, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
-        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
+        val okHttpClient = getHttpClient(userDrive)
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         val apiResponse = ApiRepository.getFileShare(okHttpClient, File(id = fileId, driveId = driveId))
         emit(apiResponse)
+    }
+
+    private suspend fun getHttpClient(userDrive: UserDrive?): OkHttpClient {
+        return userDrive?.let { AccountUtils.getHttpClient(userDrive.userId) } ?: HttpClient.okHttpClientWithTokenInterceptor
     }
 
     fun createOffice(driveId: Int, folderId: Int, createFile: CreateFile) = liveData(Dispatchers.IO) {
@@ -312,7 +298,10 @@ class MainViewModel(
         if (apiResponse.isSuccess()) {
             FileController.getRealmInstance().use { currentDriveRealm ->
                 file.getStoredFile(getContext())?.let { ioFile ->
-                    if (ioFile.exists()) moveIfOfflineFileOrDelete(file, ioFile, newParent)
+                    val folderProxy = FileController.getFileById(currentDriveRealm, newParent.id)
+                    if (ioFile.exists() && folderProxy != null) {
+                        moveIfOfflineFileOrDelete(file, ioFile, folderProxy)
+                    }
                 }
 
                 FileController.updateFile(file.parentId, currentDriveRealm) { localFolder ->
@@ -424,16 +413,6 @@ class MainViewModel(
         emit(apiResponse)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val pendingUploadsCount: LiveData<Int> = _pendingUploadsCount.switchMap { folderId ->
-        UploadFile.getCurrentUserPendingUploadFile(folderId)
-            .toFlow()
-            .mapLatest { list -> list.count() }
-            .distinctUntilChanged()
-            .cancellable()
-            .asLiveData()
-    }
-
     fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
         WorkQuery.Builder
             .fromUniqueWorkNames(arrayListOf(DownloadWorker.TAG))
@@ -444,7 +423,7 @@ class MainViewModel(
     fun restartUploadWorkerIfNeeded() {
         viewModelScope.launch {
             if (UploadFile.getAllPendingUploadsCount() > 0 && !getContext().isSyncScheduled()) {
-                getContext().syncImmediately()
+                getContext().syncImmediately(isAutomaticTrigger = true)
             }
         }
     }
@@ -512,17 +491,16 @@ class MainViewModel(
     }
 
     // Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()
-    fun deleteSynchronizedFilesOnDevice(filesToDelete: List<UploadFile>) = viewModelScope.launch(Dispatchers.IO) {
-        val fileDeleted: MutableList<UploadFile> = mutableListOf()
+    fun deleteSynchronizedFilesOnDevice(filesToDelete: List<Uri>) = viewModelScope.launch(Dispatchers.IO) {
+        val fileDeleted: MutableList<Uri> = mutableListOf()
         val isIOFilesDeleted: MutableList<Boolean> = mutableListOf()
         val fileDeleteContentResolver: MutableIntList = mutableIntListOf()
         var inconsistenciesCount = 0
         val tag = "deleteSynchronizedFilesOnDevice"
 
         SentryLog.i(tag, "filesToDelete (size): ${filesToDelete.size}")
-        filesToDelete.forEach { uploadFile ->
+        filesToDelete.forEach { uri ->
             try {
-                val uri = uploadFile.getUriObject()
                 val query = getContext().contentResolver.query(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null)
                 query?.use { cursor ->
                     if (cursor.moveToFirst()) {
@@ -538,18 +516,18 @@ class MainViewModel(
                                 scope.setExtra("columnIndex", columnIndex.toString())
                             }
                         } finally {
-                            fileDeleted.add(uploadFile)
+                            fileDeleted.add(uri)
                         }
                     } else {
                         // The app was killed before updating `deleteAt` in the realm db
                         inconsistenciesCount++
-                        fileDeleted.add(uploadFile)
+                        fileDeleted.add(uri)
                     }
-                } ?: fileDeleted.add(uploadFile)
+                } ?: fileDeleted.add(uri)
             } catch (exception: SecurityException) {
                 Sentry.captureException(exception)
                 exception.printStackTrace()
-                fileDeleted.add(uploadFile)
+                fileDeleted.add(uri)
             }
         }
         SentryLog.i(tag, "isIOFilesDeleted[${isIOFilesDeleted.size}]: $isIOFilesDeleted")
@@ -558,7 +536,7 @@ class MainViewModel(
         SentryLog.i(tag, "file doesn't exist on device but deleteAt isn't up to date in the realm db: $inconsistenciesCount")
         Sentry.captureMessage("End deleteSynchronizedFilesOnDevice. Nb of error $inconsistenciesCount")
 
-        UploadFile.deleteAll(fileDeleted)
+        UploadFile.deleteAllFromUris(fileDeleted)
     }
 
     fun checkBulkDownloadStatus() = viewModelScope.launch {
@@ -588,7 +566,9 @@ class MainViewModel(
 
     private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
         if (file.isOffline) {
-            ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
+            val offlineFile = newParent.getOfflineFile(application) ?: return
+            val destinationFile = IOFile("$offlineFile/${file.name}")
+            ioFile.renameTo(destinationFile)
         } else {
             ioFile.delete()
         }

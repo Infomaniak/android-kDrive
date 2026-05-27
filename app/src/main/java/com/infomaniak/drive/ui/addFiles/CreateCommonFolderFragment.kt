@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,10 +23,9 @@ import android.view.View
 import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.hideKeyboard
 import com.infomaniak.core.legacy.utils.hideProgressCatching
-import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -37,15 +36,19 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission.ALL_DRIVE_USERS
 import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
 import com.infomaniak.drive.data.models.Permission
+import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.showSnackbar
 
 class CreateCommonFolderFragment : CreateFolderFragment() {
 
+    override val permissionDependOnShare: Boolean = false
+
+    override fun buildPermissionList(share: Share?): List<Permission> = listOf(ALL_DRIVE_USERS, SPECIFIC_USERS)
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        accessPermissionTitle.setText(R.string.createCommonFolderDescription)
         createFolderCollapsing.title = getString(R.string.createCommonFolderTitle)
         folderCreateIcon.icon.setImageResource(R.drawable.ic_folder_common_documents)
         pathCard.isVisible = true
@@ -56,22 +59,17 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
             pathDriveIcon.imageTintList = ColorStateList.valueOf(drive.preferences.color.toColorInt())
         }
 
-        adapter.apply {
-            val permissions: ArrayList<Permission> = arrayListOf(ALL_DRIVE_USERS, SPECIFIC_USERS)
-            selectionPosition = permissions.indexOf(newFolderViewModel.currentPermission)
-            setAll(permissions)
-        }
-
-        createFolderButton.setOnClickListener { createCommonFolder() }
+        createFolderButton.setOnClickListener { adapter.currentPermission?.let(::createCommonFolder) }
     }
 
-    private fun createCommonFolder() = with(binding) {
+    private fun createCommonFolder(permission: Permission) = with(binding) {
         folderNameValueInput.hideKeyboard()
         createFolderButton.showProgressCatching()
         trackNewElementEvent(MatomoName.CreateCommonFolder)
 
         newFolderViewModel.createCommonFolder(
             name = folderNameValueInput.text.toString(),
+            currentPermission = permission
         ).observe(viewLifecycleOwner) { apiResponse ->
 
             if (apiResponse.isSuccess()) {
@@ -88,10 +86,10 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
     }
 
     private fun whenFolderCreated(file: File) {
-        showSnackbar(R.string.createCommonFolderSucces)
+        showSnackbar(R.string.createCommonFolderSuccess)
 
-        if (newFolderViewModel.currentPermission == SPECIFIC_USERS) {
-            safeNavigate(
+        if (adapter.currentPermission == SPECIFIC_USERS) {
+            safelyNavigate(
                 CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
                     fileId = file.id,
                     ignoreCreateFolderStack = true,

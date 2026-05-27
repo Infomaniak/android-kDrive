@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
-import com.infomaniak.core.cancellable
+import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
@@ -40,6 +40,7 @@ import com.infomaniak.drive.data.models.FileCount
 import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.file.SpecialFolder.Favorites
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
@@ -81,6 +82,8 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     var lastItemCount: FileCount? = null
 
+    var isPreviewManaged: Boolean = false
+
     private val rootFilesUserDrive = MutableSharedFlow<UserDrive>(replay = 1)
 
     fun sortTypeIsInitialized() = ::sortType.isInitialized
@@ -113,6 +116,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFilesJob.cancel()
         getFolderActivitiesJob.cancel()
         getFilesJob = Job()
+
         return liveData(Dispatchers.IO + getFilesJob) {
             tailrec suspend fun recursiveDownload(folderId: Int, isFirstPage: Boolean) {
                 getFilesJob.ensureActive()
@@ -128,29 +132,22 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                 )
 
                 when {
-                    folderFilesProviderResult == null -> emit(null)
+                    folderFilesProviderResult == null -> {
+                        SentryLog.i(TAG, "getFiles: Emit result is null")
+                        emit(null)
+                    }
                     folderFilesProviderResult.isComplete -> {
-                        emit(
-                            FolderFilesResult(
-                                parentFolder = folderFilesProviderResult.folder,
-                                files = folderFilesProviderResult.folderFiles,
-                                isComplete = true,
-                                isFirstPage = isFirstPage,
-                                isNewSort = isNewSort,
-                            )
-                        )
+                        emit(folderFilesProviderResult.toFolderFilesResult(isFirstPage, isNewSort))
+                        val parentFolder = folderFilesProviderResult.folder.id
+                        val files = folderFilesProviderResult.folderFiles.count()
+                        SentryLog.i(TAG, "getFiles: Emit is complete parentFolder=$parentFolder filesCount=$files")
                     }
                     else -> {
                         if (isFirstPage) {
-                            emit(
-                                FolderFilesResult(
-                                    parentFolder = folderFilesProviderResult.folder,
-                                    files = folderFilesProviderResult.folderFiles,
-                                    isComplete = true,
-                                    isFirstPage = true,
-                                    isNewSort = isNewSort,
-                                )
-                            )
+                            emit(folderFilesProviderResult.toFolderFilesResult(isFirstPage = true, isNewSort))
+                            val parentFolder = folderFilesProviderResult.folder.id
+                            val files = folderFilesProviderResult.folderFiles.count()
+                            SentryLog.i(TAG, "getFiles: Emit first page, parentFolder = $parentFolder, files = $files")
                         }
                         recursiveDownload(folderId, isFirstPage = false)
                     }
@@ -163,6 +160,17 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
             }.getOrNull()
         }
     }
+
+    fun FolderFilesProvider.FolderFilesProviderResult.toFolderFilesResult(
+        isFirstPage: Boolean,
+        isNewSort: Boolean
+    ): FolderFilesResult = FolderFilesResult(
+        parentFolder = folder,
+        files = folderFiles,
+        isComplete = true,
+        isFirstPage = isFirstPage,
+        isNewSort = isNewSort,
+    )
 
     fun getFavoriteFiles(order: SortType, isNewSort: Boolean, userDrive: UserDrive): LiveData<FolderFilesResult?> {
         getFilesJob.cancel()
@@ -203,7 +211,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                     }
                 } else emit(
                     FolderFilesResult(
-                        files = FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID, userDrive = userDrive),
+                        files = FileController.getFilesFromCache(folderId = Favorites.id, userDrive = userDrive),
                         isComplete = true,
                         isFirstPage = true,
                         isNewSort = isNewSort,
@@ -224,14 +232,15 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun getPendingFilesCount(folderId: Int) = liveData(Dispatchers.IO) {
-        emit(UploadFile.getCurrentUserPendingUploadsCount(folderId))
-    }
-
     fun getFileCount(folder: File): LiveData<FileCount> = liveData(Dispatchers.IO) {
         lastItemCount?.let { emit(it) }
         val apiResponse = if (folder.isPublicShared()) {
-            PublicShareApiRepository.getPublicShareFileCount(folder.driveId, folder.publicShareUuid, folder.id)
+            PublicShareApiRepository.getPublicShareFileCount(
+                driveId = folder.driveId,
+                linkUuid = folder.publicShareUuid,
+                fileId = folder.id,
+                authToken = folder.publicShareAuthToken,
+            )
         } else {
             ApiRepository.getFileCount(folder)
         }

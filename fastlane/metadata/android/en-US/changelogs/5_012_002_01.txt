@@ -1,0 +1,3 @@
+- Add more logs to understand login bug
+- Fix upload of a file dated older than 1 jan 1970
+- Harmonize some wording with the web

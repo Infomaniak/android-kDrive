@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,11 @@
  */
 package com.infomaniak.drive.data.api
 
+import android.util.Log
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.core.auth.api.ApiRepositoryCore
 import com.infomaniak.core.auth.networking.HttpClient
-import com.infomaniak.core.auth.networking.HttpClient.okHttpClientLongTimeoutWithTokenInterceptor as okHttpClientLongTimeout
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.api.ApiController.ApiMethod.DELETE
@@ -31,6 +31,7 @@ import com.infomaniak.core.network.api.ApiController.ApiMethod.PUT
 import com.infomaniak.core.network.api.ApiController.callApiBlocking
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.ArchiveUUID
@@ -65,6 +66,8 @@ import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.utils.AccountUtils
 import okhttp3.OkHttpClient
+import java.util.Date
+import com.infomaniak.core.auth.networking.HttpClient.okHttpClientLongTimeoutWithTokenInterceptor as okHttpClientLongTimeout
 import com.infomaniak.core.ksuite.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
 
 object ApiRepository : ApiRepositoryCore() {
@@ -78,6 +81,13 @@ object ApiRepository : ApiRepositoryCore() {
         return callApiBlocking(url, method, body, okHttpClient)
     }
 
+    private suspend inline fun <reified T> callApiSuspend(
+        url: String,
+        method: ApiController.ApiMethod,
+        body: Any? = null,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+    ): T = ApiController.callApi(url, method, body, okHttpClient)
+
     private inline fun <reified T> callApiWithCursor(
         url: String,
         method: ApiController.ApiMethod,
@@ -85,6 +95,22 @@ object ApiRepository : ApiRepositoryCore() {
         okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
     ): T {
         return callApiBlocking(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
+            CursorApiResponse<Any>(
+                result = ApiResponseStatus.ERROR,
+                error = apiError
+            ).apply {
+                translatedError = translatedErrorRes
+            } as T
+        })
+    }
+
+    private suspend inline fun <reified T> callApiWithCursorSuspend(
+        url: String,
+        method: ApiController.ApiMethod,
+        body: Any? = null,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+    ): T {
+        return ApiController.callApi(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
             CursorApiResponse<Any>(
                 result = ApiResponseStatus.ERROR,
                 error = apiError
@@ -145,6 +171,7 @@ object ApiRepository : ApiRepositoryCore() {
         cursor: String? = null,
         order: SortType
     ): CursorApiResponse<ListingFiles> {
+        SentryLog.i("ApiRepository", "getListingFiles with cursor ${cursor != null}")
         val url = when (cursor) {
             null -> "${ApiRoutes.getListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
             else -> "${ApiRoutes.getMoreListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
@@ -215,6 +242,8 @@ object ApiRepository : ApiRepositoryCore() {
             fileSize = 0L,
             conflictOption = ConflictOption.RENAME,
             directoryPath = remoteSubFolder,
+            createdAt = uploadFile.fileCreatedAt,
+            lastModifiedAt = Date(uploadFile.getLastModified()),
         )
 
         ApiController.callApi<ApiResponse<File>>(uploadUrl, POST)
@@ -363,6 +392,13 @@ object ApiRepository : ApiRepositoryCore() {
         )
     }
 
+    fun deleteDriveUser(file: File, shareableItem: Shareable): ApiResponse<Boolean> {
+        return callApi(
+            url = ApiRoutes.driveUser(driveId = file.driveId, driveUserId = shareableItem.id),
+            method = DELETE
+        )
+    }
+
     fun putFileShare(file: File, shareableItem: Shareable, body: Map<String, String>): ApiResponse<Boolean> {
         return callApi(
             when (shareableItem) {
@@ -439,16 +475,16 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.convertFile(file), POST)
     }
 
-    fun getDriveTrash(driveId: Int, order: SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
-        return callApiWithCursor("${ApiRoutes.driveTrash(driveId, order)}&${loadCursor(cursor)}", GET)
+    suspend fun getDriveTrash(driveId: Int, order: SortType, cursor: String?): CursorApiResponse<List<File>> {
+        return callApiWithCursorSuspend("${ApiRoutes.driveTrash(driveId, order)}&${loadCursor(cursor)}", GET)
     }
 
     fun getTrashedFile(file: File): ApiResponse<File> {
         return callApi(ApiRoutes.trashedFile(file), GET)
     }
 
-    fun getTrashedFolderFiles(file: File, order: SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
-        return callApiWithCursor("${ApiRoutes.trashedFolderFiles(file, order)}&${loadCursor(cursor)}", GET)
+    suspend fun getTrashedFolderFiles(file: File, order: SortType, cursor: String?): CursorApiResponse<List<File>> {
+        return callApiWithCursorSuspend("${ApiRoutes.trashedFolderFiles(file, order)}&${loadCursor(cursor)}", GET)
     }
 
     fun postRestoreTrashFile(file: File, body: Map<String, Int>?): ApiResponse<Any> =

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2025 Infomaniak Network SA
+ * Copyright (C) 2025-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,13 +51,12 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
     override val fileListViewModel: FileListViewModel by viewModels()
+    private val selectRootFolderViewModel: SelectRootFolderViewModel by viewModels()
 
     private val navigationArgs: SelectRootFolderFragmentArgs by navArgs()
 
     override val rootFolderLayout: RootFolderLayoutBinding
         get() = binding.rootFolderLayout
-
-    private val selectRootFolderViewModel: SelectRootFolderViewModel by viewModels()
 
     override val uiSettings by lazy { UiSettings(requireContext()) }
 

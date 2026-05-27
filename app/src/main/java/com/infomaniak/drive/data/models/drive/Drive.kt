@@ -36,7 +36,7 @@ open class Drive(
      * User data
      */
     @SerializedName("account_admin")
-    var isAdmin: Boolean = false, // Used to know if the user is the kSuite admin, or not.
+    var isOrganisationAdmin: Boolean = false,
     @SerializedName("rights")
     private var _rights: DriveRights? = DriveRights(),
     var name: String = "",

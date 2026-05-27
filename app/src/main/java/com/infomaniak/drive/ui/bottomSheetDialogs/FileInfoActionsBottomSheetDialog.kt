@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
@@ -114,6 +113,7 @@ class FileInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), FileInfo
                 onItemClickListener = this@FileInfoActionsBottomSheetDialog,
                 selectFolderResultLauncher = selectFolderResultLauncher,
                 isSharedWithMe = navigationArgs.userDrive.sharedWithMe,
+                hideActions = navigationArgs.hideActions,
             )
             updateCurrentFile(currentFile)
             setPrintVisibility(isGone = true)

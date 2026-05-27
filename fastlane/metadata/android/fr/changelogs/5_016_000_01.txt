@@ -1,0 +1,4 @@
+- Correction d'un problème empêchant l'affichage de l'écran d'authentification à deux facteurs lors du démarrage à froid de l'application
+- Ajout d'un bouton « Partager les logs »
+- Affichage des actions dans l'aperçu des fichiers depuis l'écran des activités
+- Diverses corrections et améliorations

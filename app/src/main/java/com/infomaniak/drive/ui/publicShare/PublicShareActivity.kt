@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024-2025 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.navArgs
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
@@ -39,6 +40,7 @@ import com.infomaniak.drive.utils.IOFile
 class PublicShareActivity : EdgeToEdgeActivity() {
 
     private val binding by lazy { ActivityPublicShareBinding.inflate(layoutInflater) }
+    private val navigationArgs: PublicShareActivityArgs by navArgs()
     private val publicShareViewModel: PublicShareViewModel by viewModels()
     private val navController by lazy {
         (supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment).navController
@@ -55,6 +57,8 @@ class PublicShareActivity : EdgeToEdgeActivity() {
             view.setMargins(left = margin + insets.left, right = margin + insets.right, bottom = margin + insets.bottom)
         }
         onBackPressedDispatcher.addCallback { finishAndRemoveTask() }
+
+        publicShareViewModel.rootFileId = navigationArgs.fileId
     }
 
     override fun onDestroy() {

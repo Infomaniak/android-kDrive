@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2024 Infomaniak Network SA
+  ~ Copyright (C) 2022-2026 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -16,18 +16,8 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="app_name" translatable="false">kDrive</string>
-    <string name="allCommonDocuments" translatable="false">Common Documents</string>
-
-    <string name="notification_channel_id_comment" translatable="false">comment_channel_id</string>
-    <string name="notification_channel_id_general" translatable="false">general_channel_id</string>
-    <string name="notification_channel_id_shared" translatable="false">shared_channel_id</string>
-    <string name="notification_channel_id_upload_download" translatable="false">upload_download_channel_id</string>
-    <string name="notification_channel_id_upload_service" translatable="false">sync_service_channel_id</string>
-
-    <string name="fileDetailsInfoFolderContentTemplate" translatable="false">%1s &amp; %2s</string>
-
     <string name="aboutAppVersionTitle">kDrive application</string>
+    <string name="aboutLibrariesTitle">Libraries</string>
     <string name="aboutLicenseDescription">GNU General Public Licence, version 3</string>
     <string name="aboutLicenseTitle">Licence</string>
     <string name="aboutPrivacyTitle">Privacy</string>
@@ -52,6 +42,7 @@
     <string name="allDateCustom">Custom</string>
     <string name="allDeletedFilePattern">\'Deleted on \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Disabled</string>
+    <string name="allDriveBlockedDescription">All your products have expired. Please renew them to manage them and access their data.</string>
     <string name="allEmail">Email</string>
     <string name="allEmptyInputError">This field cannot be empty</string>
     <string name="allErrorFeatureNotAvailableInFdroid">Feature not available since F-Droid</string>
@@ -164,7 +155,9 @@
     <string name="buttonPlayerPrev">Previous</string>
     <string name="buttonPlayerRew">Back a few seconds</string>
     <string name="buttonRefresh">Update</string>
+    <string name="buttonRemoveDriveAccess">Remove access to the drive</string>
     <string name="buttonRemoveFavorites">Delete from favorites</string>
+    <string name="buttonRemoveUserFromShare">Cancel sharing</string>
     <string name="buttonRename">Rename</string>
     <string name="buttonRenew">Renew</string>
     <string name="buttonRetry">Try again</string>
@@ -207,14 +200,13 @@
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">No search possible: no drive selected</string>
     <string name="commonDocumentsDescription">This space belongs to %s and centralizes your organization’s common files.</string>
     <string name="commonFolderDescription">Share this folder with users of kDrive %s</string>
-    <string name="commonFolderTitle">Common folder</string>
+    <string name="commonFolderTitle">Organization folder</string>
     <string name="contentDescriptionIsSelected">Is selected</string>
     <string name="convertToDropboxTitle">Convert to drop box %s</string>
     <string name="createCategoryTitle">Create a category</string>
     <string name="createCommonFolderAllUsersDescription">All kDrive %s users will automatically have access to this folder.</string>
-    <string name="createCommonFolderDescription">Who would you like to share this common folder with?</string>
-    <string name="createCommonFolderSucces">Common folder created successfully</string>
-    <string name="createCommonFolderTitle">Create a common folder</string>
+    <string name="createCommonFolderSuccess">Organization folder created successfully</string>
+    <string name="createCommonFolderTitle">Create an organization folder</string>
     <string name="createDatedSubFoldersDescription">Automatically create subfolders with the month and year of the photo</string>
     <string name="createDatedSubFoldersTitle">Create one folder per month</string>
     <string name="createDropBoxHint">Name of drop box</string>
@@ -236,9 +228,9 @@
     <string name="createFolderSomeUsersTitle">Some users</string>
     <string name="createFolderTitle">Create folder</string>
     <string name="createFolderValidUntilDescription">Once the date has passed, users will no longer be able to transfer files.</string>
-    <string name="createPrivateFolderSucces">Folder created successfully</string>
+    <string name="createPrivateFolderSuccess">Folder created successfully</string>
     <string name="deleteMyAccount">Delete my account</string>
-    <string name="deletePicturesDescription">The application will regularly ask you to delete photos from your device that are already synchronized on your kDrive. You always have to manually authorize the deletion\n</string>
+    <string name="deletePicturesDescription">The application will regularly ask you to delete photos from your device that are already synchronized on your kDrive. You always have to manually authorize the deletion</string>
     <string name="deletePicturesTitle">Delete photos</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">The product has expired since %s. Please renew it to manage it and access its data.</item>
@@ -270,6 +262,7 @@
     <string name="errorConflict">An element with the same name already exists in this location</string>
     <string name="errorDelete">Deletion error</string>
     <string name="errorDeviceStorage">Insufficient device storage</string>
+    <string name="errorDownloadPermission">You must add at least one file that you have permission to download</string>
     <string name="errorDropboxLimitExceeded">You have reached the drop box limit.</string>
     <string name="errorDuplicate">Duplication error</string>
     <string name="errorExternalImportInProgress">Cannot perform action on the folder because an external import is in progress</string>
@@ -293,6 +286,7 @@
     <string name="errorSave">Save error</string>
     <string name="errorShareAddUser">This file is already shared with this user.</string>
     <string name="errorShareLink">Error when creating link</string>
+    <string name="errorStillUploading">The item is still being imported</string>
     <string name="errorWrongPassword">Wrong password</string>
     <string name="favoritesNoFile">No favorites at this time</string>
     <string name="favoritesTitle">Favorites</string>
@@ -392,11 +386,11 @@
     <string name="fileDetailsInfoContent">Content</string>
     <string name="fileDetailsInfoEmptyFolder">Empty folder</string>
     <plurals name="fileDetailsInfoFile">
-        <item quantity="one">1 file</item>
+        <item quantity="one">%d file</item>
         <item quantity="other">%d files</item>
     </plurals>
     <plurals name="fileDetailsInfoFolder">
-        <item quantity="one">1 folder</item>
+        <item quantity="one">%d folder</item>
         <item quantity="other">%d folders</item>
     </plurals>
     <string name="fileDetailsInfosAddedDateTitle">Added to drive</string>
@@ -431,7 +425,7 @@
         <item quantity="other">%d files duplicated successfully</item>
     </plurals>
     <string name="fileListMoveDoneSnackbar">Moves completed successfully</string>
-    <plurals name="fileListMoveFileConfirmationSnackbar">
+    <plurals name="fileListMoveFileConfirmationSnackbarAndroid">
         <item quantity="one">One file was moved to %2$s</item>
         <item quantity="other">%1$d files were moved to %2$s</item>
     </plurals>
@@ -455,6 +449,9 @@
     </plurals>
     <string name="fileListTitle">Files</string>
     <string name="filePermissionTitle">Select the right</string>
+    <string name="fileProviderExtensionDescription">If this option is disabled, kDrive will no longer be available in the Files application and in third-party applications.</string>
+    <string name="fileProviderExtensionError">You have disabled file display from kDrive. You can re-enable it in the app settings.</string>
+    <string name="fileProviderExtensionTitle">Show in Files</string>
     <string name="fileShareAddMessage">Add a message for guests (optional)</string>
     <string name="fileShareDetailsFileTitle">File %s sharing and rights</string>
     <string name="fileShareDetailsFolderTitle">Folder %s sharing and rights</string>
@@ -483,7 +480,7 @@
     <string name="kDrivePdfViewer">kDrive PDF Viewer</string>
     <string name="lastEditsTitle">Most recent changes</string>
     <string name="localizedFilenamePrivateTeamSpace">My folder</string>
-    <string name="localizedFilenameTeamSpace">Common folders</string>
+    <string name="localizedFilenameTeamSpace">Organization folders</string>
     <string name="locateButton">Locate</string>
     <string name="maintenanceAsleepDescription">To reduce the impact on the environment, your kDrive has gone into standby mode following prolonged inactivity.\nRestart it to regain access to your files!</string>
     <string name="maintenanceAsleepTitle">Your kDrive %s has taken a little nap!</string>
@@ -499,7 +496,7 @@
     <string name="menuTitle">Menu</string>
     <string name="modalCommentAddTitle">Edit a comment</string>
     <string name="modalCommentDeleteDescription">Do you really want to delete your comment?</string>
-    <string name="modalCreateFileSucces">%s created successfully</string>
+    <string name="modalCreateFileSuccess">%s created successfully</string>
     <string name="modalCreateFileTitle">Create a file</string>
     <string name="modalDeleteCategoryDescription">Do you want to delete the category %s permanently for all kDrive users?</string>
     <plurals name="modalDeleteDescription">
@@ -520,9 +517,10 @@
         <item quantity="other">Move %d items to the trash?</item>
     </plurals>
     <string name="modalMoveTrashTitle">Move to trash</string>
+    <string name="modalRemoveUserDriveAccessDescription">Do you really want to remove user %1$s’s access to the kDrive %2$s?</string>
     <string name="modalTrashFileDescription">Do you really want to move %s to the trash?</string>
     <string name="modalTrashFilesDescription">Do you really want to move the selected files to the trash?</string>
-    <string name="modalUserPermissionRemoveDescription">Do you really want to delete the access of user %s?</string>
+    <string name="modalUserPermissionRemoveDescription">Do you really want to remove user %s’s access to this file?</string>
     <string name="modificationDateFilterTitle">Modification date</string>
     <string name="mySharesNoFile">No file shared</string>
     <string name="mySharesTitle">My shares</string>
@@ -542,7 +540,7 @@
     <string name="notEnoughStorageDescription1">Your kDrive storage space is almost full. Upgrade your plan and unlock new features.</string>
     <string name="notEnoughStorageDescription2">Your kDrive storage space is almost full. Contact your administrator so they can upgrade your plan.</string>
     <string name="notEnoughStorageUsed">used</string>
-    <string name="notSupportedExtensionDescription">Would you like to create a copy of your file with a compatible extension for online editing? The original %s file will remain unchanged.\n</string>
+    <string name="notSupportedExtensionDescription">Would you like to create a copy of your file with a compatible extension for online editing? The original %s file will remain unchanged.</string>
     <string name="notSupportedExtensionTitle">The %s extension is not supported for online editing</string>
     <string name="notificationCommentChannelName">Comments</string>
     <string name="notificationGeneralChannelName">General notifications</string>
@@ -571,7 +569,7 @@
     <string name="pdfIsLocked">Your PDF is locked</string>
     <string name="picturesNoFile">No photo at this time</string>
     <plurals name="preparingToUpload">
-        <item quantity="one">Preparing to upload 1 file</item>
+        <item quantity="one">Preparing to upload %d file</item>
         <item quantity="other">Preparing to upload %d files</item>
     </plurals>
     <string name="previewDownloadIndication">Loading in progress, please wait…</string>
@@ -586,7 +584,6 @@
     <string name="publicShareOutdatedLinkTitle">The files are no longer available</string>
     <string name="publicSharePasswordNeededDescription">Please enter the password provided to access the content.</string>
     <string name="publicSharePasswordNeededTitle">Protected content</string>
-    <string name="publicSharePasswordNotSupportedDescription">Password-protected links are not yet available on the mobile application.</string>
     <string name="publicSharedLinkTitle">Public sharing link</string>
     <string name="recentActivityMeTitle">By me</string>
     <string name="recentActivityMyTeam">By my team</string>
@@ -603,6 +600,7 @@
     <string name="searchNoFile">No results, please amend your search criteria</string>
     <string name="searchTitle">Search</string>
     <string name="searchViewHint">Search for a file…</string>
+    <string name="securityTitle">Security</string>
     <string name="selectDriveTitle">Select a kDrive</string>
     <string name="selectFolderTitle">Select a folder</string>
     <string name="selectMediaFoldersDescription">Select the folders on your device that should be automatically saved to your kDrive.</string>
@@ -638,6 +636,7 @@
     <string name="shareLinkTypeDocument">document</string>
     <string name="shareLinkTypeFile">file</string>
     <string name="shareLinkTypeFolder">folder</string>
+    <string name="shareLogsButton">Share logs</string>
     <string name="shareUserExternal">kDrive external user</string>
     <string name="shareUserNotAccepted">The user hasn’t yet accepted the share and is an external user of the kDrive.</string>
     <plurals name="shareUsersCount">
@@ -684,6 +683,9 @@
     <string name="switchUserDescription">View the kDrives of your other Infomaniak profiles. You can add as many user profiles as you like.</string>
     <string name="syncConfigureDescription">Your photos, videos and screenshots will be automatically saved in your kDrive %s.</string>
     <string name="syncConfigureTitle">Save your memories in a safe place</string>
+    <string name="syncOnlyWifiDescription">Offline files will be only synchronized with Wi-Fi</string>
+    <string name="syncOnlyWifiTitle">With Wi-Fi only</string>
+    <string name="syncPhotosOnlyWifiDescription">Photos and video will be only synchronized with Wi-Fi</string>
     <string name="syncSettingsButtonActiveSync">Enable automatic backup</string>
     <string name="syncSettingsButtonSaveDate">Save</string>
     <string name="syncSettingsButtonSyncPeriodicity">Synchronisation</string>
@@ -704,6 +706,10 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Every hour</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Every 15 minutes</string>
     <string name="syncSettingsTitle">Photo backup</string>
+    <string name="syncWifiAndMobileDataDescription">Mobile data usage charges may apply</string>
+    <string name="syncWifiAndMobileDataTitle">With Wi-Fi and mobile data</string>
+    <string name="syncWifiPicturesTitle">Synchronize photos and videos</string>
+    <string name="syncWifiSettingsTitle">Synchronize offline files</string>
     <string name="themeSettingsDarkLabel">Dark</string>
     <string name="themeSettingsLightLabel">Light</string>
     <string name="themeSettingsSystemDefaultLabel">System default</string>
@@ -739,7 +745,7 @@
         <item quantity="other">%2$d imports failed out of a total of %1$d</item>
     </plurals>
     <plurals name="uploadImportedOtherAmount">
-        <item quantity="one">+1 other file</item>
+        <item quantity="one">+%d other file</item>
         <item quantity="other">+%d other files</item>
     </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Cancel uploads</string>
@@ -762,13 +768,15 @@
     <string name="uploadPausedTitle">Upload suspended</string>
     <string name="uploadPermissionError">Additional permissions requested</string>
     <string name="urlUserReportAndroid">https://feedback.userreport.com/1d484922-97e1-4a43-a4c9-4d19bc1b5494/</string>
+    <string name="userDriveRemoveDescription">User will no longer have access to this kDrive.</string>
     <string name="userInviteByEmail">Invite via email</string>
     <string name="userPermissionManage">Can manage</string>
     <string name="userPermissionManageDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDelete the file\nShare with other users</string>
     <string name="userPermissionNotAvailable">Not available to external kDrive users</string>
     <string name="userPermissionRead">Can view</string>
-    <string name="userPermissionReadDescription">View only\nDownload\nAdd comments</string>
+    <string name="userPermissionReadDescription">View only\nDownload</string>
     <string name="userPermissionRemove">User will no longer have access to this file.</string>
     <string name="userPermissionWrite">Can change</string>
-    <string name="userPermissionWriteDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDeleting the file</string>
+    <string name="userPermissionWriteDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDelete files/folders</string>
+    <string name="userPermissionWriteExternalDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDelete its own files / folders</string>
 </resources>

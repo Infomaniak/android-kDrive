@@ -30,7 +30,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.legacy.utils.SnackbarUtils
 import com.infomaniak.core.legacy.utils.hideProgressCatching
 import com.infomaniak.core.legacy.utils.initProgress

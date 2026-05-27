@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@ class SearchFragment : FileListFragment() {
     override val noItemsIcon = R.drawable.ic_search_grey
     override val noItemsTitle = R.string.searchNoFile
     override val sortTypeUsage = SortTypeUsage.SEARCH
+    override val isActionMenuHidden: Boolean = true
 
     private lateinit var filtersAdapter: SearchFiltersAdapter
     private lateinit var recentSearchesAdapter: RecentSearchesAdapter
@@ -71,7 +72,7 @@ class SearchFragment : FileListFragment() {
         configureClearButtonListener()
         configureSearchView()
         configureFileRecyclerPagination()
-        configureFileAdapterListener()
+        configureFileAdapter()
         configureRecentSearches()
         configureToolbar()
         observeSearchResults()
@@ -182,21 +183,24 @@ class SearchFragment : FileListFragment() {
         })
     }
 
-    private fun configureFileAdapterListener() {
-        fileAdapter.onFileClicked = { file ->
-            if (file.isFolder()) {
-                searchViewModel.cancelDownloadFiles()
-                safeNavigate(
-                    SearchFragmentDirections.actionSearchFragmentToFileListFragment(
-                        folderId = file.id,
-                        folderName = file.name,
-                        shouldHideBottomNavigation = true,
-                        shouldShowSmallFab = true,
+    private fun configureFileAdapter() {
+        fileAdapter.apply {
+            initAsyncListDiffer()
+            onFileClicked = { file ->
+                if (file.isFolder()) {
+                    searchViewModel.cancelDownloadFiles()
+                    safeNavigate(
+                        SearchFragmentDirections.actionSearchFragmentToFileListFragment(
+                            folderId = file.id,
+                            folderName = file.name,
+                            shouldHideBottomNavigation = true,
+                            shouldShowSmallFab = true,
+                        )
                     )
-                )
-            } else {
-                val fileList = fileAdapter.getFileObjectsList(null)
-                Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+                } else {
+                    val fileList = getFileObjectsList(null)
+                    Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+                }
             }
         }
     }
@@ -239,56 +243,29 @@ class SearchFragment : FileListFragment() {
             showSnackbar(errorRes)
         }
 
-        fun getSearchResults(data: ArrayList<File>?): ArrayList<File> {
-            return (data ?: arrayListOf()).apply {
-                map { file -> file.isFromSearch = true }
-            }
-        }
-
-        fun handleFirstResult(searchList: ArrayList<File>) {
+        fun handleFirstResult(searchList: List<File>) {
             fileAdapter.setFiles(searchList)
             binding.fileRecyclerView.scrollTo(0, 0)
             searchViewModel.visibilityMode.value = if (searchList.isEmpty()) VisibilityMode.NO_RESULTS else VisibilityMode.RESULTS
         }
 
-        fun handleNoResult() {
-            fileAdapter.apply {
-                hideLoading()
-                isComplete = true
-            }
-        }
-
-        fun handleLastPage(searchList: ArrayList<File>) {
-            fileAdapter.apply {
-                addFileList(searchList)
-                isComplete = true
-            }
-        }
-
-        fun handleNewPage(searchList: ArrayList<File>) {
-            fileAdapter.addFileList(searchList)
-        }
-
-        searchViewModel.searchResults.observe(viewLifecycleOwner) {
+        searchViewModel.searchResults.observe(viewLifecycleOwner) { folderFilesResult ->
 
             if (!binding.swipeRefreshLayout.isRefreshing) return@observe
 
-            it?.let { folderFilesResult ->
-
-                if (folderFilesResult.errorRes == null) {
+            folderFilesResult?.run {
+                if (errorRes == null) {
                     updateMostRecentSearches()
-                    val searchList = getSearchResults(folderFilesResult.files)
 
-                    fileAdapter.isComplete = folderFilesResult.isComplete
+                    fileAdapter.isComplete = isComplete
 
                     when {
-                        folderFilesResult.isFirstPage -> handleFirstResult(searchList)
-                        searchList.isEmpty() -> handleNoResult()
-                        folderFilesResult.isComplete -> handleLastPage(searchList)
-                        else -> handleNewPage(searchList)
+                        isFirstPage -> handleFirstResult(files)
+                        files.isEmpty() -> fileAdapter.hideLoading()
+                        else -> fileAdapter.addFileList(files)
                     }
                 } else {
-                    handleApiCallFailure(folderFilesResult.errorRes)
+                    handleApiCallFailure(errorRes)
                 }
 
             } ?: handleLiveDataTriggerWhenInitialized()

@@ -1,0 +1,5 @@
+- Improve file's date recognition from the source file during upload and pdf opening.
+- Make all public shares use the same task to avoid having several opened shares at the same time
+- Fix crash when creating a folder with bad internet connection
+- Add missing supported languages for OCR GeniusScan
+- Fix empty trash folder loading infinitely

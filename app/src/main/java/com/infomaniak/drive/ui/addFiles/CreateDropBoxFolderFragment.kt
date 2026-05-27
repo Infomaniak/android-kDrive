@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import android.widget.CompoundButton
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.models.File.FolderPermission.INHERIT
 import com.infomaniak.drive.data.models.File.FolderPermission.ONLY_ME
 import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
 import com.infomaniak.drive.data.models.Permission
+import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.ui.dropbox.DropboxViewModel
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.animateRotation
@@ -48,6 +49,9 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
 
     var showAdvancedSettings = false
 
+    override fun buildPermissionList(share: Share?): List<Permission> =
+        listOf(ONLY_ME, if (canInherit(share)) INHERIT else SPECIFIC_USERS)
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -57,19 +61,6 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         folderCreateIcon.icon.setImageResource(R.drawable.ic_folder_dropbox)
         folderNameValueLayout.hint = getString(R.string.createDropBoxHint)
         setupAdvancedSettings()
-
-        adapter.apply {
-            getShare {
-                setUsers(it.users)
-                val permissions: ArrayList<Permission> = arrayListOf(
-                    ONLY_ME,
-                    if (canInherit(it.users, it.teams)) INHERIT else SPECIFIC_USERS,
-                )
-                selectionPosition = permissions.indexOf(newFolderViewModel.currentPermission)
-                setAll(permissions)
-            }
-        }
-
         advancedSettingsCardView.isVisible = true
         advancedSettings.setOnClickListener { toggleShowAdvancedSettings() }
 
@@ -79,7 +70,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     private fun createDropBoxFolder() {
         createDropBox(onDropBoxCreated = { file ->
             dropboxViewModel.createDropBoxSuccess.value = file.dropbox
-            if (newFolderViewModel.currentPermission == ONLY_ME) {
+            if (adapter.currentPermission == ONLY_ME) {
                 findNavController().popBackStack(R.id.newFolderFragment, true)
             } else {
                 navigateToFileShareDetails(file)
@@ -126,7 +117,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
             newFolderViewModel.saveNewFolder(newFolderViewModel.currentFolderId.value!!, file)
         }
 
-        safeNavigate(
+        safelyNavigate(
             CreateDropBoxFolderFragmentDirections.actionCreateDropBoxFolderFragmentToFileShareDetailsFragment(
                 fileId = file.id, ignoreCreateFolderStack = true
             )

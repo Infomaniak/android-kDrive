@@ -28,6 +28,7 @@ import androidx.core.view.isVisible
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.PreviewHeaderViewBinding
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
@@ -68,9 +69,16 @@ class PreviewHeaderView @JvmOverloads constructor(
         onOpenWithClicked: (() -> Unit)? = null,
         onEditClicked: (() -> Unit)? = null,
     ) = with(binding) {
-        backButton.setOnClickListener { onBackClicked?.invoke() }
-        openWithButton.setOnClickListener { onOpenWithClicked?.invoke() }
-        editButton.setOnClickListener { onEditClicked?.invoke() }
+        backButton.setup(onBackClicked)
+        openWithButton.setup(onOpenWithClicked)
+        editButton.setup(onEditClicked)
+    }
+
+    private fun MaterialButton.setup(clickAction: (() -> Unit)?) {
+        if (clickAction != null) {
+            setOnClickListener { clickAction() }
+        }
+        isVisible = clickAction != null
     }
 
     fun setupWindowInsetsListener(

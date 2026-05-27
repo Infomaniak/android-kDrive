@@ -1,0 +1,3 @@
+- Add new parameter to choose which synchronization must be done only with wifi connection
+- Fix upload notifications blinking
+- Fix pending upload count in the indicator cell

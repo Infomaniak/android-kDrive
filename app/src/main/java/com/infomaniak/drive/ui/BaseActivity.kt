@@ -19,8 +19,8 @@ package com.infomaniak.drive.ui
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
-import com.infomaniak.core.extensions.isNightModeEnabled
-import com.infomaniak.core.extensions.lightStatusBar
+import com.infomaniak.core.common.extensions.isNightModeEnabled
+import com.infomaniak.core.common.extensions.lightStatusBar
 import com.infomaniak.core.inappupdate.BaseInAppUpdateManager.Companion.checkUpdateIsRequired
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay

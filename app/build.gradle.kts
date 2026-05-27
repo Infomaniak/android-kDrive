@@ -4,7 +4,7 @@ import java.util.Properties
  * Don't change the order in this `plugins` block, it will mess things up.
  */
 plugins {
-    alias(libs.plugins.android.application)
+    alias(core.plugins.android.application)
     alias(libs.plugins.junit5)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
@@ -35,8 +35,8 @@ android {
         applicationId = "com.infomaniak.drive"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 5_011_006_01
-        versionName = "5.11.6"
+        versionCode = 5_017_002_01
+        versionName = "5.17.2"
 
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
@@ -54,8 +54,12 @@ android {
         resValue("string", "EXPOSED_UPLOAD_DIR", "upload_media")
         resValue("string", "EXPOSED_OFFLINE_DIR", "offline_storage")
         resValue("string", "EXPOSED_PUBLIC_SHARE_DIR", "public_share")
+        resValue("string", "EXPOSED_LOGS_DIR", "logs")
 
-        androidResources.localeFilters += arrayOf("en", "de", "es", "fr", "it")
+        androidResources {
+            localeFilters += listOf("da", "de", "el", "en", "es", "fi", "fr", "it", "nb", "nl", "pl", "pt", "sv")
+            generateLocaleConfig = true
+        }
     }
 
     compileOptions {
@@ -154,35 +158,37 @@ sentry {
 }
 
 dependencies {
+    implementation(core.infomaniak.core.applock)
+    implementation(core.infomaniak.core.auth)
+    implementation(core.infomaniak.core.avatar)
+    implementation(core.infomaniak.core.bugtracker)
+    implementation(core.infomaniak.core.coil)
+    implementation(core.infomaniak.core.common)
+    implementation(core.infomaniak.core.crossapplogin)
+    implementation(core.infomaniak.core.file)
+    implementation(core.infomaniak.core.fragmentnavigation)
+    implementation(core.infomaniak.core.inappreview)
+    implementation(core.infomaniak.core.inappupdate)
+    implementation(core.infomaniak.core.ksuite)
+    implementation(core.infomaniak.core.ksuite.myksuite)
+    implementation(core.infomaniak.core.ksuite.pro)
+    implementation(core.infomaniak.core.ktor)
+    implementation(core.infomaniak.core.matomo)
+    implementation(core.infomaniak.core.network)
+    implementation(core.infomaniak.core.notifications)
+    implementation(core.infomaniak.core.recyclerview)
+    implementation(core.infomaniak.core.sentry)
+    implementation(core.infomaniak.core.thumbnails)
+    implementation(core.infomaniak.core.twofactorauth.back)
+    implementation(core.infomaniak.core.twofactorauth.front)
+    implementation(core.infomaniak.core.ui)
+    implementation(core.infomaniak.core.ui.compose.basics)
+    implementation(core.infomaniak.core.ui.compose.margin)
+    implementation(core.infomaniak.core.ui.compose.materialthemefromxml)
+    implementation(core.infomaniak.core.ui.view.edgetoedge)
+    implementation(core.infomaniak.core.webview)
 
-    implementation(project(":Core"))
-    implementation(project(":Core:Auth"))
-    implementation(project(":Core:Avatar"))
-    implementation(project(":Core:Coil"))
-    implementation(project(":Core:CrossAppLogin:Back"))
-    implementation(project(":Core:CrossAppLogin:Front"))
-    implementation(project(":Core:FragmentNavigation"))
-    implementation(project(":Core:InAppReview"))
-    implementation(project(":Core:InAppUpdate"))
-    implementation(project(":Core:Ktor"))
     implementation(project(":Core:Legacy"))
-    implementation(project(":Core:Legacy:AppLock"))
-    implementation(project(":Core:Legacy:BugTracker"))
-    implementation(project(":Core:Matomo"))
-    implementation(project(":Core:KSuite"))
-    implementation(project(":Core:KSuite:KSuitePro"))
-    implementation(project(":Core:KSuite:MyKSuite"))
-    implementation(project(":Core:Network"))
-    implementation(project(":Core:RecyclerView"))
-    implementation(project(":Core:Sentry"))
-    implementation(project(":Core:Thumbnails"))
-    implementation(project(":Core:TwoFactorAuth:Front"))
-    implementation(project(":Core:TwoFactorAuth:Back:WithUserDb"))
-    implementation(project(":Core:Ui"))
-    implementation(project(":Core:Ui:Compose:Basics"))
-    implementation(project(":Core:Ui:Compose:Margin"))
-    implementation(project(":Core:Ui:Compose:MaterialThemeFromXml"))
-    implementation(project(":Core:Ui:View:EdgeToEdge"))
 
     // Compose
     implementation(platform(core.compose.bom))
@@ -227,7 +233,7 @@ dependencies {
 
     implementation(libs.realm.android.adapters)
 
-    "standardImplementation"(project(":Core:Notifications:Registration"))
+    "standardImplementation"("com.infomaniak.core:Notifications.Registration")
     "standardImplementation"(libs.firebase.messaging.ktx)
     "standardImplementation"(libs.gs.sdk)
 
@@ -237,6 +243,7 @@ dependencies {
 
     testImplementation(libs.kotlin.faker)
     testImplementation(libs.mock.web.server)
+    testImplementation(core.mockk.android)
     androidTestImplementation(libs.androidx.ui.automator)
 
     androidTestImplementation(libs.androidx.espresso.contrib) {

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,28 +24,31 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.collection.arrayMapOf
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.core.auth.room.UserDatabase
+import com.infomaniak.core.bugtracker.BugTrackerActivity
+import com.infomaniak.core.bugtracker.BugTrackerActivityArgs
+import com.infomaniak.core.crossapplogin.back.CrossAppLogin
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
-import com.infomaniak.core.legacy.applock.LockActivity
-import com.infomaniak.core.legacy.bugtracker.BugTrackerActivity
-import com.infomaniak.core.legacy.bugtracker.BugTrackerActivityArgs
-import com.infomaniak.core.legacy.ui.WebViewActivity
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
+import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.openAppNotificationSettings
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.network.AUTOLOG_URL
 import com.infomaniak.core.network.ApiEnvironment
 import com.infomaniak.core.network.TERMINATE_ACCOUNT_URL
+import com.infomaniak.core.webview.ui.WebViewActivity
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
@@ -55,12 +58,14 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentSettingsBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.ui.menu.settings.SettingsFragmentDirections.Companion.actionSettingsFragmentToSyncOfflineSelectBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.MyKSuiteDataUtils
-import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
-import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.getDashboardData
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlin.uuid.ExperimentalUuidApi
 
 class SettingsFragment : Fragment() {
 
@@ -80,37 +85,50 @@ class SettingsFragment : Fragment() {
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        val syncPermissions = DrivePermissions(DrivePermissions.Type.ReadingMediaForSync).apply {
-            registerPermissions(this@SettingsFragment) { authorized -> if (authorized) requireActivity().syncImmediately() }
-        }
-
-        onlyWifiSync.isChecked = AppSettings.onlyWifiSync
-        onlyWifiSync.setOnCheckedChangeListener { _, isChecked ->
-            trackSettingsEvent(MatomoName.OnlyWifiTransfer, isChecked)
-            AppSettings.onlyWifiSync = isChecked
-            requireActivity().launchAllUpload(syncPermissions)
-        }
 
         setupMyKSuiteLayout()
 
         syncPicture.setOnClickListener { safelyNavigate(R.id.syncSettingsActivity) }
         themeSettings.setOnClickListener { openThemeSettings() }
         notifications.setOnClickListener { requireContext().openAppNotificationSettings() }
-        appSecurity.apply {
-            if (LockActivity.hasBiometrics()) {
-                isVisible = true
-                setOnClickListener {
-                    trackSettingsEvent(MatomoName.LockApp)
-                    safelyNavigate(R.id.appSecurityActivity)
-                }
-            } else {
-                isGone = true
-            }
-        }
+        security.setOnClickListener { safelyNavigate(R.id.securitySettingsFragment) }
+
+        initFileSync()
         about.setOnClickListener { safelyNavigate(R.id.aboutSettingsFragment) }
         feedback.setOnClickListener { navigateToFeedback() }
         setDeleteAccountClickListener()
         binding.root.enableEdgeToEdge()
+
+        showCrossAppDeviceIdIfStaff(binding.crossAppDeviceId)
+    }
+
+    fun initFileSync() {
+        binding.fileSync.setOnClickListener { safelyNavigate(actionSettingsFragmentToSyncOfflineSelectBottomSheetDialog()) }
+        updateSyncOffline(AppSettings.onlyWifiSyncOffline)
+        registerFileSyncSettingResultListener()
+    }
+
+    private fun registerFileSyncSettingResultListener() {
+        getBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, ::updateSyncOffline)
+    }
+
+    private fun updateSyncOffline(isOnlyWifiSyncOffline: Boolean) {
+        val description = if (isOnlyWifiSyncOffline) R.string.syncOnlyWifiTitle else R.string.syncWifiAndMobileDataTitle
+        binding.fileSync.description = getString(description)
+    }
+
+    private fun showCrossAppDeviceIdIfStaff(targetView: ItemSettingView) {
+        lifecycleScope.launch {
+            UserDatabase().userDao().allUsers.map { list -> list.any { it.isStaff } }.collectLatest { hasStaffAccount ->
+                if (!hasStaffAccount) return@collectLatest
+                targetView.isVisible = true
+                val crossAppLogin = CrossAppLogin.forContext(requireContext(), this)
+                @OptIn(ExperimentalUuidApi::class)
+                crossAppLogin.sharedDeviceIdFlow.collect { crossAppDeviceId ->
+                    targetView.description = crossAppDeviceId.toHexDashString()
+                }
+            }
+        }
     }
 
     private fun toggleMyKSuiteLayoutVisibility(isVisible: Boolean) {
@@ -185,7 +203,6 @@ class SettingsFragment : Fragment() {
     override fun onResume() = with(binding) {
         super.onResume()
         syncPicture.endText = getString(if (AccountUtils.isEnableAppSync()) R.string.allActivated else R.string.allDisabled)
-        appSecurity.endText = getString(if (AppSettings.appSecurityLock) R.string.allActivated else R.string.allDisabled)
         setThemeSettingsValue()
     }
 
@@ -224,5 +241,10 @@ class SettingsFragment : Fragment() {
     companion object {
         private val URL_REDIRECT_SUCCESSFUL_ACCOUNT_DELETION = "login.${ApiEnvironment.current.host}"
         private val TERMINATE_ACCOUNT_FULL_URL = "$AUTOLOG_URL/?url=$TERMINATE_ACCOUNT_URL"
+        const val KEY_BACK_ACTION_BOTTOM_SHEET = "syncFilesBottomSheetDialog"
+
+        enum class SyncFilesOption(@field:StringRes val title: Int) {
+            OnlyWifi(title = R.string.syncOnlyWifiTitle), AllData(title = R.string.syncWifiAndMobileDataTitle),
+        }
     }
 }

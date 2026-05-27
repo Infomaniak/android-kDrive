@@ -52,7 +52,7 @@ fun Fragment.openKSuiteUpgradeBottomSheet(matomoName: String, drive: Drive?) {
     val kSuite = drive?.kSuite ?: return
     when {
         kSuite is KSuite.Perso.Free -> openMyKSuiteUpgradeBottomSheet(findNavController(), matomoName)
-        kSuite.isProUpgradable() -> openKSuiteProBottomSheet(kSuite, drive.isAdmin, matomoName)
+        kSuite.isProUpgradable() -> openKSuiteProBottomSheet(kSuite, drive.isOrganisationAdmin, matomoName)
         else -> Unit
     }
 }
@@ -66,7 +66,7 @@ fun openKSuiteUpgradeBottomSheet(navController: NavController, matomoName: Strin
     val kSuite = drive?.kSuite ?: return
     when {
         kSuite is KSuite.Perso.Free -> openMyKSuiteUpgradeBottomSheet(navController, matomoName)
-        kSuite.isProUpgradable() -> openKSuiteProBottomSheet(navController, kSuite, drive.isAdmin, matomoName)
+        kSuite.isProUpgradable() -> openKSuiteProBottomSheet(navController, kSuite, drive.isOrganisationAdmin, matomoName)
         else -> Unit
     }
 }

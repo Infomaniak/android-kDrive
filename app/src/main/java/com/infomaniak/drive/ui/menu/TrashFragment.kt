@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,8 +77,7 @@ class TrashFragment : FileSubTypeListFragment() {
         }
 
         setupBasicMultiSelectLayout()
-        observeDriveTrash()
-        observeTrashedFolderFiles()
+        observeTrashResults()
 
         setupAutoClearUpgradeLayout()
     }
@@ -86,9 +85,7 @@ class TrashFragment : FileSubTypeListFragment() {
     private fun initParams() = with(binding) {
         fileListViewModel.sortType = SortType.RECENT_TRASHED
         sortFiles = SortFiles()
-        downloadFiles = DownloadFiles(
-            if (folderId == ROOT_ID) null else File(id = folderId, driveId = AccountUtils.currentDriveId, name = folderName)
-        )
+        downloadFiles = DownloadFiles(folderId, folderName)
         noFilesLayout.viewsToDisable = if (folderId == ROOT_ID) listOf(emptyTrash) else null
     }
 
@@ -163,26 +160,10 @@ class TrashFragment : FileSubTypeListFragment() {
         binding.noFilesLayout.toggleVisibility(fileAdapter.getFiles().isEmpty())
     }
 
-    private fun observeDriveTrash() {
-        trashViewModel.driveTrashResults.observe(viewLifecycleOwner) { result ->
-            populateFileList(
-                files = result?.files ?: ArrayList(),
-                isComplete = result?.isComplete ?: true,
-                forceClean = result?.isFirstPage == true,
-                isNewSort = result?.isNewSort ?: false,
-            )
-        }
-    }
-
-    private fun observeTrashedFolderFiles() {
-        trashViewModel.trashedFolderFilesResults.observe(viewLifecycleOwner) {
-            it?.let { result ->
-                populateFileList(
-                    files = result.files,
-                    isComplete = result.isComplete,
-                    forceClean = result.isFirstPage,
-                    isNewSort = result.isNewSort,
-                )
+    private fun observeTrashResults() {
+        trashViewModel.trashResults.observe(viewLifecycleOwner) { result ->
+            with(result) {
+                populateFileList(files = files, isComplete = isComplete, forceClean = isFirstPage, isNewSort = isNewSort)
             }
         }
     }
@@ -211,12 +192,15 @@ class TrashFragment : FileSubTypeListFragment() {
         }
     }
 
-    private inner class DownloadFiles() : (Boolean, Boolean) -> Unit {
+    private inner class DownloadFiles(folderId: Int, folderName: String) : (Boolean, Boolean) -> Unit {
+        private val folder: File? = buildFolder(folderId, folderName)
 
-        private var folder: File? = null
-
-        constructor(folder: File?) : this() {
-            this.folder = folder
+        private fun buildFolder(folderId: Int, folderName: String): File? {
+            return if (folderId == ROOT_ID) {
+                null
+            } else {
+                File(id = folderId, driveId = AccountUtils.currentDriveId, name = folderName)
+            }
         }
 
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
@@ -224,14 +208,10 @@ class TrashFragment : FileSubTypeListFragment() {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
-            folder?.let { folder ->
-                trashViewModel.loadTrashedFolderFiles(
-                    file = folder,
-                    order = fileListViewModel.sortType,
-                    isNewSort = isNewSort,
-                )
-            } ?: run {
+            if (folder == null) {
                 trashViewModel.loadDriveTrash(AccountUtils.currentDriveId, fileListViewModel.sortType, isNewSort)
+            } else {
+                trashViewModel.loadTrashedFolderFiles(file = folder, order = fileListViewModel.sortType, isNewSort = isNewSort)
             }
         }
     }

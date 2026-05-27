@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,17 +37,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.navArgs
 import com.google.android.material.textfield.TextInputEditText
-import com.infomaniak.core.legacy.applock.LockActivity
+import com.infomaniak.core.applock.AppLockManager
+import com.infomaniak.core.applock.view.AppLockViewActivity
+import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
+import com.infomaniak.core.common.utils.format
+import com.infomaniak.core.file.fileNameFor
+import com.infomaniak.core.file.getFileDatesWithFallback
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.core.legacy.utils.getFileName
 import com.infomaniak.core.legacy.utils.hideProgressCatching
 import com.infomaniak.core.legacy.utils.initProgress
 import com.infomaniak.core.legacy.utils.parcelableArrayListExtra
 import com.infomaniak.core.legacy.utils.parcelableExtra
 import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.legacy.utils.whenResultIsOk
-import com.infomaniak.core.utils.FORMAT_NEW_FILE
-import com.infomaniak.core.utils.format
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -67,7 +69,6 @@ import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.isUrlFile
@@ -79,7 +80,6 @@ import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.URLDecoder
 import java.util.Date
 
 @AndroidEntryPoint
@@ -132,8 +132,9 @@ class SaveExternalFilesActivity : BaseActivity() {
 
         fileNameEdit.selectAllButFileExtension()
 
-        LockActivity.scheduleLockIfNeeded(
+        AppLockManager.scheduleLockIfNeeded(
             targetActivity = this@SaveExternalFilesActivity,
+            lockActivityCls = AppLockViewActivity::class,
             isAppLockEnabled = { AppSettings.appSecurityLock }
         )
     }
@@ -320,7 +321,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
                     lifecycleScope.launch(Dispatchers.IO) {
                         if (storeFiles(userId, driveIdSharedWithMe ?: driveId, folderId)) {
-                            syncImmediately()
+                            syncImmediately(isAutomaticTrigger = false)
                             finish()
                         } else {
                             withContext(Dispatchers.Main) {
@@ -365,7 +366,7 @@ class SaveExternalFilesActivity : BaseActivity() {
             return name
         }
 
-        fun getExtraStreamFileName(): String? {
+        suspend fun getExtraStreamFileName(): String? {
             return (intent.parcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
                 currentUri = uri
                 uri.fileName()
@@ -390,29 +391,34 @@ class SaveExternalFilesActivity : BaseActivity() {
             },
             *fileNameEdit.filters
         )
-
-        val fileName = when {
-            intent.hasExtra(Intent.EXTRA_STREAM) -> getExtraStreamFileName() ?: return
-            intent.hasExtra(Intent.EXTRA_TEXT) -> getExtraTextFileName()
-            else -> return
+        lifecycleScope.launch {
+            val fileName = when {
+                intent.hasExtra(Intent.EXTRA_STREAM) -> getExtraStreamFileName() ?: return@launch
+                intent.hasExtra(Intent.EXTRA_TEXT) -> getExtraTextFileName()
+                else -> return@launch
+            }
+            withContext(Dispatchers.Main) {
+                fileNameEdit.setText(fileName)
+                fileNameEditLayout.isVisible = true
+            }
         }
 
-        fileNameEdit.setText(fileName)
-        fileNameEditLayout.isVisible = true
     }
 
     private fun handleSendMultiple() = with(binding) {
-        val uris = intent.parcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)
-            ?.filterIsInstance<Uri>()
-            ?.map { it to it.fileName() }
-            ?: emptyList()
+        lifecycleScope.launch {
+            val uris = intent.parcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)
+                ?.filterIsInstance<Uri>()
+                ?.map { it to it.fileName() }
+                ?: emptyList()
 
-        saveExternalUriAdapter = SaveExternalUriAdapter(uris.toMutableList())
+            saveExternalUriAdapter = SaveExternalUriAdapter(uris.toMutableList())
 
-        fileNames.adapter = saveExternalUriAdapter
-        fileNames.isVisible = true
-        isMultiple = true
-        checkEnabledSaveButton()
+            fileNames.adapter = saveExternalUriAdapter
+            fileNames.isVisible = true
+            isMultiple = true
+            checkEnabledSaveButton()
+        }
     }
 
     private fun checkEnabledSaveButton() {
@@ -505,8 +511,8 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun store(uri: Uri, fileName: String?, userId: Int, driveId: Int, folderId: Int): Boolean {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
-                val lastModifiedDateFromUri = intent.getLongExtra(FileColumns.DATE_MODIFIED, -1L)
-                val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor, lastModifiedDateFromUri)
+                val fallbackDate = getLastModifiedDateFromIntent()
+                val (fileCreatedAt, fileModifiedAt) = cursor.getFileDatesWithFallback(fallbackDate)
 
                 try {
                     if (fileName == null) return false
@@ -543,10 +549,12 @@ class SaveExternalFilesActivity : BaseActivity() {
         return false
     }
 
-    private fun Uri.fileName(): String {
-        return contentResolver.query(this, null, null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) cursor.getFileName(this) else null
-        } ?: URLDecoder.decode(toString(), "UTF-8").substringAfterLast("/")
+    private fun getLastModifiedDateFromIntent(): Date? {
+        return intent.getLongExtra(FileColumns.DATE_MODIFIED, -1L).takeUnless { it == -1L }?.let(::Date)
+    }
+
+    private suspend fun Uri.fileName(): String {
+        return fileNameFor(uri = this) ?: toString()
     }
 
     class SaveExternalFilesViewModel : ViewModel() {
@@ -556,7 +564,6 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     companion object {
         const val SHARED_FILE_FOLDER = "shared_files"
-        const val LAST_MODIFIED_URI_KEY = "last_modified"
         const val DESTINATION_DRIVE_ID_KEY = "destination_drive_id"
         const val DESTINATION_FOLDER_ID_KEY = "destination_folder_id"
         const val DESTINATION_USER_ID_KEY = "destination_user_id"

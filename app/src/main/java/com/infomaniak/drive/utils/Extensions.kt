@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -77,6 +76,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.coil.loadAvatar
+import com.infomaniak.core.common.utils.isEmailRfc5321Compliant
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
@@ -85,7 +85,6 @@ import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.network.LOGIN_ENDPOINT_URL
 import com.infomaniak.core.network.SUPPORT_URL
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.core.utils.isEmailRfc5321Compliant
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
@@ -112,9 +111,7 @@ import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openFolder
-import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
-import com.infomaniak.drive.views.PendingFilesView
 import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
@@ -386,7 +383,11 @@ fun Context.getInfomaniakLogin() = InfomaniakLogin(
     appUID = BuildConfig.APPLICATION_ID,
     clientID = BuildConfig.CLIENT_ID,
     accessType = null,
-    sentryCallback = { error -> SentryLog.e(tag = "WebViewLogin", error) }
+    sentryCallback = { error, extras ->
+        SentryLog.e(tag = "WebViewLogin", error) { scope ->
+            extras.forEach(scope::setExtra)
+        }
+    }
 )
 
 //region Worker
@@ -518,11 +519,6 @@ fun Fragment.observeAndDisplayNetworkAvailability(
     }
 }
 
-fun Fragment.setupRootPendingFilesIndicator(countLiveData: LiveData<Int>, pendingFilesView: PendingFilesView) {
-    pendingFilesView.setUploadFileInProgress(this, OTHER_ROOT_ID)
-    countLiveData.observe(viewLifecycleOwner, pendingFilesView::updateUploadFileInProgress)
-}
-
 fun MainActivity.showQuotasExceededSnackbar(navController: NavController, drive: Drive?) {
     showSnackbar(
         title = R.string.errorQuotaExceeded,
@@ -558,3 +554,5 @@ private fun addNoDrivesBreadcrumbsToSentry() {
     }
 }
 //endregion
+
+inline fun <reified T : Any> Any.instanceOf(): T? = this as? T

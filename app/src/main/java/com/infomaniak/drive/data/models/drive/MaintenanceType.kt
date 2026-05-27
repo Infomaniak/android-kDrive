@@ -18,8 +18,8 @@
 package com.infomaniak.drive.data.models.drive
 
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.core.utils.ApiEnum
-import com.infomaniak.core.utils.apiEnum
+import com.infomaniak.core.common.utils.ApiEnum
+import com.infomaniak.core.common.utils.apiEnum
 import io.realm.RealmObject
 import io.realm.annotations.Ignore
 import io.realm.annotations.RealmClass

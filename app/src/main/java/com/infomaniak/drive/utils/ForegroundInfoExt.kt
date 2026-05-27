@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2025 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.data.models
+package com.infomaniak.drive.utils
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import android.app.Notification
+import android.os.Build
+import android.os.Build.VERSION.SDK_INT
+import androidx.work.ForegroundInfo
 
-sealed interface DeepLinkType : Parcelable {
-    val organizationId: Int?
 
-    @Parcelize
-    data class Trash(override val organizationId: Int?, val userDriveId: Int, val folderId: String?) : DeepLinkType
-    @Parcelize
-    data class SharedWithMe(override val organizationId: Int?, val path: String?) : DeepLinkType
+object ForegroundInfoExt {
+    fun build(
+        notificationId: Int,
+        notification: Notification,
+        foregroundServiceTypeProvider: () -> Int,
+    ): ForegroundInfo {
+        return if (SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(notificationId, notification, foregroundServiceTypeProvider())
+        } else {
+            ForegroundInfo(notificationId, notification)
+        }
+    }
 }

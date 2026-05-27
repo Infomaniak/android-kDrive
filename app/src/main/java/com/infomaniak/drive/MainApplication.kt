@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,20 +35,21 @@ import coil3.SingletonImageLoader
 import coil3.gif.AnimatedImageDecoder
 import coil3.gif.GifDecoder
 import com.facebook.stetho.Stetho
-import com.infomaniak.core.AssociatedUserDataCleanable
 import com.infomaniak.core.auth.AccessTokenUsageInterceptor
 import com.infomaniak.core.auth.AuthConfiguration
 import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.coil.ImageLoaderProvider
+import com.infomaniak.core.common.AssociatedUserDataCleanable
+import com.infomaniak.core.common.extensions.clearStack
 import com.infomaniak.core.crossapplogin.back.internal.deviceinfo.DeviceInfoUpdateManager
-import com.infomaniak.core.extensions.clearStack
 import com.infomaniak.core.inappupdate.AppUpdateScheduler
 import com.infomaniak.core.legacy.InfomaniakCore
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import com.infomaniak.core.network.NetworkConfiguration
 import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.networking.HttpClientConfig
+import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryConfig.configureSentry
 import com.infomaniak.core.twofactorauth.back.TwoFactorAuthManager
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
@@ -67,7 +68,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MyKSuiteDataUtils
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -161,7 +161,6 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
                 appVersionName = BuildConfig.VERSION_NAME,
                 clientId = BuildConfig.CLIENT_ID,
             )
-            apiErrorCodes = ErrorCode.apiErrorCodes
             accessType = null
         }
 
@@ -170,6 +169,7 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
             appId = BuildConfig.APPLICATION_ID,
             appVersionCode = BuildConfig.VERSION_CODE,
             appVersionName = BuildConfig.VERSION_NAME,
+            apiErrorCodes = ErrorCode.apiErrorCodes,
 //            apiEnvironment = ApiEnvironment.PreProd
         )
 
@@ -240,7 +240,7 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
         val notificationManagerCompat = NotificationManagerCompat.from(this)
         buildGeneralNotification(getString(R.string.refreshTokenError)).apply {
             setContentIntent(pendingIntent)
-            notificationManagerCompat.notifyCompat(this@MainApplication, hashCode, build())
+            notificationManagerCompat.notifyCompat(hashCode, this)
         }
 
         applicationScope.launch {

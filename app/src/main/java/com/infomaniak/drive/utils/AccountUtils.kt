@@ -47,7 +47,13 @@ import io.sentry.Sentry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
@@ -72,17 +78,13 @@ object AccountUtils : CredentialManager() {
     override var currentUserId: Int = AppSettings.getAppSettings()._currentUserId
         set(userId) {
             field = userId
-            scope.launch(Dispatchers.IO) {
-                AppSettings.updateAppSettings { appSettings -> if (appSettings.isValid) appSettings._currentUserId = userId }
-            }
+            AppSettings.updateAppSettings(scope) { if (isValid) _currentUserId = userId }
         }
 
     var currentDriveId: Int = AppSettings.getAppSettings()._currentDriveId
         set(driveId) {
             field = driveId
-            scope.launch(Dispatchers.IO) {
-                AppSettings.updateAppSettings { appSettings -> if (appSettings.isValid) appSettings._currentDriveId = driveId }
-            }
+            AppSettings.updateAppSettings(scope) { if (isValid) _currentDriveId = driveId }
         }
 
     override var currentUser: User? = null
@@ -95,6 +97,11 @@ object AccountUtils : CredentialManager() {
                 email = user?.email
             })
         }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val currentConnectedUserFlow: Flow<User> = AppSettings.currentUserIdFlow.distinctUntilChanged().flatMapLatest { id ->
+        if (id != null && id > 0) userDatabase.userDao().findByIdFlow(id) else flowOf(null)
+    }.filterNotNull()
 
     private var currentDrive: Drive? = null
 

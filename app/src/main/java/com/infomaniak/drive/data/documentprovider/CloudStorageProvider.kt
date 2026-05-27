@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,12 +34,14 @@ import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
-import com.infomaniak.core.cancellable
+import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore
 import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -57,7 +59,6 @@ import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.copyToCancellable
@@ -89,6 +90,11 @@ class CloudStorageProvider : DocumentsProvider() {
     private val cloudScope = CoroutineScope(
         CoroutineName("CloudStorage") + Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     )
+
+    private fun isProviderDisabled(): Boolean {
+        val ctx = context ?: return true
+        return isDisabled(ctx)
+    }
 
     /**
      * Indicates whether the current platform is Chrome OS.
@@ -125,14 +131,15 @@ class CloudStorageProvider : DocumentsProvider() {
         AccountUtils.getAllUsersSync().forEach { user ->
             cursor.addRoot(user.id.toString(), user.id.toString(), user.email)
 
-            cloudScope.launch {
-                context?.let {
-                    val okHttpClient = AccountUtils.getHttpClient(user.id)
-                    AccountUtils.updateCurrentUserAndDrives(it, fromCloudStorage = true, okHttpClient = okHttpClient)
+            if (!isProviderDisabled()) {
+                cloudScope.launch {
+                    context?.let {
+                        val okHttpClient = AccountUtils.getHttpClient(user.id)
+                        AccountUtils.updateCurrentUserAndDrives(it, fromCloudStorage = true, okHttpClient = okHttpClient)
+                    }
                 }
             }
         }
-
         return cursor
     }
 
@@ -175,6 +182,11 @@ class CloudStorageProvider : DocumentsProvider() {
 
     override fun queryChildDocuments(parentDocumentId: String, projection: Array<out String>?, sortOrder: String?): Cursor {
         val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION, isAutoCloseableJob = false)
+
+        if (isProviderDisabled()) {
+            cursor.extras = bundleOf(DocumentsContract.EXTRA_ERROR to (context?.getString(R.string.fileProviderExtensionError)))
+            return cursor
+        }
 
         val uri = DocumentCursor.createUri(context, parentDocumentId)
         val isNewJob = uri != oldQueryChildUri || needRefresh
@@ -266,6 +278,42 @@ class CloudStorageProvider : DocumentsProvider() {
         return cursor
     }
 
+    override fun isChildDocument(parentDocumentId: String, documentId: String): Boolean {
+        // Roots and other virtual containers must only match documents that are actually
+        // inside their subtree; otherwise SAF relationship checks can be bypassed.
+        val parentDocumentType = computeDocumentType(parentDocumentId)
+        if (parentDocumentType !is CloudDocumentType.FileOrFolder) {
+            return isDocumentIdDescendantOf(parentDocumentId, documentId)
+        }
+
+        // Folder from a Drive
+        return when (val documentType = computeDocumentType(documentId)) {
+            is CloudDocumentType.FileOrFolder -> isChildDocument(parentDocumentType, documentType)
+            else -> super.isChildDocument(parentDocumentId, documentId)
+        }
+    }
+
+    private fun isChildDocument(
+        parentDocumentType: CloudDocumentType.FileOrFolder,
+        documentType: CloudDocumentType.FileOrFolder,
+    ): Boolean = when {
+        parentDocumentType.userDrive == documentType.userDrive -> {
+            val userDrive = documentType.userDrive
+            FileController.getRealmInstance(userDrive).use { realm ->
+                val parentFolderProxy = FileController.getFileProxyById(parentDocumentType.fileId, customRealm = realm)
+                    ?: return@use false
+                val folderProxy = FileController.getFileProxyById(documentType.fileId, customRealm = realm)
+                    ?: return@use false
+
+                fun isDirectChild() = folderProxy.parentId == parentDocumentType.fileId
+                fun isGrandChild() = folderProxy.getRemotePath(userDrive).startsWith(parentFolderProxy.getRemotePath(userDrive))
+
+                return@use isDirectChild() || isGrandChild()
+            }
+        }
+        else -> false
+    }
+
     private fun DocumentCursor.addFiles(
         parentDocumentId: String,
         uri: Uri,
@@ -285,6 +333,9 @@ class CloudStorageProvider : DocumentsProvider() {
 
     override fun openDocument(documentId: String, mode: String, signal: CancellationSignal?): ParcelFileDescriptor? {
         SentryLog.d(TAG, "openDocument(), id=$documentId, mode=$mode, signalIsCancelled: ${signal?.isCanceled}")
+        if (isProviderDisabled()) {
+            throw SecurityException(context?.getString(R.string.fileProviderExtensionError))
+        }
         val context = context ?: return null
 
         fun getRemoteFile(localFile: File?, fileId: Int, driveId: Int): File? {
@@ -308,7 +359,7 @@ class CloudStorageProvider : DocumentsProvider() {
             if (isWrite) {
                 writeDataFile(context, updatedFile, userDrive, accessMode)
             } else {
-                getDataFile(context, updatedFile, userDrive, signal)
+                getDataFile(context, updatedFile, userDrive, accessMode)
             }
         }
     }
@@ -566,13 +617,15 @@ class CloudStorageProvider : DocumentsProvider() {
         val parentFolderId = getFileIdFromDocumentId(parentDocumentId)
         val userDrive = createUserDrive(parentDocumentId)
 
+        val newDate = Date()
         val uploadUrl = uploadFileDirectlyUrl(
             driveId = driveId,
             directoryId = parentFolderId,
             fileName = displayName,
             fileSize = 0L,
             conflictOption = ConflictOption.RENAME,
-            lastModifiedAt = Date(),
+            createdAt = newDate,
+            lastModifiedAt = newDate,
         )
 
         val apiResponse = ApiController.callApiBlocking<ApiResponse<File>>(
@@ -616,7 +669,7 @@ class CloudStorageProvider : DocumentsProvider() {
                         type = UploadFile.Type.CLOUD_STORAGE.name,
                         userId = userDrive.userId,
                     ).store()
-                    context.syncImmediately()
+                    context.syncImmediately(isAutomaticTrigger = false)
                     cacheFile.delete() // Delete old cache
                 }
             } else {
@@ -630,58 +683,44 @@ class CloudStorageProvider : DocumentsProvider() {
         context: Context,
         file: File,
         userDrive: UserDrive,
-        signal: CancellationSignal?,
+        accessMode: Int,
     ): ParcelFileDescriptor? {
         val cacheFile = file.getCacheFile(context, userDrive)
         val offlineFile = file.getOfflineFile(context, userDrive.userId)
 
-        val (readPipe, writePipe) = ParcelFileDescriptor.createReliablePipe()
-
-        val job = cloudScope.launch {
-            ParcelFileDescriptor.AutoCloseOutputStream(writePipe).use { writeStream ->
-                runCatching {
-                    // Get offline file if it's intact
-                    if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
-                        offlineFile.inputStream().use { it.copyToCancellable(writeStream) }
-                        return@runCatching
-                    }
-
-                    // Get cache file if it's exists and if the file is updated
-                    if (!file.isObsolete(cacheFile) && file.size == cacheFile.length()) {
-                        cacheFile.inputStream().use { it.copyToCancellable(writeStream) }
-                        return@runCatching
-                    }
-
-                    // Download data file
-                    val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
-                    val response = DownloadOfflineFileManager.downloadFileResponseAsync(
-                        fileUrl = ApiRoutes.downloadFile(file),
-                        okHttpClient = okHttpClient,
-                        downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = { progress ->
-                            SentryLog.i(TAG, "open currentProgress: $progress")
-                        })
-                    )
-
-                    if (response.isSuccessful) {
-                        val remoteDataHasBeenSaved = DownloadOfflineFileManager.saveRemoteData(TAG, response, cacheFile)
-                        writeStream.loadCachedData(remoteDataHasBeenSaved, cacheFile, file, writePipe)
-                    } else {
-                        writePipe.closeWithError("No data available")
-                    }
-
-                }.cancellable().onFailure { exception ->
-                    val event = SentryEvent(exception).apply {
-                        message = Message().apply { message = "An error has occurred on getDataFile" }
-                    }
-                    Sentry.captureEvent(event)
-                    writePipe.closeWithError(exception.message)
-                }
+        try {
+            // Get offline file if it's intact
+            if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
+                return ParcelFileDescriptor.open(offlineFile, accessMode)
             }
+
+            // Get cache file if it's exists and if the file is updated
+            if (!file.isObsolete(cacheFile) && file.size == cacheFile.length()) {
+                return ParcelFileDescriptor.open(cacheFile, accessMode)
+            }
+
+            // Download data file
+            val okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId) }
+            val response = DownloadOfflineFileManager.downloadFileResponse(
+                fileUrl = ApiRoutes.downloadFile(file),
+                okHttpClient = okHttpClient,
+                downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = { progress ->
+                    SentryLog.i(TAG, "open currentProgress: $progress")
+                })
+            )
+
+            if (response.isSuccessful) {
+                runBlocking {
+                    DownloadOfflineFileManager.saveRemoteData(TAG, response, cacheFile)
+                }
+                cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
+                return ParcelFileDescriptor.open(cacheFile, accessMode)
+            }
+        } catch (exception: Exception) {
+            SentryLog.e(TAG, "An error has occurred on getDataFile", exception)
         }
 
-        signal?.setOnCancelListener { job.cancel() }
-
-        return readPipe
+        return null
     }
 
     private suspend fun ParcelFileDescriptor.AutoCloseOutputStream.loadCachedData(
@@ -736,7 +775,7 @@ class CloudStorageProvider : DocumentsProvider() {
                             NotificationUtilsCore.PENDING_INTENT_FLAGS,
                         ),
                     )
-                    NotificationManagerCompat.from(context).notifyCompat(context, syncPermissionNotifId, build())
+                    NotificationManagerCompat.from(context).notifyCompat(syncPermissionNotifId, this)
                 }
             }
         }
@@ -839,6 +878,37 @@ class CloudStorageProvider : DocumentsProvider() {
         job = cursor.job
     }
 
+    private fun isDocumentIdDescendantOf(parentDocumentId: String, documentId: String): Boolean {
+        if (parentDocumentId == documentId) return false
+        return documentId.startsWith(parentDocumentId + SEPARATOR)
+    }
+
+    private fun computeDocumentType(documentId: String): CloudDocumentType {
+        val userId = getUserId(documentId)
+        if (documentId == userId) return CloudDocumentType.RootFolder
+
+        val fileFolderId = getFileIdFromDocumentId(documentId)
+        val isMySharesRoot = isSharedUri(documentId)
+                && fileFolderId == Utils.ROOT_ID
+                && documentId.split("/").getOrNull(1) == MY_SHARES_FOLDER_ID.toString()
+
+        if (isMySharesRoot) return CloudDocumentType.DriveFromMySharesFolder
+
+        return when (fileFolderId) {
+            SHARED_WITHME_FOLDER_ID -> CloudDocumentType.SharedWithMeFolder
+            MY_SHARES_FOLDER_ID -> CloudDocumentType.MySharesFolder
+            Utils.ROOT_ID -> CloudDocumentType.DriveFolder
+            else -> {
+                val userDrive = UserDrive(
+                    userId = userId.toInt(),
+                    driveId = getDriveFromDocId(documentId).id,
+                    sharedWithMe = comeFromSharedWithMe(documentId)
+                )
+                CloudDocumentType.FileOrFolder(fileFolderId, userDrive = userDrive)
+            }
+        }
+    }
+
     /**
      * Executes the given block either synchronously on the current thread (if on Chrome OS)
      * or asynchronously in [cloudScope] otherwise.
@@ -875,6 +945,8 @@ class CloudStorageProvider : DocumentsProvider() {
         private const val DRIVE_SEPARATOR = "@"
         private const val MY_SHARES_FOLDER_ID = -1
         private const val SHARED_WITHME_FOLDER_ID = -2
+        private const val PREFS_NAME = "cloud_storage_provider"
+        private const val KEY_PROVIDER_DISABLED = "provider_disabled"
 
         private val SHARED_URI_REGEX = Regex("\\d+/-\\d+/.+$DRIVE_SEPARATOR\\d+/\\d+")
 
@@ -975,6 +1047,27 @@ class CloudStorageProvider : DocumentsProvider() {
                 getDriveFromDocId(documentId).id,
                 comeFromSharedWithMe(documentId)
             )
+
+        fun isDisabled(context: Context): Boolean {
+            return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getBoolean(KEY_PROVIDER_DISABLED, false)
+        }
+
+        fun setDisabled(context: Context, disabled: Boolean) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val old = prefs.getBoolean(KEY_PROVIDER_DISABLED, false)
+            if (old == disabled) return
+
+            prefs.edit { putBoolean(KEY_PROVIDER_DISABLED, disabled) }
+            notifyProviderChanged(context)
+        }
+
+        fun notifyProviderChanged(context: Context) {
+            val authority = context.getString(R.string.CLOUD_STORAGE_AUTHORITY)
+            val docBase = "content://$authority/document".toUri()
+            val rootsUri = DocumentsContract.buildRootsUri(authority)
+            context.contentResolver.notifyChange(docBase, null)
+            context.contentResolver.notifyChange(rootsUri, null)
+        }
 
         fun notifyRootsChanged(context: Context) {
             val authority = context.getString(R.string.CLOUD_STORAGE_AUTHORITY)

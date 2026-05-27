@@ -1,0 +1,275 @@
+/*
+ * Infomaniak kDrive - Android
+ * Copyright (C) 2026 Infomaniak Network SA
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.infomaniak.drive.ui.selectPermission
+
+import android.os.Bundle
+import android.os.Parcelable
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.annotation.StringRes
+import androidx.core.os.bundleOf
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.legacy.utils.SnackbarUtils
+import com.infomaniak.core.legacy.utils.hideProgressCatching
+import com.infomaniak.core.legacy.utils.initProgress
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.setBackNavigationResult
+import com.infomaniak.core.legacy.utils.showProgressCatching
+import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.drive.MatomoDrive
+import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.Permission
+import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.Shareable.Companion.getAccessName
+import com.infomaniak.drive.data.models.Shareable.ShareablePermission
+import com.infomaniak.drive.databinding.FragmentSelectPermissionBinding
+import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils.createConfirmation
+import com.infomaniak.drive.views.FullScreenBottomSheetDialog
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
+
+class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
+
+    private var binding: FragmentSelectPermissionBinding by safeBinding()
+    private val navigationArgs: SelectPermissionBottomSheetDialogArgs by navArgs()
+    private val selectPermissionViewModel: SelectPermissionViewModel by viewModels()
+    private val adapter: PermissionsAdapter
+        get() = binding.permissionsRecyclerView.adapter as PermissionsAdapter
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentSelectPermissionBinding.inflate(inflater, container, false).also { binding = it }.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+        lifecycleScope.launch {
+            configurePermissionsAdapter()
+        }
+        configureSaveButton()
+    }
+
+    private suspend fun configurePermissionsAdapter() {
+        binding.permissionsRecyclerView.adapter = PermissionsAdapter(
+            initialSelectedPermission = navigationArgs.currentPermission,
+            permissionList = getPermissions(),
+            isExternalUser = navigationArgs.permissionsGroup == PermissionsGroup.EXTERNAL_USERS_RIGHTS,
+            canSelect = { newPermission ->
+                when (newPermission) {
+                    ShareablePermission.DELETE, ShareablePermission.REMOVE_DRIVE_ACCESS -> {
+                        showDeleteConfirmationPopup(newPermission)
+                        false
+                    }
+                    else -> true
+                }
+            }
+        )
+    }
+
+    private fun showDeleteConfirmationPopup(newPermission: Permission) {
+        createConfirmation(
+            context = requireContext(),
+            title = getString(R.string.buttonDelete),
+            message = buildDeleteConfirmationPopupMessage(newPermission),
+            buttonText = getString(R.string.buttonDelete),
+            isDeletion = true,
+            onConfirmation = {
+                updatePermission(
+                    shareableItem = navigationArgs.currentShareable,
+                    permission = newPermission as ShareablePermission?
+                )
+            },
+        )
+    }
+
+    private fun buildDeleteConfirmationPopupMessage(newPermission: Permission): String {
+        val userName = navigationArgs.currentShareable.getAccessName()
+        return if (newPermission == ShareablePermission.DELETE)
+            getString(R.string.modalUserPermissionRemoveDescription, userName)
+        else
+            getString(R.string.modalRemoveUserDriveAccessDescription, userName, AccountUtils.getCurrentDrive()?.name)
+    }
+
+    private suspend fun getPermissions(): List<Permission> {
+        return when (navigationArgs.permissionsGroup) {
+            PermissionsGroup.SHARE_LINK_FILE_SETTINGS -> listOf(
+                ShareLink.ShareLinkFilePermission.RESTRICTED,
+                ShareLink.ShareLinkFilePermission.PUBLIC
+            )
+            PermissionsGroup.SHARE_LINK_FOLDER_SETTINGS -> listOf(
+                ShareLink.ShareLinkFolderPermission.RESTRICTED,
+                ShareLink.ShareLinkFolderPermission.PUBLIC
+            )
+            PermissionsGroup.SHARE_LINK_DOCUMENT_SETTINGS -> listOf(
+                ShareLink.ShareLinkDocumentPermission.RESTRICTED,
+                ShareLink.ShareLinkDocumentPermission.PUBLIC
+            )
+            PermissionsGroup.FILE_SHARE_UPDATE -> withCurrentFile { currentFile ->
+                listOfNotNull(
+                    ShareablePermission.READ,
+                    ShareablePermission.WRITE,
+                    ShareablePermission.MANAGE.takeIf { currentFile?.isChildOfCommonDirectory() == true }
+                )
+            }
+            PermissionsGroup.EXTERNAL_USERS_RIGHTS -> listOfNotNull(
+                ShareablePermission.READ,
+                ShareablePermission.WRITE_EXTERNAL,
+                ShareablePermission.DELETE,
+                ShareablePermission.REMOVE_DRIVE_ACCESS.takeIf { AccountUtils.getCurrentDrive()?.isOrganisationAdmin == true }
+            )
+            PermissionsGroup.USERS_RIGHTS -> withCurrentFile { currentFile ->
+                listOfNotNull(
+                    ShareablePermission.READ,
+                    ShareablePermission.WRITE,
+                    ShareablePermission.MANAGE.takeIf { currentFile?.isChildOfCommonDirectory() == true },
+                    ShareablePermission.DELETE
+                )
+            }
+            PermissionsGroup.SHARE_LINK_FILE_OFFICE -> listOf(
+                ShareLink.OfficeFilePermission.READ,
+                ShareLink.OfficeFilePermission.WRITE
+            )
+            PermissionsGroup.SHARE_LINK_FOLDER_OFFICE -> listOf(
+                ShareLink.OfficeFolderPermission.READ,
+                ShareLink.OfficeFolderPermission.WRITE
+            )
+        }
+    }
+
+    private suspend fun withCurrentFile(onFileRetrieved: (File?) -> List<Permission>): List<Permission> {
+        return onFileRetrieved(selectPermissionViewModel.currentFileFlow.first())
+    }
+
+    private fun configureSaveButton() {
+        binding.saveButton.setOnClickListener {
+            val permission = adapter.currentPermission
+            when (navigationArgs.permissionsGroup) {
+                PermissionsGroup.EXTERNAL_USERS_RIGHTS, PermissionsGroup.USERS_RIGHTS -> {
+                    updatePermission(navigationArgs.currentShareable, permission as ShareablePermission?)
+                }
+                PermissionsGroup.SHARE_LINK_FILE_OFFICE, PermissionsGroup.SHARE_LINK_FOLDER_OFFICE -> {
+                    updateShareLinkOfficePermission()
+                }
+                PermissionsGroup.FILE_SHARE_UPDATE ->
+                    setBackNavigationResult(ADD_USERS_RIGHTS_NAV_KEY, bundleOf(PERMISSION_BUNDLE_KEY to permission))
+                else ->
+                    setBackNavigationResult(SHARE_LINK_ACCESS_NAV_KEY, bundleOf(PERMISSION_BUNDLE_KEY to permission))
+            }
+        }
+    }
+
+    private fun updateShareLinkOfficePermission() = with(binding) {
+        val permission = adapter.currentPermission
+        saveButton.initProgress(viewLifecycleOwner)
+        saveButton.showProgressCatching()
+        selectPermissionViewModel.editFileShareLinkOfficePermission(
+            canEdit = (permission as ShareLink.EditPermission).apiValue
+        ).observe(viewLifecycleOwner) { apiResponse ->
+            val bundle = bundleOf(PERMISSION_BUNDLE_KEY to permission)
+            handleFileShareApiResponse(apiResponse, OFFICE_EDITING_RIGHTS_NAV_KEY, bundle, R.string.errorModification)
+        }
+    }
+
+    private fun updatePermission(shareableItem: Shareable?, permission: ShareablePermission? = null) =
+        with(binding) {
+            shareableItem?.let { shareable ->
+                saveButton.initProgress(viewLifecycleOwner)
+                saveButton.showProgressCatching()
+                when (permission) {
+                    ShareablePermission.DELETE, null -> {
+                        MatomoDrive.trackShareRightsEvent(MatomoDrive.MatomoName.DeleteUser)
+                        deleteShare(shareable, permission)
+                    }
+                    ShareablePermission.REMOVE_DRIVE_ACCESS -> {
+                        MatomoDrive.trackShareRightsEvent(MatomoDrive.MatomoName.RemoveDriveUser)
+                        removeDriveUser(shareable, permission)
+                    }
+                    else -> {
+                        MatomoDrive.trackShareRightsEvent(permission.name.lowercase() + "Right")
+                        editShare(shareable, permission)
+                    }
+                }
+            }
+        }
+
+    private fun deleteShare(shareable: Shareable, permission: ShareablePermission?) {
+        selectPermissionViewModel.deleteFileShare(shareable).observe(viewLifecycleOwner) { apiResponse ->
+            val bundle = bundleOf(PERMISSION_BUNDLE_KEY to permission, SHAREABLE_BUNDLE_KEY to shareable)
+            handleFileShareApiResponse(apiResponse, UPDATE_USERS_RIGHTS_NAV_KEY, bundle, R.string.errorDelete)
+        }
+    }
+
+    private fun removeDriveUser(shareable: Shareable, permission: ShareablePermission?) {
+        selectPermissionViewModel.removeDriveUser(shareable).observe(viewLifecycleOwner) { apiResponse ->
+            val bundle = bundleOf(PERMISSION_BUNDLE_KEY to permission, SHAREABLE_BUNDLE_KEY to shareable)
+            handleFileShareApiResponse(apiResponse, UPDATE_USERS_RIGHTS_NAV_KEY, bundle, R.string.errorRightModification)
+        }
+    }
+
+    private fun editShare(shareable: Shareable, permission: ShareablePermission) {
+        selectPermissionViewModel.editFileShare(shareable, permission).observe(viewLifecycleOwner) { apiResponse ->
+            val bundle = bundleOf(PERMISSION_BUNDLE_KEY to permission, SHAREABLE_BUNDLE_KEY to shareable)
+            handleFileShareApiResponse(apiResponse, UPDATE_USERS_RIGHTS_NAV_KEY, bundle, R.string.errorRightModification)
+        }
+    }
+
+    private fun handleFileShareApiResponse(
+        apiResponse: ApiResponse<Boolean>,
+        key: String,
+        bundle: Bundle,
+        @StringRes errorMessage: Int,
+    ) {
+        when {
+            apiResponse.isSuccess() -> setBackNavigationResult(key, bundle)
+            else -> SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError(errorMessage))
+        }
+        binding.saveButton.hideProgressCatching(R.string.buttonSave)
+    }
+
+    companion object {
+        const val SHARE_LINK_ACCESS_NAV_KEY = "share_link_access_nav_key"
+        const val ADD_USERS_RIGHTS_NAV_KEY = "add_users_rights_nav_key"
+        const val UPDATE_USERS_RIGHTS_NAV_KEY = "update_users_rights_nav_key"
+        const val OFFICE_EDITING_RIGHTS_NAV_KEY = "office_editing_rights_nav_key"
+        const val PERMISSION_BUNDLE_KEY = "permission_bundle_key"
+        const val SHAREABLE_BUNDLE_KEY = "shareable_bundle_key"
+    }
+
+    @Parcelize
+    enum class PermissionsGroup : Parcelable {
+        SHARE_LINK_FILE_SETTINGS,
+        SHARE_LINK_FOLDER_SETTINGS,
+        SHARE_LINK_DOCUMENT_SETTINGS,
+        SHARE_LINK_FILE_OFFICE,
+        SHARE_LINK_FOLDER_OFFICE,
+        USERS_RIGHTS,
+        EXTERNAL_USERS_RIGHTS,
+        FILE_SHARE_UPDATE,
+    }
+}

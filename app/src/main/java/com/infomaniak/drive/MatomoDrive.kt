@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,11 +118,9 @@ object MatomoDrive : Matomo {
         LongPressDirectAccess("longPressDirectAccess"),
         Move("move"),
         Offline("offline"),
-        OnlyWifiTransfer("onlyWifiTransfer"),
         OpenBookmark("openBookmark"),
         OpenCreationWebview("openCreationWebview"),
         OpenFromUserMenuCard("openFromUserMenuCard"),
-        OpenInBrowser("openInBrowser"),
         OpenLoginWebview("openLoginWebview"),
         OpenWith("openWith"),
         Pause("pause"),
@@ -136,6 +134,7 @@ object MatomoDrive : Matomo {
         PublicShareWithPassword("publicShareWithPassword"),
         PutInTrash("putInTrash"),
         Remove("remove"),
+        RemoveDriveUser("removeDriveUser"),
         Rename("rename"),
         RestoreGivenFolder("restoreGivenFolder"),
         RestoreOriginFolder("restoreOriginFolder"),
@@ -159,11 +158,14 @@ object MatomoDrive : Matomo {
         SyncAll("syncAll"),
         SyncFromDate("syncFromDate"),
         SyncNew("syncNew"),
+        SyncOnlyWifi("syncOnlyWifi"),
+        SyncWifiAndData("syncWifiAndData"),
         ToggleFullScreen("toggleFullScreen"),
         TrashStorageLimit("trashStorageLimit"),
         TryAddingFileWithDriveFull("tryAddingFileWithDriveFull"),
         Update("update"),
         UploadFile("uploadFile"),
+        ValidatePassword("validatePassword"),
         ViewGrid("viewGrid"),
         ViewList("viewList"),
     }

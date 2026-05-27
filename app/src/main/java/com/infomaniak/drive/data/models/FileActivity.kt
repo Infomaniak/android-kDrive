@@ -19,9 +19,9 @@ package com.infomaniak.drive.data.models
 
 import android.content.Context
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.core.utils.FORMAT_FULL_DATE
-import com.infomaniak.core.utils.FORMAT_HOUR_MINUTES
-import com.infomaniak.core.utils.format
+import com.infomaniak.core.common.utils.FORMAT_FULL_DATE
+import com.infomaniak.core.common.utils.FORMAT_HOUR_MINUTES
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.R
 import io.realm.RealmObject
 import io.realm.annotations.Ignore
