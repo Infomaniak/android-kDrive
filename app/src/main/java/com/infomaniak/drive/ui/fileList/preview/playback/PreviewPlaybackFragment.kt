@@ -48,6 +48,8 @@ import com.infomaniak.drive.utils.shouldExcludeFromRecents
 @UnstableApi
 open class PreviewPlaybackFragment : PreviewFragment() {
 
+    private val isPublicShared by lazy { navigationArgs?.isPublicShared == true }
+
     private var _binding: FragmentPreviewPlaybackBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
@@ -87,7 +89,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         },
     )
 
-    private val exoPlayer: ExoPlayer by lazy { requireContext().getExoPlayer() }
+    private val exoPlayer: ExoPlayer by lazy { requireContext().getExoPlayer(isPublicShared) }
     private val mainExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
 
     private val exoPlayerUIToHide = listOf(
@@ -132,7 +134,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         //To avoid having the notification when we play a video, we have to avoid using the MediaController
         if (file.isVideo().not()) {
             PlaybackUtils.activePlayer = exoPlayer
-            requireContext().setMediaSession()
+            requireContext().setMediaSession(isPublicShared)
             requireActivity().shouldExcludeFromRecents(false)
             requireContext().getMediaController(mainExecutor) {
                 if (exoPlayer.currentMediaItem == null) setMediaToExoPlayer()
@@ -156,6 +158,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
                 }
                 startActivity(Intent(requireActivity(), VideoActivity::class.java).apply {
                     putExtras(VideoActivityArgs(fileId = file.id).toBundle())
+                    putExtra(VideoActivity.EXTRA_IS_PUBLIC_SHARED, isPublicShared)
                 })
             }
         }

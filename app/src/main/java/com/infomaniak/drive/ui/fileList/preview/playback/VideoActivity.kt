@@ -42,6 +42,8 @@ import com.infomaniak.drive.utils.toggleSystemBar
 @UnstableApi
 class VideoActivity : AppCompatActivity() {
 
+    private val isPublicShared by lazy { intent.getBooleanExtra(EXTRA_IS_PUBLIC_SHARED, false) }
+
     private val viewModel: PlaybackViewModel by viewModels()
 
     private val binding by lazy { ActivityVideoBinding.inflate(layoutInflater) }
@@ -132,5 +134,9 @@ class VideoActivity : AppCompatActivity() {
                 finish()
             }
         }
+    }
+
+    companion object {
+        const val EXTRA_IS_PUBLIC_SHARED = "extra_is_public_shared"
     }
 }

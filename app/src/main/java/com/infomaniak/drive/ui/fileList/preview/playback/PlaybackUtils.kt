@@ -47,6 +47,7 @@ import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
+import com.infomaniak.core.network.networking.HttpClient.okHttpClient as unauthenticatedHttpClient
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.core.sentry.SentryLog
@@ -106,11 +107,11 @@ object PlaybackUtils {
         onServiceDisconnect = null
     }
 
-    fun Context.setMediaSession() {
+    fun Context.setMediaSession(isPublicShared: Boolean = false) {
         if (mediaSession == null) {
             mediaSession = MediaSession.Builder(this, activePlayer!!)
                 .setCallback(getMediaSessionCallback())
-                .setBitmapLoader(getBitmapLoader())
+                .setBitmapLoader(getBitmapLoader(isPublicShared))
                 .setSessionActivity(getPendingIntent())
                 .build()
         } else {
@@ -118,9 +119,9 @@ object PlaybackUtils {
         }
     }
 
-    fun Context.getExoPlayer(): ExoPlayer {
+    fun Context.getExoPlayer(isPublicShared: Boolean = false): ExoPlayer {
         return ExoPlayer.Builder(this, getRenderersFactory())
-            .setMediaSourceFactory(DefaultMediaSourceFactory(getDataSourceFactory()))
+            .setMediaSourceFactory(DefaultMediaSourceFactory(getDataSourceFactory(isPublicShared)))
             .setTrackSelector(getTrackSelector())
             .build().apply {
                 addAnalyticsListener(EventLogger())
@@ -186,12 +187,17 @@ object PlaybackUtils {
     }
 
     @OptIn(ManualAuthorizationRequired::class)
-    private fun Context.getDataSourceFactory(): DataSource.Factory {
-        val okHttpDataSource = OkHttpDataSource.Factory(HttpClient.okHttpClientWithTokenInterceptor).apply {
+    private fun Context.getDataSourceFactory(isPublicShared: Boolean): DataSource.Factory {
+        val okHttpDataSource = OkHttpDataSource.Factory(getOkHttpClient(isPublicShared)).apply {
             setUserAgent(Util.getUserAgent(this@getDataSourceFactory, getString(R.string.app_name)))
             setDefaultRequestProperties(HttpUtils.getHeaders().toMap())
         }
         return DefaultDataSource.Factory(this, okHttpDataSource)
+    }
+
+    private fun getOkHttpClient(isPublicShared: Boolean) = when {
+        isPublicShared -> unauthenticatedHttpClient
+        else -> HttpClient.okHttpClientWithTokenInterceptor
     }
 
     private fun getMediaSessionCallback(): MediaSession.Callback {
@@ -228,7 +234,10 @@ object PlaybackUtils {
         }
     }
 
-    private fun Context.getBitmapLoader(): DataSourceBitmapLoader {
-        return DataSourceBitmapLoader(DataSourceBitmapLoader.DEFAULT_EXECUTOR_SERVICE.get(), getDataSourceFactory())
+    private fun Context.getBitmapLoader(isPublicShared: Boolean): DataSourceBitmapLoader {
+        return DataSourceBitmapLoader(
+            DataSourceBitmapLoader.DEFAULT_EXECUTOR_SERVICE.get(),
+            getDataSourceFactory(isPublicShared),
+        )
     }
 }
