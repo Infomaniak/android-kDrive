@@ -71,7 +71,11 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         activity,
         isPlayingChanged = { isPlaying ->
             if (isPlaying) {
-                toggleFullscreen()
+                (parentFragment as? BasePreviewSliderFragment)?.let { previewParent ->
+                    if (previewParent.isFullscreenOverlayShown()) {
+                        toggleFullscreen()
+                    }
+                }
                 activity?.window?.addFlags(flagKeepScreenOn)
             } else {
                 activity?.window?.clearFlags(flagKeepScreenOn)
