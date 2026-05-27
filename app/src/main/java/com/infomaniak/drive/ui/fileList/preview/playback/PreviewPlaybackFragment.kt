@@ -17,8 +17,10 @@
  */
 package com.infomaniak.drive.ui.fileList.preview.playback
 
+import android.app.AppOpsManager
 import android.content.Intent
 import android.os.Bundle
+import android.os.Process
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -146,13 +148,14 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     }
 
     private fun initVideoPlayerUI() {
-        with(binding.playerView) {
+        if (!isPipEnabledForApp()) return
 
+        with(binding.playerView) {
             // Hiding ExoPlayer interface elements because we'll play the video in a separate Activity
             exoPlayerUIToHide.forEach { uiID -> findViewById<View>(uiID).isVisible = false }
 
             // We'll open a new activity for videos to handle PIP perfectly
-            findViewById<View>(R.id.exo_play_pause).setOnClickListener {
+            binding.playerView.findViewById<View>(R.id.exo_play_pause).setOnClickListener {
                 with(requireActivity()) {
                     shouldExcludeFromRecents(!isDontKeepActivitiesEnabled())
                 }
@@ -162,6 +165,17 @@ open class PreviewPlaybackFragment : PreviewFragment() {
                 })
             }
         }
+    }
+
+    private fun isPipEnabledForApp(): Boolean {
+        val appOpsManager = requireContext().getSystemService(AppOpsManager::class.java) ?: return false
+        val packageName = requireContext().packageName
+        val uid = Process.myUid()
+
+        @Suppress("DEPRECATION")
+        val mode = appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_PICTURE_IN_PICTURE, uid, packageName)
+
+        return mode == AppOpsManager.MODE_ALLOWED
     }
 
     private fun setMediaToExoPlayer() {
