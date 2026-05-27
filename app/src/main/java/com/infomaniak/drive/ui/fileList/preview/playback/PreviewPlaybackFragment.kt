@@ -179,6 +179,11 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         binding.playerView.controllerHideOnTouch = false
     }
 
+    override fun onPause() {
+        persistCurrentPlaybackPosition()
+        super.onPause()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         // Compute the percentage of the media the user watched before exiting
@@ -194,8 +199,14 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     }
 
     fun onFragmentUnselected() {
+        persistCurrentPlaybackPosition()
         if (exoPlayer.currentMediaItem?.mediaId?.toInt() == file.id) {
             exoPlayer.pause()
+        }
+    }
+
+    private fun persistCurrentPlaybackPosition() {
+        if (exoPlayer.currentMediaItem?.mediaId?.toInt() == file.id) {
             (parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] = exoPlayer.currentPosition
         }
     }
