@@ -74,16 +74,15 @@ class VideoActivity : AppCompatActivity() {
         },
     )
 
-    private val exoPlayer: ExoPlayer by lazy { getExoPlayer() }
-    private val videoRatio by lazy {
-        exoPlayer.videoFormat?.let { videoFormat ->
+    private val exoPlayer: ExoPlayer by lazy { getExoPlayer(isPublicShared) }
+    private val videoRatio: Rational?
+        get() = exoPlayer.videoFormat?.let { videoFormat ->
             if (videoFormat.width > videoFormat.height) {
                 Rational(16, 9)
             } else {
                 Rational(9, 16)
             }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
