@@ -111,7 +111,7 @@ import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.Shortcuts
-import com.infomaniak.lib.login.InfomaniakLogin
+import com.infomaniak.core.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
 import io.sentry.Sentry
