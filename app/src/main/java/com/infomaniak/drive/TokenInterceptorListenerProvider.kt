@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2025 Infomaniak Network SA
+ * Copyright (C) 2025-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.AccountUtils.getUserById
 import com.infomaniak.drive.utils.AccountUtils.setUserToken
-import com.infomaniak.lib.login.ApiToken
+import com.infomaniak.core.login.ApiToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 
