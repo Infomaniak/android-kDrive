@@ -188,7 +188,9 @@ dependencies {
     implementation(core.infomaniak.core.ui.view.edgetoedge)
     implementation(core.infomaniak.core.webview)
 
-    implementation(project(":Core:Legacy"))
+    implementation(project(":Core:Legacy")) {
+        exclude(group = "com.github.infomaniak", module = "android-login")
+    }
 
     // Compose
     implementation(platform(core.compose.bom))
