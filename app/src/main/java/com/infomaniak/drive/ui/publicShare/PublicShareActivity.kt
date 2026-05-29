@@ -36,6 +36,7 @@ import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.Utils.isInDarkTheme
 
 class PublicShareActivity : EdgeToEdgeActivity() {
 
@@ -49,7 +50,12 @@ class PublicShareActivity : EdgeToEdgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
+        addComposeOverlay {
+            TwoFactorAuthApprovalAutoManagedBottomSheet(
+                twoFactorAuthManager,
+                isInDarkTheme = isInDarkTheme()
+            )
+        }
 
         navController.addOnDestinationChangedListener { _, dest, _ -> onDestinationChanged(dest) }
         binding.mainPublicShareButton.onApplyWindowInsetsListener { view, insets ->

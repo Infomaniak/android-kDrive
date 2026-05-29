@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import com.infomaniak.drive.databinding.ActivityNoDriveBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils.isInDarkTheme
 import kotlinx.coroutines.launch
 
 class MaintenanceActivity : EdgeToEdgeActivity() {
@@ -43,7 +44,7 @@ class MaintenanceActivity : EdgeToEdgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(root)
-        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
+        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager, isInDarkTheme = isInDarkTheme()) }
 
         DriveInfosController.getDrives(AccountUtils.currentUserId).apply {
             val firstDrive = firstOrNull()

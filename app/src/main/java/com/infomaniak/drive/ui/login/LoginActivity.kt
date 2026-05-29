@@ -80,6 +80,7 @@ import com.infomaniak.drive.utils.getInfomaniakLogin
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.core.login.ApiToken
 import com.infomaniak.core.login.InfomaniakLogin
+import com.infomaniak.drive.utils.Utils.isInDarkTheme
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -154,7 +155,7 @@ class LoginActivity : ComponentActivity() {
                     )
                 }
             }
-            TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager)
+            TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager, isInDarkTheme = isInDarkTheme())
         }
 
         handleNavigationFlags()

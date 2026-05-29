@@ -43,6 +43,7 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.Utils.isInDarkTheme
 import com.infomaniak.drive.utils.openWith
 import com.infomaniak.drive.utils.saveToKDrive
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
@@ -81,7 +82,12 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
         with(binding) {
             setContentView(root)
-            addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
+            addComposeOverlay {
+                TwoFactorAuthApprovalAutoManagedBottomSheet(
+                    twoFactorAuthManager,
+                    isInDarkTheme = isInDarkTheme()
+                )
+            }
 
             navController.navigate(R.id.previewPDFFragment)
 

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.databinding.ActivityNoDriveBinding
 import com.infomaniak.drive.twoFactorAuthManager
+import com.infomaniak.drive.utils.Utils.isInDarkTheme
 
 class NoDriveActivity : AppCompatActivity() {
 
@@ -34,7 +35,12 @@ class NoDriveActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(root)
-        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
+        addComposeOverlay {
+            TwoFactorAuthApprovalAutoManagedBottomSheet(
+                twoFactorAuthManager,
+                isInDarkTheme = isInDarkTheme()
+            )
+        }
 
         noDriveIconLayout.icon.setImageResource(R.drawable.ic_no_drive)
 

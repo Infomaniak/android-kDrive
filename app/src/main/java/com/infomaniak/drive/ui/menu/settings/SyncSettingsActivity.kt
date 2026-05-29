@@ -69,6 +69,7 @@ import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.cancelPeriodicSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.Utils.isInDarkTheme
 import com.infomaniak.drive.views.SyncMediaSelectBottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -105,7 +106,7 @@ class SyncSettingsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(root)
-        addTwoFactorAuthOverlay()
+        addTwoFactorAuthOverlay(isDarkTheme = isInDarkTheme())
 
         setOnBackPressed()
 

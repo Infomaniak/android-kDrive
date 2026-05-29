@@ -22,6 +22,7 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.view.LayoutInflater
 import androidx.activity.result.ActivityResultLauncher
@@ -394,6 +395,9 @@ object Utils {
             }
         }.create()
     }
+
+    fun Context.isInDarkTheme() =
+        (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
     enum class Shortcuts(val id: String) {
         UPLOAD("upload"),

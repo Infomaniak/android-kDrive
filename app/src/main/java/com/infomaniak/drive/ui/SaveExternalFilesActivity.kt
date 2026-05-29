@@ -71,6 +71,7 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
+import com.infomaniak.drive.utils.Utils.isInDarkTheme
 import com.infomaniak.drive.utils.isUrlFile
 import com.infomaniak.drive.utils.isValidUrl
 import com.infomaniak.drive.utils.showOrHideEmptyError
@@ -116,7 +117,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(root)
-        addTwoFactorAuthOverlay()
+        addTwoFactorAuthOverlay(isDarkTheme = isInDarkTheme())
 
         if (!isAuth() || isExtrasNull()) {
             finish()
