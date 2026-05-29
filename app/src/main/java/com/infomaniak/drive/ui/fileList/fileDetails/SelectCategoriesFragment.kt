@@ -35,9 +35,9 @@ import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.setBackNavigationResult
-import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.core.ui.view.utils.SnackbarUtils
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent

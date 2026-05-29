@@ -32,8 +32,8 @@ import com.google.android.material.card.MaterialCardView
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
-import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.toPx
+import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackSearchEvent
 import com.infomaniak.drive.R

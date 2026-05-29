@@ -28,7 +28,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
-import com.infomaniak.core.legacy.utils.setMargins
+import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.File

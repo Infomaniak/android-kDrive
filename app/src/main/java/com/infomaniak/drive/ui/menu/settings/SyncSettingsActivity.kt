@@ -39,12 +39,12 @@ import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.common.utils.startOfTheDay
 import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.legacy.utils.context
-import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.startAppSettingsConfig
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.ui.view.extension.hideProgressCatching
 import com.infomaniak.core.ui.view.extension.initProgress
+import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.core.ui.view.extension.showProgressCatching
 import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.MatomoDrive.MatomoName

@@ -30,9 +30,9 @@ import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.utils.inWholeSeconds
 import com.infomaniak.core.file.getFileDatesWithFallback
 import com.infomaniak.core.file.retrieveAndUse
-import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
+import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPdfActivityActionEvent

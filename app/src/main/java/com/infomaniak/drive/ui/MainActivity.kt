@@ -79,9 +79,9 @@ import com.infomaniak.core.inappreview.view.ReviewAlertDialog
 import com.infomaniak.core.inappreview.view.ReviewAlertDialogData
 import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
-import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.core.ui.view.utils.SnackbarUtils.showIndefiniteSnackbar
 import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing

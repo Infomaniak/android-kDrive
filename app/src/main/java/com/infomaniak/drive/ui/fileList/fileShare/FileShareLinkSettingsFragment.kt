@@ -31,7 +31,6 @@ import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
-import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.common.utils.day
 import com.infomaniak.core.common.utils.endOfTheDay
 import com.infomaniak.core.common.utils.hours
@@ -40,6 +39,7 @@ import com.infomaniak.core.common.utils.month
 import com.infomaniak.core.common.utils.year
 import com.infomaniak.core.ui.view.extension.hideProgressCatching
 import com.infomaniak.core.ui.view.extension.initProgress
+import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.core.ui.view.extension.showProgressCatching
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.toFloat

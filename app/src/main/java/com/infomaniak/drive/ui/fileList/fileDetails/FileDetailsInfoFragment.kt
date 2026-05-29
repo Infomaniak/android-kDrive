@@ -32,8 +32,8 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.safeNavigate
-import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.common.utils.format
+import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
