@@ -26,7 +26,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
 import com.infomaniak.core.common.extensions.isNightModeEnabled
-import com.infomaniak.core.legacy.utils.setMargins
+import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
