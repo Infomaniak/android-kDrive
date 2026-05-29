@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui
 
 import android.os.Bundle
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.extensions.lightStatusBar
