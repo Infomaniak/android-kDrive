@@ -43,6 +43,7 @@ import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.common.Xor
 import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.common.extensions.clearStack
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.observe
 import com.infomaniak.core.crossapplogin.back.CrossAppLoginFacade
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
@@ -154,7 +155,7 @@ class LoginActivity : ComponentActivity() {
                     )
                 }
             }
-            TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager)
+            TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager, isInDarkTheme = isNightModeEnabled())
         }
 
         handleNavigationFlags()

@@ -39,6 +39,7 @@ import androidx.navigation.navArgs
 import com.google.android.material.textfield.TextInputEditText
 import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.applock.view.AppLockViewActivity
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.file.fileNameFor
@@ -116,7 +117,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(root)
-        addTwoFactorAuthOverlay()
+        addTwoFactorAuthOverlay(isDarkTheme = isNightModeEnabled())
 
         if (!isAuth() || isExtrasNull()) {
             finish()

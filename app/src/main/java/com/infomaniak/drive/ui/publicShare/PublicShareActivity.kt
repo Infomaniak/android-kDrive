@@ -25,6 +25,7 @@ import androidx.core.view.isVisible
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
@@ -49,7 +50,12 @@ class PublicShareActivity : EdgeToEdgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
+        addComposeOverlay {
+            TwoFactorAuthApprovalAutoManagedBottomSheet(
+                twoFactorAuthManager,
+                isInDarkTheme = isNightModeEnabled()
+            )
+        }
 
         navController.addOnDestinationChangedListener { _, dest, _ -> onDestinationChanged(dest) }
         binding.mainPublicShareButton.onApplyWindowInsetsListener { view, insets ->

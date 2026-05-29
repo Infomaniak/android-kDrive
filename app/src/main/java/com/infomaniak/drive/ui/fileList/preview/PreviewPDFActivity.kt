@@ -26,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.utils.inWholeSeconds
 import com.infomaniak.core.file.getFileDatesWithFallback
 import com.infomaniak.core.file.retrieveAndUse
@@ -81,7 +82,12 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
         with(binding) {
             setContentView(root)
-            addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
+            addComposeOverlay {
+                TwoFactorAuthApprovalAutoManagedBottomSheet(
+                    twoFactorAuthManager,
+                    isInDarkTheme = isNightModeEnabled()
+                )
+            }
 
             navController.navigate(R.id.previewPDFFragment)
 

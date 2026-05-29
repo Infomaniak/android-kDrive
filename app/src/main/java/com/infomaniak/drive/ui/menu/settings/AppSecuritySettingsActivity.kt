@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.core.applock.AppLockHelper.silentlyReverseSwitch
 import com.infomaniak.core.applock.AppLockManager
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.drive.R
@@ -39,7 +40,12 @@ class AppSecuritySettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(root)
-        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
+        addComposeOverlay {
+            TwoFactorAuthApprovalAutoManagedBottomSheet(
+                twoFactorAuthManager,
+                isInDarkTheme = isNightModeEnabled()
+            )
+        }
         toolbar.setNavigationOnClickListener { onBackPressed() }
 
         switchSettingsTitle.text = getString(R.string.appSecurityTitle)

@@ -71,6 +71,7 @@ import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.applock.view.AppLockViewActivity
 import com.infomaniak.core.coil.ImageLoaderProvider.simpleImageLoader
 import com.infomaniak.core.common.doesFileExist
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.observe
 import com.infomaniak.core.inappreview.BaseInAppReviewManager
 import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
@@ -191,7 +192,8 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        addTwoFactorAuthOverlay()
+
+        addTwoFactorAuthOverlay(isDarkTheme = isNightModeEnabled())
 
         mainViewModel.initUploadFilesHelper(fragmentActivity = this, navController)
 
