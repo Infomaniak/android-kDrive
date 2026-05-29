@@ -28,13 +28,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.infomaniak.core.legacy.utils.hideProgressCatching
-import com.infomaniak.core.legacy.utils.initProgress
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.setBackNavigationResult
-import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.ui.view.extension.hideProgressCatching
+import com.infomaniak.core.ui.view.extension.initProgress
+import com.infomaniak.core.ui.view.extension.showProgressCatching
 import com.infomaniak.core.ui.view.utils.SnackbarUtils
 import com.infomaniak.drive.MatomoDrive
 import com.infomaniak.drive.R
