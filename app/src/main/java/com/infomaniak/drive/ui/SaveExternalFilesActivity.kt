@@ -44,13 +44,13 @@ import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.file.fileNameFor
 import com.infomaniak.core.file.getFileDatesWithFallback
-import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.hideProgressCatching
 import com.infomaniak.core.legacy.utils.initProgress
 import com.infomaniak.core.legacy.utils.parcelableArrayListExtra
 import com.infomaniak.core.legacy.utils.parcelableExtra
 import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.legacy.utils.whenResultIsOk
+import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController

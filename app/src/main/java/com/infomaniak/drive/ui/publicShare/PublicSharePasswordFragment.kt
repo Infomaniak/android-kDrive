@@ -25,7 +25,6 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
-import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.hideProgressCatching
 import com.infomaniak.core.legacy.utils.initProgress
 import com.infomaniak.core.legacy.utils.safeBinding
@@ -33,6 +32,7 @@ import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R

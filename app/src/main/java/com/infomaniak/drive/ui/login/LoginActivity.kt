@@ -47,7 +47,6 @@ import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.observe
 import com.infomaniak.core.crossapplogin.back.CrossAppLoginFacade
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
-import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.Utils.lockOrientationForSmallScreens
 import com.infomaniak.core.network.api.InternalTranslatedErrorCode
 import com.infomaniak.core.network.models.ApiError
@@ -81,6 +80,7 @@ import com.infomaniak.drive.utils.getInfomaniakLogin
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.core.login.ApiToken
 import com.infomaniak.core.login.InfomaniakLogin
+import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -77,7 +77,6 @@ import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.coil.loadAvatar
 import com.infomaniak.core.common.utils.isEmailRfc5321Compliant
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
-import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.safeNavigate
@@ -112,6 +111,7 @@ import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.core.login.InfomaniakLogin
+import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import handleActionDone
 import io.realm.RealmList
 import io.sentry.Sentry
