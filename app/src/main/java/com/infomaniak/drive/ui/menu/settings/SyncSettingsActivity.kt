@@ -37,6 +37,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.core.common.utils.FORMAT_DATE_CLEAR_MONTH
 import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.common.utils.startOfTheDay
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.hideProgressCatching
@@ -69,7 +70,6 @@ import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.cancelPeriodicSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.Utils.isInDarkTheme
 import com.infomaniak.drive.views.SyncMediaSelectBottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -106,7 +106,7 @@ class SyncSettingsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(root)
-        addTwoFactorAuthOverlay(isDarkTheme = isInDarkTheme())
+        addTwoFactorAuthOverlay(isDarkTheme = isNightModeEnabled())
 
         setOnBackPressed()
 

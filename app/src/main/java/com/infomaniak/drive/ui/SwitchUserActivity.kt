@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.core.os.bundleOf
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
@@ -31,7 +32,6 @@ import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.login.LoginActivityArgs
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils.isInDarkTheme
 
 class SwitchUserActivity : EdgeToEdgeActivity() {
 
@@ -44,7 +44,7 @@ class SwitchUserActivity : EdgeToEdgeActivity() {
         addComposeOverlay {
             TwoFactorAuthApprovalAutoManagedBottomSheet(
                 twoFactorAuthManager,
-                isInDarkTheme = isInDarkTheme()
+                isInDarkTheme = isNightModeEnabled()
             )
         }
 

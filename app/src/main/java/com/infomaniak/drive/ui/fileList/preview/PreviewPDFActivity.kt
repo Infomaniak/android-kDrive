@@ -26,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.utils.inWholeSeconds
 import com.infomaniak.core.file.getFileDatesWithFallback
 import com.infomaniak.core.file.retrieveAndUse
@@ -43,7 +44,6 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.Utils.isInDarkTheme
 import com.infomaniak.drive.utils.openWith
 import com.infomaniak.drive.utils.saveToKDrive
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
@@ -85,7 +85,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
             addComposeOverlay {
                 TwoFactorAuthApprovalAutoManagedBottomSheet(
                     twoFactorAuthManager,
-                    isInDarkTheme = isInDarkTheme()
+                    isInDarkTheme = isNightModeEnabled()
                 )
             }
 

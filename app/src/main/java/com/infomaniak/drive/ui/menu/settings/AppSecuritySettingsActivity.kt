@@ -23,6 +23,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.core.applock.AppLockHelper.silentlyReverseSwitch
 import com.infomaniak.core.applock.AppLockManager
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.drive.R
@@ -30,7 +31,6 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.databinding.ViewSwitchSettingsBinding
 import com.infomaniak.drive.twoFactorAuthManager
-import com.infomaniak.drive.utils.Utils.isInDarkTheme
 import splitties.init.appCtx
 
 class AppSecuritySettingsActivity : AppCompatActivity() {
@@ -43,7 +43,7 @@ class AppSecuritySettingsActivity : AppCompatActivity() {
         addComposeOverlay {
             TwoFactorAuthApprovalAutoManagedBottomSheet(
                 twoFactorAuthManager,
-                isInDarkTheme = isInDarkTheme()
+                isInDarkTheme = isNightModeEnabled()
             )
         }
         toolbar.setNavigationOnClickListener { onBackPressed() }

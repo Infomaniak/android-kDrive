@@ -396,8 +396,6 @@ object Utils {
         }.create()
     }
 
-    fun Context.isInDarkTheme() =
-        (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
     enum class Shortcuts(val id: String) {
         UPLOAD("upload"),

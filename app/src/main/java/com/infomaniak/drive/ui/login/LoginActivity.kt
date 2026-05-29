@@ -43,6 +43,7 @@ import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.common.Xor
 import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.common.extensions.clearStack
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.observe
 import com.infomaniak.core.crossapplogin.back.CrossAppLoginFacade
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
@@ -80,7 +81,6 @@ import com.infomaniak.drive.utils.getInfomaniakLogin
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.core.login.ApiToken
 import com.infomaniak.core.login.InfomaniakLogin
-import com.infomaniak.drive.utils.Utils.isInDarkTheme
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -155,7 +155,7 @@ class LoginActivity : ComponentActivity() {
                     )
                 }
             }
-            TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager, isInDarkTheme = isInDarkTheme())
+            TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager, isInDarkTheme = isNightModeEnabled())
         }
 
         handleNavigationFlags()

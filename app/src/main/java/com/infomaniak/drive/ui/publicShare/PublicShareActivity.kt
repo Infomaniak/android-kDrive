@@ -25,6 +25,7 @@ import androidx.core.view.isVisible
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
@@ -36,7 +37,6 @@ import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.Utils.isInDarkTheme
 
 class PublicShareActivity : EdgeToEdgeActivity() {
 
@@ -53,7 +53,7 @@ class PublicShareActivity : EdgeToEdgeActivity() {
         addComposeOverlay {
             TwoFactorAuthApprovalAutoManagedBottomSheet(
                 twoFactorAuthManager,
-                isInDarkTheme = isInDarkTheme()
+                isInDarkTheme = isNightModeEnabled()
             )
         }
 
