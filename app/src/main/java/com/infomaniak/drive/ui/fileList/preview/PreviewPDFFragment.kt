@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -171,7 +172,6 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                 withResumed {
                     with(getConfigurator(pdfNavigationArgs.fileUri, pdfFile)) {
                         password(password)
-                        disableLongPress()
                         enableAnnotationRendering(true)
                         enableDoubletap(true)
                         pageFling(false)
@@ -183,6 +183,10 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                         swipeHorizontal(false)
                         touchPriority(true)
                         thumbnailRatio(THUMBNAIL_RATIO)
+                        enableTextSelection(true)
+                        onSelectionAction { selectedText ->
+                            Toast.makeText(requireContext(), selectedText, Toast.LENGTH_SHORT).show()
+                        }
                         onLoad { pageCount ->
                             // We can arrive here with a file different from a real PDF like OpenOffice documents
                             shouldHidePrintOption(isGone = !canPrintFile())
