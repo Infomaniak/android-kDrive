@@ -34,8 +34,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
-import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.setPagination
+import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.BulkOperationType

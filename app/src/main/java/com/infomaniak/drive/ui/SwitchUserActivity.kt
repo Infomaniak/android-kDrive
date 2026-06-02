@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.core.os.bundleOf
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
@@ -40,7 +41,12 @@ class SwitchUserActivity : EdgeToEdgeActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(root)
-        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
+        addComposeOverlay {
+            TwoFactorAuthApprovalAutoManagedBottomSheet(
+                twoFactorAuthManager,
+                isInDarkTheme = isNightModeEnabled()
+            )
+        }
 
         toolbar.setNavigationOnClickListener {
             onBackPressed()

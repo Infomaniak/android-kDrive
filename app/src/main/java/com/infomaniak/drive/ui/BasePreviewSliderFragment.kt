@@ -36,7 +36,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.extensions.lightStatusBar
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
-import com.infomaniak.core.legacy.utils.setMargins
+import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File

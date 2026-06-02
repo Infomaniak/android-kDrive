@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,8 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
-import com.infomaniak.core.legacy.utils.setMargins
+import com.infomaniak.core.common.extensions.isNightModeEnabled
+import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -56,7 +57,7 @@ class SelectFolderActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        addTwoFactorAuthOverlay()
+        addTwoFactorAuthOverlay(isDarkTheme = isNightModeEnabled())
 
         val userId = navigationArgs.userId
         val driveId = navigationArgs.driveId

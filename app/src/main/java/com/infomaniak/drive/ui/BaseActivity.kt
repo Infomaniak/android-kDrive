@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,16 +48,16 @@ open class BaseActivity : EdgeToEdgeActivity() {
      * 1. **Always call this after [setContentView].**
      * 2. If you need to use it inside a compose-based Activity (i.e. w/ `setContent`), use [TwoFactorAuthAutoManagedBottomSheet]
      */
-    protected fun addTwoFactorAuthOverlay() {
-        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
+    protected fun addTwoFactorAuthOverlay(isDarkTheme: Boolean) {
+        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager, isInDarkTheme = isDarkTheme) }
     }
 
     /**
      * Enables the auto-managed 2 factor authentication challenge overlay for Compose-based Activities.
      */
     @Composable
-    protected fun TwoFactorAuthAutoManagedBottomSheet() {
-        TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager)
+    protected fun TwoFactorAuthAutoManagedBottomSheet(isDarkTheme: Boolean) {
+        TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager, isInDarkTheme = isDarkTheme)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

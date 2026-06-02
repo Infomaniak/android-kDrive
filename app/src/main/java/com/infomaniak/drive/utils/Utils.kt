@@ -22,6 +22,7 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.view.LayoutInflater
 import androidx.activity.result.ActivityResultLauncher
@@ -394,6 +395,7 @@ object Utils {
             }
         }.create()
     }
+
 
     enum class Shortcuts(val id: String) {
         UPLOAD("upload"),

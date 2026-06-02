@@ -75,18 +75,19 @@ import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.applock.view.AppLockViewActivity
 import com.infomaniak.core.coil.ImageLoaderProvider.simpleImageLoader
 import com.infomaniak.core.common.doesFileExist
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.observe
 import com.infomaniak.core.inappreview.BaseInAppReviewManager
 import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
 import com.infomaniak.core.inappreview.view.ReviewAlertDialog
 import com.infomaniak.core.inappreview.view.ReviewAlertDialogData
-import com.infomaniak.core.legacy.utils.SnackbarUtils.showIndefiniteSnackbar
-import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
-import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.ui.view.extension.setMargins
+import com.infomaniak.core.ui.view.utils.SnackbarUtils.showIndefiniteSnackbar
+import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MainApplication
@@ -197,7 +198,8 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        addTwoFactorAuthOverlay()
+
+        addTwoFactorAuthOverlay(isDarkTheme = isNightModeEnabled())
 
         mainViewModel.initUploadFilesHelper(fragmentActivity = this, navController)
 

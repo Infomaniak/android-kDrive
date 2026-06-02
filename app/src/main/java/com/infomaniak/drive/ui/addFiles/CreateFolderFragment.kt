@@ -28,10 +28,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.core.legacy.utils.hideKeyboard
-import com.infomaniak.core.legacy.utils.hideProgressCatching
-import com.infomaniak.core.legacy.utils.initProgress
-import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.ui.view.extension.hideProgressCatching
+import com.infomaniak.core.ui.view.extension.initProgress
+import com.infomaniak.core.ui.view.extension.showProgressCatching
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.models.File
