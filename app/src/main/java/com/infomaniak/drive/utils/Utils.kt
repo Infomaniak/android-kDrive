@@ -396,7 +396,6 @@ object Utils {
         }.create()
     }
 
-
     enum class Shortcuts(val id: String) {
         UPLOAD("upload"),
         SCAN("scan"),
