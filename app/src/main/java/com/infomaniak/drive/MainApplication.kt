@@ -250,7 +250,7 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
     private fun configureSentry() {
         this.configureSentry(
             isDebug = BuildConfig.DEBUG,
-            isSentryTrackingEnabled = UiSettings(applicationContext).isSentryTrackingEnabled,
+            isSentryTrackingEnabled = { UiSettings(applicationContext).isSentryTrackingEnabled },
         )
     }
 
