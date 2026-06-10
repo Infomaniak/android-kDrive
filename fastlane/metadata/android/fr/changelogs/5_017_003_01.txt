@@ -1,0 +1,2 @@
+- Correction du crash lors de l'ouverture d'un fichier de kDrive à partir de l'app Qonto
+- Diverses corrections et améliorations
