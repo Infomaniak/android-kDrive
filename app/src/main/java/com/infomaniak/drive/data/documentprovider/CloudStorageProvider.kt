@@ -30,6 +30,7 @@ import android.os.CancellationSignal
 import android.os.Handler
 import android.os.ParcelFileDescriptor
 import android.os.PowerManager
+import android.os.StrictMode
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.provider.Settings
@@ -124,7 +125,7 @@ class CloudStorageProvider : DocumentsProvider() {
         return result
     }
 
-    override fun queryRoots(projection: Array<out String>?): Cursor {
+    override fun queryRoots(projection: Array<out String>?): Cursor = withLaxStrictMode {
         SentryLog.d(TAG, "queryRoots")
         val cursor = MatrixCursor(projection ?: DEFAULT_ROOT_PROJECTION)
 
@@ -143,7 +144,10 @@ class CloudStorageProvider : DocumentsProvider() {
         return cursor
     }
 
-    override fun queryDocument(documentId: String, projection: Array<out String>?): Cursor {
+    override fun queryDocument(
+        documentId: String,
+        projection: Array<out String>?
+    ): Cursor = withLaxStrictMode {
         SentryLog.d(TAG, "queryDocument(), documentId=$documentId")
 
         return MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION).apply {
@@ -180,7 +184,11 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    override fun queryChildDocuments(parentDocumentId: String, projection: Array<out String>?, sortOrder: String?): Cursor {
+    override fun queryChildDocuments(
+        parentDocumentId: String,
+        projection: Array<out String>?,
+        sortOrder: String?
+    ): Cursor = withLaxStrictMode {
         val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION, isAutoCloseableJob = false)
 
         if (isProviderDisabled()) {
@@ -331,7 +339,11 @@ class CloudStorageProvider : DocumentsProvider() {
         context?.contentResolver?.notifyChange(uri, null)
     }
 
-    override fun openDocument(documentId: String, mode: String, signal: CancellationSignal?): ParcelFileDescriptor? {
+    override fun openDocument(
+        documentId: String,
+        mode: String,
+        signal: CancellationSignal?
+    ): ParcelFileDescriptor? = withLaxStrictMode {
         SentryLog.d(TAG, "openDocument(), id=$documentId, mode=$mode, signalIsCancelled: ${signal?.isCanceled}")
         if (isProviderDisabled()) {
             throw SecurityException(context?.getString(R.string.fileProviderExtensionError))
@@ -364,7 +376,11 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    override fun querySearchDocuments(rootId: String, query: String, projection: Array<out String>?): Cursor {
+    override fun querySearchDocuments(
+        rootId: String,
+        query: String,
+        projection: Array<out String>?
+    ): Cursor = withLaxStrictMode {
         SentryLog.d(TAG, "querySearchDocuments(), rootId=$rootId, projectionSize=${projection?.size}, $currentParentDocumentId")
 
         val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION, isAutoCloseableJob = false)
@@ -415,7 +431,11 @@ class CloudStorageProvider : DocumentsProvider() {
         return cursor
     }
 
-    override fun openDocumentThumbnail(documentId: String, sizeHint: Point?, signal: CancellationSignal?): AssetFileDescriptor {
+    override fun openDocumentThumbnail(
+        documentId: String,
+        sizeHint: Point?,
+        signal: CancellationSignal?
+    ): AssetFileDescriptor = withLaxStrictMode {
         SentryLog.d(TAG, "openDocumentThumbnail(), id=$documentId, signalIsCancelled: ${signal?.isCanceled}")
 
         val fileId = getFileIdFromDocumentId(documentId)
@@ -470,7 +490,11 @@ class CloudStorageProvider : DocumentsProvider() {
         return readPipe
     }
 
-    override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
+    override fun createDocument(
+        parentDocumentId: String,
+        mimeType: String,
+        displayName: String
+    ): String = withLaxStrictMode {
         SentryLog.d(TAG, "createDocument(), parentId=$parentDocumentId, mimeType=$mimeType")
 
         return if (mimeType.equals(DocumentsContract.Document.MIME_TYPE_DIR, true)) {
@@ -480,7 +504,7 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    override fun deleteDocument(documentId: String) {
+    override fun deleteDocument(documentId: String): Unit = withLaxStrictMode {
         SentryLog.d(TAG, "deleteDocument(), id=$documentId")
 
         val context = context ?: throw IllegalStateException("Delete document failed: missing Android Context")
@@ -506,7 +530,10 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    override fun renameDocument(documentId: String, displayName: String): String? {
+    override fun renameDocument(
+        documentId: String,
+        displayName: String
+    ): String? = withLaxStrictMode {
         SentryLog.d(TAG, "renameDocument(), id=$documentId")
 
         FileController.getRealmInstance(createUserDrive(documentId)).use { realm ->
@@ -528,7 +555,10 @@ class CloudStorageProvider : DocumentsProvider() {
         return null
     }
 
-    override fun copyDocument(sourceDocumentId: String, targetParentDocumentId: String): String {
+    override fun copyDocument(
+        sourceDocumentId: String,
+        targetParentDocumentId: String
+    ): String = withLaxStrictMode {
         SentryLog.d(TAG, "copyDocument(), sourceId=$sourceDocumentId, targetParentId=$targetParentDocumentId")
 
         return FileController.getRealmInstance(createUserDrive(sourceDocumentId)).use { realm ->
@@ -552,7 +582,11 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    override fun moveDocument(sourceDocumentId: String, sourceParentDocumentId: String, targetParentDocumentId: String): String {
+    override fun moveDocument(
+        sourceDocumentId: String,
+        sourceParentDocumentId: String,
+        targetParentDocumentId: String
+    ): String = withLaxStrictMode {
         SentryLog.d(
             TAG, "moveDocument(), " +
                     "sourceId=$sourceDocumentId, " +
@@ -1074,5 +1108,15 @@ class CloudStorageProvider : DocumentsProvider() {
             val rootsUri = DocumentsContract.buildRootsUri(authority)
             context.contentResolver.notifyChange(rootsUri, null)
         }
+    }
+}
+
+private inline fun <R> withLaxStrictMode(block: () -> R): R {
+    val currentPolicy = StrictMode.getThreadPolicy()
+    try {
+        StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.LAX)
+        return block()
+    } finally {
+        StrictMode.setThreadPolicy(currentPolicy)
     }
 }
