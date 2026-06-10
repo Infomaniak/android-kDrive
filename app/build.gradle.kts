@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 /**
@@ -67,8 +68,6 @@ android {
         targetCompatibility = javaVersion
     }
 
-    kotlinOptions { jvmTarget = javaVersion.toString() }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -111,6 +110,12 @@ android {
 
     testOptions.unitTests.all {
         it.testLogging { events("passed", "skipped", "failed", "standardOut", "standardError") }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.valueOf("JVM_${javaVersion.name.substringAfter("VERSION_")}")
     }
 }
 
