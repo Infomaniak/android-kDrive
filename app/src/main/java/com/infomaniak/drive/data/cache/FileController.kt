@@ -900,19 +900,39 @@ object FileController {
             val localFile = getFileById(realm, remoteFile.id)
             insertOrUpdateFile(realm, remoteFile, localFile)
 
-            if (remoteFile.parentId == 0) return@use
+            val driveId = userDrive?.driveId ?: remoteFile.driveId
+            saveRemoteFileAncestorsToDb(realm, parentId = remoteFile.parentId, childId = remoteFile.id, driveId, okHttpClient)
+        }
+    }
 
-            val localParent = getFileById(realm, remoteFile.parentId)
-            if (localParent == null) {
-                val driveId = userDrive?.driveId ?: remoteFile.driveId
-                val remoteParent = ApiRepository.getFileDetails(File(id = remoteFile.parentId, driveId = driveId), okHttpClient).data
-                if (remoteParent != null) {
-                    remoteParent.children = RealmList(remoteFile)
-                    insertOrUpdateFile(realm, remoteParent)
-                }
-            } else {
-                addChild(remoteFile.parentId, remoteFile, realm)
-            }
+    private tailrec fun saveRemoteFileAncestorsToDb(
+        realm: Realm,
+        parentId: Int,
+        childId: Int,
+        driveId: Int,
+        okHttpClient: OkHttpClient,
+    ) {
+        if (parentId == 0) return
+
+        val localParent = getFileById(realm, parentId)
+        if (localParent != null) {
+            linkChildToParent(realm, parentId = parentId, childId = childId)
+            return
+        }
+
+        val remoteParent = ApiRepository.getFileDetails(File(id = parentId, driveId = driveId), okHttpClient).data ?: return
+
+        insertOrUpdateFile(realm, remoteParent)
+        linkChildToParent(realm, parentId = parentId, childId = childId)
+
+        saveRemoteFileAncestorsToDb(realm, parentId = remoteParent.parentId, childId = parentId, driveId, okHttpClient)
+    }
+
+    private fun linkChildToParent(realm: Realm, parentId: Int, childId: Int) {
+        val parentProxy = getFileById(realm, parentId) ?: return
+        val childProxy = getFileById(realm, childId) ?: return
+        if (!parentProxy.children.contains(childProxy)) {
+            realm.executeTransaction { runCatching { parentProxy.children.add(childProxy) } }
         }
     }
 
