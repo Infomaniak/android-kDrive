@@ -60,6 +60,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import java.util.Calendar
 
 object FileController {
@@ -886,6 +887,31 @@ object FileController {
                 realm.executeTransaction {
                     localFolder.children.add(file)
                 }
+            }
+        }
+    }
+
+    fun saveRemoteFileToDb(
+        remoteFile: File,
+        userDrive: UserDrive? = null,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+    ) {
+        getRealmInstance(userDrive).use { realm ->
+            val localFile = getFileById(realm, remoteFile.id)
+            insertOrUpdateFile(realm, remoteFile, localFile)
+
+            if (remoteFile.parentId == 0) return@use
+
+            val localParent = getFileById(realm, remoteFile.parentId)
+            if (localParent == null) {
+                val driveId = userDrive?.driveId ?: remoteFile.driveId
+                val remoteParent = ApiRepository.getFileDetails(File(id = remoteFile.parentId, driveId = driveId), okHttpClient).data
+                if (remoteParent != null) {
+                    remoteParent.children = RealmList(remoteFile)
+                    insertOrUpdateFile(realm, remoteParent)
+                }
+            } else {
+                addChild(remoteFile.parentId, remoteFile, realm)
             }
         }
     }
