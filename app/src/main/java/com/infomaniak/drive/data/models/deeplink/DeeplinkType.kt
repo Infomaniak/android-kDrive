@@ -40,6 +40,7 @@ import com.infomaniak.drive.data.models.deeplink.DeeplinkFolderRole.SharedWithMe
 import com.infomaniak.drive.data.models.deeplink.DeeplinkFolderRole.Trash
 import com.infomaniak.drive.ui.MainActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.core.network.models.exceptions.NetworkException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
@@ -158,11 +159,13 @@ sealed interface DeeplinkType : Parcelable {
                     val okHttpClient = AccountUtils.getHttpClient(userId)
 
                     val apiResponse = ApiRepository.getFileDetails(File(id = fileId, driveId = driveId), okHttpClient)
+                    if (apiResponse.error?.exception is NetworkException) throw NetworkException()
                     val remoteFile = apiResponse.data?.takeIf { apiResponse.isSuccess() } ?: return@runCatching false
 
                     FileController.saveRemoteFileToDb(remoteFile, userDrive, okHttpClient)
                     FileController.hasFile(fileId = fileId, userDrive = userDrive)
                 }.cancellable().getOrElse { throwable ->
+                    if (throwable is NetworkException) throw throwable
                     false
                 }
             }
