@@ -83,6 +83,7 @@ fun Context.saveToKDrive(externalFileUri: Uri) {
     Intent(this, SaveExternalFilesActivity::class.java).apply {
         action = Intent.ACTION_SEND
         putExtra(Intent.EXTRA_STREAM, externalFileUri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         putExtras(
             SaveExternalFilesActivityArgs(
                 userId = AccountUtils.currentUserId,
