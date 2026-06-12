@@ -41,6 +41,7 @@ Modular Android application for kDrive cloud storage by Infomaniak. Uses MVVM ar
 - Never commit `.env`, `local.properties`, or API keys to repository
 - Drive API tokens stored in Core's Room-backed user database
 - User files cached in Realm with offline support
+- **Realm migrations:** Any schema-affecting change to a Realm `RealmObject` or `EmbeddedRealmObject` must increment the matching `DB_VERSION` (`FileMigration` or `DriveMigration`) in `app/src/main/java/com/infomaniak/drive/data/cache/`. Update the corresponding migration block when existing data needs migration.
 - Bug tracker credentials defined in build.gradle.kts (safe values only)
 
 ## JIT Index
@@ -103,3 +104,4 @@ rg -n "R\.string\." app/src/main/
 - [ ] Hilt DI used for dependencies (no manual instantiation)
 - [ ] Background work uses WorkManager (not raw threads)
 - [ ] File operations use kDrive-specific utilities
+- [ ] When modifying Realm models, verify the matching `DB_VERSION` was incremented in `FileMigration.kt` or `DriveMigration.kt` and the migration block handles existing data when needed.

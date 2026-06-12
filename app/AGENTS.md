@@ -88,6 +88,7 @@ app/src/main/java/com/infomaniak/drive/
     - Use `@RealmClass` only where needed (for example, embedded Realm objects)
     - Example: `data/models/File.kt`
 - **DON'T**: Use Room for file data (Realm only)
+- **Realm migrations:** When adding, removing, renaming, or type-changing a persisted property, increment `DB_VERSION` in `FileMigration.kt` (for file/drive data) or `DriveMigration.kt` (for drive info data), and update the corresponding migration block when existing data needs migration.
 
 ### Activity Injection
 

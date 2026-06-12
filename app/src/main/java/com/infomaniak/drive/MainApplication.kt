@@ -249,9 +249,10 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
     }
 
     private fun configureSentry() {
+        val uiSettings = UiSettings(applicationContext)
         this.configureSentry(
             isDebug = BuildConfig.DEBUG,
-            isSentryTrackingEnabled = UiSettings(applicationContext).isSentryTrackingEnabled,
+            isSentryTrackingEnabled = { uiSettings.isSentryTrackingEnabled },
         )
     }
 

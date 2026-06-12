@@ -1,0 +1,2 @@
+- Fix crash when opening a file from kDrive with Qonto app
+- Diverse fixes and improvements

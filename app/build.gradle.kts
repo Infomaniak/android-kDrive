@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 /**
@@ -35,8 +36,8 @@ android {
         applicationId = "com.infomaniak.drive"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 5_017_002_01
-        versionName = "5.17.2"
+        versionCode = 5_017_003_01
+        versionName = "5.17.3"
 
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
@@ -66,8 +67,6 @@ android {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
     }
-
-    kotlinOptions { jvmTarget = javaVersion.toString() }
 
     buildTypes {
         release {
@@ -114,11 +113,17 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.valueOf("JVM_${javaVersion.name.substringAfter("VERSION_")}")
+    }
+}
+
 val isRelease = gradle.startParameter.taskNames.any { it.contains("release", ignoreCase = true) }
 
 val envProperties = rootProject.file("env.properties")
     .takeIf { it.exists() }
-    ?.let { file -> Properties().also { it.load(file.reader()) } }
+    ?.let { file -> Properties().also { props -> file.reader().use(props::load) } }
 
 val sentryAuthToken = envProperties?.getProperty("sentryAuthToken")
     .takeUnless { it.isNullOrBlank() }
