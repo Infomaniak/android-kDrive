@@ -22,6 +22,7 @@ import android.net.Uri
 import android.os.Parcelable
 import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.legacy.utils.clearStack
+import com.infomaniak.core.network.models.exceptions.NetworkException
 import com.infomaniak.drive.BuildConfig.DEBUG
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -40,7 +41,6 @@ import com.infomaniak.drive.data.models.deeplink.DeeplinkFolderRole.SharedWithMe
 import com.infomaniak.drive.data.models.deeplink.DeeplinkFolderRole.Trash
 import com.infomaniak.drive.ui.MainActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.core.network.models.exceptions.NetworkException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
@@ -104,9 +104,9 @@ sealed interface DeeplinkType : Parcelable {
             }
 
             private suspend fun DeeplinkExternalFilePath?.hasAccessTo(): DeeplinkType = when (this) {
-                is FilePreview -> ensureHasAccess(fileId, sharedWithMe = true)
-                is FilePreviewInFolder -> ensureHasAccess(fileId, sharedWithMe = true)
-                is Folder -> ensureHasAccess(fileId = folderId, sharedWithMe = true)
+                is FilePreview -> ensureSharedWithMeAccess(fileId = fileId, sourceDriveId = sourceDriveId)
+                is FilePreviewInFolder -> ensureSharedWithMeAccess(fileId = fileId, sourceDriveId = sourceDriveId)
+                is Folder -> ensureSharedWithMeAccess(fileId = folderId, sourceDriveId = sourceDriveId)
                 null -> this@Drive
             }
         }
@@ -134,6 +134,31 @@ sealed interface DeeplinkType : Parcelable {
                             || fetchAndSaveRemoteFileForAnyDrive(fileId, sharedWithMe)
                     }
                 } ?: hasDrive(sharedWithMe)
+            }
+
+            private suspend fun DeeplinkAction.ensureSharedWithMeAccess(fileId: Int, sourceDriveId: Int): DeeplinkType {
+                return takeIf { hasSharedWithMeAccess(fileId, sourceDriveId) } ?: Unmanaged.NotAccessible
+            }
+
+            private suspend fun DeeplinkAction.hasSharedWithMeAccess(fileId: Int, sourceDriveId: Int): Boolean {
+                return sharedWithMeCandidateUserIds(sourceDriveId).any { candidateUserId ->
+                    val userDrive = UserDrive(userId = candidateUserId, driveId = sourceDriveId, sharedWithMe = true)
+                    val hasAccess = FileController.hasFile(fileId = fileId, userDrive = userDrive)
+                            || fetchAndSaveRemoteFile(
+                        fileId,
+                        userId = candidateUserId,
+                        driveId = sourceDriveId,
+                        sharedWithMe = true
+                    )
+                    if (hasAccess) userId = candidateUserId
+                    hasAccess
+                }
+            }
+
+            private fun sharedWithMeCandidateUserIds(sourceDriveId: Int): List<Int> {
+                val knownUserIds = DriveInfosController.getDrives(driveId = sourceDriveId, sharedWithMe = null).map { it.userId }
+                val allUserIds = AccountUtils.getAllUsersSync().map { it.id }
+                return (knownUserIds + allUserIds).distinct().sortedByDescending { it == AccountUtils.currentUserId }
             }
 
             private suspend fun hasFile(fileId: Int, userId: Int, driveId: Int, sharedWithMe: Boolean): Boolean {
@@ -179,7 +204,7 @@ sealed interface DeeplinkType : Parcelable {
             }
 
             private fun DeeplinkAction.getDrives(sharedWithMe: Boolean): List<UserDrive> {
-                return DriveInfosController.getDrives(driveId = driveId)
+                return DriveInfosController.getDrives(driveId = driveId, sharedWithMe = sharedWithMe)
                     .sortedByDescending { it.userId == AccountUtils.currentUserId }
                     .map { UserDrive(userId = it.userId, driveId = it.id, sharedWithMe = sharedWithMe) }
             }

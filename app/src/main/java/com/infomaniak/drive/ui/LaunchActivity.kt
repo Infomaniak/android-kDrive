@@ -245,7 +245,14 @@ class LaunchActivity : EdgeToEdgeActivity() {
     }
 
     private suspend fun retrieveDeeplink(uri: Uri) {
-        deeplinkType = DeeplinkParser.parse(uri).ensureHasAccess()
+        val parsedDeeplink = DeeplinkParser.parse(uri)
+        deeplinkType = parsedDeeplink.ensureHasAccess()
+
+        if (deeplinkType is DeeplinkType.Unmanaged.NotAccessible) {
+            AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
+            deeplinkType = parsedDeeplink.ensureHasAccess()
+        }
+
         switchToDeeplinkTargetUser()
 
         if (deeplinkType !is DeeplinkType.Unmanaged) trackDeepLink(MatomoName.Internal)
