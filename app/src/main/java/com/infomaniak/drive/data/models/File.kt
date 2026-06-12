@@ -197,6 +197,7 @@ open class File(
     }
 
     fun isPDF() = getFileType() == ExtensionType.PDF
+    fun isVideo() = getFileType() == ExtensionType.VIDEO
 
     fun getFileType(): ExtensionType {
         return if (isFromUploads) getFileTypeFromExtension() else when (extensionType) {

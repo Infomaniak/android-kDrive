@@ -17,13 +17,16 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
+import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
+import androidx.media3.common.util.UnstableApi
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.ui.fileList.preview.playback.PreviewPlaybackFragment
 
 class PreviewSliderAdapter(
     manager: FragmentManager,
@@ -37,14 +40,14 @@ class PreviewSliderAdapter(
 
     override fun getItemCount() = files.size
 
+    @OptIn(UnstableApi::class)
     override fun createFragment(position: Int): Fragment {
         val file = getFile(position)
         val args = PreviewFragmentArgs(fileId = file.id, userDrive = userDrive, isPublicShared = isPublicShared).toBundle()
 
         return when (file.getFileType()) {
             ExtensionType.IMAGE -> PreviewPictureFragment()
-            ExtensionType.VIDEO -> PreviewVideoFragment()
-            ExtensionType.AUDIO -> PreviewMusicFragment()
+            ExtensionType.VIDEO, ExtensionType.AUDIO -> PreviewPlaybackFragment()
             ExtensionType.PDF -> PreviewPDFFragment()
             else -> if (file.isOnlyOfficePreview()) PreviewPDFFragment() else PreviewOtherFragment()
         }.apply { arguments = args }

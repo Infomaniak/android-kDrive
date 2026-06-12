@@ -92,6 +92,7 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
     }
 
     var geniusScanIsReady = false
+    var isVideoActivityInPIPMode = false
 
     private val appUpdateWorkerScheduler by lazy { AppUpdateScheduler(applicationContext) }
 
