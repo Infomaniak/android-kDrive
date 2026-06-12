@@ -69,6 +69,7 @@ import com.infomaniak.drive.utils.Utils
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
@@ -86,6 +87,8 @@ class LaunchActivity : EdgeToEdgeActivity() {
     private var isHelpShortcutPressed = false
     private var deeplinkType: DeeplinkType? = null
 
+    private class NetworkDeepLinkException : CancellationException()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -96,18 +99,21 @@ class LaunchActivity : EdgeToEdgeActivity() {
         trackScreen()
 
         lifecycleScope.launch {
+            try {
+                logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
+                handleLaunchArgs()
+                if (deeplinkType?.isHandled == false) {
+                    PublicShareUtils.openDeepLinkInBrowser(activity = this@LaunchActivity, intent.data.toString())
+                } else {
+                    startApp()
+                }
 
-            logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
-            handleLaunchArgs()
-            if (deeplinkType?.isHandled == false) {
-                PublicShareUtils.openDeepLinkInBrowser(activity = this@LaunchActivity, intent.data.toString())
-            } else {
-                startApp()
+                // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
+                // so that even when we return, the activity will still be closed.
+                finish()
+            } catch (_: NetworkDeepLinkException) {
+                // Activity was already closed by the deeplink error handler, nothing more to do.
             }
-
-            // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
-            // so that even when we return, the activity will still be closed.
-            finish()
         }
     }
 
@@ -221,9 +227,11 @@ class LaunchActivity : EdgeToEdgeActivity() {
         try {
             if (deeplink.path.contains("/app/share/")) processPublicShare(deeplink.path) else retrieveDeeplink(uri = deeplink.uri)
         } catch (throwable: ApiControllerNetworkException) {
-            Dispatchers.Main { showToast(R.string.errorNetwork) }
-            finishAndRemoveTask()
-            return@IO
+            Dispatchers.Main {
+                showToast(R.string.errorNetwork)
+                finishAndRemoveTask()
+            }
+            throw NetworkDeepLinkException()
         }
         SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: ${deeplink.path}")
     }
@@ -271,8 +279,11 @@ class LaunchActivity : EdgeToEdgeActivity() {
     private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
         when {
             error?.exception is ApiControllerNetworkException -> {
-                Dispatchers.Main { showToast(R.string.errorNetwork) }
-                finishAndRemoveTask()
+                Dispatchers.Main {
+                    showToast(R.string.errorNetwork)
+                    finishAndRemoveTask()
+                }
+                throw NetworkDeepLinkException()
             }
             error?.code == ErrorCode.PASSWORD_NOT_VALID -> {
                 setPublicShareActivityArgs(driveId, publicShareUuid, isPasswordNeeded = true)
