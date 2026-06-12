@@ -60,6 +60,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import java.util.Calendar
 
 object FileController {
@@ -887,6 +888,51 @@ object FileController {
                     localFolder.children.add(file)
                 }
             }
+        }
+    }
+
+    fun saveRemoteFileToDb(
+        remoteFile: File,
+        userDrive: UserDrive? = null,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+    ) {
+        getRealmInstance(userDrive).use { realm ->
+            val localFile = getFileById(realm, remoteFile.id)
+            insertOrUpdateFile(realm, remoteFile, localFile)
+
+            val driveId = userDrive?.driveId ?: remoteFile.driveId
+            saveRemoteFileAncestorsToDb(realm, parentId = remoteFile.parentId, childId = remoteFile.id, driveId, okHttpClient)
+        }
+    }
+
+    private tailrec fun saveRemoteFileAncestorsToDb(
+        realm: Realm,
+        parentId: Int,
+        childId: Int,
+        driveId: Int,
+        okHttpClient: OkHttpClient,
+    ) {
+        if (parentId == 0) return
+
+        val localParent = getFileById(realm, parentId)
+        if (localParent != null) {
+            linkChildToParent(realm, parentId = parentId, childId = childId)
+            return
+        }
+
+        val remoteParent = ApiRepository.getFileDetails(File(id = parentId, driveId = driveId), okHttpClient).data ?: return
+
+        insertOrUpdateFile(realm, remoteParent)
+        linkChildToParent(realm, parentId = parentId, childId = childId)
+
+        saveRemoteFileAncestorsToDb(realm, parentId = remoteParent.parentId, childId = parentId, driveId, okHttpClient)
+    }
+
+    private fun linkChildToParent(realm: Realm, parentId: Int, childId: Int) {
+        val parentProxy = getFileById(realm, parentId) ?: return
+        val childProxy = getFileById(realm, childId) ?: return
+        if (!parentProxy.children.contains(childProxy)) {
+            realm.executeTransaction { runCatching { parentProxy.children.add(childProxy) } }
         }
     }
 

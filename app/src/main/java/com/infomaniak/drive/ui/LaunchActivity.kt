@@ -23,14 +23,16 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import com.infomaniak.drive.databinding.ActivityLaunchBinding
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
-import com.infomaniak.core.legacy.utils.showToast
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.ui.showToast
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
@@ -76,6 +78,8 @@ import com.infomaniak.core.network.models.exceptions.NetworkException as ApiCont
 @SuppressLint("CustomSplashScreen")
 class LaunchActivity : EdgeToEdgeActivity() {
 
+    private val binding by lazy { ActivityLaunchBinding.inflate(layoutInflater) }
+
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var mainActivityExtras: Bundle? = null
     private var publicShareActivityExtras: Bundle? = null
@@ -84,6 +88,8 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setContentView(binding.root)
 
         setDefaultLocaleIfNeeded()
 
@@ -107,7 +113,10 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
     private suspend fun handleLaunchArgs() {
         when (val type = LaunchArgsType.from(navigationArgs, intent)) {
-            is Deeplink -> handleDeeplink(type)
+            is Deeplink -> {
+                withContext(Dispatchers.Main) { binding.loadingIndicator.visibility = View.VISIBLE }
+                handleDeeplink(type)
+            }
             is Notification -> handleNotificationDestinationIntent(type.navArgs)
             is Shortcut -> handleShortcuts(type.tag)
             null -> Unit
@@ -209,7 +218,13 @@ class LaunchActivity : EdgeToEdgeActivity() {
         // external instead of internal if you already have access to the files. So we set it here
         if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
 
-        if (deeplink.path.contains("/app/share/")) processPublicShare(deeplink.path) else retrieveDeeplink(uri = deeplink.uri)
+        try {
+            if (deeplink.path.contains("/app/share/")) processPublicShare(deeplink.path) else retrieveDeeplink(uri = deeplink.uri)
+        } catch (throwable: ApiControllerNetworkException) {
+            Dispatchers.Main { showToast(R.string.errorNetwork) }
+            finishAndRemoveTask()
+            return@IO
+        }
         SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: ${deeplink.path}")
     }
 
@@ -230,7 +245,14 @@ class LaunchActivity : EdgeToEdgeActivity() {
     }
 
     private suspend fun retrieveDeeplink(uri: Uri) {
-        deeplinkType = DeeplinkParser.parse(uri).ensureHasAccess()
+        val parsedDeeplink = DeeplinkParser.parse(uri)
+        deeplinkType = parsedDeeplink.ensureHasAccess()
+
+        if (deeplinkType is DeeplinkType.Unmanaged.NotAccessible) {
+            AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
+            deeplinkType = parsedDeeplink.ensureHasAccess()
+        }
+
         switchToDeeplinkTargetUser()
 
         if (deeplinkType !is DeeplinkType.Unmanaged) trackDeepLink(MatomoName.Internal)
