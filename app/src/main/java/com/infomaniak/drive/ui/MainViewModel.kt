@@ -90,6 +90,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import java.util.Date
+import java.util.concurrent.ConcurrentHashMap
 
 class MainViewModel(
     appContext: Application,
@@ -117,7 +118,7 @@ class MainViewModel(
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<FileId>()
 
-    private val pendingCopyToDriveImports = mutableMapOf<Int, String>()
+    private val pendingCopyToDriveImports = ConcurrentHashMap<Int, String>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
     val isBulkDownloadRunning = MutableLiveData<Boolean>()
 
