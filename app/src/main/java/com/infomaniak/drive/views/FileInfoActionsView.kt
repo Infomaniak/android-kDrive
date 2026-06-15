@@ -172,7 +172,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         leaveShare.isVisible = rights.canLeave == true
         cancelExternalImport.isVisible = file.isImporting()
         moveFile.isVisible = rights.canMove == true && !isSharedWithMe && !file.isImporting()
-        copyToDrive.isVisible = rights.canRead == true && !isSharedWithMe && !file.isImporting() && hasOtherDrivesAvailable
+        copyToDrive.isVisible = isCopyToDriveVisible(file, rights)
         renameFile.isVisible = rights.canRename == true && !file.isImporting()
         goToFolder.isVisible = isGoToFolderVisible()
     }
@@ -227,6 +227,10 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     private fun computeHasOtherDrivesAvailable(): Boolean {
         return DriveInfosController.hasEligibleDestinationDrives(AccountUtils.currentUserId)
+    }
+
+    private fun isCopyToDriveVisible(file: File, rights: Rights): Boolean {
+        return rights.canRead == true && !isSharedWithMe && !file.isImporting() && hasOtherDrivesAvailable
     }
 
     private fun isGoToFolderVisible(): Boolean {
