@@ -184,7 +184,7 @@ sealed interface DeeplinkType : Parcelable {
                     val okHttpClient = AccountUtils.getHttpClient(userId)
 
                     val apiResponse = ApiRepository.getFileDetails(File(id = fileId, driveId = driveId), okHttpClient)
-                    if (apiResponse.error?.exception is NetworkException) throw NetworkException()
+                    (apiResponse.error?.exception as? NetworkException)?.let { throw it }
                     val remoteFile = apiResponse.data?.takeIf { apiResponse.isSuccess() } ?: return@runCatching false
 
                     FileController.saveRemoteFileToDb(remoteFile, userDrive, okHttpClient)
