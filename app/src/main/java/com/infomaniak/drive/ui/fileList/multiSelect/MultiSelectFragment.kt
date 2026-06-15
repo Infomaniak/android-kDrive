@@ -113,7 +113,13 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
 
                 fileIds.forEach { fileId ->
                     mediator.addSource(
-                        mainViewModel.copyFileToAnotherDrive(fileId, sourceDriveId, targetDriveId, result.folderId),
+                        mainViewModel.copyFileToAnotherDrive(
+                            fileId = fileId,
+                            fileName = pendingCopyToDriveFileName,
+                            sourceDriveId = sourceDriveId,
+                            destDriveId = targetDriveId,
+                            destFolderId = result.folderId,
+                        ),
                         mainViewModel.updateMultiSelectMediator(mediator),
                     )
                 }
