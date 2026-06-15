@@ -21,6 +21,7 @@ import android.content.Context
 import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.legacy.utils.removeAccents
 import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.models.exceptions.NetworkException
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
@@ -920,7 +921,11 @@ object FileController {
             return
         }
 
-        val remoteParent = ApiRepository.getFileDetails(File(id = parentId, driveId = driveId), okHttpClient).data ?: return
+        val response = ApiRepository.getFileDetails(File(id = parentId, driveId = driveId), okHttpClient)
+        if (response.error?.exception is NetworkException) {
+            throw NetworkException()
+        }
+        val remoteParent = response.data?.takeIf { response.isSuccess() } ?: return
 
         insertOrUpdateFile(realm, remoteParent)
         linkChildToParent(realm, parentId = parentId, childId = childId)
