@@ -922,9 +922,7 @@ object FileController {
         }
 
         val response = ApiRepository.getFileDetails(File(id = parentId, driveId = driveId), okHttpClient)
-        if (response.error?.exception is NetworkException) {
-            throw NetworkException()
-        }
+        (response.error?.exception as? NetworkException)?.let { throw it }
         val remoteParent = response.data?.takeIf { response.isSuccess() } ?: return
 
         insertOrUpdateFile(realm, remoteParent)
