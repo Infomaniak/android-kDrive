@@ -932,10 +932,8 @@ object FileController {
     }
 
     private fun linkChildToParent(realm: Realm, parentId: Int, childId: Int) {
-        val parentProxy = getFileById(realm, parentId) ?: return
-        val childProxy = getFileById(realm, childId) ?: return
-        if (!parentProxy.children.contains(childProxy)) {
-            realm.executeTransaction { runCatching { parentProxy.children.add(childProxy) } }
+        getFileById(realm, childId)?.let { childProxy ->
+            addChild(localFolderId = parentId, newFile = childProxy, realm = realm)
         }
     }
 
