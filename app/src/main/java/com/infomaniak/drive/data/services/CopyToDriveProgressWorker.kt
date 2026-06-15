@@ -91,7 +91,11 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     }
 
     private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, isSuccess: Boolean?) {
-        mqttNotificationsObserver?.let { MqttClientWrapper.removeObserver(it) }
+        val observer = mqttNotificationsObserver ?: return
+        mqttNotificationsObserver = null
+
+        if (::timer.isInitialized) timer.cancel()
+        MqttClientWrapper.removeObserver(observer)
         notificationManagerCompat.cancel(notificationId)
         isSuccess?.let { showResultNotification(it) }
         completer.set(Result.success())

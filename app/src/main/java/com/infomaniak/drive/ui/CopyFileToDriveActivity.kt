@@ -34,7 +34,6 @@ import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ActivityCopyFileToDriveBinding
@@ -45,7 +44,6 @@ import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.SingleOperation
 import com.infomaniak.drive.utils.Utils.TARGET_DRIVE_ID_TAG
-import com.infomaniak.drive.utils.setFileItemWithoutCategories
 import com.infomaniak.drive.views.FileInfoActionsView.Companion.SINGLE_OPERATION_CUSTOM_TAG
 import dagger.hilt.android.AndroidEntryPoint
 

@@ -100,7 +100,7 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         it.whenResultIsOk { data ->
             data?.extras?.let { bundle ->
                 val result = SelectFolderActivityArgs.fromBundle(bundle)
-                val targetDriveId = result.customArgs?.getInt(Utils.TARGET_DRIVE_ID_TAG) ?: -1
+                val targetDriveId = result.customArgs?.getInt(Utils.TARGET_DRIVE_ID_TAG, -1) ?: -1
 
                 val fileIds = pendingCopyToDriveFileIds
                 val sourceDriveId = pendingCopyToDriveSourceId
