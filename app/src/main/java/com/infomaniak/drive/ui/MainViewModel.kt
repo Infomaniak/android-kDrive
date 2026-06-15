@@ -58,9 +58,13 @@ import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
+import com.infomaniak.drive.data.models.MqttAction
+import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.models.file.SpecialFolder.Trash
+import com.infomaniak.drive.data.services.CopyToDriveProgressWorker
 import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
@@ -112,6 +116,8 @@ class MainViewModel(
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<FileId>()
+
+    private val pendingCopyToDriveImports = mutableMapOf<Int, String>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
     val isBulkDownloadRunning = MutableLiveData<Boolean>()
 
@@ -388,9 +394,37 @@ class MainViewModel(
         }
     }
 
-    fun copyFileToAnotherDrive(fileId: Int, sourceDriveId: Int, destDriveId: Int, destFolderId: Int) = liveData(Dispatchers.IO) {
+    fun copyFileToAnotherDrive(
+        fileId: Int,
+        fileName: String,
+        sourceDriveId: Int,
+        destDriveId: Int,
+        destFolderId: Int,
+    ) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.copyFileToAnotherDrive(sourceDriveId, fileId, destDriveId, destFolderId)
+
+
+        apiResponse.data?.forEach { externalImport ->
+            pendingCopyToDriveImports[externalImport.id] = fileName
+            MqttClientWrapper.start(externalImport.id)
+            CopyToDriveProgressWorker.scheduleWork(getContext(), externalImport.id, fileName)
+        }
+
         emit(mapCopyApiResponseToFileResult(apiResponse))
+    }
+
+    fun resolveCopyToDriveNotification(notification: MqttNotification): CopyToDriveResult? {
+        val importId = notification.importId ?: return null
+        val fileName = pendingCopyToDriveImports[importId] ?: return null
+
+        val isSuccess = when (notification.action) {
+            MqttAction.EXTERNAL_IMPORT_FINISHED -> true
+            MqttAction.EXTERNAL_IMPORT_ERROR -> false
+            else -> return null
+        }
+
+        pendingCopyToDriveImports.remove(importId)
+        return CopyToDriveResult(isSuccess, fileName)
     }
 
     fun duplicateFile(
@@ -634,6 +668,8 @@ class MainViewModel(
         val data: Any? = null,
         val errorCode: String? = null
     )
+
+    data class CopyToDriveResult(val isSuccess: Boolean, val fileName: String)
 
     data class MultiSelectMediatorState(
         var numberOfSuccessfulActions: Int,
