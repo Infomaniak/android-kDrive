@@ -119,6 +119,7 @@
     <string name="buttonConfirmNotify">Bekreft og varsle</string>
     <string name="buttonConvertToDropBox">Konverter til drop box</string>
     <string name="buttonCopy">Kopier</string>
+    <string name="buttonCopyToDrive">Kopier til en annen stasjon</string>
     <string name="buttonCreate">Opprett</string>
     <string name="buttonCreateFolder">Opprett mappe</string>
     <string name="buttonCreateOnlyOfficeCopy">Opprett en .%s-kopi</string>
@@ -203,6 +204,8 @@
     <string name="commonFolderTitle">Organisasjonsmappe</string>
     <string name="contentDescriptionIsSelected">Er valgt</string>
     <string name="convertToDropboxTitle">Gjør om til dropboks %s</string>
+    <string name="copyToDriveStarted">%s overføres til en annen stasjon</string>
+    <string name="copyToDriveSuccess">%s er overført til en annen stasjon</string>
     <string name="createCategoryTitle">Opprett en kategori</string>
     <string name="createCommonFolderAllUsersDescription">Alle kDrive %s-brukere vil automatisk ha tilgang til denne mappen.</string>
     <string name="createCommonFolderSuccess">Organisasjonsmappe opprettet</string>
@@ -260,6 +263,7 @@
     <string name="errorCache">Feil ved mellomlagring</string>
     <string name="errorCategoryAlreadyExists">En kategori med samme navn finnes allerede</string>
     <string name="errorConflict">Et element med samme navn finnes allerede på denne plasseringen</string>
+    <string name="errorCopyToDrive">Overføring til en annen stasjon mislyktes</string>
     <string name="errorDelete">Feil ved sletting</string>
     <string name="errorDeviceStorage">Manglende lagringsplass på enheten</string>
     <string name="errorDownloadPermission">Du må legge til minst én fil som du har tillatelse til å laste ned</string>

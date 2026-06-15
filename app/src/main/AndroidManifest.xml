@@ -142,6 +142,11 @@
         </activity>
 
         <activity
+            android:name=".ui.CopyFileToDriveActivity"
+            android:configChanges="orientation|screenSize|layoutDirection"
+            android:label="@string/buttonCopyToDrive" />
+
+        <activity
             android:name=".ui.SaveExternalFilesActivity"
             android:configChanges="orientation|screenSize|layoutDirection"
             android:excludeFromRecents="true"

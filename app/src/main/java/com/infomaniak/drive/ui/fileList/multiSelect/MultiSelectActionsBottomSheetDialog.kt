@@ -76,6 +76,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
         configureDownload()
         configureMoveFile()
         configureDuplicateFile()
+        configureCopyToDrive()
         configureRestoreFileIn()
         configureRestoreFileToOriginalPlace()
         configureDeletePermanently()
@@ -174,6 +175,10 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
         binding.duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
     }
 
+    protected open fun configureCopyToDrive() {
+        binding.copyToDrive.isGone = true
+    }
+
     protected open fun configureRestoreFileIn() {
         binding.restoreFileIn.isGone = true
     }
@@ -247,6 +252,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
             SelectDialogAction.ADD_OFFLINE -> BulkOperationType.ADD_OFFLINE
             SelectDialogAction.REMOVE_OFFLINE -> BulkOperationType.REMOVE_OFFLINE
             SelectDialogAction.DUPLICATE -> BulkOperationType.COPY
+            SelectDialogAction.COPY_TO_DRIVE -> null
             SelectDialogAction.MOVE -> BulkOperationType.MOVE
             SelectDialogAction.RESTORE_IN -> BulkOperationType.RESTORE_IN
             SelectDialogAction.RESTORE_TO_ORIGIN -> BulkOperationType.RESTORE_TO_ORIGIN
@@ -255,7 +261,9 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
         }
 
         (parentFragment as MultiSelectFragment).apply {
-            if (finalType == null) {
+            if (type == SelectDialogAction.COPY_TO_DRIVE) {
+                copyFilesToAnotherDrive()
+            } else if (finalType == null) {
                 closeMultiSelect()
             } else {
                 when (finalType) {
@@ -283,6 +291,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
         ADD_FAVORITES, REMOVE_FAVORITES,
         ADD_OFFLINE, REMOVE_OFFLINE,
         DUPLICATE,
+        COPY_TO_DRIVE,
         MOVE,
         COLOR_FOLDER,
         RESTORE_IN, RESTORE_TO_ORIGIN, DELETE_PERMANENTLY,

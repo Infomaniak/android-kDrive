@@ -313,6 +313,11 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.duplicateFile(file, destinationId), POST)
     }
 
+    fun copyFileToAnotherDrive(sourceDriveId: Int, sourceFileId: Int, destDriveId: Int, destFolderId: Int): ApiResponse<JsonElement> {
+        val body = mapOf("source_drive_id" to sourceDriveId, "source_file_id" to sourceFileId)
+        return callApi(ApiRoutes.copyFileToAnotherDrive(destDriveId, destFolderId), POST, body)
+    }
+
     fun moveFile(file: File, newParent: File): ApiResponse<CancellableAction> {
         return callApi(ApiRoutes.moveFile(file, newParent.id), POST)
     }

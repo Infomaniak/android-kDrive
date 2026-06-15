@@ -119,6 +119,7 @@
     <string name="buttonConfirmNotify">Bekræft og underret</string>
     <string name="buttonConvertToDropBox">Konverter til indleveringsboks</string>
     <string name="buttonCopy">Kopiér</string>
+    <string name="buttonCopyToDrive">Kopier til et andet drev</string>
     <string name="buttonCreate">Opret</string>
     <string name="buttonCreateFolder">Opret mappe</string>
     <string name="buttonCreateOnlyOfficeCopy">Opret en .%s kopi</string>
@@ -203,6 +204,8 @@
     <string name="commonFolderTitle">Organisationsmappe</string>
     <string name="contentDescriptionIsSelected">Er valgt</string>
     <string name="convertToDropboxTitle">Konverter til indleveringsboks %s</string>
+    <string name="copyToDriveStarted">%s overføres til et andet drev</string>
+    <string name="copyToDriveSuccess">%s er blevet overført til et andet drev</string>
     <string name="createCategoryTitle">Opret en kategori</string>
     <string name="createCommonFolderAllUsersDescription">Alle brugere af kDrive %s får automatisk adgang til denne mappe.</string>
     <string name="createCommonFolderSuccess">Organisationsmappe oprettet med succes</string>
@@ -260,6 +263,7 @@
     <string name="errorCache">Cache-fejl</string>
     <string name="errorCategoryAlreadyExists">En kategori med samme navn findes allerede</string>
     <string name="errorConflict">Der findes allerede et element med samme navn på dette sted</string>
+    <string name="errorCopyToDrive">Overførsel til et andet drev mislykkedes</string>
     <string name="errorDelete">Sletningsfejl</string>
     <string name="errorDeviceStorage">Utilstrækkelig enhedslagerplads</string>
     <string name="errorDownloadPermission">Du skal tilføje mindst én fil, som du har tilladelse til at downloade</string>

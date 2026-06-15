@@ -247,6 +247,23 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         )
     }
 
+    override fun onCopyFileToDrive(destinationFolder: File) {
+        mainViewModel.copyFileToAnotherDrive(
+            fileId = currentFile.id,
+            sourceDriveId = currentFile.driveId,
+            destDriveId = destinationFolder.driveId,
+            destFolderId = destinationFolder.id,
+        ).observe(viewLifecycleOwner) { fileResult ->
+            val message = if (fileResult.isSuccess) {
+                getString(R.string.copyToDriveStarted, currentFile.name)
+            } else {
+                getString(fileResult.errorResId ?: R.string.errorCopyToDrive)
+            }
+            showSnackbar(message)
+            toggleBottomSheet(shouldShow = true)
+        }
+    }
+
     override fun onDuplicateFile(destinationFolder: File) {
         mainViewModel.duplicateFile(currentFile, destinationFolder.id).observe(viewLifecycleOwner) { fileResult ->
             if (fileResult.isSuccess) {

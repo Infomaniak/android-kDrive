@@ -17,6 +17,20 @@
  */
 package com.infomaniak.drive.ui.fileList.multiSelect
 
+import android.view.View
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
+import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.utils.AccountUtils
 
-class FileListMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.FileListFileAction)
+class FileListMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.FileListFileAction) {
+
+    override fun configureCopyToDrive() {
+        val isSingleFile = navigationArgs.fileIds.size == 1 && !navigationArgs.isAllSelected
+        val userId = navigationArgs.userDrive?.userId ?: AccountUtils.currentUserId
+        val hasOtherDrivesAvailable = DriveInfosController.hasEligibleDestinationDrives(userId)
+        binding.copyToDrive.apply {
+            visibility = if (isSingleFile && hasOtherDrivesAvailable) View.VISIBLE else View.GONE
+            setOnClickListener { onActionSelected(SelectDialogAction.COPY_TO_DRIVE) }
+        }
+    }
+}
