@@ -27,18 +27,23 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.navArgs
+import coil3.ImageLoader
+import coil3.imageLoader
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ui.view.extension.setMargins
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.drive.data.models.coil.ImageLoaderType
 import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.databinding.FragmentSelectRootFolderBinding
 import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseRootFolderFragment
 import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.TypeFolder
 import com.infomaniak.drive.utils.setFileItem
 import kotlinx.coroutines.CoroutineStart
@@ -61,6 +66,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
     override val uiSettings by lazy { UiSettings(requireContext()) }
 
     private val recentFoldersBindings = mutableListOf<CardviewFileListBinding>()
+    private var newImageLoader: ImageLoader? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentSelectRootFolderBinding.inflate(inflater, container, false).also {
@@ -72,6 +78,14 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val userDrive = navigationArgs.userDrive
+
+        newImageLoader = if (userDrive.userId != AccountUtils.currentUserId) {
+            (requireContext().applicationContext as MainApplication).newImageLoader(
+                ImageLoaderType.SpecificUser(userDrive.userId)
+            )
+        } else {
+            null
+        }
 
         fileListViewModel.updateRootFiles(userDrive)
 
@@ -119,6 +133,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         recentFoldersBindings.clear()
+        newImageLoader = null
         _binding = null
     }
 
@@ -153,7 +168,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
                 )
             )
         }
-        itemViewFile.setFileItem(file = file, typeFolder = TypeFolder.recentFolder)
+        itemViewFile.setFileItem(file = file, imageLoader = newImageLoader ?: binding.root.context.imageLoader, typeFolder = TypeFolder.recentFolder)
     }
 
     override fun fileListDirections(
