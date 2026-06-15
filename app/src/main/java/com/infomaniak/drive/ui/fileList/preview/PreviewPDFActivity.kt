@@ -182,6 +182,7 @@ class PreviewPDFActivity : EdgeToEdgeActivity(), OnItemClickListener {
     override fun manageCategoriesClicked(fileId: Int) = Unit
     override fun onCacheAddedToOffline() = Unit
     override fun onDeleteFile(onApiResponse: () -> Unit) = Unit
+    override fun onCopyFileToDrive(destinationFolder: File) = Unit
     override fun onDuplicateFile(destinationFolder: File) = Unit
     override fun onLeaveShare(onApiResponse: () -> Unit) = Unit
     override fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean) = Unit

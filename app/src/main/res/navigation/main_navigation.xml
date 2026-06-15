@@ -445,6 +445,24 @@
     </activity>
 
     <activity
+        android:id="@+id/copyFileToDriveActivity"
+        android:name="com.infomaniak.drive.ui.CopyFileToDriveActivity"
+        android:label="CopyFileToDriveActivity"
+        tools:layout="@layout/activity_copy_file_to_drive">
+        <argument
+            android:name="fileIds"
+            app:argType="integer[]" />
+        <argument
+            android:name="sourceDriveId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="userId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+    </activity>
+
+    <activity
         android:id="@+id/saveExternalFilesActivity"
         android:name="com.infomaniak.drive.ui.SaveExternalFilesActivity"
         android:label="SaveExternalFilesActivity"

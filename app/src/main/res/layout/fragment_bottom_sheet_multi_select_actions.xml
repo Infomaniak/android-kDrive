@@ -133,6 +133,14 @@
         app:text="@string/buttonDuplicate" />
 
     <com.infomaniak.drive.views.BottomSheetItemView
+        android:id="@+id/copyToDrive"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_drive"
+        app:iconTint="@color/iconColor"
+        app:text="@string/buttonCopyToDrive" />
+
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/restoreFileIn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

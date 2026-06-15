@@ -326,6 +326,7 @@ class GalleryFragment : MultiSelectFragment(
             BulkOperationType.MOVE,
             BulkOperationType.MANAGE_CATEGORIES,
             BulkOperationType.COLOR_FOLDER,
+            BulkOperationType.COPY_TO_DRIVE,
             BulkOperationType.RESTORE_IN, BulkOperationType.RESTORE_TO_ORIGIN, BulkOperationType.DELETE_PERMANENTLY -> Unit
         }
     }

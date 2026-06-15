@@ -40,6 +40,7 @@ import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.network.NetworkAvailability
 import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
@@ -387,6 +388,11 @@ class MainViewModel(
         }
     }
 
+    fun copyFileToAnotherDrive(fileId: Int, sourceDriveId: Int, destDriveId: Int, destFolderId: Int) = liveData(Dispatchers.IO) {
+        val apiResponse = ApiRepository.copyFileToAnotherDrive(sourceDriveId, fileId, destDriveId, destFolderId)
+        emit(mapCopyApiResponseToFileResult(apiResponse))
+    }
+
     fun duplicateFile(
         file: File,
         destinationId: Int? = null,
@@ -640,5 +646,15 @@ class MainViewModel(
 
         private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"
         private const val SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY = "mustOpenUploadShortcut"
+
+        internal fun mapCopyApiResponseToFileResult(apiResponse: ApiResponse<*>): FileResult {
+            val isSuccess = apiResponse.result == ApiResponseStatus.SUCCESS
+                    || apiResponse.result == ApiResponseStatus.ASYNCHRONOUS
+            return FileResult(
+                isSuccess = isSuccess,
+                errorCode = apiResponse.error?.code,
+                errorResId = if (isSuccess) null else apiResponse.translateError(defaultMessage = R.string.errorCopyToDrive),
+            )
+        }
     }
 }

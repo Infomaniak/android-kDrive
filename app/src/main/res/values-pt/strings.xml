@@ -119,6 +119,7 @@
     <string name="buttonConfirmNotify">Confirmar e notificar</string>
     <string name="buttonConvertToDropBox">Converter para caixa de depósito</string>
     <string name="buttonCopy">Copiar</string>
+    <string name="buttonCopyToDrive">Copiar para outra unidade</string>
     <string name="buttonCreate">Criar</string>
     <string name="buttonCreateFolder">Criar pasta</string>
     <string name="buttonCreateOnlyOfficeCopy">Criar uma cópia .%s</string>
@@ -203,6 +204,8 @@
     <string name="commonFolderTitle">Pasta de organização</string>
     <string name="contentDescriptionIsSelected">Está selecionado</string>
     <string name="convertToDropboxTitle">Converter para caixa de depósito %s</string>
+    <string name="copyToDriveStarted">%s está a ser transferido para outra unidade</string>
+    <string name="copyToDriveSuccess">%s foi transferido para outra unidade</string>
     <string name="createCategoryTitle">Criar uma categoria</string>
     <string name="createCommonFolderAllUsersDescription">Todos os utilizadores do kDrive %s terão automaticamente acesso a esta pasta.</string>
     <string name="createCommonFolderSuccess">Pasta de organização criada com sucesso</string>
@@ -260,6 +263,7 @@
     <string name="errorCache">Erro de cache</string>
     <string name="errorCategoryAlreadyExists">Já existe uma categoria com o mesmo nome</string>
     <string name="errorConflict">Já existe um elemento com o mesmo nome neste local</string>
+    <string name="errorCopyToDrive">A transferência para outra unidade falhou</string>
     <string name="errorDelete">Erro ao eliminar</string>
     <string name="errorDeviceStorage">Armazenamento do dispositivo insuficiente</string>
     <string name="errorDownloadPermission">Tem de adicionar pelo menos um ficheiro que tenha permissão para transferir</string>

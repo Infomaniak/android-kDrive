@@ -123,6 +123,7 @@
     <string name="buttonConfirmNotify">Potwierdź i powiadom</string>
     <string name="buttonConvertToDropBox">Konwertuj na skrzynkę odbiorczą</string>
     <string name="buttonCopy">Kopiuj</string>
+    <string name="buttonCopyToDrive">Kopiuj na inny dysk</string>
     <string name="buttonCreate">Utwórz</string>
     <string name="buttonCreateFolder">Utwórz folder</string>
     <string name="buttonCreateOnlyOfficeCopy">Utwórz kopię .%s</string>
@@ -207,6 +208,8 @@
     <string name="commonFolderTitle">Folder organizacyjny</string>
     <string name="contentDescriptionIsSelected">Jest zaznaczony</string>
     <string name="convertToDropboxTitle">Konwertuj na skrzynkę nadawczą %s</string>
+    <string name="copyToDriveStarted">%s jest w trakcie przesyłania na inny dysk</string>
+    <string name="copyToDriveSuccess">%s przeniesiono na inny dysk</string>
     <string name="createCategoryTitle">Utwórz kategorię</string>
     <string name="createCommonFolderAllUsersDescription">Wszyscy użytkownicy kDrive %s automatycznie otrzymają dostęp do tego folderu.</string>
     <string name="createCommonFolderSuccess">Folder organizacyjny został pomyślnie utworzony</string>
@@ -270,6 +273,7 @@
     <string name="errorCache">Błąd buforowania</string>
     <string name="errorCategoryAlreadyExists">Kategoria o tej samej nazwie już istnieje</string>
     <string name="errorConflict">Element o tej samej nazwie już istnieje w tym miejscu</string>
+    <string name="errorCopyToDrive">Przesyłanie na inny dysk nie powiodło się</string>
     <string name="errorDelete">Błąd usuwania</string>
     <string name="errorDeviceStorage">Niewystarczająca pamięć urządzenia</string>
     <string name="errorDownloadPermission">Musisz dodać co najmniej jeden plik, który masz uprawnienia do pobrania</string>
