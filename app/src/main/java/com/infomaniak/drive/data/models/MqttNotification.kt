@@ -43,6 +43,10 @@ data class MqttNotification(
     @SerializedName("action_uuid")
     val actionUuid: String? = null,
     val progress: ActionProgress? = null,
+
+    // Only for external import progress notification
+    @SerializedName("import_progress")
+    val importProgress: ImportProgress? = null,
 ) {
     fun isExternalImportNotification() = importId != null
 

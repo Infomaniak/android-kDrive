@@ -290,6 +290,7 @@ class FileInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), FileInfo
     override fun onCopyFileToDrive(destinationFolder: File) {
         mainViewModel.copyFileToAnotherDrive(
             fileId = currentFile.id,
+            fileName = currentFile.name,
             sourceDriveId = currentFile.driveId,
             destDriveId = destinationFolder.driveId,
             destFolderId = destinationFolder.id,

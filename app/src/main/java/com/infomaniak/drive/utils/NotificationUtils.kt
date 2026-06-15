@@ -45,6 +45,10 @@ object NotificationUtils : NotificationUtilsCore() {
         return progressNotification(getString(R.string.fileListCopyStartedSnackbar), R.drawable.ic_copy)
     }
 
+    fun Context.copyToDriveProgressNotification(): NotificationCompat.Builder {
+        return progressNotification(getString(R.string.buttonCopyToDrive), R.drawable.ic_drive)
+    }
+
     fun Context.trashOperationProgressNotification(): NotificationCompat.Builder {
         return progressNotification(getString(R.string.fileListDeletionStartedSnackbar), R.drawable.ic_bin)
     }

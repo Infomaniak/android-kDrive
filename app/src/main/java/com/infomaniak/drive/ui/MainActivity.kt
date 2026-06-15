@@ -107,6 +107,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
+import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
@@ -220,6 +221,7 @@ class MainActivity : BaseActivity() {
         observeDownloadCancellation()
         observeFailureDownloadWorkerOffline()
         observeCurrentUserAvatar()
+        observeCopyToDriveResult()
 
         AppLockManager.scheduleLockIfNeeded(
             targetActivity = this,
@@ -364,6 +366,19 @@ class MainActivity : BaseActivity() {
     private fun observeCurrentUserAvatar() {
         AccountUtils.currentConnectedUserFlow.observe(this) {
             setBottomNavigationUserAvatar(this@MainActivity)
+        }
+    }
+
+    private fun observeCopyToDriveResult() {
+        MqttClientWrapper.observe(this) { notification ->
+            mainViewModel.resolveCopyToDriveNotification(notification)?.let { result ->
+                val message = if (result.isSuccess) {
+                    getString(R.string.copyToDriveSuccess, result.fileName)
+                } else {
+                    getString(R.string.errorCopyToDrive)
+                }
+                showSnackbar(title = message, anchor = getMainFab())
+            }
         }
     }
 
