@@ -32,7 +32,7 @@ enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successM
     TRASH(R.string.fileListDeletionInProgressSnackbar, R.plurals.fileListMoveTrashConfirmationSnackbar),
     MOVE(R.string.fileListMoveInProgressSnackbar, R.plurals.fileListMoveFileConfirmationSnackbarAndroid),
     COPY(R.string.fileListCopyInProgressSnackbar, R.plurals.fileListDuplicationConfirmationSnackbar),
-    COPY_TO_DRIVE(R.string.copyToDriveStarted, 0),
+    COPY_TO_DRIVE(0, 0),
     COLOR_FOLDER(0, R.plurals.fileListColorFolderConfirmationSnackbar),
     MANAGE_CATEGORIES(0, 0),
 
