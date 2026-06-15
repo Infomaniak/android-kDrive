@@ -185,7 +185,7 @@ object DriveInfosController {
     fun hasSingleDrive(userId: Int): Boolean = getDrivesCount(userId) == 1L
 
     fun getEligibleDestinationDrives(userId: Int?, excludedDriveId: Int?): List<Drive> {
-        return getDrives(userId = userId).filter { it.id != excludedDriveId && !it.maintenance }
+        return getDrives(userId = userId, sharedWithMe = null).filter { it.id != excludedDriveId && !it.maintenance }
     }
 
     fun hasEligibleDestinationDrives(userId: Int?): Boolean {
