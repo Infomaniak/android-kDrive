@@ -25,7 +25,6 @@ class SelectDriveViewModel : ViewModel() {
     val selectedUserId = MutableLiveData<Int>()
     val selectedDrive = MutableLiveData<Drive>()
 
-    var showSharedWithMe: Boolean = false
     var excludedDriveId: Int? = null
     var showUserSelection: Boolean = true
 }
