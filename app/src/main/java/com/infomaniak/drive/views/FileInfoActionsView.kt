@@ -597,8 +597,10 @@ class FileInfoActionsView @JvmOverloads constructor(
                         SingleOperation.COPY.name -> onDuplicateFile(file)
                         SingleOperation.MOVE.name -> onMoveFile(file, isSharedWithMe)
                         SingleOperation.COPY_TO_DRIVE.name -> {
-                            val targetDriveId = customArgs.getInt(TARGET_DRIVE_ID_TAG, AccountUtils.currentDriveId)
-                            onCopyFileToDrive(File(id = folderId, name = folderName, driveId = targetDriveId))
+                            val targetDriveId = customArgs.getInt(TARGET_DRIVE_ID_TAG, -1)
+                            if (targetDriveId != -1) {
+                                onCopyFileToDrive(File(id = folderId, name = folderName, driveId = targetDriveId))
+                            }
                         }
                         else -> Unit
                     }
