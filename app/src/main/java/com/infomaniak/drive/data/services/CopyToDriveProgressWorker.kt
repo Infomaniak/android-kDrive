@@ -63,6 +63,11 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     override fun startWork(): ListenableFuture<Result> {
         importId = inputData.getInt(IMPORT_ID_KEY, 0)
         fileName = inputData.getString(FILE_NAME_KEY).orEmpty()
+
+        if (importId <= 0 || fileName.isBlank()) {
+            return CallbackToFutureAdapter.getFuture { completer -> completer.set(Result.failure()) }
+        }
+
         notificationId = importId
         notificationManagerCompat = NotificationManagerCompat.from(applicationContext)
 
@@ -78,6 +83,8 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
             ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
         }
         setForegroundAsync(foregroundInfo)
+
+        MqttClientWrapper.start(externalImportId = importId)
         lastReception = Date()
 
         return CallbackToFutureAdapter.getFuture { completer ->
@@ -91,11 +98,10 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     }
 
     private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, isSuccess: Boolean?) {
-        val observer = mqttNotificationsObserver ?: return
+        if (::timer.isInitialized) timer.cancel()
+        mqttNotificationsObserver?.let { MqttClientWrapper.removeObserver(it) }
         mqttNotificationsObserver = null
 
-        if (::timer.isInitialized) timer.cancel()
-        MqttClientWrapper.removeObserver(observer)
         notificationManagerCompat.cancel(notificationId)
         isSuccess?.let { showResultNotification(it) }
         completer.set(Result.success())

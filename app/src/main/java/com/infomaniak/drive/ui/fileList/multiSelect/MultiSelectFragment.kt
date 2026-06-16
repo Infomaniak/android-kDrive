@@ -260,8 +260,7 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         val selectedFiles = multiSelectManager.getValidSelectedItems()
         if (selectedFiles.size != 1) return
         val sourceDriveId = selectedFiles.first().driveId
-        val drives = DriveInfosController.getEligibleDestinationDrives(AccountUtils.currentUserId, sourceDriveId)
-        if (drives.isEmpty()) return
+        if (!DriveInfosController.hasEligibleDestinationDrives(AccountUtils.currentUserId)) return
 
         val file = selectedFiles.first()
         val fileId = file.id

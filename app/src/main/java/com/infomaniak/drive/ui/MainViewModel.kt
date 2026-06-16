@@ -64,7 +64,6 @@ import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImpo
 import com.infomaniak.drive.data.models.file.SpecialFolder.Trash
 import com.infomaniak.drive.data.services.CopyToDriveProgressWorker
 import com.infomaniak.drive.data.services.DownloadWorker
-import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
@@ -407,7 +406,6 @@ class MainViewModel(
 
         apiResponse.data?.forEach { externalImport ->
             pendingCopyToDriveImports[externalImport.id] = fileName
-            MqttClientWrapper.start(externalImport.id)
             CopyToDriveProgressWorker.scheduleWork(getContext(), externalImport.id, fileName)
         }
 
