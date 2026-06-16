@@ -78,7 +78,8 @@ class CopyFileToDriveActivity : BaseActivity() {
         val sourceDriveId = navigationArgs.sourceDriveId
         val userId = navigationArgs.userId
 
-        val userDrive = UserDrive(userId = userId, driveId = sourceDriveId)
+        val isSourceSharedWithMe = DriveInfosController.getDrive(driveId = sourceDriveId, sharedWithMe = null)?.sharedWithMe == true
+        val userDrive = UserDrive(userId = userId, driveId = sourceDriveId, sharedWithMe = isSourceSharedWithMe)
         val sourceFiles = fileIds.toList().mapNotNull { id ->
             if (id != -1) FileController.getFileById(id, userDrive) else null
         }
