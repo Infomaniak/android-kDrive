@@ -102,6 +102,8 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         mqttNotificationsObserver?.let { MqttClientWrapper.removeObserver(it) }
         mqttNotificationsObserver = null
 
+        if (isSuccess == null) MqttClientWrapper.stopExternalImportTracking(importId)
+
         notificationManagerCompat.cancel(notificationId)
         isSuccess?.let { showResultNotification(it) }
         completer.set(Result.success())
