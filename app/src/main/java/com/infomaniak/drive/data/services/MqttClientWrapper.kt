@@ -87,6 +87,10 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
         }
     }
 
+    fun stopExternalImportTracking(externalImportId: Int) {
+        runningExternalImportIds.remove(externalImportId)
+    }
+
     fun start(
         externalImportId: Int? = null,
         coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
