@@ -18,7 +18,9 @@
 package com.infomaniak.drive.data.services
 
 import android.app.Notification
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build.VERSION.SDK_INT
 import android.os.CountDownTimer
@@ -34,12 +36,18 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.google.common.util.concurrent.ListenableFuture
+import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
+import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.ImportProgress
 import com.infomaniak.drive.data.models.MqttAction
 import com.infomaniak.drive.data.models.MqttNotification
+import com.infomaniak.drive.ui.LaunchActivity
+import com.infomaniak.drive.ui.LaunchActivityArgs
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.ForegroundInfoExt
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.copyToDriveProgressNotification
@@ -50,6 +58,8 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
 
     private var importId: Int = 0
     private var fileName: String = ""
+    private var destDriveId: Int = 0
+    private var destFolderId: Int = 0
     private var notificationId: Int = 0
     private val resultNotificationId: Int = UUID.randomUUID().hashCode()
 
@@ -63,6 +73,8 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     override fun startWork(): ListenableFuture<Result> {
         importId = inputData.getInt(IMPORT_ID_KEY, 0)
         fileName = inputData.getString(FILE_NAME_KEY).orEmpty()
+        destDriveId = inputData.getInt(DEST_DRIVE_ID_KEY, -1)
+        destFolderId = inputData.getInt(DEST_FOLDER_ID_KEY, -1)
 
         if (importId <= 0 || fileName.isBlank()) {
             return CallbackToFutureAdapter.getFuture { completer -> completer.set(Result.failure()) }
@@ -138,8 +150,23 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
             description = description,
         ).apply {
             setAutoCancel(true)
+            if (isSuccess) setContentIntent(destinationPendingIntent())
         }
         notificationManagerCompat.notifyCompat(resultNotificationId, builder)
+    }
+
+    private fun destinationPendingIntent(): PendingIntent {
+        val destUserId = DriveInfosController.getDrive(driveId = destDriveId)?.userId ?: AccountUtils.currentUserId
+        val args = LaunchActivityArgs(
+            destinationUserId = destUserId,
+            destinationDriveId = destDriveId,
+            destinationRemoteFolderId = destFolderId,
+        )
+        val intent = Intent(applicationContext, LaunchActivity::class.java).apply {
+            clearStack()
+            putExtras(args.toBundle())
+        }
+        return PendingIntent.getActivity(applicationContext, resultNotificationId, intent, PENDING_INTENT_FLAGS)
     }
 
     private fun buildNotification(progress: ImportProgress?): NotificationCompat.Builder {
@@ -154,11 +181,20 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         const val TAG = "copy_to_drive_progress_worker"
         const val IMPORT_ID_KEY = "import_id_key"
         const val FILE_NAME_KEY = "file_name_key"
+        const val DEST_DRIVE_ID_KEY = "dest_drive_id_key"
+        const val DEST_FOLDER_ID_KEY = "dest_folder_id_key"
         private const val COPY_TO_DRIVE_TIMEOUT = 30_000L
 
-        fun scheduleWork(context: Context, importId: Int, fileName: String) {
+        fun scheduleWork(context: Context, importId: Int, fileName: String, destDriveId: Int, destFolderId: Int) {
             val workRequest = OneTimeWorkRequestBuilder<CopyToDriveProgressWorker>()
-                .setInputData(workDataOf(IMPORT_ID_KEY to importId, FILE_NAME_KEY to fileName))
+                .setInputData(
+                    workDataOf(
+                        IMPORT_ID_KEY to importId,
+                        FILE_NAME_KEY to fileName,
+                        DEST_DRIVE_ID_KEY to destDriveId,
+                        DEST_FOLDER_ID_KEY to destFolderId,
+                    )
+                )
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                 .addTag(TAG)
                 .build()
