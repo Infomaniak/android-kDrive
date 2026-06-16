@@ -201,6 +201,12 @@ class LaunchActivity : EdgeToEdgeActivity() {
         } else {
             DeeplinkType.Unmanaged.NotAccessible
         }
+
+        (deeplinkType as? DeeplinkAction.Drive)?.let {
+            it.userId?.let { id -> AccountUtils.currentUserId = id }
+            AccountUtils.currentDriveId = it.driveId
+            AccountUtils.requestCurrentUser()
+        }
     }
 
     private suspend fun LaunchActivityArgs.areValid(): Boolean = Dispatchers.IO {
