@@ -259,8 +259,9 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
     fun copyFilesToAnotherDrive() {
         val selectedFiles = multiSelectManager.getValidSelectedItems()
         if (selectedFiles.size != 1) return
+        val userId = userDrive?.userId ?: AccountUtils.currentUserId
         val sourceDriveId = selectedFiles.first().driveId
-        if (!DriveInfosController.hasEligibleDestinationDrives(AccountUtils.currentUserId)) return
+        if (!DriveInfosController.hasEligibleDestinationDrives(userId)) return
 
         val file = selectedFiles.first()
         val fileId = file.id
@@ -273,7 +274,7 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
                 CopyFileToDriveActivityArgs(
                     fileIds = intArrayOf(fileId),
                     sourceDriveId = sourceDriveId,
-                    userId = AccountUtils.currentUserId,
+                    userId = userId,
                 ).toBundle()
             )
         }
