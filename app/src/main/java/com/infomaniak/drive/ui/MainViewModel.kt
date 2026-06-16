@@ -403,7 +403,6 @@ class MainViewModel(
     ) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.copyFileToAnotherDrive(sourceDriveId, fileId, destDriveId, destFolderId)
 
-
         apiResponse.data?.forEach { externalImport ->
             pendingCopyToDriveImports[externalImport.id] = fileName
             CopyToDriveProgressWorker.scheduleWork(getContext(), externalImport.id, fileName)
