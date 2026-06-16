@@ -405,7 +405,8 @@ class MainViewModel(
 
         apiResponse.data?.forEach { externalImport ->
             pendingCopyToDriveImports[externalImport.id] = fileName
-            CopyToDriveProgressWorker.scheduleWork(getContext(), externalImport.id, fileName)
+            val realDestFolderId = externalImport.directoryId.takeIf { it > 0 } ?: destFolderId
+            CopyToDriveProgressWorker.scheduleWork(getContext(), externalImport.id, fileName, destDriveId, realDestFolderId)
         }
 
         emit(mapCopyApiResponseToFileResult(apiResponse))
