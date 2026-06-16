@@ -53,6 +53,7 @@ import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.copyToDriveProgressNotification
 import java.util.Date
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 
 class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters) : ListenableWorker(context, workerParams) {
 
@@ -69,6 +70,7 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
 
     private lateinit var timer: CountDownTimer
     private lateinit var lastReception: Date
+    private val isFinished = AtomicBoolean(false)
 
     override fun startWork(): ListenableFuture<Result> {
         importId = inputData.getInt(IMPORT_ID_KEY, 0)
@@ -110,6 +112,7 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     }
 
     private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, isSuccess: Boolean?) {
+        if (!isFinished.compareAndSet(false, true)) return
         if (::timer.isInitialized) timer.cancel()
         mqttNotificationsObserver?.let { MqttClientWrapper.removeObserver(it) }
         mqttNotificationsObserver = null
