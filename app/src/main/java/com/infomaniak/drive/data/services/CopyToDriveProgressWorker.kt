@@ -113,15 +113,23 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
 
     private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, isSuccess: Boolean?) {
         if (!isFinished.compareAndSet(false, true)) return
+        releaseResources()
+        isSuccess?.let { showResultNotification(it) }
+        completer.set(Result.success())
+    }
+
+    // Called when WorkManager stops/cancels the worker without going through finish(): clean up to avoid leaks.
+    override fun onStopped() {
+        super.onStopped()
+        releaseResources()
+    }
+
+    private fun releaseResources() {
         if (::timer.isInitialized) timer.cancel()
         mqttNotificationsObserver?.let { MqttClientWrapper.removeObserver(it) }
         mqttNotificationsObserver = null
-
-        if (isSuccess == null) MqttClientWrapper.stopExternalImportTracking(importId)
-
-        notificationManagerCompat.cancel(notificationId)
-        isSuccess?.let { showResultNotification(it) }
-        completer.set(Result.success())
+        if (importId > 0) MqttClientWrapper.stopExternalImportTracking(importId)
+        if (::notificationManagerCompat.isInitialized) notificationManagerCompat.cancel(notificationId)
     }
 
     private fun launchObserver(onTerminal: (isSuccess: Boolean?) -> Unit) {
