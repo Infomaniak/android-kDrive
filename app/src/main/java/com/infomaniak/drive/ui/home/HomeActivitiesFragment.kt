@@ -24,9 +24,9 @@ import android.view.ViewGroup
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.distinctUntilChanged
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.core.legacy.utils.safeNavigate
@@ -45,7 +45,7 @@ class HomeActivitiesFragment : Fragment() {
     private var _binding: FragmentHomeActivitiesBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
-    private val homeViewModel: HomeViewModel by navGraphViewModels(R.id.homeFragment)
+    private val homeViewModel: HomeViewModel by viewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private var isDownloadingActivities = false
