@@ -232,7 +232,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
         try {
             if (deeplink.path.contains("/app/share/")) processPublicShare(deeplink.path) else retrieveDeeplink(uri = deeplink.uri)
-        } catch (throwable: ApiControllerNetworkException) {
+        } catch (_: ApiControllerNetworkException) {
             Dispatchers.Main {
                 showToast(R.string.errorNetwork)
                 finishAndRemoveTask()
