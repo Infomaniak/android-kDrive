@@ -892,11 +892,11 @@ object FileController {
         }
     }
 
-    fun saveRemoteFileToDb(
+    suspend fun saveRemoteFileToDb(
         remoteFile: File,
         userDrive: UserDrive? = null,
         okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
-    ) {
+    ) = Dispatchers.IO {
         getRealmInstance(userDrive).use { realm ->
             val localFile = getFileById(realm, remoteFile.id)
             insertOrUpdateFile(realm, remoteFile, localFile)
