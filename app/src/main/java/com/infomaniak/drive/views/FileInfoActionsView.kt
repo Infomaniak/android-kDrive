@@ -227,7 +227,9 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     private fun computeHasOtherDrivesAvailable(): Boolean {
-        return DriveInfosController.hasEligibleDestinationDrives(AccountUtils.currentUserId)
+        val userId = currentFile?.let { DriveInfosController.getDrive(driveId = it.driveId, sharedWithMe = null)?.userId }
+            ?: AccountUtils.currentUserId
+        return DriveInfosController.hasEligibleDestinationDrives(userId)
     }
 
     private fun isCopyToDriveVisible(file: File, rights: Rights): Boolean {
@@ -651,13 +653,15 @@ class FileInfoActionsView @JvmOverloads constructor(
         @CallSuper
         fun copyFileToAnotherDriveClicked(selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
             currentFile?.let { file ->
-                if (!DriveInfosController.hasEligibleDestinationDrives(AccountUtils.currentUserId)) return
+                val userId = DriveInfosController.getDrive(driveId = file.driveId, sharedWithMe = null)?.userId
+                    ?: AccountUtils.currentUserId
+                if (!DriveInfosController.hasEligibleDestinationDrives(userId)) return
                 val intent = Intent(currentContext, CopyFileToDriveActivity::class.java).apply {
                     putExtras(
                         CopyFileToDriveActivityArgs(
                             fileIds = intArrayOf(file.id),
                             sourceDriveId = file.driveId,
-                            userId = AccountUtils.currentUserId,
+                            userId = userId,
                         ).toBundle()
                     )
                 }
