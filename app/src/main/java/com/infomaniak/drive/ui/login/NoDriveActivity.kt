@@ -26,6 +26,7 @@ import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.databinding.ActivityNoDriveBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.twoFactorAuthManager
 
 class NoDriveActivity : AppCompatActivity() {
@@ -49,5 +50,7 @@ class NoDriveActivity : AppCompatActivity() {
             onBackPressed()
         }
         anotherProfileButton.setOnClickListener { onBackPressed() }
+
+        root.enableEdgeToEdge()
     }
 }
