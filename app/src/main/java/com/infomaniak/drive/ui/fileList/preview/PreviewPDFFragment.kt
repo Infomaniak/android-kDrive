@@ -97,38 +97,47 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding.downloadLayout) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (noCurrentFile() && !previewPDFHandler.isExternalFile()) return@with
+        val isExternalFile = previewPDFHandler.isExternalFile()
+        if (noCurrentFile() && !isExternalFile) return@with
 
-        if (previewPDFHandler.isExternalFile()) {
-            fileIcon.setImageResource(ExtensionType.PDF.icon)
-            fileName.text = previewPDFHandler.fileName
-            showPdf()
-        } else {
-            container.layoutTransition?.setAnimateParentHierarchy(false)
-
-            fileIcon.setImageResource(file.getFileType().icon)
-            fileName.text = file.name
-            downloadProgressIndicator.isVisible = true
-
-            previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
-                if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
-                downloadProgressIndicator.progress = progress
-            }
-        }
+        if (isExternalFile) setupExternalPdf() else setupDrivePdf()
 
         previewDescription.apply {
             setText(R.string.previewDownloadIndication)
             isVisible = true
         }
 
-        if (!previewPDFHandler.isExternalFile() && isFileUnavailableOffline()) showNoNetwork()
+        if (!isExternalFile && isFileUnavailableOffline()) showNoNetwork()
 
         initViewsForFullscreen(root, binding.pdfView)
 
         bigOpenWithButton.apply {
             isGone = true
-            setOnClickListener { if (previewPDFHandler.isPasswordProtected) showPasswordDialog() else openWithClicked() }
+            setOnClickListener { onBigOpenWithClicked() }
         }
+    }
+
+    private fun setupExternalPdf() = with(binding.downloadLayout) {
+        fileIcon.setImageResource(ExtensionType.PDF.icon)
+        fileName.text = previewPDFHandler.fileName
+        showPdf()
+    }
+
+    private fun setupDrivePdf() = with(binding.downloadLayout) {
+        container.layoutTransition?.setAnimateParentHierarchy(false)
+
+        fileIcon.setImageResource(file.getFileType().icon)
+        fileName.text = file.name
+        downloadProgressIndicator.isVisible = true
+
+        previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
+            if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
+            downloadProgressIndicator.progress = progress
+        }
+    }
+
+    private fun onBigOpenWithClicked() {
+        if (previewPDFHandler.isPasswordProtected) showPasswordDialog() else openWithClicked()
     }
 
     override fun setMenuVisibility(menuVisible: Boolean) {
