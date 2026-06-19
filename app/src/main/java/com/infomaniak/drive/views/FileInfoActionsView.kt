@@ -176,7 +176,10 @@ class FileInfoActionsView @JvmOverloads constructor(
         disabledSendCopy.isGone = canSendCopy
 
         val isOfflineToggleInteractable = !file.isMarkedAsOffline || file.currentProgress == 100
-        enableAvailableOffline(isOfflineToggleInteractable)
+        val effectiveEnabled = isOfflineToggleInteractable && (hasNetwork || file.isOffline)
+        availableOfflineSwitch.isEnabled = effectiveEnabled
+        availableOffline.isEnabled = effectiveEnabled
+        availableOffline.alpha = if (effectiveEnabled) ENABLED_ALPHA else DISABLED_ALPHA
 
         editDocument.isEnabled = hasNetwork
         manageCategories.isEnabled = hasNetwork
