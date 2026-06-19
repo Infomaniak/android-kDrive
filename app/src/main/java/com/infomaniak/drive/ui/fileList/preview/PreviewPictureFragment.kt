@@ -91,6 +91,8 @@ class PreviewPictureFragment : PreviewFragment() {
         super.onDestroyView()
     }
 
+    override fun canDisplayFileOffline(): Boolean = isOfflineCopyIntact()
+
     private fun FragmentPreviewPictureBinding.showNoNetwork() {
         loader.isGone = true
         imageView.isGone = true
