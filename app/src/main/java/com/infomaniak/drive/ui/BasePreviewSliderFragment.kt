@@ -167,6 +167,12 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                 }
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.isNetworkAvailable.collectLatest { isNetworkAvailable ->
+                (bottomSheetView as? FileInfoActionsView)?.updateNetworkAvailability(isNetworkAvailable != false)
+            }
+        }
     }
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
