@@ -29,6 +29,9 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import io.sentry.Sentry
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
 
 open class PreviewFragment : Fragment() {
 
@@ -52,7 +55,19 @@ open class PreviewFragment : Fragment() {
             ?: lifecycleScope.launchWhenResumed { findNavController().popBackStack() }
 
         super.onViewCreated(view, savedInstanceState)
+
+        observeNetworkToReloadPreview()
     }
+
+    private fun observeNetworkToReloadPreview() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.isNetworkAvailable.drop(1).collectLatest { isNetworkAvailable ->
+                if (isNetworkAvailable && !noCurrentFile()) reloadPreviewIfNeeded()
+            }
+        }
+    }
+
+    protected open fun reloadPreviewIfNeeded() = Unit
 
     private fun getCurrentFile(fileId: Int): File? = runCatching {
         FileController.getFileById(fileId, previewSliderViewModel.userDrive) ?: mainViewModel.currentPreviewFileList[fileId]

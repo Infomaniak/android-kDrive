@@ -310,6 +310,14 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         setPageNumber(currentPage + 1, totalPage)
     }
 
+    override fun reloadPreviewIfNeeded() = with(binding.downloadLayout) {
+        if (pdfFile != null || previewPDFHandler.isExternalFile()) return@with
+        previewDescription.setText(R.string.previewDownloadIndication)
+        downloadProgressIndicator.isVisible = true
+        bigOpenWithButton.isGone = true
+        downloadPdf()
+    }
+
     private fun showNoNetwork() = with(binding.downloadLayout) {
         previewPDFViewModel.cancelJobs()
         root.isVisible = true
