@@ -176,10 +176,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         disabledSendCopy.isGone = canSendCopy
 
         val isOfflineToggleInteractable = !file.isMarkedAsOffline || file.currentProgress == 100
-        val effectiveEnabled = isOfflineToggleInteractable && (hasNetwork || file.isOffline)
-        availableOfflineSwitch.isEnabled = effectiveEnabled
-        availableOffline.isEnabled = effectiveEnabled
-        availableOffline.alpha = if (effectiveEnabled) ENABLED_ALPHA else DISABLED_ALPHA
+        setAvailableOfflineEnabled(isOfflineToggleInteractable && (hasNetwork || file.isOffline))
 
         editDocument.isEnabled = hasNetwork
         manageCategories.isEnabled = hasNetwork
@@ -421,11 +418,14 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
     }
 
-    private fun enableAvailableOffline(isEnabled: Boolean) = with(binding) {
-        val effectiveEnabled = isEnabled && (mainViewModel.hasNetwork || currentFile.isOffline)
-        availableOfflineSwitch.isEnabled = effectiveEnabled
-        availableOffline.isEnabled = effectiveEnabled
-        availableOffline.alpha = if (effectiveEnabled) ENABLED_ALPHA else DISABLED_ALPHA
+    private fun enableAvailableOffline(isEnabled: Boolean) {
+        setAvailableOfflineEnabled(isEnabled && (mainViewModel.hasNetwork || currentFile.isOffline))
+    }
+
+    private fun setAvailableOfflineEnabled(isEnabled: Boolean) = with(binding) {
+        availableOfflineSwitch.isEnabled = isEnabled
+        availableOffline.isEnabled = isEnabled
+        availableOffline.alpha = if (isEnabled) ENABLED_ALPHA else DISABLED_ALPHA
     }
 
     fun observeOfflineProgression(lifecycleOwner: LifecycleOwner, updateFile: ((fileId: Int) -> Unit)? = null) {
