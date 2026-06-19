@@ -31,7 +31,6 @@ import com.infomaniak.drive.ui.MainViewModel
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.launch
 
 open class PreviewFragment : Fragment() {
 
@@ -60,7 +59,7 @@ open class PreviewFragment : Fragment() {
     }
 
     private fun observeNetworkToReloadPreview() {
-        viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
             mainViewModel.isNetworkAvailable.drop(1).collectLatest { isNetworkAvailable ->
                 if (isNetworkAvailable && !noCurrentFile()) reloadPreviewIfNeeded()
             }
