@@ -21,8 +21,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentPreviewOthersBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
@@ -46,6 +48,12 @@ class PreviewOtherFragment : PreviewFragment() {
         fileName.text = file.name
 
         container.setOnClickListener { toggleFullscreen() }
+
+        if (isFileUnavailableOffline()) {
+            previewDescription.setText(R.string.allNoNetwork)
+            bigOpenWithButton.isGone = true
+            return
+        }
 
         val shouldDisplayOpenWithButton = !file.isPublicShared() || previewSliderViewModel.publicShareCanDownload
         bigOpenWithButton.isVisible = shouldDisplayOpenWithButton

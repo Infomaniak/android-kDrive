@@ -370,8 +370,11 @@ open class FileAdapter(
     }
 
     private fun FileItemViewHolder.setupMenuButton(file: File) {
-        if (!shouldHideMenu(file)) {
+        if (shouldHideMenu(file)) {
+            menuButton.isGone = true
+        } else {
             menuButton.isVisible = true
+            menuButton.isEnabled = file.isFolder() || !(offlineMode && !file.isOffline)
             menuButton.setOnClickListener { onMenuClicked?.invoke(file) }
         }
     }
@@ -380,7 +383,6 @@ open class FileAdapter(
         return uploadInProgress
                 || isSelectingFolder
                 || isActionMenuHidden
-                || (offlineMode && !file.isOffline)
                 || !publicShareCanDownload
                 || onMenuClicked == null
     }

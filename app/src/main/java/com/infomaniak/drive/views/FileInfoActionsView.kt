@@ -133,8 +133,9 @@ class FileInfoActionsView @JvmOverloads constructor(
     // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
     private fun computeFileRights(file: File, rights: Rights, hasOtherDrivesAvailable: Boolean) = with(binding) {
         val hasNetwork = mainViewModel.hasNetwork
-        displayInfo.isEnabled = hasNetwork
-        disabledInfo.isGone = hasNetwork
+        val isDisplayInfoEnabled = hasNetwork || file.isFolder()
+        displayInfo.isEnabled = isDisplayInfoEnabled
+        disabledInfo.isGone = isDisplayInfoEnabled
 
         (rights.canShare && hasNetwork).let { rightsEnabled ->
             fileRights.isEnabled = rightsEnabled
@@ -174,6 +175,22 @@ class FileInfoActionsView @JvmOverloads constructor(
         copyToDrive.isVisible = isCopyToDriveVisible(file, rights, hasOtherDrivesAvailable)
         renameFile.isVisible = rights.canRename == true && !file.isImporting()
         goToFolder.isVisible = isGoToFolderVisible()
+
+        setNetworkDependentActionsEnabled(hasNetwork)
+    }
+
+    private fun setNetworkDependentActionsEnabled(hasNetwork: Boolean) = with(binding) {
+        editDocument.isEnabled = hasNetwork
+        manageCategories.isEnabled = hasNetwork
+        addFavorites.isEnabled = hasNetwork
+        coloredFolder.isEnabled = hasNetwork
+        dropBox.isEnabled = hasNetwork
+        downloadFile.isEnabled = hasNetwork
+        moveFile.isEnabled = hasNetwork
+        duplicateFile.isEnabled = hasNetwork
+        renameFile.isEnabled = hasNetwork
+        leaveShare.isEnabled = hasNetwork
+        deleteFile.isEnabled = hasNetwork
     }
 
     fun updateCurrentFile(file: File, hasOtherDrivesAvailable: Boolean) = with(binding) {
@@ -448,7 +465,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     fun refreshBottomSheetUi(file: File, isOfflineProgress: Boolean = false): Unit = with(binding) {
         addFavorites.apply {
-            isEnabled = true
+            isEnabled = mainViewModel.hasNetwork
             isActivated = file.isFavorite
             text = context.getString(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
         }
