@@ -125,6 +125,13 @@ open class PreviewVideoFragment : PreviewFragment() {
 
     override fun canDisplayFileOffline(): Boolean = isOfflineCopyIntact()
 
+    override fun reloadPreviewIfNeeded() {
+        if (exoPlayer == null) {
+            hideNoNetwork()
+            initializePlayer()
+        }
+    }
+
     private fun showNoNetwork() = with(binding) {
         activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         exoPlayer?.release()

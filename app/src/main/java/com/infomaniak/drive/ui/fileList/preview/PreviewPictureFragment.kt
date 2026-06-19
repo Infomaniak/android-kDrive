@@ -93,6 +93,14 @@ class PreviewPictureFragment : PreviewFragment() {
 
     override fun canDisplayFileOffline(): Boolean = isOfflineCopyIntact()
 
+    override fun reloadPreviewIfNeeded() = with(binding) {
+        if (imageView.isVisible) return@with
+        noThumbnailLayout.root.isGone = true
+        loadImage()
+        container.layoutTransition?.setAnimateParentHierarchy(false)
+        setupImageListeners()
+    }
+
     private fun FragmentPreviewPictureBinding.showNoNetwork() {
         loader.isGone = true
         imageView.isGone = true
