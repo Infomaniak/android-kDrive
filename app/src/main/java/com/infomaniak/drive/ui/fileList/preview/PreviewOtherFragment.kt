@@ -52,9 +52,17 @@ class PreviewOtherFragment : PreviewFragment() {
         if (isFileUnavailableOffline()) {
             previewDescription.setText(R.string.allNoNetwork)
             bigOpenWithButton.isGone = true
-            return
+        } else {
+            showOpenWith()
         }
+    }
 
+    override fun reloadPreviewIfNeeded() = with(binding) {
+        previewDescription.setText(R.string.previewNoPreview)
+        showOpenWith()
+    }
+
+    private fun FragmentPreviewOthersBinding.showOpenWith() {
         val shouldDisplayOpenWithButton = !file.isPublicShared() || previewSliderViewModel.publicShareCanDownload
         bigOpenWithButton.isVisible = shouldDisplayOpenWithButton
         if (shouldDisplayOpenWithButton) bigOpenWithButton.setOnClickListener { openWithClicked() }
