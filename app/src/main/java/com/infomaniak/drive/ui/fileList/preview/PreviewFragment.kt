@@ -71,17 +71,20 @@ open class PreviewFragment : Fragment() {
 
     protected fun noCurrentFile() = previewViewModel.currentFile == null
 
-    protected fun isFileUnavailableOffline(): Boolean {
-        if (mainViewModel.hasNetwork) return false
+    protected fun isFileUnavailableOffline(): Boolean = !mainViewModel.hasNetwork && !canDisplayFileOffline()
 
+    protected open fun canDisplayFileOffline(): Boolean {
         val context = requireContext()
         val userDrive = previewSliderViewModel.userDrive
-        val canUsePreviewCache = if (file.isOnlyOfficePreview()) {
+        return if (file.isOnlyOfficePreview()) {
             !file.isObsolete(file.getConvertedPdfCache(context, userDrive))
         } else {
             file.canUseStoredFile(context, userDrive)
         }
+    }
 
-        return !canUsePreviewCache
+    protected fun isOfflineCopyIntact(): Boolean {
+        return file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)
+            ?.let { file.isOfflineAndIntact(it) } == true
     }
 }
