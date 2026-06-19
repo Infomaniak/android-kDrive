@@ -36,6 +36,7 @@ import coil3.request.SuccessResult
 import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.MainApplication
+import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.coil.ImageLoaderType
 import com.infomaniak.drive.databinding.FragmentPreviewPictureBinding
@@ -74,6 +75,11 @@ class PreviewPictureFragment : PreviewFragment() {
             bigOpenWithButton.setOnClickListener { openWithClicked() }
         }
 
+        if (isFileUnavailableOffline()) {
+            showNoNetwork()
+            return
+        }
+
         loadImage()
 
         container.layoutTransition?.setAnimateParentHierarchy(false)
@@ -83,6 +89,17 @@ class PreviewPictureFragment : PreviewFragment() {
     override fun onDestroyView() {
         loadTimer.cancel()
         super.onDestroyView()
+    }
+
+    private fun FragmentPreviewPictureBinding.showNoNetwork() {
+        loader.isGone = true
+        imageView.isGone = true
+        noThumbnailLayout.apply {
+            fileName.text = file.name
+            previewDescription.setText(R.string.allNoNetwork)
+            bigOpenWithButton.isGone = true
+            root.isVisible = true
+        }
     }
 
     private fun loadImage() {

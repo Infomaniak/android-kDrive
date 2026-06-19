@@ -121,6 +121,8 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
             isVisible = true
         }
 
+        if (!previewPDFHandler.isExternalFile() && isFileUnavailableOffline()) showNoNetwork()
+
         initViewsForFullscreen(root, binding.pdfView)
 
         bigOpenWithButton.apply {
@@ -133,6 +135,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         super.setMenuVisibility(menuVisible)
         if (menuVisible) {
             when {
+                !previewPDFHandler.isExternalFile() && isFileUnavailableOffline() -> showNoNetwork()
                 isDownloading -> previewSliderViewModel.pdfIsDownloading.value = isDownloading
                 pdfFile == null -> downloadPdf()
                 else -> showPdf()
@@ -296,6 +299,19 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
     private fun updatePageNumber(currentPage: Int = 1, totalPage: Int) {
         setPageNumber(currentPage + 1, totalPage)
+    }
+
+    private fun showNoNetwork() = with(binding.downloadLayout) {
+        previewPDFViewModel.cancelJobs()
+        root.isVisible = true
+        downloadProgressIndicator.isGone = true
+        previewDescription.apply {
+            setText(R.string.allNoNetwork)
+            isVisible = true
+        }
+        bigOpenWithButton.isGone = true
+        previewSliderViewModel.pdfIsDownloading.value = false
+        isDownloading = false
     }
 
     private fun downloadPdf() = with(binding.downloadLayout) {

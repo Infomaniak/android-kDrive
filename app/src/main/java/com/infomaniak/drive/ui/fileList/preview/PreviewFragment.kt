@@ -70,4 +70,9 @@ open class PreviewFragment : Fragment() {
     }
 
     protected fun noCurrentFile() = previewViewModel.currentFile == null
+
+    protected fun isFileUnavailableOffline(): Boolean {
+        val userDrive = previewSliderViewModel.userDrive
+        return !mainViewModel.hasNetwork && !file.canUseStoredFile(requireContext(), userDrive)
+    }
 }
