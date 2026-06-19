@@ -170,7 +170,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.isNetworkAvailable.collectLatest { isNetworkAvailable ->
-                (bottomSheetView as? FileInfoActionsView)?.updateNetworkAvailability(isNetworkAvailable != false)
+                (bottomSheetView as? FileInfoActionsView)?.updateNetworkAvailability(isNetworkAvailable)
             }
         }
     }
