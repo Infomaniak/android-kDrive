@@ -74,8 +74,17 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { file ->
+        setupCurrentFileObserver()
+        setBackActionHandlers()
+        setupNetworkObserver()
 
+        binding.scrollingContent.onApplyWindowInsetsListener { view, windowInsets ->
+            view.setMargins(bottom = windowInsets.bottom)
+        }
+    }
+
+    private fun setupCurrentFileObserver() = with(binding) {
+        fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { file ->
             this@FileDetailsInfoFragment.file = file
 
             file.shareLink?.let { setupShareLink() }
@@ -109,9 +118,9 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
                 originalSize.isVisible = true
             }
         }
+    }
 
-        setBackActionHandlers()
-
+    private fun setupNetworkObserver() {
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.isNetworkAvailable.collect {
                 if (::file.isInitialized) {
@@ -119,10 +128,6 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
                     setupCategoriesContainer(file.getCategories())
                 }
             }
-        }
-
-        binding.scrollingContent.onApplyWindowInsetsListener { view, windowInsets ->
-            view.setMargins(bottom = windowInsets.bottom)
         }
     }
 
