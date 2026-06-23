@@ -18,6 +18,8 @@
 package com.infomaniak.drive.ui.fileList.fileDetails
 
 import android.annotation.SuppressLint
+import kotlinx.coroutines.launch
+import androidx.lifecycle.lifecycleScope
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.format.Formatter
@@ -110,6 +112,15 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
 
         setBackActionHandlers()
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.isNetworkAvailable.collect {
+                if (::file.isInitialized) {
+                    setupShareButton()
+                    setupCategoriesContainer(file.getCategories())
+                }
+            }
+        }
+
         binding.scrollingContent.onApplyWindowInsetsListener { view, windowInsets ->
             view.setMargins(bottom = windowInsets.bottom)
         }
@@ -165,6 +176,8 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
     private fun setupShareButton() = with(binding) {
         if (file.rights?.canShare == true) {
             shareButton.isVisible = true
+            shareButton.isEnabled = mainViewModel.hasNetwork
+            shareButton.alpha = if (mainViewModel.hasNetwork) 1.0f else 0.5f
             shareButton.setOnClickListener {
                 parentFragment?.safeNavigate(
                     FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareDetailsFragment(fileId = file.id)
@@ -255,6 +268,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
                 setup(
                     categories = categories,
                     canPutCategoryOnFile = !file.isDisabled() && rights.canPutOnFile,
+                    isEnabled = mainViewModel.hasNetwork,
                     layoutInflater = layoutInflater,
                     onClicked = { onCategoriesClicked(file.id) },
                 )

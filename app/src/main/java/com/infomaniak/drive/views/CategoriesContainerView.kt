@@ -42,22 +42,32 @@ class CategoriesContainerView @JvmOverloads constructor(
 
     private var categories: List<Category> = emptyList()
     private var canPutCategoryOnFile: Boolean = false
+    private var isEnabled: Boolean = true
     private var onClicked: (() -> Unit)? = null
 
-    fun setup(categories: List<Category>, canPutCategoryOnFile: Boolean, layoutInflater: LayoutInflater, onClicked: () -> Unit) {
+    fun setup(
+        categories: List<Category>,
+        canPutCategoryOnFile: Boolean,
+        isEnabled: Boolean = true,
+        layoutInflater: LayoutInflater,
+        onClicked: () -> Unit,
+    ) {
         this.categories = categories
         this.canPutCategoryOnFile = canPutCategoryOnFile
+        this.isEnabled = isEnabled
         this.onClicked = onClicked
 
         binding.categorySwitch.isVisible = canPutCategoryOnFile
         setCategoryTitle()
         setClickListener()
         setCategories(layoutInflater)
+        updateAlpha()
     }
 
     private fun setCategoryTitle() {
+        val canInteract = canPutCategoryOnFile && isEnabled
         binding.categoryTitle.setText(
-            if (canPutCategoryOnFile) {
+            if (canInteract) {
                 if (categories.isEmpty()) R.string.addCategoriesTitle else R.string.manageCategoriesTitle
             } else {
                 R.string.categoriesFilterTitle
@@ -66,9 +76,14 @@ class CategoriesContainerView @JvmOverloads constructor(
     }
 
     private fun setClickListener() {
-        if (canPutCategoryOnFile) {
-            binding.categoriesContainerView.setOnClickListener { onClicked?.invoke() }
+        val canClick = canPutCategoryOnFile && isEnabled
+        binding.categoriesContainerView.setOnClickListener {
+            if (canClick) onClicked?.invoke()
         }
+    }
+
+    private fun updateAlpha() {
+        binding.categoriesContainerView.alpha = if (isEnabled) 1.0f else 0.5f
     }
 
     private fun setCategories(layoutInflater: LayoutInflater) = with(binding.categoriesGroup) {
@@ -86,7 +101,7 @@ class CategoriesContainerView @JvmOverloads constructor(
         return (layoutInflater.inflate(R.layout.chip_category, null) as Chip).apply {
             text = category.getName(context)
             chipBackgroundColor = ColorStateList.valueOf(category.color.toColorInt())
-            if (canPutCategoryOnFile) setOnClickListener { onClicked?.invoke() }
+            if (canPutCategoryOnFile && isEnabled) setOnClickListener { onClicked?.invoke() }
         }
     }
 }

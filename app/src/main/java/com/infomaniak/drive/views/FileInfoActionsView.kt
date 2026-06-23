@@ -171,7 +171,11 @@ class FileInfoActionsView @JvmOverloads constructor(
         disabledPublicLink.isGone = isPublicLinkEnabled
 
         val sendCopyEnabledByRights = (file.isFolder() && rights.canCreateFile && rights.canCreateDirectory) || !file.isFolder()
-        val canSendCopy = sendCopyEnabledByRights && (hasNetwork || file.isFolder() || file.isOffline)
+        val canSendCopyOffline = !file.isFolder() && file.canUseStoredFile(
+            context,
+            UserDrive(driveId = file.driveId, sharedWithMe = isSharedWithMe)
+        )
+        val canSendCopy = sendCopyEnabledByRights && (hasNetwork || file.isFolder() || canSendCopyOffline)
         sendCopy.isEnabled = canSendCopy
         disabledSendCopy.isGone = canSendCopy
 
