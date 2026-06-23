@@ -55,6 +55,7 @@ open class PreviewFragment : Fragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
+        if (noCurrentFile()) return
         observeNetworkToReloadPreview()
     }
 
