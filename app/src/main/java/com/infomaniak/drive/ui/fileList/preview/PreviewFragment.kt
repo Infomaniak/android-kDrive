@@ -60,7 +60,12 @@ open class PreviewFragment : Fragment() {
 
     private fun observeNetworkToReloadPreview() {
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
-            mainViewModel.isNetworkAvailable.drop(1).collectLatest { isNetworkAvailable ->
+            val networkFlow = if (isFileUnavailableOffline()) {
+                mainViewModel.isNetworkAvailable
+            } else {
+                mainViewModel.isNetworkAvailable.drop(1)
+            }
+            networkFlow.collectLatest { isNetworkAvailable ->
                 if (isNetworkAvailable && !noCurrentFile()) reloadPreviewIfNeeded()
             }
         }
