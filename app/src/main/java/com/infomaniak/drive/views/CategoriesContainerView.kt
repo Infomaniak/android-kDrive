@@ -42,7 +42,7 @@ class CategoriesContainerView @JvmOverloads constructor(
 
     private var categories: List<Category> = emptyList()
     private var canPutCategoryOnFile: Boolean = false
-    private var isEnabled: Boolean = true
+    private var isCategoryInteractionEnabled: Boolean = true
     private var onClicked: (() -> Unit)? = null
 
     fun setup(
@@ -54,7 +54,7 @@ class CategoriesContainerView @JvmOverloads constructor(
     ) {
         this.categories = categories
         this.canPutCategoryOnFile = canPutCategoryOnFile
-        this.isEnabled = isEnabled
+        this.isCategoryInteractionEnabled = isEnabled
         this.onClicked = onClicked
 
         binding.categorySwitch.isVisible = canPutCategoryOnFile
@@ -65,7 +65,7 @@ class CategoriesContainerView @JvmOverloads constructor(
     }
 
     private fun setCategoryTitle() {
-        val canInteract = canPutCategoryOnFile && isEnabled
+        val canInteract = canPutCategoryOnFile && isCategoryInteractionEnabled
         binding.categoryTitle.setText(
             if (canInteract) {
                 if (categories.isEmpty()) R.string.addCategoriesTitle else R.string.manageCategoriesTitle
@@ -76,14 +76,14 @@ class CategoriesContainerView @JvmOverloads constructor(
     }
 
     private fun setClickListener() {
-        val canClick = canPutCategoryOnFile && isEnabled
+        val canClick = canPutCategoryOnFile && isCategoryInteractionEnabled
         binding.categoriesContainerView.setOnClickListener {
             if (canClick) onClicked?.invoke()
         }
     }
 
     private fun updateAlpha() {
-        binding.categoriesContainerView.alpha = if (isEnabled) 1.0f else 0.5f
+        binding.categoriesContainerView.alpha = if (isCategoryInteractionEnabled) 1.0f else 0.5f
     }
 
     private fun setCategories(layoutInflater: LayoutInflater) = with(binding.categoriesGroup) {
@@ -101,7 +101,7 @@ class CategoriesContainerView @JvmOverloads constructor(
         return (layoutInflater.inflate(R.layout.chip_category, null) as Chip).apply {
             text = category.getName(context)
             chipBackgroundColor = ColorStateList.valueOf(category.color.toColorInt())
-            if (canPutCategoryOnFile && isEnabled) setOnClickListener { onClicked?.invoke() }
+            if (canPutCategoryOnFile && isCategoryInteractionEnabled) setOnClickListener { onClicked?.invoke() }
         }
     }
 }
