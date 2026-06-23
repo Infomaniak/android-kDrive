@@ -76,9 +76,10 @@ class CategoriesContainerView @JvmOverloads constructor(
     }
 
     private fun setClickListener() {
-        val canClick = canPutCategoryOnFile && isCategoryInteractionEnabled
-        binding.categoriesContainerView.setOnClickListener {
-            if (canClick) onClicked?.invoke()
+        if (canPutCategoryOnFile && isCategoryInteractionEnabled) {
+            binding.categoriesContainerView.setOnClickListener { onClicked?.invoke() }
+        } else {
+            binding.categoriesContainerView.setOnClickListener(null)
         }
     }
 
