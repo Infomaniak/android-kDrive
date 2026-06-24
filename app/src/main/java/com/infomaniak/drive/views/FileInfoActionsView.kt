@@ -61,6 +61,8 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.databinding.ViewFileInfoActionsBinding
+import com.infomaniak.drive.ui.CopyFileToDriveActivity
+import com.infomaniak.drive.ui.CopyFileToDriveActivityArgs
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
@@ -71,6 +73,7 @@ import com.infomaniak.drive.utils.SingleOperation
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
+import com.infomaniak.drive.utils.Utils.TARGET_DRIVE_ID_TAG
 import com.infomaniak.drive.utils.openOnlyOfficeDocument
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
@@ -101,6 +104,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     private lateinit var onItemClickListener: OnItemClickListener
     private lateinit var selectFolderResultLauncher: ActivityResultLauncher<Intent>
     private var isSharedWithMe = false
+    private var hasOtherDrivesAvailable = false
 
     private val canCreateDropbox by lazy { AccountUtils.getCurrentDrive(forceRefresh = true)?.canCreateDropbox == true }
 
@@ -168,12 +172,14 @@ class FileInfoActionsView @JvmOverloads constructor(
         leaveShare.isVisible = rights.canLeave == true
         cancelExternalImport.isVisible = file.isImporting()
         moveFile.isVisible = rights.canMove == true && !isSharedWithMe && !file.isImporting()
+        copyToDrive.isVisible = isCopyToDriveVisible(file, rights)
         renameFile.isVisible = rights.canRename == true && !file.isImporting()
         goToFolder.isVisible = isGoToFolderVisible()
     }
 
     fun updateCurrentFile(file: File) = with(binding) {
         currentFile = file
+        hasOtherDrivesAvailable = computeHasOtherDrivesAvailable()
         refreshBottomSheetUi(currentFile)
         manageCategories.isVisible = DriveInfosController.getCategoryRights(file.driveId).canPutOnFile
                 && !file.isDisabled()
@@ -217,6 +223,16 @@ class FileInfoActionsView @JvmOverloads constructor(
     fun setupActions(isVisible: Boolean) = with(binding) {
         actionListLayout.isVisible = isVisible
         quickActionsLayout.isVisible = isVisible
+    }
+
+    private fun computeHasOtherDrivesAvailable(): Boolean {
+        val userId = currentFile?.let { DriveInfosController.getDrive(driveId = it.driveId, sharedWithMe = null)?.userId }
+            ?: AccountUtils.currentUserId
+        return DriveInfosController.hasEligibleDestinationDrives(userId)
+    }
+
+    private fun isCopyToDriveVisible(file: File, rights: Rights): Boolean {
+        return rights.canRead == true && !isSharedWithMe && !file.isImporting() && hasOtherDrivesAvailable
     }
 
     private fun isGoToFolderVisible(): Boolean {
@@ -299,6 +315,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             onItemClickListener.moveFileClicked(currentFile.parentId, selectFolderResultLauncher, mainViewModel)
         }
         duplicateFile.setOnClickListener { onItemClickListener.duplicateFileClicked(selectFolderResultLauncher, mainViewModel) }
+        copyToDrive.setOnClickListener { onItemClickListener.copyFileToAnotherDriveClicked(selectFolderResultLauncher) }
         renameFile.setOnClickListener { onItemClickListener.renameFileClicked() }
         deleteFile.setOnClickListener { onItemClickListener.deleteFileClicked() }
         goToFolder.setOnClickListener { onItemClickListener.goToFolder() }
@@ -557,6 +574,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onCacheAddedToOffline()
         fun onDeleteFile(onApiResponse: () -> Unit)
         fun onLeaveShare(onApiResponse: () -> Unit)
+        fun onCopyFileToDrive(destinationFolder: File)
         fun onDuplicateFile(destinationFolder: File)
         fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean = false)
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
@@ -580,6 +598,12 @@ class FileInfoActionsView @JvmOverloads constructor(
                     when (customArgs?.getString(SINGLE_OPERATION_CUSTOM_TAG)) {
                         SingleOperation.COPY.name -> onDuplicateFile(file)
                         SingleOperation.MOVE.name -> onMoveFile(file, isSharedWithMe)
+                        SingleOperation.COPY_TO_DRIVE.name -> {
+                            val targetDriveId = customArgs.getInt(TARGET_DRIVE_ID_TAG, -1)
+                            if (targetDriveId != -1) {
+                                onCopyFileToDrive(File(id = folderId, name = folderName, driveId = targetDriveId))
+                            }
+                        }
                         else -> Unit
                     }
                 }
@@ -623,6 +647,25 @@ class FileInfoActionsView @JvmOverloads constructor(
             trackFileActionEvent(MatomoName.Copy)
             mainViewModel.ignoreSyncOffline = true
             currentContext.duplicateFilesClicked(selectFolderResultLauncher, mainViewModel)
+        }
+
+        @CallSuper
+        fun copyFileToAnotherDriveClicked(selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
+            currentFile?.let { file ->
+                val userId = DriveInfosController.getDrive(driveId = file.driveId, sharedWithMe = null)?.userId
+                    ?: AccountUtils.currentUserId
+                if (!DriveInfosController.hasEligibleDestinationDrives(userId)) return
+                val intent = Intent(currentContext, CopyFileToDriveActivity::class.java).apply {
+                    putExtras(
+                        CopyFileToDriveActivityArgs(
+                            fileIds = intArrayOf(file.id),
+                            sourceDriveId = file.driveId,
+                            userId = userId,
+                        ).toBundle()
+                    )
+                }
+                selectFolderResultLauncher.launch(intent)
+            }
         }
 
         @CallSuper

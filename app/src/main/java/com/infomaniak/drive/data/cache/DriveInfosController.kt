@@ -176,13 +176,21 @@ object DriveInfosController {
     }
 
     fun getDrivesCount(
-        userId: Int,
+        userId: Int?,
         driveId: Int? = null,
         sharedWithMe: Boolean? = false,
         maintenance: Boolean? = null
     ) = getRealmInstance().use { it.getDrivesQuery(userId, driveId, sharedWithMe, maintenance).count() }
 
     fun hasSingleDrive(userId: Int): Boolean = getDrivesCount(userId) == 1L
+
+    fun getEligibleDestinationDrives(userId: Int?, excludedDriveId: Int?): List<Drive> {
+        return getDrives(userId = userId, sharedWithMe = null).filter { it.id != excludedDriveId && !it.maintenance }
+    }
+
+    fun hasEligibleDestinationDrives(userId: Int?): Boolean {
+        return getDrivesCount(userId = userId, sharedWithMe = null, maintenance = false) > 1
+    }
 
     fun getTeams(drive: Drive): List<Team> {
         val teamList = getRealmInstance().use { realm ->

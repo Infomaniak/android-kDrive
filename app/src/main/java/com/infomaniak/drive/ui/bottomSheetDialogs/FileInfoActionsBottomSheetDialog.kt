@@ -287,6 +287,23 @@ class FileInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), FileInfo
         mainViewModel.updateOfflineFile.value = currentFile.id
     }
 
+    override fun onCopyFileToDrive(destinationFolder: File) {
+        mainViewModel.copyFileToAnotherDrive(
+            fileId = currentFile.id,
+            fileName = currentFile.name,
+            sourceDriveId = currentFile.driveId,
+            destDriveId = destinationFolder.driveId,
+            destFolderId = destinationFolder.id,
+        ).observe(viewLifecycleOwner) { fileRequest ->
+            val snackbarMessage = if (fileRequest.isSuccess) {
+                getString(R.string.copyToDriveStarted, currentFile.name)
+            } else {
+                getString(fileRequest.errorResId ?: R.string.errorCopyToDrive)
+            }
+            transmitActionAndPopBack(snackbarMessage)
+        }
+    }
+
     override fun onDuplicateFile(destinationFolder: File) {
         mainViewModel.duplicateFile(currentFile, destinationFolder.id).observe(viewLifecycleOwner) { apiResponse ->
             val snackbarMessage = if (apiResponse.isSuccess) {

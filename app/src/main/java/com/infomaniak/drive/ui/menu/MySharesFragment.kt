@@ -47,6 +47,7 @@ class MySharesFragment : FileSubTypeListFragment() {
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        userDrive = navigationArgs.userDrive
         initParams()
         super.onViewCreated(view, savedInstanceState)
         setToolbarTitle(R.string.mySharesTitle)

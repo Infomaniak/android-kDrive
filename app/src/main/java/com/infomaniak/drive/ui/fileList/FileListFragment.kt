@@ -829,6 +829,7 @@ open class FileListFragment : MultiSelectFragment(
             BulkOperationType.REMOVE_OFFLINE -> lifecycleScope.launch(Dispatchers.Main) { closeMultiSelect() }
             BulkOperationType.MANAGE_CATEGORIES,
             BulkOperationType.COPY,
+            BulkOperationType.COPY_TO_DRIVE,
             BulkOperationType.COLOR_FOLDER,
             BulkOperationType.REMOVE_FAVORITES -> Unit
         }

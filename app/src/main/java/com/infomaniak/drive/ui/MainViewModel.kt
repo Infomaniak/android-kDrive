@@ -40,6 +40,7 @@ import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.network.NetworkAvailability
 import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
@@ -57,8 +58,11 @@ import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
+import com.infomaniak.drive.data.models.MqttAction
+import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.models.file.SpecialFolder.Trash
+import com.infomaniak.drive.data.services.CopyToDriveProgressWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.utils.AccountUtils
@@ -85,6 +89,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import java.util.Date
+import java.util.concurrent.ConcurrentHashMap
 
 class MainViewModel(
     appContext: Application,
@@ -111,6 +116,8 @@ class MainViewModel(
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<FileId>()
+
+    private val pendingCopyToDriveImports = ConcurrentHashMap<Int, String>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
     val isBulkDownloadRunning = MutableLiveData<Boolean>()
 
@@ -387,6 +394,38 @@ class MainViewModel(
         }
     }
 
+    fun copyFileToAnotherDrive(
+        fileId: Int,
+        fileName: String,
+        sourceDriveId: Int,
+        destDriveId: Int,
+        destFolderId: Int,
+    ) = liveData(Dispatchers.IO) {
+        val apiResponse = ApiRepository.copyFileToAnotherDrive(sourceDriveId, fileId, destDriveId, destFolderId)
+
+        apiResponse.data?.forEach { externalImport ->
+            pendingCopyToDriveImports[externalImport.id] = fileName
+            val realDestFolderId = externalImport.directoryId.takeIf { it > 0 } ?: destFolderId
+            CopyToDriveProgressWorker.scheduleWork(getContext(), externalImport.id, fileName, destDriveId, realDestFolderId)
+        }
+
+        emit(mapCopyApiResponseToFileResult(apiResponse))
+    }
+
+    fun resolveCopyToDriveNotification(notification: MqttNotification): CopyToDriveResult? {
+        val importId = notification.importId ?: return null
+        val fileName = pendingCopyToDriveImports[importId] ?: return null
+
+        val isSuccess = when (notification.action) {
+            MqttAction.EXTERNAL_IMPORT_FINISHED -> true
+            MqttAction.EXTERNAL_IMPORT_ERROR -> false
+            else -> return null
+        }
+
+        pendingCopyToDriveImports.remove(importId)
+        return CopyToDriveResult(isSuccess, fileName)
+    }
+
     fun duplicateFile(
         file: File,
         destinationId: Int? = null,
@@ -629,6 +668,8 @@ class MainViewModel(
         val errorCode: String? = null
     )
 
+    data class CopyToDriveResult(val isSuccess: Boolean, val fileName: String)
+
     data class MultiSelectMediatorState(
         var numberOfSuccessfulActions: Int,
         var totalOfActions: Int,
@@ -640,5 +681,15 @@ class MainViewModel(
 
         private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"
         private const val SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY = "mustOpenUploadShortcut"
+
+        internal fun mapCopyApiResponseToFileResult(apiResponse: ApiResponse<*>): FileResult {
+            val isSuccess = apiResponse.result == ApiResponseStatus.SUCCESS
+                    || apiResponse.result == ApiResponseStatus.ASYNCHRONOUS
+            return FileResult(
+                isSuccess = isSuccess,
+                errorCode = apiResponse.error?.code,
+                errorResId = if (isSuccess) null else apiResponse.translateError(defaultMessage = R.string.errorCopyToDrive),
+            )
+        }
     }
 }

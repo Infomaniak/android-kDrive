@@ -60,8 +60,10 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
         binding.driveList.adapter = driveListAdapter
 
         AccountUtils.getAllUsers().observe(viewLifecycleOwner) { users ->
-            if (users.size > 1) {
+            if (users.size > 1 && showUserSelection) {
                 val selectedUser = users.find { it.id == selectedUserId.value } ?: users.first()
+                selectedUserId.value = selectedUser.id
+                driveListAdapter.setDrives(getDriveList())
                 binding.userCardview.itemViewUser.setUserView(selectedUser) {
                     popupWindow = PopupWindow(
                         popupLayoutBinding.root,
@@ -87,12 +89,19 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
                     popupWindow.dismiss()
                 }
             } else {
-                selectedUserId.value = users.first().id
+                if (selectedUserId.value == null) {
+                    selectedUserId.value = users.first().id
+                    driveListAdapter.setDrives(getDriveList())
+                }
+                binding.userCardview.root.isVisible = false
             }
         }
     }
 
-    private fun SelectDriveViewModel.getDriveList(): ArrayList<Drive> {
-        return DriveInfosController.getDrives(selectedUserId.value, sharedWithMe = if (showSharedWithMe) null else false)
+    private fun SelectDriveViewModel.getDriveList(): List<Drive> {
+        return DriveInfosController.getEligibleDestinationDrives(
+            userId = selectedUserId.value,
+            excludedDriveId = excludedDriveId,
+        )
     }
 }

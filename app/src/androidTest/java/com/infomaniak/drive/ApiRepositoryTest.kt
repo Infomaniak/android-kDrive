@@ -185,7 +185,7 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     @DisplayName("Put a file in trash then get all files in trash")
-    fun getAllDriveTrashFiles() {
+    fun getAllDriveTrashFiles() = runTest {
         // Create File to put it in trash
         val fileToDelete = putNewFileInTrash()
         // Get all trash Files
@@ -198,7 +198,7 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     @DisplayName("Put a file in trash then restore it to root folder")
-    fun restoreFileFromTrash() {
+    fun restoreFileFromTrash() = runTest {
         // Create File and put it in trash
         val file = putNewFileInTrash()
         // Restore file from trash
@@ -216,7 +216,7 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     @DisplayName("Delete all trashed files, then delete one created file specifically")
-    fun permanentlyDeleteFiles() {
+    fun permanentlyDeleteFiles() = runTest {
         // Clean the trash to make sure nothing is left in
         assertApiResponseData(emptyTrash(userDrive.driveId))
         with(getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, null)) {

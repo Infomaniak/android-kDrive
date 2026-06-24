@@ -56,6 +56,7 @@ import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileLastActivityBody
 import com.infomaniak.drive.data.models.file.LastFileAction
 import com.infomaniak.drive.data.models.file.ListingFiles
@@ -311,6 +312,16 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun duplicateFile(file: File, destinationId: Int): ApiResponse<File> {
         return callApi(ApiRoutes.duplicateFile(file, destinationId), POST)
+    }
+
+    fun copyFileToAnotherDrive(
+        sourceDriveId: Int,
+        sourceFileId: Int,
+        destDriveId: Int,
+        destFolderId: Int,
+    ): ApiResponse<ArrayList<FileExternalImport>> {
+        val body = mapOf("source_drive_id" to sourceDriveId, "source_file_id" to sourceFileId)
+        return callApi(ApiRoutes.copyFileToAnotherDrive(destDriveId, destFolderId), POST, body)
     }
 
     fun moveFile(file: File, newParent: File): ApiResponse<CancellableAction> {

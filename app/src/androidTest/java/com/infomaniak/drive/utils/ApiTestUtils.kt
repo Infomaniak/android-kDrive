@@ -18,8 +18,8 @@
 package com.infomaniak.drive.utils
 
 import androidx.collection.arrayMapOf
-import com.infomaniak.core.legacy.api.ApiController
-import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.network.api.ApiController
+import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.drive.KDriveTest.Companion.context
 import com.infomaniak.drive.KDriveTest.Companion.okHttpClient
 import com.infomaniak.drive.KDriveTest.Companion.userDrive
