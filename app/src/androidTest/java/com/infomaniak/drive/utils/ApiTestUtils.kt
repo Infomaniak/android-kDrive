@@ -17,23 +17,9 @@
  */
 package com.infomaniak.drive.utils
 
-import androidx.collection.arrayMapOf
-import com.infomaniak.core.legacy.api.ApiController
-import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.drive.KDriveTest.Companion.context
-import com.infomaniak.drive.KDriveTest.Companion.okHttpClient
-import com.infomaniak.drive.KDriveTest.Companion.userDrive
-import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.api.ApiRepository.createFolder
-import com.infomaniak.drive.data.api.ApiRepository.postDropBox
-import com.infomaniak.drive.data.api.ApiRoutes
-import com.infomaniak.drive.data.models.CreateFile
-import com.infomaniak.drive.data.models.DropBox
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.drive.Category
-import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions
-import java.util.UUID
 
 object ApiTestUtils {
 
@@ -45,47 +31,6 @@ object ApiTestUtils {
             Assertions.assertTrue(isSuccess(), "This should succeed $resultError")
             Assertions.assertNull(error, "There should be no error")
             Assertions.assertNotNull(data, "The data cannot be null")
-        }
-    }
-
-    fun deleteTestFile(remoteFile: File) {
-        Assertions.assertTrue(
-            ApiRepository.deleteFile(remoteFile).isSuccess(),
-            "created file couldn't be deleted from the remote",
-        )
-    }
-
-    fun createFileForTest(): File {
-        val createFile = CreateFile("offline doc ${UUID.randomUUID()}", File.Office.DOCS.extension)
-        return ApiRepository.createOfficeFile(Env.DRIVE_ID, Utils.ROOT_ID, createFile).let {
-            assertApiResponseData(it)
-            it.data!!
-        }
-    }
-
-    fun getCategory(driveId: Int): ApiResponse<Array<Category>> {
-        return runBlocking { ApiController.callApi(ApiRoutes.categories(driveId), ApiController.ApiMethod.GET) }
-    }
-
-    // Creates a file, puts it in trash and returns it
-    fun putNewFileInTrash() = createFileForTest().also { deleteTestFile(it) }
-
-    fun createFolderWithName(name: String): File {
-        return createFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, name).let {
-            assertApiResponseData(it)
-            it.data!!
-        }
-    }
-
-    fun createDropBoxForTest(folder: File, maxSize: Long): DropBox {
-        val body = arrayMapOf(
-            "email_when_finished" to true,
-            "limit_file_size" to maxSize,
-            "password" to "password",
-        )
-        return postDropBox(folder, body).let {
-            assertApiResponseData(it)
-            it.data!!
         }
     }
 }
