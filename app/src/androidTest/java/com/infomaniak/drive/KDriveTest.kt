@@ -22,8 +22,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.runner.permission.PermissionRequester
 import com.infomaniak.core.auth.TokenAuthenticator.Companion.changeAccessToken
 import com.infomaniak.core.auth.models.user.User
+import com.infomaniak.core.legacy.networking.HttpClient
 import com.infomaniak.core.login.ApiToken
-import com.infomaniak.core.network.networking.HttpClient
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
@@ -34,9 +34,7 @@ import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.RealmModules
 import io.realm.Realm
-import io.realm.RealmConfiguration
 import io.realm.exceptions.RealmFileException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -70,7 +68,7 @@ open class KDriveTest {
                     expiresAt = null,
                 )
 
-                val okhttpClient = HttpClient.okHttpClient.newBuilder().addInterceptor { chain ->
+                val okhttpClient = HttpClient.okHttpClientNoTokenInterceptor.newBuilder().addInterceptor { chain ->
                     val newRequest = changeAccessToken(chain.request(), apiToken)
                     chain.proceed(newRequest)
                 }.build()
@@ -108,12 +106,6 @@ open class KDriveTest {
                 runBlocking { AccountUtils.removeUser(context, user) }
             }
         }
-
-        internal fun getRealmConfigurationTest() = RealmConfiguration.Builder().inMemory()
-            .name("KDrive-test.realm")
-            .deleteRealmIfMigrationNeeded()
-            .modules(RealmModules.LocalFilesModule())
-            .build()
 
         private fun setUpRealm() {
             try {
