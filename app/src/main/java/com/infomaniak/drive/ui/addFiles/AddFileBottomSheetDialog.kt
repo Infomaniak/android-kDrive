@@ -108,21 +108,12 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
         dismiss()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return (mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value)?.let { file ->
-            currentFolderFile = file
-            FragmentBottomSheetAddFileBinding.inflate(inflater, container, false).also { binding = it }.root
-        } ?: run {
-            findNavController().popBackStack()
-            null
-        } // TODO Temporary fix
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentBottomSheetAddFileBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
-        viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            currentFolder.setFileItem(currentFolderFile)
-        }
 
         backgroundUploadPermissions = DrivePermissions(DrivePermissions.Type.UploadInTheBackground).apply {
             registerPermissions(this@AddFileBottomSheetDialog)
@@ -130,6 +121,8 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
         openCameraPermissions = CameraPermissions().apply {
             registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }
         }
+
+        observeCurrentFolder()
 
         openCamera.setOnClickListener { openCamera() }
         documentUpload.setOnClickListener {
@@ -145,6 +138,28 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
         noteCreate.setOnClickListener { createFile(Office.TXT) }
 
         documentScanning.isVisible = (context.applicationContext as MainApplication).geniusScanIsReady
+    }
+
+    private fun observeCurrentFolder() {
+        mainViewModel.currentFolderOpenAddFileBottom.observe(viewLifecycleOwner) { folderFromBottom ->
+            updateCurrentFolder(folderFromBottom ?: mainViewModel.currentFolder.value)
+        }
+
+        mainViewModel.currentFolder.observe(viewLifecycleOwner) { folder ->
+            if (mainViewModel.currentFolderOpenAddFileBottom.value == null) updateCurrentFolder(folder)
+        }
+    }
+
+    private fun updateCurrentFolder(file: File?) {
+        if (file == null) {
+            // TODO Temporary fix
+            findNavController().popBackStack()
+            return
+        }
+        currentFolderFile = file
+        viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            binding.currentFolder.setFileItem(currentFolderFile)
+        }
     }
 
     override fun onDismiss(dialog: DialogInterface) {

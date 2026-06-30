@@ -166,11 +166,6 @@ class MainViewModel(
         }
     }
 
-    private fun postCurrentFolder(file: File?) {
-        setCurrentFolderJob.cancel()
-        _currentFolder.postValue(file)
-    }
-
     fun initUploadFilesHelper(fragmentActivity: FragmentActivity, navController: NavController) {
         uploadFilesHelper = UploadFilesHelper(
             activity = fragmentActivity,
@@ -215,8 +210,13 @@ class MainViewModel(
         }
     }
 
-    fun loadCurrentFolder(folderId: Int, userDrive: UserDrive) = viewModelScope.launch(Dispatchers.IO) {
-        postCurrentFolder(FileController.getFileById(folderId, userDrive))
+    fun loadCurrentFolder(folderId: Int, userDrive: UserDrive) {
+        setCurrentFolderJob.cancel()
+        setCurrentFolderJob = Job()
+        viewModelScope.launch(Dispatchers.IO + setCurrentFolderJob) {
+            val file = FileController.getFileById(folderId, userDrive)
+            _currentFolder.postValue(file)
+        }
     }
 
     fun createMultiSelectMediator(): MediatorLiveData<MultiSelectMediatorState> =

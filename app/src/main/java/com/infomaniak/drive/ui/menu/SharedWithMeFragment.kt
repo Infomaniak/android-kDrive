@@ -62,16 +62,12 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val isRoot = folderId == ROOT_ID
-        mainViewModel.setCurrentFolder(null)
         userDrive = UserDrive(
             userId = navigationArgs.userDrive.userId,
             driveId = navigationArgs.driveId,
             sharedWithMe = true
         ).also {
-            mainViewModel.loadCurrentFolder(
-                folderId = if (isRoot) SharedWithMe.id else folderId,
-                userDrive = it,
-            )
+            mainViewModel.loadCurrentFolder(folderId = if (isRoot) SharedWithMe.id else folderId, userDrive = it)
         }
 
         sharedWithMeViewModel.sharedWithMeRealm = FileController.getRealmInstance(userDrive)
