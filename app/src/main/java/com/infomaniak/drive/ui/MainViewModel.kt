@@ -166,9 +166,6 @@ class MainViewModel(
         }
     }
 
-    private fun postCurrentFolder(file: File?) {
-    }
-
     fun initUploadFilesHelper(fragmentActivity: FragmentActivity, navController: NavController) {
         uploadFilesHelper = UploadFilesHelper(
             activity = fragmentActivity,
