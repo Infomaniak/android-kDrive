@@ -27,7 +27,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
-import com.infomaniak.core.legacy.utils.showToast
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.sentry.SentryLog
@@ -36,7 +35,6 @@ import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -52,6 +50,7 @@ import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.ensureHa
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.putIfNeeded
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.databinding.ActivityLaunchBinding
 import com.infomaniak.drive.ui.LaunchArgsType.Deeplink
 import com.infomaniak.drive.ui.LaunchArgsType.Notification
 import com.infomaniak.drive.ui.LaunchArgsType.Shortcut
@@ -71,10 +70,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.infomaniak.core.network.models.exceptions.NetworkException as ApiControllerNetworkException
+import com.infomaniak.core.network.models.exceptions.NetworkException
 
 @SuppressLint("CustomSplashScreen")
 class LaunchActivity : EdgeToEdgeActivity() {
+
+    private val binding by lazy { ActivityLaunchBinding.inflate(layoutInflater) }
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var mainActivityExtras: Bundle? = null
@@ -85,12 +86,13 @@ class LaunchActivity : EdgeToEdgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setContentView(binding.root)
+
         setDefaultLocaleIfNeeded()
 
         trackScreen()
 
         lifecycleScope.launch {
-
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
             handleLaunchArgs()
             if (deeplinkType?.isHandled == false) {
@@ -209,7 +211,11 @@ class LaunchActivity : EdgeToEdgeActivity() {
         // external instead of internal if you already have access to the files. So we set it here
         if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
 
-        if (deeplink.path.contains("/app/share/")) processPublicShare(deeplink.path) else retrieveDeeplink(uri = deeplink.uri)
+        try {
+            if (deeplink.path.contains("/app/share/")) processPublicShare(deeplink.path) else retrieveDeeplink(uri = deeplink.uri)
+        } catch (_: Exception) {
+            deeplinkType = DeeplinkType.Unmanaged.BrowserLaunch.Unknown(deeplink.uri)
+        }
         SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: ${deeplink.path}")
     }
 
@@ -230,10 +236,22 @@ class LaunchActivity : EdgeToEdgeActivity() {
     }
 
     private suspend fun retrieveDeeplink(uri: Uri) {
-        deeplinkType = DeeplinkParser.parse(uri).ensureHasAccess()
-        switchToDeeplinkTargetUser()
+        val parsedDeeplink = DeeplinkParser.parse(uri)
+        deeplinkType = parsedDeeplink.ensureHasAccess()
 
+        // File can be inaccessible because the user's drives are not up to date locally (e.g., new share, sync never done)
+        // So we force an API refresh and then re-evaluate.
+        refreshDrivesAndRetryAccessCheck(parsedDeeplink)
+
+        switchToDeeplinkTargetUser()
         if (deeplinkType !is DeeplinkType.Unmanaged) trackDeepLink(MatomoName.Internal)
+    }
+
+    private suspend fun refreshDrivesAndRetryAccessCheck(parsedDeeplink: DeeplinkType) {
+        if (deeplinkType is DeeplinkType.Unmanaged.NotAccessible) {
+            AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
+            deeplinkType = parsedDeeplink.ensureHasAccess()
+        }
     }
 
     private suspend fun switchToDeeplinkTargetUser() {
@@ -246,12 +264,10 @@ class LaunchActivity : EdgeToEdgeActivity() {
         }
     }
 
-    private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
+    private fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
+        val exception = error?.exception
         when {
-            error?.exception is ApiControllerNetworkException -> {
-                Dispatchers.Main { showToast(R.string.errorNetwork) }
-                finishAndRemoveTask()
-            }
+            exception is NetworkException -> throw exception
             error?.code == ErrorCode.PASSWORD_NOT_VALID -> {
                 setPublicShareActivityArgs(driveId, publicShareUuid, isPasswordNeeded = true)
             }

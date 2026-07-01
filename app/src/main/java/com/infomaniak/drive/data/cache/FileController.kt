@@ -21,6 +21,7 @@ import android.content.Context
 import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.legacy.utils.removeAccents
 import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.models.exceptions.NetworkException
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
@@ -60,6 +61,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import java.util.Calendar
 
 object FileController {
@@ -557,6 +559,13 @@ object FileController {
         }
     }
 
+    @Throws(NetworkException::class)
+    fun getRemoteFile(fileId: Int, driveId: Int, okHttpClient: OkHttpClient): File? {
+        val apiResponse = ApiRepository.getFileDetails(File(id = fileId, driveId = driveId), okHttpClient)
+        (apiResponse.error?.exception as? NetworkException)?.let { throw it }
+        return apiResponse.data?.takeIf { apiResponse.isSuccess() }
+    }
+
     tailrec suspend fun getMySharedFiles(
         userDrive: UserDrive,
         sortType: SortType,
@@ -887,6 +896,62 @@ object FileController {
                     localFolder.children.add(file)
                 }
             }
+        }
+    }
+
+    suspend fun saveRemoteFileToDb(
+        remoteFile: File,
+        userDrive: UserDrive? = null,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+    ) = Dispatchers.IO {
+        getRealmInstance(userDrive).use { realm ->
+            val localFile = getFileById(realm, remoteFile.id)
+            insertOrUpdateFile(realm, remoteFile, localFile)
+
+            val driveId = userDrive?.driveId ?: remoteFile.driveId
+            resolveAndLinkFileAncestorsChain(realm, parentId = remoteFile.parentId, childId = remoteFile.id, driveId, okHttpClient)
+        }
+    }
+
+    private tailrec fun resolveAndLinkFileAncestorsChain(
+        realm: Realm,
+        parentId: Int,
+        childId: Int,
+        driveId: Int,
+        okHttpClient: OkHttpClient,
+    ) {
+        if (parentId == 0) return
+        if (tryLinkToExistingParent(realm, parentId, childId)) return
+
+        val remoteParent = saveRemoteFileAncestorToDb(realm, parentId, childId, driveId, okHttpClient) ?: return
+        resolveAndLinkFileAncestorsChain(realm, remoteParent.parentId, parentId, driveId, okHttpClient)
+    }
+
+    private fun saveRemoteFileAncestorToDb(
+        realm: Realm,
+        parentId: Int,
+        childId: Int,
+        driveId: Int,
+        okHttpClient: OkHttpClient,
+    ): File? {
+        val remoteParent = getRemoteFile(fileId = parentId, driveId = driveId, okHttpClient = okHttpClient) ?: return null
+        insertOrUpdateFile(realm, remoteParent)
+        linkChildToParent(realm, parentId = parentId, childId = childId)
+        return remoteParent
+    }
+
+    private fun tryLinkToExistingParent(realm: Realm, parentId: Int, childId: Int): Boolean {
+        val localParent = getFileById(realm, parentId)
+        if (localParent != null) {
+            linkChildToParent(realm, parentId = parentId, childId = childId)
+            return true
+        }
+        return false
+    }
+
+    private fun linkChildToParent(realm: Realm, parentId: Int, childId: Int) {
+        getFileById(realm, childId)?.let { childProxy ->
+            addChild(localFolderId = parentId, newFile = childProxy, realm = realm)
         }
     }
 
