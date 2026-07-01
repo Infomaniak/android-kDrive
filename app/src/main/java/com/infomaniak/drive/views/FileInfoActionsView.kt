@@ -129,29 +129,10 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
     private fun computeFileRights(file: File, rights: Rights) = with(binding) {
-        val hasNetwork = mainViewModel.hasNetwork
-        displayInfo.isEnabled = hasNetwork
-        disabledInfo.isGone = hasNetwork
-
-        (rights.canShare && hasNetwork).let { rightsEnabled ->
-            fileRights.isEnabled = rightsEnabled
-            disabledFileRights.isGone = rightsEnabled
-        }
-
-        val isPublicLinkEnabled = rights.canBecomeShareLink && hasNetwork
-                || currentFile.shareLink != null
-                || !file.dropbox?.url.isNullOrBlank()
-
-        sharePublicLink.isEnabled = isPublicLinkEnabled
-        disabledPublicLink.isGone = isPublicLinkEnabled
+        applyNetworkDependentState(file, rights, mainViewModel.hasNetwork)
 
         if (!file.dropbox?.url.isNullOrBlank()) {
             sharePublicLinkText.text = context.getString(R.string.buttonShareDropboxLink)
-        }
-
-        ((file.isFolder() && rights.canCreateFile && rights.canCreateDirectory) || !file.isFolder()).let { sendCopyEnabled ->
-            sendCopy.isEnabled = sendCopyEnabled
-            disabledSendCopy.isGone = sendCopyEnabled
         }
 
         addFavorites.isVisible = rights.canUseFavorite == true && !isSharedWithMe
@@ -170,6 +151,52 @@ class FileInfoActionsView @JvmOverloads constructor(
         moveFile.isVisible = rights.canMove == true && !isSharedWithMe && !file.isImporting()
         renameFile.isVisible = rights.canRename == true && !file.isImporting()
         goToFolder.isVisible = isGoToFolderVisible()
+    }
+
+    private fun applyNetworkDependentState(file: File, rights: Rights, hasNetwork: Boolean) = with(binding) {
+        displayInfo.isEnabled = true
+        disabledInfo.isGone = true
+
+        (rights.canShare && hasNetwork).let { rightsEnabled ->
+            fileRights.isEnabled = rightsEnabled
+            disabledFileRights.isGone = rightsEnabled
+        }
+
+        val isPublicLinkEnabled = rights.canBecomeShareLink && hasNetwork
+                || file.shareLink != null
+                || !file.dropbox?.url.isNullOrBlank()
+
+        sharePublicLink.isEnabled = isPublicLinkEnabled
+        disabledPublicLink.isGone = isPublicLinkEnabled
+
+        val sendCopyEnabledByRights = (file.isFolder() && rights.canCreateFile && rights.canCreateDirectory) || !file.isFolder()
+        val canSendCopyOffline = !file.isFolder() && file.canUseStoredFile(
+            context,
+            UserDrive(driveId = file.driveId, sharedWithMe = isSharedWithMe)
+        )
+        val canSendCopy = sendCopyEnabledByRights && (hasNetwork || file.isFolder() || canSendCopyOffline)
+        sendCopy.isEnabled = canSendCopy
+        disabledSendCopy.isGone = canSendCopy
+
+        val isOfflineToggleInteractable = !file.isMarkedAsOffline || file.currentProgress == 100
+        setAvailableOfflineEnabled(isOfflineToggleInteractable && (hasNetwork || file.isOffline))
+
+        editDocument.isEnabled = hasNetwork
+        manageCategories.isEnabled = hasNetwork
+        addFavorites.isEnabled = hasNetwork
+        coloredFolder.isEnabled = hasNetwork
+        dropBox.isEnabled = hasNetwork
+        downloadFile.isEnabled = hasNetwork
+        moveFile.isEnabled = hasNetwork
+        duplicateFile.isEnabled = hasNetwork
+        renameFile.isEnabled = hasNetwork
+        leaveShare.isEnabled = hasNetwork
+        deleteFile.isEnabled = hasNetwork
+    }
+
+    fun updateNetworkAvailability(hasNetwork: Boolean) {
+        if (!::currentFile.isInitialized) return
+        currentFile.rights?.let { applyNetworkDependentState(currentFile, it, hasNetwork) }
     }
 
     fun updateCurrentFile(file: File) = with(binding) {
@@ -388,15 +415,20 @@ class FileInfoActionsView @JvmOverloads constructor(
      * To be called only in the [Lifecycle.Event.ON_RESUME].
      */
     fun updateAvailableOfflineItem() {
-        if (!binding.availableOffline.isEnabled && !currentFile.isMarkedAsOffline) {
+        if (mainViewModel.hasNetwork && !binding.availableOffline.isEnabled && !currentFile.isMarkedAsOffline) {
             currentFile.isOffline = true
             refreshBottomSheetUi(currentFile)
         }
     }
 
-    private fun enableAvailableOffline(isEnabled: Boolean) = with(binding) {
+    private fun enableAvailableOffline(isEnabled: Boolean) {
+        setAvailableOfflineEnabled(isEnabled && (mainViewModel.hasNetwork || currentFile.isOffline))
+    }
+
+    private fun setAvailableOfflineEnabled(isEnabled: Boolean) = with(binding) {
         availableOfflineSwitch.isEnabled = isEnabled
         availableOffline.isEnabled = isEnabled
+        availableOffline.alpha = if (isEnabled) ENABLED_ALPHA else DISABLED_ALPHA
     }
 
     fun observeOfflineProgression(lifecycleOwner: LifecycleOwner, updateFile: ((fileId: Int) -> Unit)? = null) {
@@ -439,7 +471,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     fun refreshBottomSheetUi(file: File, isOfflineProgress: Boolean = false): Unit = with(binding) {
         addFavorites.apply {
-            isEnabled = true
+            isEnabled = mainViewModel.hasNetwork
             isActivated = file.isFavorite
             text = context.getString(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
         }
@@ -688,5 +720,8 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     companion object {
         const val SINGLE_OPERATION_CUSTOM_TAG = "single_operation"
+
+        private const val ENABLED_ALPHA = 1f
+        private const val DISABLED_ALPHA = 0.5f
     }
 }

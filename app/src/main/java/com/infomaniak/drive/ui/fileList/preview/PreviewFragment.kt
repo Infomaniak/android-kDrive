@@ -29,6 +29,8 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import io.sentry.Sentry
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 
 open class PreviewFragment : Fragment() {
 
@@ -52,7 +54,25 @@ open class PreviewFragment : Fragment() {
             ?: lifecycleScope.launchWhenResumed { findNavController().popBackStack() }
 
         super.onViewCreated(view, savedInstanceState)
+
+        if (noCurrentFile()) return
+        observeNetworkToReloadPreview()
     }
+
+    private fun observeNetworkToReloadPreview() {
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+            val networkFlow = if (isFileUnavailableOffline()) {
+                mainViewModel.isNetworkAvailable
+            } else {
+                mainViewModel.isNetworkAvailable.drop(1)
+            }
+            networkFlow.collectLatest { isNetworkAvailable ->
+                if (isNetworkAvailable && !noCurrentFile()) reloadPreviewIfNeeded()
+            }
+        }
+    }
+
+    protected open fun reloadPreviewIfNeeded() = Unit
 
     private fun getCurrentFile(fileId: Int): File? = runCatching {
         FileController.getFileById(fileId, previewSliderViewModel.userDrive) ?: mainViewModel.currentPreviewFileList[fileId]
@@ -70,4 +90,21 @@ open class PreviewFragment : Fragment() {
     }
 
     protected fun noCurrentFile() = previewViewModel.currentFile == null
+
+    protected fun isFileUnavailableOffline(): Boolean = !mainViewModel.hasNetwork && !canDisplayFileOffline()
+
+    protected open fun canDisplayFileOffline(): Boolean {
+        val context = requireContext()
+        val userDrive = previewSliderViewModel.userDrive
+        return if (file.isOnlyOfficePreview()) {
+            !file.isObsolete(file.getConvertedPdfCache(context, userDrive))
+        } else {
+            file.canUseStoredFile(context, userDrive)
+        }
+    }
+
+    protected fun isOfflineCopyIntact(): Boolean {
+        return file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)
+            ?.let { file.isOfflineAndIntact(it) } == true
+    }
 }

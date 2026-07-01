@@ -94,7 +94,14 @@ open class PreviewVideoFragment : PreviewFragment() {
 
     override fun onResume() {
         super.onResume()
-        if (!noCurrentFile() && exoPlayer == null) initializePlayer()
+        if (noCurrentFile()) return
+        when {
+            isFileUnavailableOffline() -> showNoNetwork()
+            exoPlayer == null -> {
+                hideNoNetwork()
+                initializePlayer()
+            }
+        }
     }
 
     override fun onPause() {
@@ -114,6 +121,34 @@ open class PreviewVideoFragment : PreviewFragment() {
             release()
         }
         super.onDestroy()
+    }
+
+    override fun canDisplayFileOffline(): Boolean = isOfflineCopyIntact()
+
+    override fun reloadPreviewIfNeeded() {
+        if (exoPlayer == null) {
+            hideNoNetwork()
+            initializePlayer()
+        }
+    }
+
+    private fun showNoNetwork() = with(binding) {
+        activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        exoPlayer?.release()
+        exoPlayer = null
+        playerView.player = null
+        playerView.isGone = true
+        errorLayout.apply {
+            previewDescription.setText(R.string.allNoNetwork)
+            previewDescription.isVisible = true
+            bigOpenWithButton.isGone = true
+            root.isVisible = true
+        }
+    }
+
+    private fun hideNoNetwork() = with(binding) {
+        errorLayout.root.isGone = true
+        playerView.isVisible = true
     }
 
     private fun initializePlayer() {

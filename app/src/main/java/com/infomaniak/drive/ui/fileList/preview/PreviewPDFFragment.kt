@@ -97,42 +97,54 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding.downloadLayout) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (noCurrentFile() && !previewPDFHandler.isExternalFile()) return@with
+        val isExternalFile = previewPDFHandler.isExternalFile()
+        if (noCurrentFile() && !isExternalFile) return@with
 
-        if (previewPDFHandler.isExternalFile()) {
-            fileIcon.setImageResource(ExtensionType.PDF.icon)
-            fileName.text = previewPDFHandler.fileName
-            showPdf()
-        } else {
-            container.layoutTransition?.setAnimateParentHierarchy(false)
-
-            fileIcon.setImageResource(file.getFileType().icon)
-            fileName.text = file.name
-            downloadProgressIndicator.isVisible = true
-
-            previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
-                if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
-                downloadProgressIndicator.progress = progress
-            }
-        }
+        if (isExternalFile) setupExternalPdf() else setupDrivePdf()
 
         previewDescription.apply {
             setText(R.string.previewDownloadIndication)
             isVisible = true
         }
 
+        if (!isExternalFile && isFileUnavailableOffline()) showNoNetwork()
+
         initViewsForFullscreen(root, binding.pdfView)
 
         bigOpenWithButton.apply {
             isGone = true
-            setOnClickListener { if (previewPDFHandler.isPasswordProtected) showPasswordDialog() else openWithClicked() }
+            setOnClickListener { onBigOpenWithClicked() }
         }
+    }
+
+    private fun setupExternalPdf() = with(binding.downloadLayout) {
+        fileIcon.setImageResource(ExtensionType.PDF.icon)
+        fileName.text = previewPDFHandler.fileName
+        showPdf()
+    }
+
+    private fun setupDrivePdf() = with(binding.downloadLayout) {
+        container.layoutTransition?.setAnimateParentHierarchy(false)
+
+        fileIcon.setImageResource(file.getFileType().icon)
+        fileName.text = file.name
+        downloadProgressIndicator.isVisible = true
+
+        previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
+            if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
+            downloadProgressIndicator.progress = progress
+        }
+    }
+
+    private fun onBigOpenWithClicked() {
+        if (previewPDFHandler.isPasswordProtected) showPasswordDialog() else openWithClicked()
     }
 
     override fun setMenuVisibility(menuVisible: Boolean) {
         super.setMenuVisibility(menuVisible)
         if (menuVisible) {
             when {
+                !previewPDFHandler.isExternalFile() && isFileUnavailableOffline() -> showNoNetwork()
                 isDownloading -> previewSliderViewModel.pdfIsDownloading.value = isDownloading
                 pdfFile == null -> downloadPdf()
                 else -> showPdf()
@@ -296,6 +308,27 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
     private fun updatePageNumber(currentPage: Int = 1, totalPage: Int) {
         setPageNumber(currentPage + 1, totalPage)
+    }
+
+    override fun reloadPreviewIfNeeded() = with(binding.downloadLayout) {
+        if (pdfFile != null || previewPDFHandler.isExternalFile()) return@with
+        previewDescription.setText(R.string.previewDownloadIndication)
+        downloadProgressIndicator.isVisible = true
+        bigOpenWithButton.isGone = true
+        downloadPdf()
+    }
+
+    private fun showNoNetwork() = with(binding.downloadLayout) {
+        previewPDFViewModel.cancelJobs()
+        root.isVisible = true
+        downloadProgressIndicator.isGone = true
+        previewDescription.apply {
+            setText(R.string.allNoNetwork)
+            isVisible = true
+        }
+        bigOpenWithButton.isGone = true
+        previewSliderViewModel.pdfIsDownloading.value = false
+        isDownloading = false
     }
 
     private fun downloadPdf() = with(binding.downloadLayout) {
