@@ -23,22 +23,18 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
-import com.infomaniak.drive.databinding.ActivityLaunchBinding
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.core.ui.showToast
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -54,6 +50,7 @@ import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.ensureHa
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.putIfNeeded
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.databinding.ActivityLaunchBinding
 import com.infomaniak.drive.ui.LaunchArgsType.Deeplink
 import com.infomaniak.drive.ui.LaunchArgsType.Notification
 import com.infomaniak.drive.ui.LaunchArgsType.Shortcut
@@ -69,12 +66,11 @@ import com.infomaniak.drive.utils.Utils
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.infomaniak.core.network.models.exceptions.NetworkException as ApiControllerNetworkException
+import com.infomaniak.core.network.models.exceptions.NetworkException
 
 @SuppressLint("CustomSplashScreen")
 class LaunchActivity : EdgeToEdgeActivity() {
@@ -87,8 +83,6 @@ class LaunchActivity : EdgeToEdgeActivity() {
     private var isHelpShortcutPressed = false
     private var deeplinkType: DeeplinkType? = null
 
-    private class NetworkDeepLinkException : CancellationException()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -99,30 +93,23 @@ class LaunchActivity : EdgeToEdgeActivity() {
         trackScreen()
 
         lifecycleScope.launch {
-            try {
-                logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
-                handleLaunchArgs()
-                if (deeplinkType?.isHandled == false) {
-                    PublicShareUtils.openDeepLinkInBrowser(activity = this@LaunchActivity, intent.data.toString())
-                } else {
-                    startApp()
-                }
-
-                // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
-                // so that even when we return, the activity will still be closed.
-                finish()
-            } catch (_: NetworkDeepLinkException) {
-                // Activity was already closed by the deeplink error handler, nothing more to do.
+            logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
+            handleLaunchArgs()
+            if (deeplinkType?.isHandled == false) {
+                PublicShareUtils.openDeepLinkInBrowser(activity = this@LaunchActivity, intent.data.toString())
+            } else {
+                startApp()
             }
+
+            // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
+            // so that even when we return, the activity will still be closed.
+            finish()
         }
     }
 
     private suspend fun handleLaunchArgs() {
         when (val type = LaunchArgsType.from(navigationArgs, intent)) {
-            is Deeplink -> {
-                withContext(Dispatchers.Main) { binding.loadingIndicator.visibility = View.VISIBLE }
-                handleDeeplink(type)
-            }
+            is Deeplink -> handleDeeplink(type)
             is Notification -> handleNotificationDestinationIntent(type.navArgs)
             is Shortcut -> handleShortcuts(type.tag)
             null -> Unit
@@ -226,12 +213,8 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
         try {
             if (deeplink.path.contains("/app/share/")) processPublicShare(deeplink.path) else retrieveDeeplink(uri = deeplink.uri)
-        } catch (throwable: ApiControllerNetworkException) {
-            Dispatchers.Main {
-                showToast(R.string.errorNetwork)
-                finishAndRemoveTask()
-            }
-            throw NetworkDeepLinkException()
+        } catch (_: Exception) {
+            deeplinkType = DeeplinkType.Unmanaged.BrowserLaunch.Unknown(deeplink.uri)
         }
         SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: ${deeplink.path}")
     }
@@ -256,14 +239,19 @@ class LaunchActivity : EdgeToEdgeActivity() {
         val parsedDeeplink = DeeplinkParser.parse(uri)
         deeplinkType = parsedDeeplink.ensureHasAccess()
 
+        // File can be inaccessible because the user's drives are not up to date locally (e.g., new share, sync never done)
+        // So we force an API refresh and then re-evaluate.
+        refreshDrivesAndRetryAccessCheck(parsedDeeplink)
+
+        switchToDeeplinkTargetUser()
+        if (deeplinkType !is DeeplinkType.Unmanaged) trackDeepLink(MatomoName.Internal)
+    }
+
+    private suspend fun refreshDrivesAndRetryAccessCheck(parsedDeeplink: DeeplinkType) {
         if (deeplinkType is DeeplinkType.Unmanaged.NotAccessible) {
             AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
             deeplinkType = parsedDeeplink.ensureHasAccess()
         }
-
-        switchToDeeplinkTargetUser()
-
-        if (deeplinkType !is DeeplinkType.Unmanaged) trackDeepLink(MatomoName.Internal)
     }
 
     private suspend fun switchToDeeplinkTargetUser() {
@@ -276,15 +264,10 @@ class LaunchActivity : EdgeToEdgeActivity() {
         }
     }
 
-    private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
+    private fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
+        val exception = error?.exception
         when {
-            error?.exception is ApiControllerNetworkException -> {
-                Dispatchers.Main {
-                    showToast(R.string.errorNetwork)
-                    finishAndRemoveTask()
-                }
-                throw NetworkDeepLinkException()
-            }
+            exception is NetworkException -> throw exception
             error?.code == ErrorCode.PASSWORD_NOT_VALID -> {
                 setPublicShareActivityArgs(driveId, publicShareUuid, isPasswordNeeded = true)
             }

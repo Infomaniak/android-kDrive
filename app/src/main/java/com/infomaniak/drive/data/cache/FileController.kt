@@ -559,6 +559,13 @@ object FileController {
         }
     }
 
+    @Throws(NetworkException::class)
+    fun getRemoteFile(fileId: Int, driveId: Int, okHttpClient: OkHttpClient): File? {
+        val apiResponse = ApiRepository.getFileDetails(File(id = fileId, driveId = driveId), okHttpClient)
+        (apiResponse.error?.exception as? NetworkException)?.let { throw it }
+        return apiResponse.data?.takeIf { apiResponse.isSuccess() }
+    }
+
     tailrec suspend fun getMySharedFiles(
         userDrive: UserDrive,
         sortType: SortType,
@@ -902,11 +909,11 @@ object FileController {
             insertOrUpdateFile(realm, remoteFile, localFile)
 
             val driveId = userDrive?.driveId ?: remoteFile.driveId
-            saveRemoteFileAncestorsToDb(realm, parentId = remoteFile.parentId, childId = remoteFile.id, driveId, okHttpClient)
+            resolveAndLinkFileAncestorsChain(realm, parentId = remoteFile.parentId, childId = remoteFile.id, driveId, okHttpClient)
         }
     }
 
-    private tailrec fun saveRemoteFileAncestorsToDb(
+    private tailrec fun resolveAndLinkFileAncestorsChain(
         realm: Realm,
         parentId: Int,
         childId: Int,
@@ -914,21 +921,32 @@ object FileController {
         okHttpClient: OkHttpClient,
     ) {
         if (parentId == 0) return
+        if (tryLinkToExistingParent(realm, parentId, childId)) return
 
+        val remoteParent = saveRemoteFileAncestorToDb(realm, parentId, childId, driveId, okHttpClient) ?: return
+        resolveAndLinkFileAncestorsChain(realm, remoteParent.parentId, parentId, driveId, okHttpClient)
+    }
+
+    private fun saveRemoteFileAncestorToDb(
+        realm: Realm,
+        parentId: Int,
+        childId: Int,
+        driveId: Int,
+        okHttpClient: OkHttpClient,
+    ): File? {
+        val remoteParent = getRemoteFile(fileId = parentId, driveId = driveId, okHttpClient = okHttpClient) ?: return null
+        insertOrUpdateFile(realm, remoteParent)
+        linkChildToParent(realm, parentId = parentId, childId = childId)
+        return remoteParent
+    }
+
+    private fun tryLinkToExistingParent(realm: Realm, parentId: Int, childId: Int): Boolean {
         val localParent = getFileById(realm, parentId)
         if (localParent != null) {
             linkChildToParent(realm, parentId = parentId, childId = childId)
-            return
+            return true
         }
-
-        val response = ApiRepository.getFileDetails(File(id = parentId, driveId = driveId), okHttpClient)
-        (response.error?.exception as? NetworkException)?.let { throw it }
-        val remoteParent = response.data?.takeIf { response.isSuccess() } ?: return
-
-        insertOrUpdateFile(realm, remoteParent)
-        linkChildToParent(realm, parentId = parentId, childId = childId)
-
-        saveRemoteFileAncestorsToDb(realm, parentId = remoteParent.parentId, childId = parentId, driveId, okHttpClient)
+        return false
     }
 
     private fun linkChildToParent(realm: Realm, parentId: Int, childId: Int) {
