@@ -450,8 +450,9 @@
         android:label="CopyFileToDriveActivity"
         tools:layout="@layout/activity_copy_file_to_drive">
         <argument
-            android:name="fileIds"
-            app:argType="integer[]" />
+            android:name="fileId"
+            android:defaultValue="-1"
+            app:argType="integer" />
         <argument
             android:name="sourceDriveId"
             android:defaultValue="-1"

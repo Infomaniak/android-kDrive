@@ -29,7 +29,5 @@ data class ImportProgress(
     @SerializedName("total_errors")
     val totalErrors: Int = 0,
 ) {
-    val isDeterminate: Boolean get() = totalFiles > 0
-
-    val percent: Int get() = if (isDeterminate) (totalFilesProcessed * 100 / totalFiles).coerceIn(0, 100) else 0
+    val percent: Int get() = if (totalFiles > 0) (totalFilesProcessed * 100 / totalFiles).coerceIn(0, 100) else 0
 }

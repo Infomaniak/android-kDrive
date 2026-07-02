@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.api
 
-import android.util.Log
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.core.auth.api.ApiRepositoryCore
@@ -317,11 +316,11 @@ object ApiRepository : ApiRepositoryCore() {
     fun copyFileToAnotherDrive(
         sourceDriveId: Int,
         sourceFileId: Int,
-        destDriveId: Int,
-        destFolderId: Int,
-    ): ApiResponse<ArrayList<FileExternalImport>> {
+        destinationDriveId: Int,
+        destinationFolderId: Int,
+    ): ApiResponse<List<FileExternalImport>> {
         val body = mapOf("source_drive_id" to sourceDriveId, "source_file_id" to sourceFileId)
-        return callApi(ApiRoutes.copyFileToAnotherDrive(destDriveId, destFolderId), POST, body)
+        return callApi(ApiRoutes.copyFileToAnotherDrive(destinationDriveId, destinationFolderId), POST, body)
     }
 
     fun moveFile(file: File, newParent: File): ApiResponse<CancellableAction> {

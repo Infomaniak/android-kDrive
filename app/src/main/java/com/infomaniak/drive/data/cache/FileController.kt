@@ -907,21 +907,15 @@ object FileController {
 
     suspend fun saveRemoteFileToDb(
         remoteFile: File,
-        userDrive: UserDrive? = null,
+        userDrive: UserDrive,
         okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
     ) = Dispatchers.IO {
         getRealmInstance(userDrive).use { realm ->
             val localFile = getFileById(realm, remoteFile.id)
             insertOrUpdateFile(realm, remoteFile, localFile)
 
-            val driveId = userDrive?.driveId ?: remoteFile.driveId
-            resolveAndLinkFileAncestorsChain(
-                realm,
-                parentId = remoteFile.parentId,
-                childId = remoteFile.id,
-                driveId,
-                okHttpClient
-            )
+            val driveId = userDrive.driveId
+            resolveAndLinkFileAncestorsChain(realm, remoteFile.parentId, remoteFile.id, driveId, okHttpClient)
         }
     }
 

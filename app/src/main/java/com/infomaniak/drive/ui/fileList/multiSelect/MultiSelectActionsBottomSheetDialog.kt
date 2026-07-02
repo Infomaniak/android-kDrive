@@ -38,6 +38,7 @@ import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.BulkOperationType
@@ -52,7 +53,10 @@ import com.infomaniak.drive.utils.showSnackbar
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 
-abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: MatomoCategory) : EdgeToEdgeBottomSheetDialog() {
+open class MultiSelectActionsBottomSheetDialog(
+    private val matomoCategory: MatomoCategory,
+    private val enableCopyToDrive: Boolean = false,
+) : EdgeToEdgeBottomSheetDialog() {
 
     protected var binding: FragmentBottomSheetMultiSelectActionsBinding by safeBinding()
 
@@ -177,7 +181,26 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
     }
 
     protected open fun configureCopyToDrive() {
-        binding.copyToDrive.isGone = true
+        if (enableCopyToDrive) {
+            setupCopyToDriveButton()
+        } else {
+            binding.copyToDrive.isGone = true
+        }
+    }
+
+    protected fun setupCopyToDriveButton() {
+        val isSingleFile = navigationArgs.fileIds.size == 1 && !navigationArgs.isAllSelected
+        val userId = navigationArgs.userDrive?.userId ?: AccountUtils.currentUserId
+        val hasOtherDrivesAvailable = DriveInfosController.hasEligibleDestinationDrives(userId)
+        val showCopyToDrive = isSingleFile && hasOtherDrivesAvailable
+        binding.copyToDrive.apply {
+            if (showCopyToDrive) {
+                visibility = View.VISIBLE
+                setOnClickListener { onActionSelected(SelectDialogAction.COPY_TO_DRIVE) }
+            } else {
+                visibility = View.GONE
+            }
+        }
     }
 
     protected open fun configureRestoreFileIn() {

@@ -54,12 +54,12 @@ import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.FileListNavigationType
+import com.infomaniak.drive.data.models.MqttAction
+import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
-import com.infomaniak.drive.data.models.MqttAction
-import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.models.file.SpecialFolder.Trash
 import com.infomaniak.drive.data.services.CopyToDriveProgressWorker
@@ -117,7 +117,6 @@ class MainViewModel(
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<FileId>()
 
-    private val pendingCopyToDriveImports = ConcurrentHashMap<Int, String>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
     val isBulkDownloadRunning = MutableLiveData<Boolean>()
 
@@ -136,6 +135,7 @@ class MainViewModel(
 
     var uploadFilesHelper: UploadFilesHelper? = null
 
+    private val pendingCopyToDriveImports = ConcurrentHashMap<Int, String>()
     private var rootFilesJob: Job = Job()
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob: Job? = null
@@ -398,15 +398,21 @@ class MainViewModel(
         fileId: Int,
         fileName: String,
         sourceDriveId: Int,
-        destDriveId: Int,
-        destFolderId: Int,
+        destinationDriveId: Int,
+        destinationFolderId: Int,
     ) = liveData(Dispatchers.IO) {
-        val apiResponse = ApiRepository.copyFileToAnotherDrive(sourceDriveId, fileId, destDriveId, destFolderId)
+        val apiResponse = ApiRepository.copyFileToAnotherDrive(sourceDriveId, fileId, destinationDriveId, destinationFolderId)
 
         apiResponse.data?.forEach { externalImport ->
             pendingCopyToDriveImports[externalImport.id] = fileName
-            val realDestFolderId = externalImport.directoryId.takeIf { it > 0 } ?: destFolderId
-            CopyToDriveProgressWorker.scheduleWork(getContext(), externalImport.id, fileName, destDriveId, realDestFolderId)
+            val realDestFolderId = externalImport.directoryId.takeIf { it > 0 } ?: destinationFolderId
+            CopyToDriveProgressWorker.scheduleWork(
+                getContext(),
+                externalImport.id,
+                fileName,
+                destinationDriveId,
+                realDestFolderId
+            )
         }
 
         emit(mapCopyApiResponseToFileResult(apiResponse))
@@ -419,6 +425,7 @@ class MainViewModel(
         val isSuccess = when (notification.action) {
             MqttAction.EXTERNAL_IMPORT_FINISHED -> true
             MqttAction.EXTERNAL_IMPORT_ERROR -> false
+            MqttAction.EXTERNAL_IMPORT_CANCELED -> false
             else -> return null
         }
 
@@ -590,6 +597,16 @@ class MainViewModel(
         }
     }
 
+    private fun mapCopyApiResponseToFileResult(apiResponse: ApiResponse<*>): FileResult {
+        val isSuccess = apiResponse.result == ApiResponseStatus.SUCCESS
+                || apiResponse.result == ApiResponseStatus.ASYNCHRONOUS
+        return FileResult(
+            isSuccess = isSuccess,
+            errorCode = apiResponse.error?.code,
+            errorResId = if (isSuccess) null else apiResponse.translateError(defaultMessage = R.string.errorCopyToDrive),
+        )
+    }
+
     private suspend fun onNetworkAvailabilityChanged(isNetworkAvailable: Boolean) {
         SentryLog.d("Internet availability", if (isNetworkAvailable) "Available" else "Unavailable")
         Sentry.addBreadcrumb(Breadcrumb().apply {
@@ -681,15 +698,5 @@ class MainViewModel(
 
         private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"
         private const val SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY = "mustOpenUploadShortcut"
-
-        internal fun mapCopyApiResponseToFileResult(apiResponse: ApiResponse<*>): FileResult {
-            val isSuccess = apiResponse.result == ApiResponseStatus.SUCCESS
-                    || apiResponse.result == ApiResponseStatus.ASYNCHRONOUS
-            return FileResult(
-                isSuccess = isSuccess,
-                errorCode = apiResponse.error?.code,
-                errorResId = if (isSuccess) null else apiResponse.translateError(defaultMessage = R.string.errorCopyToDrive),
-            )
-        }
     }
 }

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,13 @@
  */
 package com.infomaniak.drive.ui.fileList.multiSelect
 
-import android.view.View
 import androidx.core.view.isGone
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
-import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.utils.AccountUtils
 
-class GalleryMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.PicturesFileAction) {
+class GalleryMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(
+    matomoCategory = MatomoCategory.PicturesFileAction,
+    enableCopyToDrive = true,
+) {
 
     override fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
         binding.coloredFolder.isGone = true
@@ -33,15 +33,5 @@ class GalleryMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheet
     // This make the offline action buggy because we cannot update the UI responsively, and the setting offline doesn't work
     override fun configureAvailableOffline() {
         binding.availableOffline.isGone = true
-    }
-
-    override fun configureCopyToDrive() {
-        val isSingleFile = navigationArgs.fileIds.size == 1 && !navigationArgs.isAllSelected
-        val userId = navigationArgs.userDrive?.userId ?: AccountUtils.currentUserId
-        val hasOtherDrivesAvailable = DriveInfosController.hasEligibleDestinationDrives(userId)
-        binding.copyToDrive.apply {
-            visibility = if (isSingleFile && hasOtherDrivesAvailable) View.VISIBLE else View.GONE
-            setOnClickListener { onActionSelected(SelectDialogAction.COPY_TO_DRIVE) }
-        }
     }
 }
