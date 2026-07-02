@@ -154,6 +154,7 @@ sealed interface DeeplinkType : Parcelable {
             private fun sharedWithMeCandidateUserIds(sourceDriveId: Int): List<Int> {
                 val knownUserIds = DriveInfosController.getDrives(driveId = sourceDriveId, sharedWithMe = null).map { it.userId }
                 val allUserIds = AccountUtils.getAllUsersSync().map { it.id }
+                // Prioritize current user to short-circuit the .any() in hasSharedWithMeAccess() if the current user has access
                 return (knownUserIds + allUserIds).distinct().sortedByDescending { it == AccountUtils.currentUserId }
             }
 
@@ -164,8 +165,7 @@ sealed interface DeeplinkType : Parcelable {
 
             private suspend fun DeeplinkAction.fetchAndSaveRemoteFileForAnyDrive(fileId: Int, sharedWithMe: Boolean): Boolean {
                 return getDrives(sharedWithMe).any { userDrive ->
-                    val file =
-                        fetchAndSaveRemoteFile(fileId, userId = userDrive.userId, driveId = userDrive.driveId, sharedWithMe)
+                    val file = fetchAndSaveRemoteFile(fileId, userDrive.userId, userDrive.driveId, sharedWithMe)
                     if (file != null) userDrive.updateUser(deeplinkAction = this)
                     file != null
                 }

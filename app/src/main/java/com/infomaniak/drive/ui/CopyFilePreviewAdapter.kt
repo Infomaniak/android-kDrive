@@ -36,8 +36,6 @@ class CopyFilePreviewAdapter(private val files: List<File>) : Adapter<CopyFilePr
 
     override fun onBindViewHolder(holder: CopyFilePreviewViewHolder, position: Int): Unit = with(holder.binding) {
         itemViewFile.setFileItemWithoutCategories(files[position])
-        itemViewFile.fileSize.isGone = true
-        itemViewFile.fileDate.isGone = true
         itemViewFile.menuButton.isGone = true
         fileCardView.setMargins(left = 0, right = 0)
         fileCardView.setCorners(position, itemCount)

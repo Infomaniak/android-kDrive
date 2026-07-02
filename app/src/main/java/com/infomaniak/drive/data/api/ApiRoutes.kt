@@ -291,8 +291,9 @@ object ApiRoutes {
 
     fun duplicateFile(file: File, destinationId: Int) = "${fileURL(file)}/copy/$destinationId?$fileWithQuery"
 
-    fun copyFileToAnotherDrive(destDriveId: Int, destFolderId: Int) =
-        "$DRIVE_API_V2/$destDriveId/files/$destFolderId/copy-to-drive"
+    fun copyFileToAnotherDrive(destinationDriveId: Int, destinationFolderId: Int): String {
+        return "$DRIVE_API_V2/$destinationDriveId/files/$destinationFolderId/copy-to-drive"
+    }
 
     fun renameFile(file: File) = "${fileURLV2(file)}/rename"
 

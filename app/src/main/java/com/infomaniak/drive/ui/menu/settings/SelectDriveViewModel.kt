@@ -27,4 +27,5 @@ class SelectDriveViewModel : ViewModel() {
 
     var excludedDriveId: Int? = null
     var showUserSelection: Boolean = true
+    var showSharedWithMe: Boolean = false
 }

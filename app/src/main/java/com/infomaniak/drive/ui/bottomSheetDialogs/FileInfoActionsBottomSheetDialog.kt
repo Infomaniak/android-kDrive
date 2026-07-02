@@ -292,8 +292,8 @@ class FileInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), FileInfo
             fileId = currentFile.id,
             fileName = currentFile.name,
             sourceDriveId = currentFile.driveId,
-            destDriveId = destinationFolder.driveId,
-            destFolderId = destinationFolder.id,
+            destinationDriveId = destinationFolder.driveId,
+            destinationFolderId = destinationFolder.id,
         ).observe(viewLifecycleOwner) { fileRequest ->
             val snackbarMessage = if (fileRequest.isSuccess) {
                 getString(R.string.copyToDriveStarted, currentFile.name)

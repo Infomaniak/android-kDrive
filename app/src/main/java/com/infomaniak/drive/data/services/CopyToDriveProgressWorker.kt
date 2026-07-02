@@ -57,20 +57,23 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters) : ListenableWorker(context, workerParams) {
 
+    private val resultNotificationId: Int = UUID.randomUUID().hashCode()
+    private val notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
+    private val notificationBuilder: NotificationCompat.Builder by lazy {
+        applicationContext.copyToDriveProgressNotification().apply {
+            setContentTitle(applicationContext.getString(R.string.copyToDriveStarted, fileName))
+        }
+    }
+    private val isFinished = AtomicBoolean(false)
+
     private var importId: Int = 0
     private var fileName: String = ""
     private var destDriveId: Int = 0
     private var destFolderId: Int = 0
     private var notificationId: Int = 0
-    private val resultNotificationId: Int = UUID.randomUUID().hashCode()
-
-    private lateinit var notificationBuilder: NotificationCompat.Builder
-    private lateinit var notificationManagerCompat: NotificationManagerCompat
     private var mqttNotificationsObserver: Observer<MqttNotification>? = null
-
     private lateinit var timer: CountDownTimer
     private lateinit var lastReception: Date
-    private val isFinished = AtomicBoolean(false)
 
     override fun startWork(): ListenableFuture<Result> {
         importId = inputData.getInt(IMPORT_ID_KEY, 0)
@@ -78,16 +81,7 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         destDriveId = inputData.getInt(DEST_DRIVE_ID_KEY, -1)
         destFolderId = inputData.getInt(DEST_FOLDER_ID_KEY, -1)
 
-        if (importId <= 0 || fileName.isBlank()) {
-            return CallbackToFutureAdapter.getFuture { completer -> completer.set(Result.failure()) }
-        }
-
         notificationId = importId
-        notificationManagerCompat = NotificationManagerCompat.from(applicationContext)
-
-        notificationBuilder = applicationContext.copyToDriveProgressNotification().apply {
-            setContentTitle(applicationContext.getString(R.string.copyToDriveStarted, fileName))
-        }
 
         val notification = buildNotification(progress = null).apply {
             if (SDK_INT >= 31) foregroundServiceBehavior = Notification.FOREGROUND_SERVICE_IMMEDIATE
@@ -103,7 +97,10 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
 
         return CallbackToFutureAdapter.getFuture { completer ->
             timer = createRefreshTimer(milliseconds = 1_000L) {
-                if (Date().time - lastReception.time > COPY_TO_DRIVE_TIMEOUT) finish(completer, isSuccess = null) else timer.start()
+                if (Date().time - lastReception.time > COPY_TO_DRIVE_TIMEOUT) finish(
+                    completer = completer,
+                    isSuccess = false
+                ) else timer.start()
             }
             timer.start()
 
@@ -111,10 +108,10 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         }
     }
 
-    private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, isSuccess: Boolean?) {
+    private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, isSuccess: Boolean) {
         if (!isFinished.compareAndSet(false, true)) return
         releaseResources()
-        isSuccess?.let { showResultNotification(it) }
+        showResultNotification(isSuccess)
         completer.set(Result.success())
     }
 
@@ -129,18 +126,18 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         mqttNotificationsObserver?.let { MqttClientWrapper.removeObserver(it) }
         mqttNotificationsObserver = null
         if (importId > 0) MqttClientWrapper.stopExternalImportTracking(importId)
-        if (::notificationManagerCompat.isInitialized) notificationManagerCompat.cancel(notificationId)
+        notificationManagerCompat.cancel(notificationId)
     }
 
-    private fun launchObserver(onTerminal: (isSuccess: Boolean?) -> Unit) {
+    private fun launchObserver(onOperationFinished: (isSuccess: Boolean) -> Unit) {
         mqttNotificationsObserver = Observer { notification ->
             if (notification.importId != importId) return@Observer
 
             lastReception = Date()
             when (notification.action) {
-                MqttAction.EXTERNAL_IMPORT_FINISHED -> onTerminal(true)
-                MqttAction.EXTERNAL_IMPORT_ERROR -> onTerminal(false)
-                MqttAction.EXTERNAL_IMPORT_CANCELED -> onTerminal(null)
+                MqttAction.EXTERNAL_IMPORT_FINISHED -> onOperationFinished(true)
+                MqttAction.EXTERNAL_IMPORT_ERROR -> onOperationFinished(false)
+                MqttAction.EXTERNAL_IMPORT_CANCELED -> onOperationFinished(false)
                 else -> notification.importProgress?.let { progress ->
                     notificationManagerCompat.notifyCompat(notificationId, buildNotification(progress))
                 }
@@ -182,9 +179,8 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
 
     private fun buildNotification(progress: ImportProgress?): NotificationCompat.Builder {
         return notificationBuilder.apply {
-            val isIndeterminate = progress == null || !progress.isDeterminate
             setContentText(progress?.let { "${it.percent}%" })
-            setProgress(100, progress?.percent ?: 0, isIndeterminate)
+            setProgress(100, progress?.percent ?: 0, progress == null || progress.totalFiles == 0)
         }
     }
 
@@ -197,6 +193,8 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         private const val COPY_TO_DRIVE_TIMEOUT = 30_000L
 
         fun scheduleWork(context: Context, importId: Int, fileName: String, destDriveId: Int, destFolderId: Int) {
+            if (importId <= 0 || fileName.isBlank()) return
+
             val workRequest = OneTimeWorkRequestBuilder<CopyToDriveProgressWorker>()
                 .setInputData(
                     workDataOf(
@@ -207,7 +205,6 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
                     )
                 )
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
-                .addTag(TAG)
                 .build()
 
             WorkManager.getInstance(context).enqueue(workRequest)

@@ -71,9 +71,9 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.SingleOperation
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.Utils.TARGET_DRIVE_ID_TAG
 import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
-import com.infomaniak.drive.utils.Utils.TARGET_DRIVE_ID_TAG
 import com.infomaniak.drive.utils.openOnlyOfficeDocument
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
@@ -227,13 +227,13 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     private fun computeHasOtherDrivesAvailable(): Boolean {
-        val userId = currentFile?.let { DriveInfosController.getDrive(driveId = it.driveId, sharedWithMe = null)?.userId }
+        val userId = currentFile.let { DriveInfosController.getDrive(driveId = it.driveId, sharedWithMe = null)?.userId }
             ?: AccountUtils.currentUserId
         return DriveInfosController.hasEligibleDestinationDrives(userId)
     }
 
     private fun isCopyToDriveVisible(file: File, rights: Rights): Boolean {
-        return rights.canRead == true && !isSharedWithMe && !file.isImporting() && hasOtherDrivesAvailable
+        return rights.canRead && !isSharedWithMe && !file.isImporting() && hasOtherDrivesAvailable
     }
 
     private fun isGoToFolderVisible(): Boolean {
@@ -659,7 +659,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 val intent = Intent(currentContext, CopyFileToDriveActivity::class.java).apply {
                     putExtras(
                         CopyFileToDriveActivityArgs(
-                            fileIds = intArrayOf(file.id),
+                            fileId = file.id,
                             sourceDriveId = file.driveId,
                             userId = userId,
                         ).toBundle()

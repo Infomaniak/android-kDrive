@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,10 +46,10 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
-import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.MainViewModel.MultiSelectMediatorState
 import com.infomaniak.drive.ui.CopyFileToDriveActivity
 import com.infomaniak.drive.ui.CopyFileToDriveActivityArgs
+import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.MainViewModel.MultiSelectMediatorState
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
@@ -69,14 +69,16 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
 
     protected val mainViewModel: MainViewModel by activityViewModels()
     protected val multiSelectManager = MultiSelectManager()
+    protected abstract val userDrive: UserDrive?
     protected var adapter: RecyclerView.Adapter<*>? = null
     protected var multiSelectLayout: MultiSelectLayoutBinding? = null
-    private var multiSelectToolbar: CollapsingToolbarLayout? = null
-    private var swipeRefresh: SwipeRefreshLayout? = null
 
     private val notificationPermission by lazy { NotificationPermission() }
-
-    protected abstract val userDrive: UserDrive?
+    private var multiSelectToolbar: CollapsingToolbarLayout? = null
+    private var swipeRefresh: SwipeRefreshLayout? = null
+    private var pendingCopyToDriveFileId: Int = -1
+    private var pendingCopyToDriveSourceId: Int = -1
+    private var pendingCopyToDriveFileName: String = ""
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
@@ -102,29 +104,27 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
                 val result = SelectFolderActivityArgs.fromBundle(bundle)
                 val targetDriveId = result.customArgs?.getInt(Utils.TARGET_DRIVE_ID_TAG, -1) ?: -1
 
-                val fileIds = pendingCopyToDriveFileIds
+                val fileId = pendingCopyToDriveFileId
                 val sourceDriveId = pendingCopyToDriveSourceId
-                if (fileIds.isEmpty() || sourceDriveId == -1 || targetDriveId == -1) return@let
+                if (fileId == -1 || sourceDriveId == -1 || targetDriveId == -1) return@let
 
                 val destinationFolder = File(id = result.folderId, name = result.folderName, driveId = targetDriveId)
 
                 val mediator = mainViewModel.createMultiSelectMediator()
                 enableMultiSelectButtons(false)
 
-                fileIds.forEach { fileId ->
-                    mediator.addSource(
-                        mainViewModel.copyFileToAnotherDrive(
-                            fileId = fileId,
-                            fileName = pendingCopyToDriveFileName,
-                            sourceDriveId = sourceDriveId,
-                            destDriveId = targetDriveId,
-                            destFolderId = result.folderId,
-                        ),
-                        mainViewModel.updateMultiSelectMediator(mediator),
-                    )
-                }
+                mediator.addSource(
+                    mainViewModel.copyFileToAnotherDrive(
+                        fileId = fileId,
+                        fileName = pendingCopyToDriveFileName,
+                        sourceDriveId = sourceDriveId,
+                        destinationDriveId = targetDriveId,
+                        destinationFolderId = result.folderId,
+                    ),
+                    mainViewModel.updateMultiSelectMediator(mediator),
+                )
 
-                observeMediator(mediator, fileIds.size, BulkOperationType.COPY_TO_DRIVE, destinationFolder, dialog = null)
+                observeMediator(mediator, 1, BulkOperationType.COPY_TO_DRIVE, destinationFolder, dialog = null)
             }
         }
     }
@@ -265,14 +265,14 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
 
         val file = selectedFiles.first()
         val fileId = file.id
-        pendingCopyToDriveFileIds = listOf(fileId)
+        pendingCopyToDriveFileId = fileId
         pendingCopyToDriveSourceId = sourceDriveId
         pendingCopyToDriveFileName = file.name
 
         val intent = Intent(requireContext(), CopyFileToDriveActivity::class.java).apply {
             putExtras(
                 CopyFileToDriveActivityArgs(
-                    fileIds = intArrayOf(fileId),
+                    fileId = fileId,
                     sourceDriveId = sourceDriveId,
                     userId = userId,
                 ).toBundle()
@@ -280,10 +280,6 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         }
         copyToDriveResultLauncher.launch(intent)
     }
-
-    private var pendingCopyToDriveFileIds: List<Int> = emptyList()
-    private var pendingCopyToDriveSourceId: Int = -1
-    private var pendingCopyToDriveFileName: String = ""
 
     fun restoreIn() {
         Intent(requireContext(), SelectFolderActivity::class.java).apply {

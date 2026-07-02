@@ -252,8 +252,8 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             fileId = currentFile.id,
             fileName = currentFile.name,
             sourceDriveId = currentFile.driveId,
-            destDriveId = destinationFolder.driveId,
-            destFolderId = destinationFolder.id,
+            destinationDriveId = destinationFolder.driveId,
+            destinationFolderId = destinationFolder.id,
         ).observe(viewLifecycleOwner) { fileResult ->
             val message = if (fileResult.isSuccess) {
                 getString(R.string.copyToDriveStarted, currentFile.name)

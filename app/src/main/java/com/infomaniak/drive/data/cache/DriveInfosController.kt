@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -176,7 +176,7 @@ object DriveInfosController {
     }
 
     fun getDrivesCount(
-        userId: Int?,
+        userId: Int,
         driveId: Int? = null,
         sharedWithMe: Boolean? = false,
         maintenance: Boolean? = null
@@ -184,11 +184,11 @@ object DriveInfosController {
 
     fun hasSingleDrive(userId: Int): Boolean = getDrivesCount(userId) == 1L
 
-    fun getEligibleDestinationDrives(userId: Int?, excludedDriveId: Int?): List<Drive> {
-        return getDrives(userId = userId, sharedWithMe = null).filter { it.id != excludedDriveId && !it.maintenance }
+    fun getEligibleDestinationDrives(userId: Int?, excludedDriveId: Int?, sharedWithMe: Boolean? = null): List<Drive> {
+        return getDrives(userId = userId, sharedWithMe = sharedWithMe).filter { it.id != excludedDriveId && !it.maintenance }
     }
 
-    fun hasEligibleDestinationDrives(userId: Int?): Boolean {
+    fun hasEligibleDestinationDrives(userId: Int): Boolean {
         return getDrivesCount(userId = userId, sharedWithMe = null, maintenance = false) > 1
     }
 
