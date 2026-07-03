@@ -127,10 +127,10 @@ sealed interface DeeplinkType : Parcelable {
                     val userId = userId
                     if (userId != null) {
                         hasFile(fileId, userId = userId, driveId, sharedWithMe)
-                            || fetchAndSaveRemoteFile(fileId, userId = userId, driveId, sharedWithMe) != null
+                                || fetchAndSaveRemoteFile(fileId, userId = userId, driveId, sharedWithMe) != null
                     } else {
                         getUserDriveWithFile(fileId, sharedWithMe)?.updateUser(deeplinkAction = this) != null
-                            || fetchAndSaveRemoteFileForAnyDrive(fileId, sharedWithMe)
+                                || fetchAndSaveRemoteFileForAnyDrive(fileId, sharedWithMe)
                     }
                 } ?: hasDrive(sharedWithMe)
             }
@@ -143,9 +143,11 @@ sealed interface DeeplinkType : Parcelable {
                 return sharedWithMeCandidateUserIds(sourceDriveId).any { candidateUserId ->
                     val userDrive = UserDrive(userId = candidateUserId, driveId = sourceDriveId, sharedWithMe = true)
                     val hasLocalAccess = FileController.hasFile(fileId = fileId, userDrive = userDrive)
-                    val hasRemoteAccess = fetchAndSaveRemoteFile(fileId, userId = candidateUserId, driveId = sourceDriveId, sharedWithMe = true) != null
-                    if (hasLocalAccess || hasRemoteAccess ) userId = candidateUserId
-                    hasLocalAccess || hasRemoteAccess
+                    var hasRemoteAccess = false
+                    if (!hasLocalAccess) {
+                        hasRemoteAccess = fetchAndSaveRemoteFile(fileId, candidateUserId, sourceDriveId, true) != null
+                    }
+                    (hasLocalAccess || hasRemoteAccess).also { hasAccess -> if (hasAccess) userId = candidateUserId }
                 }
             }
 
@@ -162,7 +164,8 @@ sealed interface DeeplinkType : Parcelable {
 
             private suspend fun DeeplinkAction.fetchAndSaveRemoteFileForAnyDrive(fileId: Int, sharedWithMe: Boolean): Boolean {
                 return getDrives(sharedWithMe).any { userDrive ->
-                    val file = fetchAndSaveRemoteFile(fileId, userId = userDrive.userId, driveId = userDrive.driveId, sharedWithMe)
+                    val file =
+                        fetchAndSaveRemoteFile(fileId, userId = userDrive.userId, driveId = userDrive.driveId, sharedWithMe)
                     if (file != null) userDrive.updateUser(deeplinkAction = this)
                     file != null
                 }

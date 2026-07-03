@@ -171,6 +171,12 @@ object FileController {
             .count() > 0
     }
 
+    fun hasFile(realm: Realm, fileId: Int): Boolean {
+        return realm.where(File::class.java)
+            .equalTo(File::id.name, fileId)
+            .count() > 0
+    }
+
     private suspend fun <R> forRealm(userDrive: UserDrive?, block: Realm.() -> R): R = Dispatchers.IO {
         getRealmInstance(userDrive).use(block)
     }
@@ -909,7 +915,13 @@ object FileController {
             insertOrUpdateFile(realm, remoteFile, localFile)
 
             val driveId = userDrive?.driveId ?: remoteFile.driveId
-            resolveAndLinkFileAncestorsChain(realm, parentId = remoteFile.parentId, childId = remoteFile.id, driveId, okHttpClient)
+            resolveAndLinkFileAncestorsChain(
+                realm,
+                parentId = remoteFile.parentId,
+                childId = remoteFile.id,
+                driveId,
+                okHttpClient
+            )
         }
     }
 
@@ -941,12 +953,9 @@ object FileController {
     }
 
     private fun tryLinkToExistingParent(realm: Realm, parentId: Int, childId: Int): Boolean {
-        val localParent = getFileById(realm, parentId)
-        if (localParent != null) {
-            linkChildToParent(realm, parentId = parentId, childId = childId)
-            return true
+        return hasFile(realm, parentId).also { _ ->
+            linkChildToParent(realm = realm, parentId = parentId, childId = childId)
         }
-        return false
     }
 
     private fun linkChildToParent(realm: Realm, parentId: Int, childId: Int) {
