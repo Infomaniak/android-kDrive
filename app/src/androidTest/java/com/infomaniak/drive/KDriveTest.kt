@@ -20,8 +20,8 @@ package com.infomaniak.drive
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.runner.permission.PermissionRequester
-import com.infomaniak.core.legacy.auth.TokenAuthenticator.Companion.changeAccessToken
-import com.infomaniak.core.legacy.models.user.User
+import com.infomaniak.core.auth.TokenAuthenticator.Companion.changeAccessToken
+import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.legacy.networking.HttpClient
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
