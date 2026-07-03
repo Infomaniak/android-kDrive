@@ -30,6 +30,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
@@ -141,13 +142,16 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
     }
 
     private fun observeCurrentFolder() {
-        mainViewModel.currentFolderOpenAddFileBottom.observe(viewLifecycleOwner) { folderFromBottom ->
-            updateCurrentFolder(folderFromBottom ?: mainViewModel.currentFolder.value)
+        val currentFolderMerged = MediatorLiveData<File?>().apply {
+            addSource(mainViewModel.currentFolderOpenAddFileBottom) { folderFromBottom ->
+                value = folderFromBottom ?: mainViewModel.currentFolder.value
+            }
+            addSource(mainViewModel.currentFolder) { folder ->
+                if (mainViewModel.currentFolderOpenAddFileBottom.value == null) value = folder
+            }
         }
 
-        mainViewModel.currentFolder.observe(viewLifecycleOwner) { folder ->
-            if (mainViewModel.currentFolderOpenAddFileBottom.value == null) updateCurrentFolder(folder)
-        }
+        currentFolderMerged.observe(viewLifecycleOwner, ::updateCurrentFolder)
     }
 
     private fun updateCurrentFolder(file: File?) {
@@ -156,6 +160,7 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
             findNavController().popBackStack()
             return
         }
+
         currentFolderFile = file
         viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) {
             binding.currentFolder.setFileItem(currentFolderFile)

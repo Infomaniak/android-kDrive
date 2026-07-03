@@ -215,6 +215,7 @@ class MainViewModel(
         setCurrentFolderJob = Job()
         viewModelScope.launch(Dispatchers.IO + setCurrentFolderJob) {
             val file = FileController.getFileById(folderId, userDrive)
+            setCurrentFolderJob.ensureActive()
             _currentFolder.postValue(file)
         }
     }
