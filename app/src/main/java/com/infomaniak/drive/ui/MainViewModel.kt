@@ -105,6 +105,8 @@ class MainViewModel(
 
     private val privateFolder = MutableLiveData<File>()
     private val _currentFolder = MutableLiveData<File?>()
+    private val pendingCopyToDriveImports = ConcurrentHashMap<Int, String>()
+
     val currentFolder: LiveData<File?> = _currentFolder // Use `setCurrentFolder` and `postCurrentFolder` to set value on it
 
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
@@ -135,7 +137,6 @@ class MainViewModel(
 
     var uploadFilesHelper: UploadFilesHelper? = null
 
-    private val pendingCopyToDriveImports = ConcurrentHashMap<Int, String>()
     private var rootFilesJob: Job = Job()
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob: Job? = null
@@ -403,7 +404,7 @@ class MainViewModel(
     ) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.copyFileToAnotherDrive(sourceDriveId, fileId, destinationDriveId, destinationFolderId)
 
-        apiResponse.data?.forEach { externalImport ->
+        apiResponse.data?.firstOrNull()?.let { externalImport ->
             pendingCopyToDriveImports[externalImport.id] = fileName
             val realDestFolderId = externalImport.directoryId.takeIf { it > 0 } ?: destinationFolderId
             CopyToDriveProgressWorker.scheduleWork(
