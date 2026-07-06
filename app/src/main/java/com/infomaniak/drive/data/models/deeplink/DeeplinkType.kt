@@ -127,10 +127,10 @@ sealed interface DeeplinkType : Parcelable {
                     val userId = userId
                     if (userId != null) {
                         hasFile(fileId, userId = userId, driveId, sharedWithMe)
-                                || fetchAndSaveRemoteFile(fileId, userId = userId, driveId, sharedWithMe) != null
+                                || syncRemoteFile(fileId, userId = userId, driveId, sharedWithMe) != null
                     } else {
                         getUserDriveWithFile(fileId, sharedWithMe)?.updateUser(deeplinkAction = this) != null
-                                || fetchAndSaveRemoteFileForAnyDrive(fileId, sharedWithMe)
+                                || syncRemoteFileInAnyDrive(fileId, sharedWithMe) != null
                     }
                 } ?: hasDrive(sharedWithMe)
             }
@@ -145,7 +145,7 @@ sealed interface DeeplinkType : Parcelable {
                     val hasLocalAccess = FileController.hasFile(fileId = fileId, userDrive = userDrive)
                     var hasRemoteAccess = false
                     if (!hasLocalAccess) {
-                        hasRemoteAccess = fetchAndSaveRemoteFile(fileId, candidateUserId, sourceDriveId, true) != null
+                        hasRemoteAccess = syncRemoteFile(fileId, candidateUserId, sourceDriveId, true) != null
                     }
                     (hasLocalAccess || hasRemoteAccess).also { hasAccess -> if (hasAccess) userId = candidateUserId }
                 }
@@ -163,15 +163,15 @@ sealed interface DeeplinkType : Parcelable {
                 return FileController.hasFile(fileId = fileId, userDrive = userDrive)
             }
 
-            private suspend fun DeeplinkAction.fetchAndSaveRemoteFileForAnyDrive(fileId: Int, sharedWithMe: Boolean): Boolean {
-                return getDrives(sharedWithMe).any { userDrive ->
-                    val file = fetchAndSaveRemoteFile(fileId, userDrive.userId, userDrive.driveId, sharedWithMe)
-                    if (file != null) userDrive.updateUser(deeplinkAction = this)
-                    file != null
+            private suspend fun DeeplinkAction.syncRemoteFileInAnyDrive(fileId: Int, sharedWithMe: Boolean): File? {
+                return getDrives(sharedWithMe).firstNotNullOfOrNull { userDrive ->
+                    syncRemoteFile(fileId, userDrive.userId, userDrive.driveId, sharedWithMe)?.also {
+                        userDrive.updateUser(deeplinkAction = this)
+                    }
                 }
             }
 
-            private suspend fun fetchAndSaveRemoteFile(
+            private suspend fun syncRemoteFile(
                 fileId: Int,
                 userId: Int,
                 driveId: Int,
@@ -232,7 +232,7 @@ sealed interface DeeplinkType : Parcelable {
                 if (DEBUG) require(deeplinkFolderRole is Redirect)
 
                 return getDrives(sharedWithMe = withSharedDrives).firstNotNullOfOrNull { userDrive ->
-                    val file = fetchAndSaveRemoteFile(
+                    val file = syncRemoteFile(
                         fileId = fileId,
                         userId = userDrive.userId,
                         driveId = userDrive.driveId,

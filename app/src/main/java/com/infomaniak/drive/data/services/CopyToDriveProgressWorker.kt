@@ -115,7 +115,6 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         completer.set(Result.success())
     }
 
-    // Called when WorkManager stops/cancels the worker without going through finish(): clean up to avoid leaks.
     override fun onStopped() {
         super.onStopped()
         releaseResources()

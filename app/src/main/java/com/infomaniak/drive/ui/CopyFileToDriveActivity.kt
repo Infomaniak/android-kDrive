@@ -26,7 +26,6 @@ import androidx.core.graphics.toColorInt
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.infomaniak.core.common.extensions.isNightModeEnabled
@@ -127,10 +126,8 @@ class CopyFileToDriveActivity : BaseActivity() {
     }
 
     private fun observeDriveDialogSelection() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                selectDriveViewModel.selectedDrive.asFlow().collect(copyFileToDriveViewModel::onDriveSelected)
-            }
+        selectDriveViewModel.selectedDrive.observe(this) { drive ->
+            drive?.let(copyFileToDriveViewModel::onDriveSelected)
         }
     }
 
