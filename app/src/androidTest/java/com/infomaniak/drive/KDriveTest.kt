@@ -22,7 +22,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.runner.permission.PermissionRequester
 import com.infomaniak.core.auth.TokenAuthenticator.Companion.changeAccessToken
 import com.infomaniak.core.auth.models.user.User
-import com.infomaniak.core.legacy.networking.HttpClient
+import com.infomaniak.core.login.ApiToken
+import com.infomaniak.core.network.networking.HttpClient
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
@@ -34,7 +35,6 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmModules
-import com.infomaniak.core.login.ApiToken
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.exceptions.RealmFileException
@@ -70,7 +70,7 @@ open class KDriveTest {
                     expiresAt = null,
                 )
 
-                val okhttpClient = HttpClient.okHttpClientNoTokenInterceptor.newBuilder().addInterceptor { chain ->
+                val okhttpClient = HttpClient.okHttpClient.newBuilder().addInterceptor { chain ->
                     val newRequest = changeAccessToken(chain.request(), apiToken)
                     chain.proceed(newRequest)
                 }.build()

@@ -26,14 +26,19 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
-import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
+import coil3.asDrawable
+import coil3.request.ImageRequest
+import coil3.request.error
+import coil3.request.fallback
+import coil3.request.placeholder
+import coil3.request.transformations
+import coil3.transform.CircleCropTransformation
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.infomaniak.core.legacy.utils.CoilUtils.simpleImageLoader
+import com.infomaniak.core.coil.ImageLoaderProvider.simpleImageLoader
+import com.infomaniak.core.coil.generateInitialsAvatarDrawable
+import com.infomaniak.core.coil.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.Utils.getDefaultAcceptedLanguage
-import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
-import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
@@ -183,7 +188,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                         .error(fallback)
                         .placeholder(R.drawable.ic_account)
                         .build()
-                    simpleImageLoader.execute(request).drawable?.let {
+                    simpleImageLoader.execute(request).image?.asDrawable(resources)?.let {
                         withContext(Dispatchers.Main) {
                             chip.chipIcon = it
                         }

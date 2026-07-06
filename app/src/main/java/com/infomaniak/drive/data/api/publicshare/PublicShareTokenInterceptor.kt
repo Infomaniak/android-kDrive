@@ -19,12 +19,10 @@ package com.infomaniak.drive.data.api.publicshare
 
 import com.infomaniak.core.auth.TokenAuthenticator.Companion.changeAccessToken
 import com.infomaniak.core.auth.TokenInterceptorListener
-import com.infomaniak.core.legacy.auth.TokenAuthenticator.Companion.changeAccessToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
-import com.infomaniak.core.legacy.auth.TokenInterceptorListener as LegacyTokenInterceptorListener
 
 class PublicShareTokenInterceptor(
     private val tokenInterceptorListener: TokenInterceptorListener
@@ -35,26 +33,6 @@ class PublicShareTokenInterceptor(
 
         runBlocking(Dispatchers.Default) {
             tokenInterceptorListener.getApiToken()
-        }?.let { apiToken ->
-            val authorization = request.header("Authorization")
-            if (apiToken.accessToken != authorization?.replaceFirst("Bearer ", "")) {
-                request = changeAccessToken(request, apiToken)
-            }
-        }
-
-        return chain.proceed(request)
-    }
-}
-
-class PublicShareLegacyTokenInterceptor(
-    private val tokenInterceptorListener: LegacyTokenInterceptorListener
-) : Interceptor {
-
-    override fun intercept(chain: Interceptor.Chain): Response {
-        var request = chain.request()
-
-        runBlocking(Dispatchers.Default) {
-            tokenInterceptorListener.getUserApiToken()
         }?.let { apiToken ->
             val authorization = request.header("Authorization")
             if (apiToken.accessToken != authorization?.replaceFirst("Bearer ", "")) {

@@ -44,8 +44,8 @@ import com.google.android.exoplayer2.upstream.FileDataSource
 import com.google.android.exoplayer2.util.EventLogger
 import com.google.android.exoplayer2.util.Util
 import com.infomaniak.core.auth.networking.HttpClient
-import com.infomaniak.core.legacy.networking.HttpUtils
-import com.infomaniak.core.legacy.networking.ManualAuthorizationRequired
+import com.infomaniak.core.network.networking.HttpUtils
+import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackMediaPlayerEvent
 import com.infomaniak.drive.R

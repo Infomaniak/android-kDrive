@@ -29,7 +29,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.viewbinding.ViewBinding
-import coil.load
+import coil3.load
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.views.LoaderAdapter
 import com.infomaniak.drive.R
