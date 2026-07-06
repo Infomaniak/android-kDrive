@@ -674,9 +674,8 @@ class FileInfoActionsView @JvmOverloads constructor(
                 if (downloadPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
                     val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
                     val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
-                    val url = ApiRoutes.getDownloadFileUrl(file)
                     DownloadManagerUtils.launchDownload(
-                        url = url,
+                        url = ApiRoutes.getDownloadFileUrl(file),
                         name = fileName,
                         userAgent = HttpUtils.getUserAgent,
                         userBearerToken = userBearerToken,
@@ -685,7 +684,8 @@ class FileInfoActionsView @JvmOverloads constructor(
                             Sentry.captureMessage("DownloadManager Error") { scope ->
                                 scope.setTag("reason", reason)
                                 scope.setExtra("name", fileName)
-                                scope.setExtra("url", url)
+                                scope.setExtra("fileId", file.id.toString())
+                                scope.setExtra("driveId", file.driveId.toString())
                             }
                         }
                     )

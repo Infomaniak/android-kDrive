@@ -243,7 +243,8 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
                         Sentry.captureMessage("DownloadManager Error") { scope ->
                             scope.setTag("reason", reason)
                             scope.setExtra("name", fileName)
-                            scope.setExtra("file size", file.size.toString())
+                            scope.setExtra("driveId", file.driveId.toString())
+                            scope.setExtra("fileSize", file.size.toString())
                         }
                     }
                 )
@@ -304,6 +305,5 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
 
     protected companion object {
         const val ARCHIVE_FILE_NAME = "Archive.zip"
-        const val TAG = "MultiselectActionsBottomSheetDialog"
     }
 }
