@@ -79,7 +79,7 @@ class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomS
                     onError = { messageResId -> showSnackbar(title = messageResId) },
                     onSentryLog = { reason ->
                         Sentry.captureMessage("DownloadManager Error") { scope ->
-                            scope.setTag("Reason", reason)
+                            scope.setTag("reason", reason)
                             scope.setExtra("location", "public share download archive")
                         }
                     }

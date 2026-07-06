@@ -27,7 +27,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.core.common.utils.DownloadManagerUtils
-import com.infomaniak.core.legacy.utils.SentryLog
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
@@ -210,7 +209,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
                         onError = { showSnackbar(titleId = it) },
                         onSentryLog = { reason ->
                             Sentry.captureMessage("DownloadManager Error") { scope ->
-                                scope.setTag("Reason", reason)
+                                scope.setTag("reason", reason)
                                 scope.setExtra("location", "multiselect download archive")
                             }
                         }
@@ -242,7 +241,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
                     onError = { showSnackbar(titleId = it) },
                     onSentryLog = { reason ->
                         Sentry.captureMessage("DownloadManager Error") { scope ->
-                            scope.setTag("Reason", reason)
+                            scope.setTag("reason", reason)
                             scope.setExtra("name", fileName)
                             scope.setExtra("file size", file.size.toString())
                         }

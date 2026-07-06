@@ -683,7 +683,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                         onError = { showToast(title = it) },
                         onSentryLog = { reason ->
                             Sentry.captureMessage("DownloadManager Error") { scope ->
-                                scope.setTag("Reason", reason)
+                                scope.setTag("reason", reason)
                                 scope.setExtra("name", fileName)
                                 scope.setExtra("url", url)
                             }
