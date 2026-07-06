@@ -76,6 +76,7 @@ import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
 import com.infomaniak.drive.utils.shareFile
 import com.infomaniak.drive.utils.showSnackbar
+import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -673,12 +674,20 @@ class FileInfoActionsView @JvmOverloads constructor(
                 if (downloadPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
                     val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
                     val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
+                    val url = ApiRoutes.getDownloadFileUrl(file)
                     DownloadManagerUtils.launchDownload(
-                        url = ApiRoutes.getDownloadFileUrl(file),
+                        url = url,
                         name = fileName,
                         userAgent = HttpUtils.getUserAgent,
                         userBearerToken = userBearerToken,
-                        onError = { showToast(title = it) }
+                        onError = { showToast(title = it) },
+                        onSentryLog = { reason ->
+                            Sentry.captureMessage("DownloadManager Error") { scope ->
+                                scope.setTag("Reason", reason)
+                                scope.setExtra("name", fileName)
+                                scope.setExtra("url", url)
+                            }
+                        }
                     )
                     onSuccess?.invoke()
                 }

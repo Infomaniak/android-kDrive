@@ -30,6 +30,7 @@ import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
+import io.sentry.Sentry
 
 class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.PublicShareAction) {
 
@@ -75,7 +76,13 @@ class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomS
                     name = ARCHIVE_FILE_NAME,
                     userAgent = HttpUtils.getUserAgent,
                     userBearerToken = userBearerToken,
-                    onError = { messageResId -> showSnackbar(title = messageResId) }
+                    onError = { messageResId -> showSnackbar(title = messageResId) },
+                    onSentryLog = { reason ->
+                        Sentry.captureMessage("DownloadManager Error") { scope ->
+                            scope.setTag("Reason", reason)
+                            scope.setExtra("location", "public share download archive")
+                        }
+                    }
                 )
             }
             error?.let { showSnackbar(it, anchor = (requireActivity() as PublicShareActivity).getMainButton()) }

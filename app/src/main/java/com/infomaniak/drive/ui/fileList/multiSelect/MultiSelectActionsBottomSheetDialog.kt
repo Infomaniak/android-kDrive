@@ -27,6 +27,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.core.common.utils.DownloadManagerUtils
+import com.infomaniak.core.legacy.utils.SentryLog
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
@@ -49,6 +50,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.showSnackbar
+import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 
 abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: MatomoCategory) : EdgeToEdgeBottomSheetDialog() {
@@ -205,7 +207,13 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
                         name = ARCHIVE_FILE_NAME,
                         userAgent = HttpUtils.getUserAgent,
                         userBearerToken = userBearerToken,
-                        onError = { showSnackbar(titleId = it) }
+                        onError = { showSnackbar(titleId = it) },
+                        onSentryLog = { reason ->
+                            Sentry.captureMessage("DownloadManager Error") { scope ->
+                                scope.setTag("Reason", reason)
+                                scope.setExtra("location", "multiselect download archive")
+                            }
+                        }
                     )
                 }
             } else {
@@ -231,7 +239,14 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
                     name = fileName,
                     userAgent = HttpUtils.getUserAgent,
                     userBearerToken = userBearerToken,
-                    onError = { showSnackbar(titleId = it) }
+                    onError = { showSnackbar(titleId = it) },
+                    onSentryLog = { reason ->
+                        Sentry.captureMessage("DownloadManager Error") { scope ->
+                            scope.setTag("Reason", reason)
+                            scope.setExtra("name", fileName)
+                            scope.setExtra("file size", file.size.toString())
+                        }
+                    }
                 )
             }
         }
@@ -290,5 +305,6 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
 
     protected companion object {
         const val ARCHIVE_FILE_NAME = "Archive.zip"
+        const val TAG = "MultiselectActionsBottomSheetDialog"
     }
 }
