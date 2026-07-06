@@ -18,10 +18,12 @@
 package com.infomaniak.drive.ui.dropbox
 
 import androidx.collection.arrayMapOf
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.google.gson.JsonObject
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
+import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -43,7 +45,7 @@ class DropboxViewModel : ViewModel() {
         limitFileSize: Long? = null,
         password: String? = null,
         validUntil: Long? = null
-    ) = liveData(Dispatchers.IO) {
+    ): LiveData<ApiResponse<DropBox>> = liveData(Dispatchers.IO) {
         val body = arrayMapOf(
             "email_when_finished" to emailWhenFinished,
             "limit_file_size" to limitFileSize,

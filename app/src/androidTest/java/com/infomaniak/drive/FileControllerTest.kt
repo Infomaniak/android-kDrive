@@ -32,12 +32,14 @@ import com.infomaniak.drive.data.cache.FileController.searchFiles
 import com.infomaniak.drive.data.cache.FileController.storeGalleryDrive
 import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType
+import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.file.SpecialFolder.Favorites
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
 import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
+import com.infomaniak.drive.utils.ApiTestUtils.createFolderWithName
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.Utils
@@ -281,6 +283,37 @@ class FileControllerTest : KDriveTest() {
             assertTrue(data?.name == newName, "File's name should be $newName")
         }
         deleteTestFile(file)
+    }
+
+    @Test
+    @DisplayName("Save a remote leaf file then check its ancestors are fetched and linked")
+    fun saveRemoteFileToDbFetchesAndLinksAncestors() = runBlocking {
+        val folder = createFolderWithName("TestFolder-$randomSuffix")
+        val createFile = CreateFile("offline doc $randomSuffix", File.Office.DOCS.extension)
+        val remoteFile = ApiRepository.createOfficeFile(Env.DRIVE_ID, folder.id, createFile).let {
+            assertApiResponseData(it)
+            it.data!!.apply { parentId = folder.id }
+        }
+
+        try {
+            FileController.saveRemoteFileToDb(remoteFile, userDrive, okHttpClient)
+
+            assertNotNull(
+                FileController.getFileById(remoteFile.id, userDrive),
+                "the saved remote file must be stored in realm",
+            )
+
+            val localParent = FileController.getFileById(folder.id, userDrive)
+            assertNotNull(localParent, "the ancestor folder must be fetched and stored in realm")
+
+            assertNotNull(
+                localParent!!.children.firstOrNull { it.id == remoteFile.id },
+                "the leaf file must be linked as a child of its parent folder",
+            )
+        } finally {
+            deleteTestFile(folder)
+            FileController.getRealmInstance(userDrive).use { removeFile(folder.id, customRealm = it) }
+        }
     }
 
     private fun getAndSaveRemoteRootFiles(): FolderFilesProvider.FolderFilesProviderResult? {

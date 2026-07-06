@@ -74,6 +74,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.applock.view.AppLockViewActivity
 import com.infomaniak.core.coil.ImageLoaderProvider.simpleImageLoader
+import com.infomaniak.core.coil.generateInitialsAvatarDrawable
+import com.infomaniak.core.coil.getBackgroundColorBasedOnId
 import com.infomaniak.core.common.doesFileExist
 import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.observe
@@ -81,8 +83,6 @@ import com.infomaniak.core.inappreview.BaseInAppReviewManager
 import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
 import com.infomaniak.core.inappreview.view.ReviewAlertDialog
 import com.infomaniak.core.inappreview.view.ReviewAlertDialogData
-import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
-import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.ui.view.extension.setMargins

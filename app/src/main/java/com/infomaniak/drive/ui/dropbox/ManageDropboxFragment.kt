@@ -145,7 +145,7 @@ open class ManageDropboxFragment : Fragment() {
         with(dropBox) {
             emailWhenFinishedSwitch.isChecked = hasNotification
             expirationDateSwitch.isChecked = validUntil != null
-            limitStorageSwitch.isChecked = limitFileSize != null
+            limitStorageSwitch.isChecked = capabilities?.hasSizeLimit == true
             passwordSwitch.isChecked = hasPassword
         }
 
@@ -195,7 +195,7 @@ open class ManageDropboxFragment : Fragment() {
                 currentDropBox?.newLimitFileSize = if (settings.limitStorageSwitch.isChecked) {
                     settings.limitStorageValue.text?.toString()?.toDoubleOrNull()?.let { Utils.convertGigaByteToBytes(it) }
                 } else {
-                    null
+                    0
                 }
                 currentDropBox?.let {
                     showProgressCatching()
@@ -268,7 +268,7 @@ open class ManageDropboxFragment : Fragment() {
     private fun limitStorageSwitched(dropBox: DropBox?, isChecked: Boolean) = with(binding.settings) {
         trackDropboxEvent(MatomoName.SwitchLimitStorageSpace, value = isChecked.toFloat())
 
-        if ((dropBox?.limitFileSize != null) == isChecked) validationCount-- else validationCount++
+        if (dropBox?.capabilities?.hasSizeLimit == isChecked) validationCount-- else validationCount++
         limitStorageValueLayout.isVisible = isChecked
         limitStorageValueUnit.isVisible = isChecked
         enableSaveButton()
