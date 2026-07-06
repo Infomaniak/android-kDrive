@@ -93,7 +93,11 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
             val emailWhenFinished = emailWhenFinishedSwitch.isChecked
             val validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
             val password = passwordTextInput.text.toString()
-            val limitFileSize = limitStorageValue.text.toString().toDoubleOrNull()?.let { Utils.convertGigaByteToBytes(it) }
+            val limitFileSize = if (limitStorageSwitch.isChecked) {
+                limitStorageValue.text.toString().toDoubleOrNull()?.let { Utils.convertGigaByteToBytes(it) }
+            } else {
+                null
+            }
 
             createFolder(false) { file, _ ->
                 file?.let {
