@@ -25,7 +25,7 @@ import android.widget.ArrayAdapter
 import android.widget.Filter
 import android.widget.Filterable
 import androidx.core.view.isGone
-import coil.load
+import coil3.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.Invitation
