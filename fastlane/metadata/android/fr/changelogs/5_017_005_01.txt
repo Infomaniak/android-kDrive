@@ -1,0 +1,2 @@
+- Correction de l'ouverture d'un lien profond lorsque l'utilisateur n'avait encore jamais ouvert le fichier sur l'app.
+- Correction de la limite des dropbox
