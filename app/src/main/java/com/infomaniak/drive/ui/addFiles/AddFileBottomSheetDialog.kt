@@ -73,6 +73,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.Date
 
@@ -80,7 +81,7 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
 
     private var binding: FragmentBottomSheetAddFileBinding by safeBinding()
 
-    private lateinit var currentFolderFile: File
+    private var currentFolderFile: File? = null
 
     private val mainViewModel: MainViewModel by activityViewModels()
 
@@ -163,7 +164,7 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
 
         currentFolderFile = file
         viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            binding.currentFolder.setFileItem(currentFolderFile)
+            binding.currentFolder.setFileItem(file)
         }
     }
 
@@ -193,12 +194,18 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
     }
 
     private fun createFolder() {
+        val currentFolder = currentFolderFile ?: run {
+            showErrorCurrentFolder()
+            return
+        }
+
         safeNavigate(
             AddFileBottomSheetDialogDirections.actionAddFileBottomSheetDialogToNewFolderFragment(
-                parentFolderId = currentFolderFile.id,
-                userDrive = UserDrive(driveId = currentFolderFile.driveId)
+                parentFolderId = currentFolder.id,
+                userDrive = UserDrive(driveId = currentFolder.driveId)
             )
         )
+
         dismiss()
     }
 
@@ -213,6 +220,11 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
     }
 
     private fun createFile(office: Office) {
+        val currentFolder = currentFolderFile ?: run {
+            showErrorCurrentFolder()
+            return
+        }
+
         Utils.createPromptNameDialog(
             context = requireContext(),
             title = R.string.modalCreateFileTitle,
@@ -222,7 +234,7 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
         ) { dialog, name ->
             trackNewElement(office.getEventName())
             val createFile = CreateFile(name, office.extension)
-            mainViewModel.createOffice(currentFolderFile.driveId, currentFolderFile.id, createFile)
+            mainViewModel.createOffice(currentFolder.driveId, currentFolder.id, createFile)
                 .observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
                         showSnackbar(getString(R.string.modalCreateFileSuccess, createFile.name), showAboveFab = true)
@@ -248,18 +260,23 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
 
     private fun onCaptureMediaResult(): Job = lifecycleScope.launch(Dispatchers.IO) {
         try {
+            val currentFolder = currentFolderFile ?: run {
+                withContext(Dispatchers.Main) { showErrorCurrentFolder() }
+                return@launch
+            }
+
             val file = IOFile(mediaPhotoPath)
             val fileModifiedAt = Date(file.lastModified())
             val applicationContext = context?.applicationContext
             val cacheUri = Utils.copyDataToUploadCache(requireContext(), file, fileModifiedAt)
             UploadFile(
                 uri = cacheUri.toString(),
-                driveId = currentFolderFile.driveId,
+                driveId = currentFolder.driveId,
                 fileCreatedAt = fileModifiedAt,
                 fileModifiedAt = fileModifiedAt,
                 fileName = file.name,
                 fileSize = file.length(),
-                remoteFolder = currentFolderFile.id,
+                remoteFolder = currentFolder.id,
                 type = UploadFile.Type.UPLOAD.name,
                 userId = currentUserId,
             ).store()
@@ -303,6 +320,11 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
     private fun trackNewElement(trackerName: String) {
         val trackerSource = if (mainViewModel.currentFolderOpenAddFileBottom.value == null) "FromFAB" else "FromFolder"
         trackNewElementEvent(trackerName + trackerSource)
+    }
+
+    private fun showErrorCurrentFolder() {
+        findNavController().popBackStack()
+        showSnackbar(R.string.anErrorHasOccurred)
     }
 
     override fun onDestroy() {
