@@ -43,7 +43,11 @@ class CopyFileToDriveViewModel(savedStateHandle: SavedStateHandle) : ViewModel()
 
     val sourceFile: File? = loadSourceFile()
 
-    private val eligibleDrives = DriveInfosController.getEligibleDestinationDrives(userId, excludedDriveId = sourceDriveId)
+    private val eligibleDrives = DriveInfosController.getEligibleDestinationDrives(
+        userId = userId,
+        excludedDriveId = sourceDriveId,
+        sharedWithMe = false,
+    )
     val hasMultipleDrives = eligibleDrives.size > 1
 
     private val _selectedDrive = MutableStateFlow(eligibleDrives.firstOrNull())
