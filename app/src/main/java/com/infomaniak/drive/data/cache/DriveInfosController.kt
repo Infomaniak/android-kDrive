@@ -188,8 +188,8 @@ object DriveInfosController {
         return getDrives(userId = userId, sharedWithMe = sharedWithMe).filter { it.id != excludedDriveId && !it.maintenance }
     }
 
-    fun hasEligibleDestinationDrives(userId: Int): Boolean {
-        return getDrivesCount(userId = userId, sharedWithMe = null, maintenance = false) > 1
+    fun hasEligibleDestinationDrives(userId: Int, sharedWithMe: Boolean? = null): Boolean {
+        return getDrivesCount(userId = userId, sharedWithMe = sharedWithMe, maintenance = false) > 1
     }
 
     fun getTeams(drive: Drive): List<Team> {
