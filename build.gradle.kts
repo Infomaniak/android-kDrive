@@ -2,6 +2,10 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
 
     extra.apply {
         set("appCompileSdk", 36) // Ensure any extra configChanges are added into Activities' manifests.
@@ -27,9 +31,11 @@ plugins {
     alias(core.plugins.dagger.hilt) apply false
     alias(core.plugins.ksp) apply false
     alias(core.plugins.navigation.safeargs) apply false
-    alias(libs.plugins.ktlint) version "12.3.0"
+    alias(core.plugins.ktlint)
+}
+
 ktlint {
-    version.set("1.6.0")
+    version.set("1.7.1")
     outputToConsole.set(true)
     android.set(true)
     ignoreFailures.set(false)

@@ -28,5 +28,6 @@ plugins {
 rootProject.name = "kDrive"
 include(
     ":app",
+    ":Core:KtlintCustomRules",
     ":Core:Legacy",
 )
