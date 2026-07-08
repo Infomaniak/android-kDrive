@@ -102,25 +102,23 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        bottomSheetView.init(
+            ownerFragment = this@PreviewSliderFragment,
+            mainViewModel = mainViewModel,
+            shareLinkViewModel = shareLinkViewModel,
+            onItemClickListener = this@PreviewSliderFragment,
+            selectFolderResultLauncher = selectFolderResultLauncher,
+            isSharedWithMe = userDrive.sharedWithMe,
+            hideActions = false,
+        )
+        bottomSheetView.updateCurrentFile(currentFile)
+
         super.onViewCreated(view, savedInstanceState)
 
         requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = true)
 
-        bottomSheetView.apply {
-            init(
-                ownerFragment = this@PreviewSliderFragment,
-                mainViewModel = mainViewModel,
-                shareLinkViewModel = shareLinkViewModel,
-                onItemClickListener = this@PreviewSliderFragment,
-                selectFolderResultLauncher = selectFolderResultLauncher,
-                isSharedWithMe = userDrive.sharedWithMe,
-                hideActions = false,
-            )
-            updateCurrentFile(currentFile, mainViewModel.hasEligibleDestinationDrives(currentFile))
-
-            previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
-                openWith.isGone = isDownloading
-            }
+        previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
+            bottomSheetView.openWith.isGone = isDownloading
         }
 
         observeCopyToDriveResult(mainViewModel) { message ->

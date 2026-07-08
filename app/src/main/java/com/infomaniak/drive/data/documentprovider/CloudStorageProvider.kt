@@ -363,9 +363,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
         val updatedFile = runCatching {
             getRemoteFile(localFile, fileId, userDrive.driveId)
-        }.getOrElse {
-            localFile
-        }
+        }.getOrNull() ?: localFile
 
         return updatedFile?.let {
             if (isWrite) {
