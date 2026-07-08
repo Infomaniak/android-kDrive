@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,18 +19,25 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.databinding.FragmentPreviewOthersBinding
 import com.infomaniak.drive.ui.MainViewModel
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 
 open class PreviewFragment : Fragment() {
 
@@ -39,6 +46,8 @@ open class PreviewFragment : Fragment() {
     protected val previewSliderViewModel: PreviewSliderViewModel by viewModels(ownerProducer = ::requireParentFragment)
 
     protected val navigationArgs by lazy { arguments?.let(PreviewFragmentArgs.Companion::fromBundle) }
+
+    protected open val noNetworkBinding: FragmentPreviewOthersBinding? get() = null
 
     protected lateinit var file: File
 
@@ -60,19 +69,16 @@ open class PreviewFragment : Fragment() {
     }
 
     private fun observeNetworkToReloadPreview() {
-        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
-            val networkFlow = if (isFileUnavailableOffline()) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mainViewModel.isNetworkAvailable
-            } else {
-                mainViewModel.isNetworkAvailable.drop(1)
-            }
-            networkFlow.collectLatest { isNetworkAvailable ->
-                if (isNetworkAvailable && !noCurrentFile()) reloadPreviewIfNeeded()
+                    .filter { it }
+                    .collectLatest {
+                        if (!noCurrentFile()) reloadPreviewIfNeeded()
+                    }
             }
         }
     }
-
-    protected open fun reloadPreviewIfNeeded() = Unit
 
     private fun getCurrentFile(fileId: Int): File? = runCatching {
         FileController.getFileById(fileId, previewSliderViewModel.userDrive) ?: mainViewModel.currentPreviewFileList[fileId]
@@ -89,6 +95,8 @@ open class PreviewFragment : Fragment() {
         null
     }
 
+    protected open fun reloadPreviewIfNeeded() = Unit
+
     protected fun noCurrentFile() = previewViewModel.currentFile == null
 
     protected fun isFileUnavailableOffline(): Boolean = !mainViewModel.hasNetwork && !canDisplayFileOffline()
@@ -96,15 +104,30 @@ open class PreviewFragment : Fragment() {
     protected open fun canDisplayFileOffline(): Boolean {
         val context = requireContext()
         val userDrive = previewSliderViewModel.userDrive
-        return if (file.isOnlyOfficePreview()) {
-            !file.isObsolete(file.getConvertedPdfCache(context, userDrive))
+        val storedFile = if (file.isOnlyOfficePreview()) {
+            file.getConvertedPdfCache(context, userDrive)
         } else {
-            file.canUseStoredFile(context, userDrive)
+            file.getStoredFile(context, userDrive)
         }
+        return (storedFile?.length() ?: 0L) > 0L
     }
 
     protected fun isOfflineCopyIntact(): Boolean {
         return file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)
             ?.let { file.isOfflineAndIntact(it) } == true
+    }
+
+    protected open fun showNoNetwork() {
+        noNetworkBinding?.apply {
+            fileName.text = file.name
+            previewDescription.setText(R.string.allNoNetwork)
+            previewDescription.isVisible = true
+            bigOpenWithButton.isGone = true
+            root.isVisible = true
+        }
+    }
+
+    protected open fun hideNoNetwork() {
+        noNetworkBinding?.root?.isGone = true
     }
 }

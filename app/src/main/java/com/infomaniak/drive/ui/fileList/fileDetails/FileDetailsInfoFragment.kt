@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@
 package com.infomaniak.drive.ui.fileList.fileDetails
 
 import android.annotation.SuppressLint
-import kotlinx.coroutines.launch
-import androidx.lifecycle.lifecycleScope
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.format.Formatter
@@ -31,10 +29,11 @@ import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.safeNavigate
-import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -55,6 +54,7 @@ import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.utils.navigateToParentFolder
 import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
+import kotlinx.coroutines.launch
 
 class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
 
@@ -88,9 +88,9 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
             this@FileDetailsInfoFragment.file = file
 
             file.shareLink?.let { setupShareLink() }
-            setupCategoriesContainer(file.getCategories())
+            setupCategoriesContainer(file.getCategories(), mainViewModel.hasNetwork)
             displayUsersAvatars()
-            setupShareButton()
+            setupShareButton(mainViewModel.hasNetwork)
             setupPathLocationButton()
 
             if (file.addedAt.isPositive()) {
@@ -122,10 +122,10 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
 
     private fun setupNetworkObserver() {
         viewLifecycleOwner.lifecycleScope.launch {
-            mainViewModel.isNetworkAvailable.collect {
+            mainViewModel.isNetworkAvailable.collect { isAvailable ->
                 if (::file.isInitialized) {
-                    setupShareButton()
-                    setupCategoriesContainer(file.getCategories())
+                    setupShareButton(isAvailable)
+                    setupCategoriesContainer(file.getCategories(), isAvailable)
                 }
             }
         }
@@ -165,7 +165,10 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
         getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) { ids ->
             fileDetailsViewModel.currentFile.value?.let {
                 file = it
-                setupCategoriesContainer(DriveInfosController.getCategoriesFromIds(file.driveId, ids.toTypedArray()))
+                setupCategoriesContainer(
+                    DriveInfosController.getCategoriesFromIds(file.driveId, ids.toTypedArray()),
+                    mainViewModel.hasNetwork
+                )
             }
         }
     }
@@ -178,11 +181,11 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
         pathView.isVisible = true
     }
 
-    private fun setupShareButton() = with(binding) {
+    private fun setupShareButton(isAvailable: Boolean) = with(binding) {
         if (file.rights?.canShare == true) {
             shareButton.isVisible = true
-            shareButton.isEnabled = mainViewModel.hasNetwork
-            shareButton.alpha = if (mainViewModel.hasNetwork) 1.0f else 0.5f
+            shareButton.isEnabled = isAvailable
+            shareButton.alpha = if (isAvailable) 1.0f else 0.5f
             shareButton.setOnClickListener {
                 parentFragment?.safeNavigate(
                     FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareDetailsFragment(fileId = file.id)
@@ -263,7 +266,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
         shareLinkDivider.isGone = true
     }
 
-    private fun setupCategoriesContainer(categories: List<Category>) = with(binding) {
+    private fun setupCategoriesContainer(categories: List<Category>, isAvailable: Boolean) = with(binding) {
         val rights = DriveInfosController.getCategoryRights(file.driveId)
 
         if (file.id.isPositive() && rights.canReadOnFile) {
@@ -273,7 +276,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
                 setup(
                     categories = categories,
                     canPutCategoryOnFile = !file.isDisabled() && rights.canPutOnFile,
-                    isEnabled = mainViewModel.hasNetwork,
+                    isEnabled = isAvailable,
                     layoutInflater = layoutInflater,
                     onClicked = { onCategoriesClicked(file.id) },
                 )

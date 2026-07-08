@@ -44,6 +44,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.databinding.FragmentPreviewOthersBinding
 import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.getHeader
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.getPreviewPDFHandler
@@ -62,6 +63,8 @@ import kotlinx.coroutines.launch
 import okio.IOException
 
 class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
+
+    override val noNetworkBinding: FragmentPreviewOthersBinding get() = binding.downloadLayout
 
     private var binding: FragmentPreviewPdfBinding by safeBinding()
 
@@ -318,17 +321,12 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         downloadPdf()
     }
 
-    private fun showNoNetwork() = with(binding.downloadLayout) {
+    override fun showNoNetwork() {
         previewPDFViewModel.cancelJobs()
-        root.isVisible = true
-        downloadProgressIndicator.isGone = true
-        previewDescription.apply {
-            setText(R.string.allNoNetwork)
-            isVisible = true
-        }
-        bigOpenWithButton.isGone = true
+        binding.downloadLayout.downloadProgressIndicator.isGone = true
         previewSliderViewModel.pdfIsDownloading.value = false
         isDownloading = false
+        super.showNoNetwork()
     }
 
     private fun downloadPdf() = with(binding.downloadLayout) {
