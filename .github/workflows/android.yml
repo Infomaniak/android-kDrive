@@ -20,11 +20,11 @@ jobs:
       with:
         java-version: 11
 
-    - name: Install ktlint
-      run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.7.1/ktlint && chmod a+x ktlint
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
 
     - name: Run ktlint
-      run: cd app && ../ktlint 'src/**/*.kt' --baseline=config/ktlint/baseline.xml
+      run: ./gradlew :app:ktlintCheck --no-daemon
 
   instrumentation-tests:
     if: github.event.pull_request.draft == false
