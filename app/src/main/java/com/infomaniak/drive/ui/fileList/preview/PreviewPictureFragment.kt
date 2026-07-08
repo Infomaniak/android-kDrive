@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,9 +36,9 @@ import coil3.request.SuccessResult
 import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.MainApplication
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.coil.ImageLoaderType
+import com.infomaniak.drive.databinding.FragmentPreviewOthersBinding
 import com.infomaniak.drive.databinding.FragmentPreviewPictureBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
@@ -47,7 +47,10 @@ import kotlinx.coroutines.launch
 
 class PreviewPictureFragment : PreviewFragment() {
 
+    override val noNetworkBinding: FragmentPreviewOthersBinding get() = binding.noThumbnailLayout
+
     private var binding: FragmentPreviewPictureBinding by safeBinding()
+
     private val loadTimer by lazy {
         createRefreshTimer(milliseconds = LOADER_TIMEOUT_MS) {
             binding.loader.isGone = true
@@ -55,10 +58,20 @@ class PreviewPictureFragment : PreviewFragment() {
             binding.imageView.isGone = true
         }
     }
-    private val previewRequestListener = object : ImageRequest.Listener {
+    private var isPreviewLoaded = false
+
+    private fun previewRequestListener(isPreviewRequest: Boolean) = object : ImageRequest.Listener {
         override fun onStart(request: ImageRequest) = binding.onPreviewRequestStart()
-        override fun onSuccess(request: ImageRequest, result: SuccessResult) = binding.onPreviewRequestSuccess(result)
-        override fun onError(request: ImageRequest, result: ErrorResult) = binding.onPreviewRequestError()
+
+        override fun onSuccess(request: ImageRequest, result: SuccessResult) {
+            if (isPreviewRequest) isPreviewLoaded = true
+            binding.onPreviewRequestSuccess(result)
+        }
+
+        override fun onError(request: ImageRequest, result: ErrorResult) {
+            if (isPreviewRequest) isPreviewLoaded = false
+            binding.onPreviewRequestError()
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -94,22 +107,17 @@ class PreviewPictureFragment : PreviewFragment() {
     override fun canDisplayFileOffline(): Boolean = isOfflineCopyIntact()
 
     override fun reloadPreviewIfNeeded() = with(binding) {
-        if (imageView.isVisible) return@with
+        if (isPreviewLoaded) return@with
         noThumbnailLayout.root.isGone = true
         loadImage()
         container.layoutTransition?.setAnimateParentHierarchy(false)
         setupImageListeners()
     }
 
-    private fun FragmentPreviewPictureBinding.showNoNetwork() {
-        loader.isGone = true
-        imageView.isGone = true
-        noThumbnailLayout.apply {
-            fileName.text = file.name
-            previewDescription.setText(R.string.allNoNetwork)
-            bigOpenWithButton.isGone = true
-            root.isVisible = true
-        }
+    override fun showNoNetwork() {
+        binding.loader.isGone = true
+        binding.imageView.isGone = true
+        super.showNoNetwork()
     }
 
     private fun loadImage() {
@@ -135,7 +143,7 @@ class PreviewPictureFragment : PreviewFragment() {
     private fun buildThumbnailPreviewRequest(): ImageRequest {
         return ImageRequest.Builder(requireContext())
             .data(ApiRoutes.getThumbnailUrl(file))
-            .listener(previewRequestListener)
+            .listener(previewRequestListener(isPreviewRequest = false))
             .build()
     }
 
@@ -144,7 +152,7 @@ class PreviewPictureFragment : PreviewFragment() {
 
         return ImageRequest.Builder(requireContext())
             .data(offlineFile ?: ApiRoutes.getImagePreviewUrl(file))
-            .listener(previewRequestListener)
+            .listener(previewRequestListener(isPreviewRequest = true))
             .build()
     }
 
