@@ -26,7 +26,7 @@ plugins {
     alias(core.plugins.dagger.hilt) apply false
     alias(core.plugins.ksp) apply false
     alias(core.plugins.navigation.safeargs) apply false
-    alias(libs.plugins.ktlint) version "13.0.0"
+    alias(core.plugins.ktlint)
 }
 
 ktlint {
