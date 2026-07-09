@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2025 Infomaniak Network SA
+ * Copyright (C) 2025-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,15 @@ package com.infomaniak.drive.ui.fileList.preview.playback
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class PlaybackViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -40,11 +45,21 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
 
     private val userDrive by lazy { UserDrive() }
 
-    fun loadFile(fileId: Int) {
-        currentFile = runCatching {
-            FileController.getFileById(fileId, userDrive)
-        }.getOrElse { _ ->
-            null
+    fun loadFile(fileId: Int, callback: (File?) -> Unit) {
+        viewModelScope.launch {
+            currentFile = runCatching {
+                FileController.getFileById(fileId, userDrive) ?: run {
+                    withContext(Dispatchers.IO) {
+                        val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
+                        val remoteFile = FileController.getRemoteFile(fileId, userDrive.driveId, okHttpClient)
+                        FileController.saveRemoteFileToDb(remoteFile!!, userDrive, okHttpClient)
+                        remoteFile
+                    }
+                }
+            }.getOrElse { _ ->
+                null
+            }
+            callback(currentFile)
         }
     }
 

@@ -130,14 +130,15 @@ class VideoActivity : AppCompatActivity() {
     private fun loadVideo(intent: Intent) {
         intent.extras?.let { VideoActivityArgs.fromBundle(it) }?.fileId?.let { videoFileId ->
             if (videoFileId > 0) {
-                viewModel.loadFile(videoFileId)
-                val currentFile = viewModel.currentFile ?: run {
-                    SentryLog.e(TAG, "Cannot load file")
-                    finish()
-                    return
+                viewModel.loadFile(videoFileId) { file ->
+                    file?.let {
+                        exoPlayer.setMediaItem(getMediaItem(file, viewModel.offlineFile, viewModel.offlineIsComplete))
+                        exoPlayer.prepare()
+                    } ?: run {
+                        SentryLog.e(TAG, "Cannot load file")
+                        finish()
+                    }
                 }
-                exoPlayer.setMediaItem(getMediaItem(currentFile, viewModel.offlineFile, viewModel.offlineIsComplete))
-                exoPlayer.prepare()
             } else {
                 finish()
             }
