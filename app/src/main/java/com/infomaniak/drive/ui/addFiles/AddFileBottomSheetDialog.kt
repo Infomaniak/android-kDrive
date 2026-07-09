@@ -157,7 +157,6 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
 
     private fun updateCurrentFolder(file: File?) {
         if (file == null) {
-            // TODO Temporary fix
             findNavController().popBackStack()
             return
         }
