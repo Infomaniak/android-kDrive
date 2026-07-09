@@ -1,0 +1,2 @@
+- Fix deep link's opening when the user had never opened the file in the app before
+- Fixed dropbox limit
