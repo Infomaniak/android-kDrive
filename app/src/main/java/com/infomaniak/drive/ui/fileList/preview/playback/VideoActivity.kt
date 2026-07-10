@@ -26,6 +26,7 @@ import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.media3.common.util.UnstableApi
@@ -128,6 +129,7 @@ class VideoActivity : AppCompatActivity() {
         enableEdgeToEdge()
         if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
         window.lightStatusBar(false)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = false
     }
 
     override fun onDestroy() {
