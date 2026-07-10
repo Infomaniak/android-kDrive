@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -314,7 +314,13 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
     }
 
     override fun reloadPreviewIfNeeded() = with(binding.downloadLayout) {
-        if (pdfFile != null || previewPDFHandler.isExternalFile()) return@with
+        if (previewPDFHandler.isExternalFile()) return@with
+        if (pdfFile != null) {
+            hideNoNetwork()
+            previewPDFHandler.shouldHidePrintOption(isGone = !canPrintFile())
+            showPdf()
+            return@with
+        }
         previewDescription.setText(R.string.previewDownloadIndication)
         downloadProgressIndicator.isVisible = true
         bigOpenWithButton.isGone = true
@@ -323,6 +329,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
     override fun showNoNetwork() {
         previewPDFViewModel.cancelJobs()
+        previewPDFHandler.shouldHidePrintOption(isGone = true)
         binding.downloadLayout.downloadProgressIndicator.isGone = true
         previewSliderViewModel.pdfIsDownloading.value = false
         isDownloading = false
@@ -342,6 +349,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                     this@PreviewPDFFragment.pdfFile = pdfFile
                     showPdf()
                 } ?: run {
+                    previewPDFHandler.shouldHidePrintOption(isGone = true)
                     downloadProgressIndicator.isGone = true
                     previewDescription.setText(apiResponse.translateError())
                     bigOpenWithButton.isVisible = true
