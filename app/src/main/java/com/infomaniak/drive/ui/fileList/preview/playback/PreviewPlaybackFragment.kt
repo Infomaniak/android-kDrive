@@ -31,11 +31,9 @@ import androidx.core.view.isVisible
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import com.infomaniak.core.common.extensions.isDontKeepActivitiesEnabled
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentPreviewPlaybackBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
@@ -165,9 +163,6 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
             // We'll open a new activity for videos to handle PIP perfectly
             binding.playerView.findViewById<View>(R.id.exo_play_pause).setOnClickListener {
-                with(requireActivity()) {
-                    shouldExcludeFromRecents(!isDontKeepActivitiesEnabled())
-                }
                 startActivity(Intent(requireActivity(), VideoActivity::class.java).apply {
                     putExtras(VideoActivityArgs(fileId = file.id).toBundle())
                     putExtra(VideoActivity.EXTRA_IS_PUBLIC_SHARED, isPublicShared)
