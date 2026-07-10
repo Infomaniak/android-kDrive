@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,9 @@ import androidx.core.graphics.Insets
 import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.appbar.AppBarLayout
@@ -35,9 +38,9 @@ import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.button.MaterialButton
 import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.extensions.lightStatusBar
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.safeBinding
-import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -50,6 +53,7 @@ import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.utils.getFolderIcon
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 class FileDetailsFragment : FileDetailsSubFragment() {
@@ -77,6 +81,27 @@ class FileDetailsFragment : FileDetailsSubFragment() {
                 shareResponse.data?.let { fileDetailsViewModel.currentFileShare.value = it }
             }
         }
+
+        setupNetworkObserver()
+    }
+
+    private fun setupNetworkObserver() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.isNetworkAvailable.collect { isNetworkAvailable ->
+                    setNetworkDependentTabsEnabled(isNetworkAvailable)
+                }
+            }
+        }
+    }
+
+    private fun setNetworkDependentTabsEnabled(isEnabled: Boolean) = with(binding) {
+        listOf(fileActivities, fileComments).forEach { tabButton ->
+            tabButton.isEnabled = isEnabled
+            tabButton.alpha = if (isEnabled) 1.0f else 0.5f
+        }
+        tabsViewPager.isUserInputEnabled = isEnabled
+        if (!isEnabled && tabsGroup.checkedButtonId != R.id.fileInfo) tabsGroup.check(R.id.fileInfo)
     }
 
     override fun onStart() {
