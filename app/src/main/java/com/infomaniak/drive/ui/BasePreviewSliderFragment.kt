@@ -87,7 +87,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     override lateinit var currentFile: File
 
-    var positionsForMedia: MutableMap<Int, Long> = mutableMapOf()
+    val mediaPositionsMap: MutableMap<Int, Long> = mutableMapOf()
 
     // This is not protected, otherwise it won't build because PublicSharePreviewSliderFragment needs it public for the interface
     // it implements
@@ -118,7 +118,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         header.apply {
             setupWindowInsetsListener(root, bottomSheetView) { pdfContainer.setMargins(right = it?.right ?: 0) }
             setup(
-                onBackClicked = ::navigateBack,
+                onBackClicked = findNavController()::popBackStack,
                 onOpenWithClicked = ::openWith,
                 onEditClicked = { openOnlyOfficeDocument(currentFile, mainViewModel.hasNetwork) },
             )
@@ -208,8 +208,8 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         super.onDestroy()
     }
 
-    private fun initViewPager() = with(binding) {
-        viewPager.apply {
+    private fun initViewPager() {
+        binding.viewPager.apply {
             adapter = previewSliderAdapter
             offscreenPageLimit = 1
 
@@ -238,7 +238,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                         }
                     }
 
-                    with(header) {
+                    with(binding.header) {
                         toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
                         setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
                         toggleOpenWithVisibility(isVisible = !isPublicShared && !currentFile.isOnlyOfficePreview())
@@ -250,10 +250,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                 }
             })
         }
-    }
-
-    private fun navigateBack() {
-        findNavController().popBackStack()
     }
 
     protected fun noPreviewList() = mainViewModel.currentPreviewFileList.isEmpty()

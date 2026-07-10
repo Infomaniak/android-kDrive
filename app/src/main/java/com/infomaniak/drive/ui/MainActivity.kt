@@ -418,7 +418,6 @@ class MainActivity : BaseActivity() {
     }
     //endregion
 
-    @OptIn(UnstableApi::class)
     override fun onResume() {
         super.onResume()
 

@@ -46,8 +46,8 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.infomaniak.core.auth.networking.HttpClient
-import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import com.infomaniak.core.network.networking.HttpClient.okHttpClient as unauthenticatedHttpClient
+import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.core.sentry.SentryLog
@@ -78,16 +78,19 @@ object PlaybackUtils {
     }
 
     fun Context.getMediaController(mainExecutor: Executor, callback: (MediaController) -> Unit) {
-        if (mediaController == null) {
-            val playbackSessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
-            mediaControllerFuture = MediaController.Builder(this, playbackSessionToken).buildAsync().apply {
-                addListener(
-                    getRunnable(callback),
-                    mainExecutor,
-                )
-            }
-        } else {
-            callback(mediaController!!)
+        mediaController?.let { callback(it) } ?: initController(callback, mainExecutor)
+    }
+
+    private fun Context.initController(
+        callback: (MediaController) -> Unit,
+        mainExecutor: Executor
+    ) {
+        val playbackSessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
+        mediaControllerFuture = MediaController.Builder(this, playbackSessionToken).buildAsync().apply {
+            addListener(
+                getRunnable(callback),
+                mainExecutor,
+            )
         }
     }
 
@@ -107,15 +110,20 @@ object PlaybackUtils {
         onServiceDisconnect = null
     }
 
-    fun Context.setMediaSession(isPublicShared: Boolean = false) {
+    fun Context.setMediaSession(isPublicShared: Boolean = false, showError: () -> Unit) {
+        val player = activePlayer ?: run {
+            showError()
+            return
+        }
+
         if (mediaSession == null) {
-            mediaSession = MediaSession.Builder(this, activePlayer!!)
+            mediaSession = MediaSession.Builder(this, player)
                 .setCallback(getMediaSessionCallback())
                 .setBitmapLoader(getBitmapLoader(isPublicShared))
                 .setSessionActivity(getPendingIntent())
                 .build()
         } else {
-            mediaSession?.player = activePlayer!!
+            mediaSession?.player = player
         }
     }
 
@@ -123,7 +131,8 @@ object PlaybackUtils {
         return ExoPlayer.Builder(this, getRenderersFactory())
             .setMediaSourceFactory(DefaultMediaSourceFactory(getDataSourceFactory(isPublicShared)))
             .setTrackSelector(getTrackSelector())
-            .build().apply {
+            .build()
+            .apply {
                 addAnalyticsListener(EventLogger())
                 setAudioAttributes(AudioAttributes.DEFAULT,  /* handleAudioFocus= */true)
                 playWhenReady = false
@@ -154,23 +163,19 @@ object PlaybackUtils {
         return pipParams.build()
     }
 
-    private fun getRunnable(callback: (MediaController) -> Unit): Runnable {
-        return Runnable {
-            if (mediaController == null) {
-                runCatching { mediaControllerFuture?.get() }
-                    .onSuccess { controller ->
-                        if (controller != null) {
-                            mediaController = controller
-                            callback(controller)
-                        }
-                    }
-                    .onFailure {
-                        SentryLog.e(TAG, "Failed to get MediaController from PlaybackService")
-                    }
-            } else {
-                callback(mediaController!!)
-            }
+    private fun getRunnable(callback: (MediaController) -> Unit) = Runnable {
+        mediaController?.let {
+            callback(it)
+            return@Runnable
         }
+
+        runCatching { mediaControllerFuture?.get()!! }
+            .onSuccess { controller ->
+                mediaController = controller
+                callback(controller)
+            }.onFailure {
+                SentryLog.e(TAG, "Failed to get MediaController from PlaybackService")
+            }
     }
 
     private fun getThumbnailUri(file: File): Uri {
@@ -199,16 +204,14 @@ object PlaybackUtils {
         else -> HttpClient.okHttpClientWithTokenInterceptor
     }
 
-    private fun getMediaSessionCallback(): MediaSession.Callback {
-        return object : MediaSession.Callback {
+    private fun getMediaSessionCallback() = object : MediaSession.Callback {
 
-            // When the user returns from the PreviewPlaybackFragment, we want to stop
-            // the service because it does not make sense to have the media notification
-            // when the user willingly quits the PreviewPlaybackFragment.
-            override fun onDisconnected(session: MediaSession, controller: MediaSession.ControllerInfo) {
-                super.onDisconnected(session, controller)
-                onServiceDisconnect?.invoke()
-            }
+        // When the user returns from the PreviewPlaybackFragment, we want to stop
+        // the service because it does not make sense to have the media notification
+        // when the user willingly quits the PreviewPlaybackFragment.
+        override fun onDisconnected(session: MediaSession, controller: MediaSession.ControllerInfo) {
+            super.onDisconnected(session, controller)
+            onServiceDisconnect?.invoke()
         }
     }
 

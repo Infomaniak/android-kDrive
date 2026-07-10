@@ -51,14 +51,12 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
                 FileController.getFileById(fileId, userDrive) ?: run {
                     withContext(Dispatchers.IO) {
                         val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
-                        val remoteFile = FileController.getRemoteFile(fileId, userDrive.driveId, okHttpClient)
-                        FileController.saveRemoteFileToDb(remoteFile!!, userDrive, okHttpClient)
-                        remoteFile
+                        FileController.getRemoteFile(fileId, userDrive.driveId, okHttpClient)?.also { remoteFile ->
+                            FileController.saveRemoteFileToDb(remoteFile, userDrive, okHttpClient)
+                        }
                     }
                 }
-            }.getOrElse { _ ->
-                null
-            }
+            }.getOrNull()
             callback(currentFile)
         }
     }

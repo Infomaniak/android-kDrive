@@ -31,6 +31,7 @@ import androidx.core.view.isVisible
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import com.infomaniak.core.ui.view.utils.SnackbarUtils
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentPreviewPlaybackBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
@@ -69,31 +70,35 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     private val playerListener = PlayerListener(
         activity,
-        isPlayingChanged = { isPlaying ->
-            if (isPlaying) {
-                (parentFragment as? BasePreviewSliderFragment)?.let { previewParent ->
-                    if (previewParent.isFullscreenOverlayShown()) {
-                        toggleFullscreen()
-                    }
-                }
-                activity?.window?.addFlags(flagKeepScreenOn)
-            } else {
-                activity?.window?.clearFlags(flagKeepScreenOn)
-            }
-        },
-        onError = { playbackExceptionMessage ->
-            _binding?.errorLayout?.apply {
-                when (playbackExceptionMessage) {
-                    "Source error" -> previewDescription.setText(R.string.previewVideoSourceError)
-                    else -> previewDescription.setText(R.string.previewLoadError)
-                }
-                bigOpenWithButton.isVisible = true
-                root.isVisible = true
-                previewDescription.isVisible = true
-            }
-            _binding?.playerView?.isGone = true
-        },
+        isPlayingChanged = ::isPlayingChanged,
+        onError = ::onPlayerError,
     )
+
+    private fun isPlayingChanged(isPlaying: Boolean) {
+        if (isPlaying) {
+            (parentFragment as? BasePreviewSliderFragment)?.let { previewParent ->
+                if (previewParent.isFullscreenOverlayShown()) {
+                    toggleFullscreen()
+                }
+            }
+            activity?.window?.addFlags(flagKeepScreenOn)
+        } else {
+            activity?.window?.clearFlags(flagKeepScreenOn)
+        }
+    }
+
+    private fun onPlayerError(playbackExceptionMessage: String?) {
+        _binding?.errorLayout?.apply {
+            when (playbackExceptionMessage) {
+                SOURCE_ERROR -> previewDescription.setText(R.string.previewVideoSourceError)
+                else -> previewDescription.setText(R.string.previewLoadError)
+            }
+            bigOpenWithButton.isVisible = true
+            root.isVisible = true
+            previewDescription.isVisible = true
+        }
+        _binding?.playerView?.isGone = true
+    }
 
     private val exoPlayer: ExoPlayer by lazy { requireContext().getExoPlayer(isPublicShared) }
     private val mainExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
@@ -141,10 +146,15 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         super.onResume()
 
         //To avoid having the notification when we play a video, we have to avoid using the MediaController
-        if (file.isVideo().not()) {
+        if (!file.isVideo()) {
             PlaybackUtils.activePlayer = exoPlayer
-            requireContext().setMediaSession(isPublicShared)
-            requireActivity().shouldExcludeFromRecents(false)
+            requireContext().setMediaSession(isPublicShared) {
+                SnackbarUtils.showSnackbar(
+                    view = requireView(),
+                    title = R.string.anErrorHasOccurred,
+                )
+            }
+            requireActivity().shouldExcludeFromRecents(exclude = false)
             requireContext().getMediaController(mainExecutor) {
                 if (exoPlayer.currentMediaItem == null) setMediaToExoPlayer()
             }
@@ -159,10 +169,10 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
         with(binding.playerView) {
             // Hiding ExoPlayer interface elements because we'll play the video in a separate Activity
-            exoPlayerUIToHide.forEach { uiID -> findViewById<View>(uiID).isVisible = false }
+            exoPlayerUIToHide.forEach { uiID -> findViewById<View>(uiID)?.isVisible = false }
 
             // We'll open a new activity for videos to handle PIP perfectly
-            binding.playerView.findViewById<View>(R.id.exo_play_pause).setOnClickListener {
+            binding.playerView.findViewById<View>(R.id.exo_play_pause)?.setOnClickListener {
                 startActivity(Intent(requireActivity(), VideoActivity::class.java).apply {
                     putExtras(VideoActivityArgs(fileId = file.id).toBundle())
                     putExtra(VideoActivity.EXTRA_IS_PUBLIC_SHARED, isPublicShared)
@@ -188,7 +198,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
         exoPlayer.setMediaItem(
             getMediaItem(file, offlineFile, offlineIsComplete),
-            (parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] ?: 0L,
+            (parentFragment as BasePreviewSliderFragment).mediaPositionsMap[file.id] ?: 0L,
         )
         exoPlayer.prepare()
 
@@ -225,9 +235,13 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     private fun persistCurrentPlaybackPosition() {
         if (exoPlayer.currentMediaItem?.mediaId?.toInt() == file.id) {
-            (parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] = exoPlayer.currentPosition
+            (parentFragment as BasePreviewSliderFragment).mediaPositionsMap[file.id] = exoPlayer.currentPosition
         }
     }
 
     private fun isOfflineFileComplete(offlineFile: IOFile?) = offlineFile?.let { file.isOfflineAndIntact(it) } ?: false
+
+    companion object {
+        private const val SOURCE_ERROR = "Source error"
+    }
 }

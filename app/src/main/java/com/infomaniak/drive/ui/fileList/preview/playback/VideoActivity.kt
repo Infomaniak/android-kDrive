@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileList.preview.playback
 
-import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
@@ -35,16 +34,15 @@ import androidx.media3.ui.PlayerView
 import com.infomaniak.core.common.extensions.isDontKeepActivitiesEnabled
 import com.infomaniak.core.common.extensions.lightStatusBar
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.ui.view.utils.SnackbarUtils
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityVideoBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.CONTROLLER_SHOW_TIMEOUT_MS
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getExoPlayer
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaItem
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getPictureInPictureParams
-import com.infomaniak.drive.ui.fileList.preview.playback.PlayerListener.Companion.trackMediaPlayerEvent
 import com.infomaniak.drive.utils.shouldExcludeFromRecents
 import com.infomaniak.drive.utils.toggleSystemBar
 
@@ -52,6 +50,7 @@ import com.infomaniak.drive.utils.toggleSystemBar
 class VideoActivity : AppCompatActivity() {
 
     private val isPublicShared by lazy { intent.getBooleanExtra(EXTRA_IS_PUBLIC_SHARED, false) }
+    private val videoArgs: VideoActivityArgs? by lazy { intent.extras?.let { VideoActivityArgs.fromBundle(it) } }
 
     private val viewModel: PlaybackViewModel by viewModels()
 
@@ -72,7 +71,7 @@ class VideoActivity : AppCompatActivity() {
         onError = { playbackExceptionMessage ->
             binding.errorLayout.apply {
                 when (playbackExceptionMessage) {
-                    "Source error" -> previewDescription.setText(R.string.previewVideoSourceError)
+                    SOURCE_ERROR -> previewDescription.setText(R.string.previewVideoSourceError)
                     else -> previewDescription.setText(R.string.previewLoadError)
                 }
                 bigOpenWithButton.isVisible = true
@@ -86,11 +85,7 @@ class VideoActivity : AppCompatActivity() {
     private val exoPlayer: ExoPlayer by lazy { getExoPlayer(isPublicShared) }
     private val videoRatio: Rational?
         get() = exoPlayer.videoFormat?.let { videoFormat ->
-            if (videoFormat.width > videoFormat.height) {
-                Rational(16, 9)
-            } else {
-                Rational(9, 16)
-            }
+            if (videoFormat.width > videoFormat.height) Rational(16, 9) else Rational(9, 16)
         }
     private var isOverlayShown = false
 
@@ -120,7 +115,7 @@ class VideoActivity : AppCompatActivity() {
         exoPlayer.addListener(playerListener)
         exoPlayer.playWhenReady = true
 
-        loadVideo(intent)
+        loadVideo()
 
         toggleSystemBar(show = false)
     }
@@ -150,8 +145,8 @@ class VideoActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadVideo(intent: Intent) {
-        intent.extras?.let { VideoActivityArgs.fromBundle(it) }?.fileId?.let { videoFileId ->
+    private fun loadVideo() {
+        videoArgs?.fileId?.let { videoFileId ->
             if (videoFileId > 0) {
                 viewModel.loadFile(videoFileId) { file ->
                     file?.let {
@@ -159,6 +154,10 @@ class VideoActivity : AppCompatActivity() {
                         exoPlayer.prepare()
                     } ?: run {
                         SentryLog.e(TAG, "Cannot load file")
+                        SnackbarUtils.showSnackbar(
+                            view = binding.root,
+                            title = R.string.anErrorHasOccurred,
+                        )
                         finish()
                     }
                 }
@@ -172,5 +171,6 @@ class VideoActivity : AppCompatActivity() {
         const val EXTRA_IS_PUBLIC_SHARED = "extra_is_public_shared"
 
         private const val TAG = "VideoActivity"
+        private const val SOURCE_ERROR = "Source error"
     }
 }
