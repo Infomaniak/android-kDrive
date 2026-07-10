@@ -35,6 +35,7 @@ import com.infomaniak.core.common.extensions.isDontKeepActivitiesEnabled
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentPreviewPlaybackBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
@@ -132,6 +133,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         playerView.setOnClickListener {
             if ((it as PlayerView).isControllerFullyVisible) {
                 context?.trackMediaPlayerEvent("toggleFullScreen")
+                playerView.enableEdgeToEdge(withPadding = true, withTop = false, withLeft = false, withRight = false)
                 toggleFullscreen()
             }
         }

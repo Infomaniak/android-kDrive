@@ -277,14 +277,14 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     fun isFullscreenOverlayShown(): Boolean = isOverlayShown
 
-     protected fun toggleBottomSheet(shouldShow: Boolean) {
+    protected fun toggleBottomSheet(shouldShow: Boolean) {
         (bottomSheetView as? FileInfoActionsView)?.scrollToTop()
         bottomSheetBehavior.state = if (shouldShow) {
             BottomSheetBehavior.STATE_COLLAPSED
         } else {
             BottomSheetBehavior.STATE_HIDDEN
         }
-     }
+    }
 
     private fun clearEdgeToEdge() = with(requireActivity()) {
         toggleSystemBar(true)
