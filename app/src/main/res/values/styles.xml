@@ -62,6 +62,11 @@
 
     <style name="AppTheme" parent="AppThemeBase" />
 
+    <style name="AppTheme.Video" parent="AppTheme">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowDisablePreview">true</item>
+    </style>
+
     <style name="AppTheme.LoginBase" parent="AppThemeBase">
         <item name="android:windowBackground">@color/appBar</item>
         <item name="android:windowLightNavigationBar">true</item>

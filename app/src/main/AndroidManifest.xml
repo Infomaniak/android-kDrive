@@ -107,7 +107,8 @@
             android:name=".ui.fileList.preview.playback.VideoActivity"
             android:configChanges="orientation|screenSize|layoutDirection|screenLayout|smallestScreenSize"
             android:launchMode="singleInstance"
-            android:supportsPictureInPicture="true" />
+            android:supportsPictureInPicture="true"
+            android:theme="@style/AppTheme.Video" />
 
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
