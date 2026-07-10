@@ -19,25 +19,31 @@ package com.infomaniak.drive.ui.fileList.preview.playback
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.util.Rational
 import android.view.WindowManager
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import com.infomaniak.core.common.extensions.isDontKeepActivitiesEnabled
+import com.infomaniak.core.common.extensions.lightStatusBar
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityVideoBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.CONTROLLER_SHOW_TIMEOUT_MS
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getExoPlayer
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaItem
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getPictureInPictureParams
+import com.infomaniak.drive.ui.fileList.preview.playback.PlayerListener.Companion.trackMediaPlayerEvent
 import com.infomaniak.drive.utils.shouldExcludeFromRecents
 import com.infomaniak.drive.utils.toggleSystemBar
 
@@ -85,16 +91,25 @@ class VideoActivity : AppCompatActivity() {
                 Rational(9, 16)
             }
         }
+    private var isOverlayShown = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(binding.root)
-        binding.root.enableEdgeToEdge(withPadding = true, withTop = false, withLeft = false, withRight = false)
+        setupEdgeToEdge()
 
         shouldExcludeFromRecents(!isDontKeepActivitiesEnabled())
 
         with(binding.playerView) {
+            enableEdgeToEdge(withPadding = true, withTop = false, withLeft = false, withRight = false)
+            setOnClickListener {
+                if ((it as PlayerView).isControllerFullyVisible) {
+                    isOverlayShown = !isOverlayShown
+                    binding.playerView.enableEdgeToEdge(withPadding = true, withTop = false, withLeft = false, withRight = false)
+                    toggleSystemBar(show = isOverlayShown)
+                }
+            }
+
             player = exoPlayer
             controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
             controllerHideOnTouch = false
@@ -107,6 +122,12 @@ class VideoActivity : AppCompatActivity() {
         loadVideo(intent)
 
         toggleSystemBar(show = false)
+    }
+
+    private fun setupEdgeToEdge() {
+        enableEdgeToEdge()
+        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
+        window.lightStatusBar(false)
     }
 
     override fun onDestroy() {
