@@ -174,8 +174,14 @@ open class PreviewPlaybackFragment : PreviewFragment() {
             // We'll open a new activity for videos to handle PIP perfectly
             binding.playerView.findViewById<View>(R.id.exo_play_pause)?.setOnClickListener {
                 startActivity(Intent(requireActivity(), VideoActivity::class.java).apply {
-                    putExtras(VideoActivityArgs(fileId = file.id).toBundle())
-                    putExtra(VideoActivity.EXTRA_IS_PUBLIC_SHARED, isPublicShared)
+                    putExtras(
+                        VideoActivityArgs(
+                            fileId = file.id,
+                            driveId = file.driveId,
+                            publicShareUuid = file.publicShareUuid.takeIf(String::isNotBlank),
+                            publicShareAuthToken = file.publicShareAuthToken,
+                        ).toBundle()
+                    )
                 })
             }
         }

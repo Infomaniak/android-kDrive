@@ -49,8 +49,8 @@ import com.infomaniak.drive.utils.toggleSystemBar
 @UnstableApi
 class VideoActivity : AppCompatActivity() {
 
-    private val isPublicShared by lazy { intent.getBooleanExtra(EXTRA_IS_PUBLIC_SHARED, false) }
     private val videoArgs: VideoActivityArgs? by lazy { intent.extras?.let { VideoActivityArgs.fromBundle(it) } }
+    private val isPublicShared by lazy { videoArgs?.publicShareUuid?.isNotBlank() == true }
 
     private val viewModel: PlaybackViewModel by viewModels()
 
@@ -146,9 +146,14 @@ class VideoActivity : AppCompatActivity() {
     }
 
     private fun loadVideo() {
-        videoArgs?.fileId?.let { videoFileId ->
-            if (videoFileId > 0) {
-                viewModel.loadFile(videoFileId) { file ->
+        videoArgs?.let { args ->
+            if (args.fileId > 0) {
+                viewModel.loadFile(
+                    fileId = args.fileId,
+                    driveId = args.driveId,
+                    publicShareUuid = args.publicShareUuid,
+                    publicShareAuthToken = args.publicShareAuthToken,
+                ) { file ->
                     file?.let {
                         exoPlayer.setMediaItem(getMediaItem(file, viewModel.offlineFile, viewModel.offlineIsComplete))
                         exoPlayer.prepare()
@@ -168,8 +173,6 @@ class VideoActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val EXTRA_IS_PUBLIC_SHARED = "extra_is_public_shared"
-
         private const val TAG = "VideoActivity"
         private const val SOURCE_ERROR = "Source error"
     }

@@ -388,6 +388,20 @@
         <argument
             android:name="fileId"
             app:argType="integer" />
+        <argument
+            android:name="driveId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="publicShareUuid"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="publicShareAuthToken"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
     </activity>
 
     <activity
