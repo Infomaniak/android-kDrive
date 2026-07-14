@@ -17,16 +17,19 @@
  */
 package com.infomaniak.drive.ui.publicShare
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.network.models.ApiError
+import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.ui.view.extension.hideProgressCatching
 import com.infomaniak.core.ui.view.extension.initProgress
@@ -39,6 +42,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
 import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.PublicShareSubmitPasswordResult
@@ -105,8 +109,16 @@ class PublicSharePasswordFragment : Fragment() {
     }
 
     private fun observeInitResult() {
-        publicShareViewModel.initPublicShareResult.observe(viewLifecycleOwner) { (errorMessage, shareLink) ->
-            errorMessage?.let(::onInitError) ?: onInitSuccess(shareLink)
+        publicShareViewModel.initPublicShareResult.observe(viewLifecycleOwner) { apiResponse ->
+            if (apiResponse.result == ApiResponseStatus.REDIRECT) {
+                Intent(requireContext(), LaunchActivity::class.java).apply {
+                    data = apiResponse.uri?.toUri()
+                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                }.also(requireContext()::startActivity)
+                return@observe
+            }
+
+            apiResponse.error?.let(::onInitError) ?: onInitSuccess(shareLink = apiResponse.data)
         }
     }
 
