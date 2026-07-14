@@ -18,16 +18,13 @@
 package com.infomaniak.drive.ui.publicShare
 
 import android.app.Application
-import android.content.Intent
 import androidx.annotation.StringRes
-import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
-import com.infomaniak.core.network.models.ApiError
-import com.infomaniak.core.network.models.ApiResponseStatus
+import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
@@ -42,7 +39,6 @@ import com.infomaniak.drive.data.models.ArchiveUUID
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.ShareLink
-import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
 import com.infomaniak.drive.utils.IOFile
@@ -64,7 +60,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     var fileClicked: File? = null
     val downloadProgressLiveData = MutableLiveData(0)
     val buildArchiveResult = SingleLiveEvent<Pair<Int?, ArchiveUUID?>>()
-    val initPublicShareResult = SingleLiveEvent<Pair<ApiError?, ShareLink?>>()
+    val initPublicShareResult = SingleLiveEvent<ApiResponse<ShareLink>>()
     val importPublicShareResult = SingleLiveEvent<PublicShareImportResult>()
     val submitPasswordResult = SingleLiveEvent<PublicShareSubmitPasswordResult>()
     var hasBeenAuthenticated = false
@@ -102,16 +98,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
 
     fun initPublicShare(authToken: String? = null) = viewModelScope.launch {
         val apiResponse = PublicShareApiRepository.getPublicShareInfo(driveId, publicShareUuid, authToken)
-        if (apiResponse.result == ApiResponseStatus.REDIRECT) {
-            Intent(appContext, LaunchActivity::class.java).apply {
-                data = apiResponse.uri?.toUri()
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-            }.also(appContext::startActivity)
-            return@launch
-        }
-        val result = if (apiResponse.isSuccess()) null to apiResponse.data else apiResponse.error to null
-
-        initPublicShareResult.postValue(result)
+        initPublicShareResult.postValue(apiResponse)
     }
 
     fun submitPublicSharePassword(password: String) = viewModelScope.launch {
