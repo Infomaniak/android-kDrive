@@ -172,6 +172,13 @@ fun Activity.toggleSystemBar(show: Boolean) {
     }
 }
 
+fun Activity.shouldExcludeFromRecents(exclude: Boolean) {
+    val tasks = (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).appTasks
+    if (tasks != null && tasks.isNotEmpty()) {
+        tasks[0].setExcludeFromRecents(exclude)
+    }
+}
+
 fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()
 
 fun ItemUserBinding.setUserView(

@@ -1,0 +1,179 @@
+/*
+ * Infomaniak kDrive - Android
+ * Copyright (C) 2025-2026 Infomaniak Network SA
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.infomaniak.drive.ui.fileList.preview.playback
+
+import android.content.res.Configuration
+import android.os.Build.VERSION.SDK_INT
+import android.os.Bundle
+import android.util.Rational
+import android.view.WindowManager
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
+import com.infomaniak.core.common.extensions.isDontKeepActivitiesEnabled
+import com.infomaniak.core.common.extensions.lightStatusBar
+import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.ui.view.utils.SnackbarUtils
+import com.infomaniak.drive.MainApplication
+import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.ActivityVideoBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.CONTROLLER_SHOW_TIMEOUT_MS
+import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getExoPlayer
+import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaItem
+import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getPictureInPictureParams
+import com.infomaniak.drive.utils.shouldExcludeFromRecents
+import com.infomaniak.drive.utils.toggleSystemBar
+
+@UnstableApi
+class VideoActivity : AppCompatActivity() {
+
+    private val videoArgs: VideoActivityArgs? by lazy { intent.extras?.let { VideoActivityArgs.fromBundle(it) } }
+    private val isPublicShared by lazy { videoArgs?.publicShareUuid?.isNotBlank() == true }
+
+    private val viewModel: PlaybackViewModel by viewModels()
+
+    private val binding by lazy { ActivityVideoBinding.inflate(layoutInflater) }
+
+    private val flagKeepScreenOn by lazy { WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON }
+
+    private val playerListener = PlayerListener(
+        this,
+        isPlayingChanged = { isPlaying ->
+            if (isPlaying) {
+                setPIPParams()
+                window?.addFlags(flagKeepScreenOn)
+            } else {
+                window?.clearFlags(flagKeepScreenOn)
+            }
+        },
+        onError = { playbackExceptionMessage ->
+            binding.errorLayout.apply {
+                when (playbackExceptionMessage) {
+                    SOURCE_ERROR -> previewDescription.setText(R.string.previewVideoSourceError)
+                    else -> previewDescription.setText(R.string.previewLoadError)
+                }
+                bigOpenWithButton.isVisible = true
+                root.isVisible = true
+                previewDescription.isVisible = true
+            }
+            binding.playerView.isGone = true
+        },
+    )
+
+    private val exoPlayer: ExoPlayer by lazy { getExoPlayer(isPublicShared) }
+    private val videoRatio: Rational?
+        get() = exoPlayer.videoFormat?.let { videoFormat ->
+            if (videoFormat.width > videoFormat.height) Rational(16, 9) else Rational(9, 16)
+        }
+    private var isOverlayShown = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(binding.root)
+        setupEdgeToEdge()
+
+        shouldExcludeFromRecents(!isDontKeepActivitiesEnabled())
+
+        with(binding.playerView) {
+            enableEdgeToEdge(withPadding = true, withTop = false, withLeft = false, withRight = false)
+            setOnClickListener {
+                if ((it as PlayerView).isControllerFullyVisible) {
+                    isOverlayShown = !isOverlayShown
+                    binding.playerView.enableEdgeToEdge(withPadding = true, withTop = false, withLeft = false, withRight = false)
+                    toggleSystemBar(show = isOverlayShown)
+                }
+            }
+
+            player = exoPlayer
+            controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
+            controllerHideOnTouch = false
+            showController()
+        }
+
+        exoPlayer.addListener(playerListener)
+        exoPlayer.playWhenReady = true
+
+        loadVideo()
+
+        toggleSystemBar(show = false)
+    }
+
+    private fun setupEdgeToEdge() {
+        enableEdgeToEdge()
+        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
+        window.lightStatusBar(false)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = false
+    }
+
+    override fun onDestroy() {
+        binding.playerView.player?.release()
+        super.onDestroy()
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        (application as MainApplication).isVideoActivityInPIPMode = isInPictureInPictureMode
+    }
+
+    private fun setPIPParams() {
+        videoRatio?.let {
+            getPictureInPictureParams(it)?.let { pictureInPictureParams ->
+                setPictureInPictureParams(pictureInPictureParams)
+            }
+        }
+    }
+
+    private fun loadVideo() {
+        videoArgs?.let { args ->
+            if (args.fileId > 0) {
+                viewModel.loadFile(
+                    fileId = args.fileId,
+                    driveId = args.driveId,
+                    publicShareUuid = args.publicShareUuid,
+                    publicShareAuthToken = args.publicShareAuthToken,
+                ) { file ->
+                    file?.let {
+                        exoPlayer.setMediaItem(getMediaItem(file, viewModel.offlineFile, viewModel.offlineIsComplete))
+                        exoPlayer.prepare()
+                    } ?: run {
+                        SentryLog.e(TAG, "Cannot load file")
+                        SnackbarUtils.showSnackbar(
+                            view = binding.root,
+                            title = R.string.anErrorHasOccurred,
+                        )
+                        finish()
+                    }
+                }
+            } else {
+                finish()
+            }
+        }
+    }
+
+    companion object {
+        private const val TAG = "VideoActivity"
+        private const val SOURCE_ERROR = "Source error"
+    }
+}
