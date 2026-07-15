@@ -26,10 +26,10 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
-import com.infomaniak.drive.databinding.ActivityLaunchBinding
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponseStatus
+import com.infomaniak.core.network.models.exceptions.NetworkException
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -51,6 +51,7 @@ import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.ensureHa
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.putIfNeeded
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.databinding.ActivityLaunchBinding
 import com.infomaniak.drive.ui.LaunchArgsType.Deeplink
 import com.infomaniak.drive.ui.LaunchArgsType.Notification
 import com.infomaniak.drive.ui.LaunchArgsType.Shortcut
@@ -70,7 +71,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.infomaniak.core.network.models.exceptions.NetworkException
 
 @SuppressLint("CustomSplashScreen")
 class LaunchActivity : EdgeToEdgeActivity() {

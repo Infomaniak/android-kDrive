@@ -89,7 +89,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import java.util.Date
-import java.util.concurrent.ConcurrentHashMap
 
 class MainViewModel(
     appContext: Application,
@@ -105,7 +104,7 @@ class MainViewModel(
 
     private val privateFolder = MutableLiveData<File>()
     private val _currentFolder = MutableLiveData<File?>()
-    private val pendingCopyToDriveImports = ConcurrentHashMap<Int, String>()
+    private var pendingCopyToDriveImport: Pair<Int, String>? = null
 
     val currentFolder: LiveData<File?> = _currentFolder // Use `setCurrentFolder` and `postCurrentFolder` to set value on it
 
@@ -405,7 +404,7 @@ class MainViewModel(
         val apiResponse = ApiRepository.copyFileToAnotherDrive(sourceDriveId, fileId, destinationDriveId, destinationFolderId)
 
         apiResponse.data?.firstOrNull()?.let { externalImport ->
-            pendingCopyToDriveImports[externalImport.id] = fileName
+            pendingCopyToDriveImport = externalImport.id to fileName
             val realDestFolderId = externalImport.directoryId.takeIf { it > 0 } ?: destinationFolderId
             CopyToDriveProgressWorker.scheduleWork(
                 getContext(),
@@ -421,16 +420,15 @@ class MainViewModel(
 
     fun resolveCopyToDriveNotification(notification: MqttNotification): CopyToDriveResult? {
         val importId = notification.importId ?: return null
-        val fileName = pendingCopyToDriveImports[importId] ?: return null
+        val fileName = pendingCopyToDriveImport?.takeIf { it.first == importId }?.second ?: return null
 
         val isSuccess = when (notification.action) {
             MqttAction.EXTERNAL_IMPORT_FINISHED -> true
-            MqttAction.EXTERNAL_IMPORT_ERROR -> false
-            MqttAction.EXTERNAL_IMPORT_CANCELED -> false
+            MqttAction.EXTERNAL_IMPORT_ERROR, MqttAction.EXTERNAL_IMPORT_CANCELED -> false
             else -> return null
         }
 
-        pendingCopyToDriveImports.remove(importId)
+        pendingCopyToDriveImport = null
         return CopyToDriveResult(isSuccess, fileName)
     }
 

@@ -227,8 +227,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     private fun computeHasOtherDrivesAvailable(): Boolean {
-        val userId = currentFile.let { DriveInfosController.getDrive(driveId = it.driveId, sharedWithMe = null)?.userId }
-            ?: AccountUtils.currentUserId
+        val userId = DriveInfosController.getDrive(driveId = currentFile.driveId)?.userId ?: AccountUtils.currentUserId
         return DriveInfosController.hasEligibleDestinationDrives(userId)
     }
 
@@ -650,11 +649,9 @@ class FileInfoActionsView @JvmOverloads constructor(
             currentContext.duplicateFilesClicked(selectFolderResultLauncher, mainViewModel)
         }
 
-        @CallSuper
         fun copyFileToAnotherDriveClicked(selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
             currentFile?.let { file ->
-                val userId = DriveInfosController.getDrive(driveId = file.driveId, sharedWithMe = null)?.userId
-                    ?: AccountUtils.currentUserId
+                val userId = DriveInfosController.getDrive(driveId = file.driveId)?.userId ?: AccountUtils.currentUserId
                 if (!DriveInfosController.hasEligibleDestinationDrives(userId)) return
                 val intent = Intent(currentContext, CopyFileToDriveActivity::class.java).apply {
                     putExtras(

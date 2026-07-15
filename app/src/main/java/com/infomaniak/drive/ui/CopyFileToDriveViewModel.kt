@@ -26,6 +26,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,25 +34,24 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class CopyFileToDriveViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
+class CopyFileToDriveViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() {
+    val sourceFile = MutableSharedFlow<File?>()
+    val hasMultipleDrives = MutableStateFlow(false)
 
-    private val navigationArgs = CopyFileToDriveActivityArgs.fromSavedStateHandle(savedStateHandle)
-
-    val userId = navigationArgs.userId
-    val sourceDriveId = navigationArgs.sourceDriveId
-
-    val sourceFile: File? = loadSourceFile()
-
-    private val eligibleDrives = DriveInfosController.getEligibleDestinationDrives(
-        userId = userId,
-        excludedDriveId = sourceDriveId,
-        sharedWithMe = false,
-    )
-    val hasMultipleDrives = eligibleDrives.size > 1
-
-    private val _selectedDrive = MutableStateFlow(eligibleDrives.firstOrNull())
+    private val _selectedDrive = MutableStateFlow<Drive?>(null)
     val selectedDrive = _selectedDrive.asStateFlow()
+
+    private val userId: Int
+        inline get() = savedStateHandle[CopyFileToDriveActivityArgs::userId.name] ?: -1
+
+    private val sourceDriveId: Int
+        inline get() = savedStateHandle[CopyFileToDriveActivityArgs::sourceDriveId.name] ?: -1
+
+    private val fileId: Int
+        inline get() = savedStateHandle[CopyFileToDriveActivityArgs::fileId.name] ?: -1
 
     private val folderId = MutableStateFlow<Int?>(null)
 
@@ -62,6 +62,11 @@ class CopyFileToDriveViewModel(savedStateHandle: SavedStateHandle) : ViewModel()
     val canCopy: StateFlow<Boolean> = combine(_selectedDrive, folderId) { drive, folderId ->
         drive != null && folderId != null
     }.stateIn(viewModelScope, SharingStarted.Eagerly, initialValue = false)
+
+    init {
+        loadSourceFile()
+        loadSelectedDrive()
+    }
 
     fun onDriveSelected(drive: Drive) {
         if (_selectedDrive.value?.id != drive.id) folderId.value = null
@@ -79,14 +84,31 @@ class CopyFileToDriveViewModel(savedStateHandle: SavedStateHandle) : ViewModel()
         return CopyDestination(folderId = folderId, folderName = selectedFolderName.value, driveId = drive.id)
     }
 
-    private fun loadSourceFile(): File? {
-        val fileId = navigationArgs.fileId
-        if (fileId == -1 || sourceDriveId == -1 || userId == -1) return null
+    private fun loadSourceFile() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                if (fileId == -1 || sourceDriveId == -1 || userId == -1) sourceFile.emit(null)
 
-        val isSourceSharedWithMe = DriveInfosController.getDrive(driveId = sourceDriveId)?.sharedWithMe == true
-        val sourceUserDrive = UserDrive(userId = userId, driveId = sourceDriveId, sharedWithMe = isSourceSharedWithMe)
+                val isSourceSharedWithMe = DriveInfosController.getDrive(driveId = sourceDriveId)?.sharedWithMe == true
+                val sourceUserDrive = UserDrive(userId = userId, driveId = sourceDriveId, sharedWithMe = isSourceSharedWithMe)
 
-        return FileController.getFileById(fileId, sourceUserDrive)
+                sourceFile.emit(FileController.getFileById(fileId, sourceUserDrive))
+            }
+        }
+    }
+
+    private fun loadSelectedDrive() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val eligibleDrives = DriveInfosController.getEligibleDestinationDrives(
+                    userId = userId,
+                    excludedDriveId = sourceDriveId,
+                    sharedWithMe = false,
+                )
+                hasMultipleDrives.emit(eligibleDrives.size > 1)
+                _selectedDrive.emit(eligibleDrives.firstOrNull())
+            }
+        }
     }
 
     private fun getFolder(drive: Drive, folderId: Int): File? {
