@@ -184,11 +184,10 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     }
 
     companion object {
-        const val TAG = "copy_to_drive_progress_worker"
-        const val IMPORT_ID_KEY = "import_id_key"
-        const val FILE_NAME_KEY = "file_name_key"
-        const val DEST_DRIVE_ID_KEY = "dest_drive_id_key"
-        const val DEST_FOLDER_ID_KEY = "dest_folder_id_key"
+        private const val IMPORT_ID_KEY = "import_id_key"
+        private const val FILE_NAME_KEY = "file_name_key"
+        private const val DEST_DRIVE_ID_KEY = "dest_drive_id_key"
+        private const val DEST_FOLDER_ID_KEY = "dest_folder_id_key"
         private const val COPY_TO_DRIVE_TIMEOUT = 30_000L
 
         fun scheduleWork(context: Context, importId: Int, fileName: String, destDriveId: Int, destFolderId: Int) {

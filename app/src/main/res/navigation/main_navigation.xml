@@ -451,15 +451,12 @@
         tools:layout="@layout/activity_copy_file_to_drive">
         <argument
             android:name="fileId"
-            android:defaultValue="-1"
             app:argType="integer" />
         <argument
             android:name="sourceDriveId"
-            android:defaultValue="-1"
             app:argType="integer" />
         <argument
             android:name="userId"
-            android:defaultValue="-1"
             app:argType="integer" />
     </activity>
 
@@ -618,8 +615,7 @@
         android:id="@+id/securitySettingsFragment"
         android:name="com.infomaniak.drive.ui.menu.settings.SecuritySettingsFragment"
         android:label="SecuritySettingsFragment"
-        tools:layout="@layout/fragment_settings_security">
-    </fragment>
+        tools:layout="@layout/fragment_settings_security"></fragment>
 
     <fragment
         android:id="@+id/aboutSettingsFragment"

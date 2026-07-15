@@ -28,6 +28,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.navArgs
 import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.drive.R
@@ -50,6 +51,7 @@ import kotlinx.coroutines.launch
 class CopyFileToDriveActivity : BaseActivity() {
 
     private val binding by lazy { ActivityCopyFileToDriveBinding.inflate(layoutInflater) }
+    private val navArgs: CopyFileToDriveActivityArgs by navArgs()
 
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
     private val copyFileToDriveViewModel: CopyFileToDriveViewModel by viewModels()
@@ -71,26 +73,31 @@ class CopyFileToDriveActivity : BaseActivity() {
 
         binding.toolbar.setNavigationOnClickListener { finish() }
 
-        val sourceFile = copyFileToDriveViewModel.sourceFile
-        if (sourceFile == null || copyFileToDriveViewModel.selectedDrive.value == null) {
-            finish()
-            return
+        lifecycleScope.launch {
+            copyFileToDriveViewModel.sourceFile.collect { sourceFile ->
+                if (sourceFile == null || copyFileToDriveViewModel.selectedDrive.value == null) {
+                    finish()
+                    return@collect
+                }
+
+                binding.filePreview.adapter = CopyFilePreviewAdapter(listOf(sourceFile))
+            }
         }
 
-        binding.filePreview.adapter = CopyFilePreviewAdapter(listOf(sourceFile))
+        lifecycleScope.launch {
+            copyFileToDriveViewModel.hasMultipleDrives.collect { hasMultipleDrives ->
+                if (hasMultipleDrives) setupDriveSwitch()
+            }
+        }
 
         selectDriveViewModel.apply {
-            excludedDriveId = copyFileToDriveViewModel.sourceDriveId
+            excludedDriveId = navArgs.sourceDriveId
             showUserSelection = false
-            selectedUserId.value = copyFileToDriveViewModel.userId
+            selectedUserId.value = navArgs.userId
         }
 
-        if (copyFileToDriveViewModel.hasMultipleDrives) setupDriveSwitch()
-
         setupClickListeners()
-        observeSelectedDrive()
-        observeSelectedFolderName()
-        observeCanCopy()
+        observeData()
         observeDriveDialogSelection()
     }
 
@@ -99,28 +106,18 @@ class CopyFileToDriveActivity : BaseActivity() {
         copyButton.setOnClickListener { copyFileToDriveViewModel.getCopyDestination()?.let(::finishWithResult) }
     }
 
-    private fun observeSelectedDrive() {
+    private fun observeData() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                copyFileToDriveViewModel.selectedDrive.filterNotNull().collect(::displaySelectedDrive)
-            }
-        }
-    }
-
-    private fun observeSelectedFolderName() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                copyFileToDriveViewModel.selectedFolderName.collect { folderName ->
-                    binding.pathName.text = folderName ?: getString(R.string.selectFolderTitle)
+                launch { copyFileToDriveViewModel.selectedDrive.filterNotNull().collect(::displaySelectedDrive) }
+                launch {
+                    copyFileToDriveViewModel.selectedFolderName.collect { folderName ->
+                        binding.pathName.text = folderName ?: getString(R.string.selectFolderTitle)
+                    }
                 }
-            }
-        }
-    }
-
-    private fun observeCanCopy() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                copyFileToDriveViewModel.canCopy.collect { canCopy -> binding.copyButton.isEnabled = canCopy }
+                launch {
+                    copyFileToDriveViewModel.canCopy.collect { canCopy -> binding.copyButton.isEnabled = canCopy }
+                }
             }
         }
     }
@@ -150,7 +147,7 @@ class CopyFileToDriveActivity : BaseActivity() {
         Intent(this, SelectFolderActivity::class.java).apply {
             putExtras(
                 SelectFolderActivityArgs(
-                    userId = copyFileToDriveViewModel.userId,
+                    userId = navArgs.userId,
                     fromSaveExternal = true,
                     driveId = drive.id,
                 ).toBundle()
