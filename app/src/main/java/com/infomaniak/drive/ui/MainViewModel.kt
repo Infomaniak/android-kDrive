@@ -216,7 +216,7 @@ class MainViewModel(
     }
 
     fun loadCurrentFolder(folderId: Int, userDrive: UserDrive) = viewModelScope.launch(Dispatchers.IO) {
-        postCurrentFolder(FileController.getFileById(folderId, userDrive))
+        postCurrentFolder(FileController.getFileByIdOrUid(folderId, userDrive))
     }
 
     fun createMultiSelectMediator(): MediatorLiveData<MultiSelectMediatorState> =

@@ -205,7 +205,7 @@ open class FileListFragment : MultiSelectFragment(
             is DeeplinkFilePath.FilePreviewInFolder -> fileType.folderId
             else -> navigationArgs.folderId
         }
-        folderName = fileType?.let { FileController.getFileById(folderId, userDrive)?.name } ?: navigationArgs.folderName
+        folderName = fileType?.let { FileController.getFileByIdOrUid(folderId, userDrive)?.name } ?: navigationArgs.folderName
     }
 
     override fun initMultiSelectLayout(): MultiSelectLayoutBinding? = binding.multiSelectLayout
