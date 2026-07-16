@@ -159,8 +159,23 @@ object FileController {
 
     fun getFileById(fileId: Int, userDrive: UserDrive? = null): File? {
         return getRealmInstance(userDrive).use { realm ->
-            realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()?.let {
-                realm.copyFromRealm(it, 1)
+            realm.run {
+                where(File::class.java)
+                    .equalTo(File::uid.name, "${fileId}_${userDrive?.driveId}")
+                    .findFirst()
+                    ?.let { realm.copyFromRealm(it, 1) }
+            }
+        }
+    }
+
+    fun getFileByUid(fileId: Int, userDrive: UserDrive): File? {
+        val uid = "${fileId}_${userDrive.driveId}"
+        return getRealmInstance(userDrive).use { realm ->
+            realm.run {
+                where(File::class.java)
+                    .equalTo(File::uid.name, uid)
+                    .findFirst()
+                    ?.let { realm.copyFromRealm(it, 1) }
             }
         }
     }
