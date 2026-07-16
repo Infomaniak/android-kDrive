@@ -123,12 +123,10 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     }
 
     override fun previewFile(fileId: Int) {
-        userDrive?.let { FileController.getFileByUid(folderId, it) }
-            ?: FileController.getFileById(folderId, null)
-                ?.let { file ->
-                    openFileOrFolder(file)
-                    fileListViewModel.isPreviewManaged = true
-                }
+        FileController.getFileByUidOrId(fileId, userDrive)?.let { file ->
+            openFileOrFolder(file)
+            fileListViewModel.isPreviewManaged = true
+        }
     }
 
     private fun openFileOrFolder(file: File) {
@@ -148,9 +146,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     }
 
     private fun canShowButton(): Boolean {
-        val currentFolderRights = userDrive?.let {
-            FileController.getFileByUid(folderId, it)?.rights ?: Rights()
-        } ?: FileController.getFileById(folderId, null)?.rights ?: Rights()
+        val currentFolderRights = FileController.getFileByUidOrId(folderId, userDrive)?.rights ?: Rights()
 
         val isFromExternalOrCurrentDrive = navigationArgs.fromSaveExternal || userDrive?.driveId == AccountUtils.currentDriveId
         return folderId != selectFolderViewModel.disableSelectedFolderId
