@@ -157,8 +157,8 @@ object FileController {
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
-    fun getFileByIdOrUid(fileId: Int, userDrive: UserDrive? = null) : File? {
-        return userDrive?.let { getFileByUid(fileId, userDrive) } ?: getFileById(fileId, userDrive)
+    fun getFileByIdOrUid(fileId: Int, userDrive: UserDrive? = null): File? {
+        return userDrive?.let { getFileByUid(fileId, it) } ?: getFileById(fileId, userDrive)
     }
 
     fun getFileById(fileId: Int, userDrive: UserDrive? = null): File? {
