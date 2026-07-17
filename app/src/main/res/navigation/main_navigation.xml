@@ -426,9 +426,14 @@
             android:defaultValue=""
             app:argType="string" />
         <argument
-            android:name="disabledFolderId"
+            android:name="disabledDestinationFolderId"
             android:defaultValue="-1"
             app:argType="integer" />
+        <argument
+            android:name="disabledNavigationFolderIds"
+            android:defaultValue="@null"
+            app:argType="integer[]"
+            app:nullable="true" />
         <argument
             android:name="fromSaveExternal"
             android:defaultValue="false"
