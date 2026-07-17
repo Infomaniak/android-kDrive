@@ -232,6 +232,7 @@ object Utils {
         selectFolderResultLauncher: ActivityResultLauncher<Intent>,
         mainViewModel: MainViewModel,
         filesToMove: List<File> = emptyList(),
+        disabledNavigationParentFolderId: Int? = null,
     ) {
         mainViewModel.ignoreSyncOffline = true
         val disabledNavigationFolderIds = filesToMove.filter { it.isFolder() }.map { it.id }.toIntArray()
@@ -243,6 +244,7 @@ object Utils {
                     folderId = disabledDestinationFolderId ?: -1,
                     disabledDestinationFolderId = disabledDestinationFolderId ?: -1,
                     disabledNavigationFolderIds = disabledNavigationFolderIds,
+                    disabledNavigationParentFolderId = disabledNavigationParentFolderId ?: -1,
                     customArgs = bundleOf(
                         MultiSelectFragment.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE,
                         SINGLE_OPERATION_CUSTOM_TAG to SingleOperation.MOVE.name,

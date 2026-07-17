@@ -80,6 +80,7 @@ class SelectFolderFragment : FileListFragment() {
         fileAdapter.apply {
             isSelectingFolder = true
             disabledNavigationFolderIds = selectFolderViewModel.disabledNavigationFolderIds
+            disabledNavigationParentFolderId = selectFolderViewModel.disabledNavigationParentFolderId
             onFileClicked = { file ->
                 if (file.isFolder() && !file.isDisabled()) {
                     fileListViewModel.cancelDownloadFiles()
