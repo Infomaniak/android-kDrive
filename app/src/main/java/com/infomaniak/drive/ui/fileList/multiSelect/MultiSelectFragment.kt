@@ -215,6 +215,7 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
             mainViewModel = mainViewModel,
             filesToMove = getValidSelectedItems(),
             disabledNavigationParentFolderId = if (isSelectAllOn) currentFolder?.id else null,
+            exceptedNavigationFolderIds = if (isSelectAllOn) exceptedItemsIds.toIntArray() else null,
         )
     }
 

@@ -66,6 +66,7 @@ class SelectFolderActivity : BaseActivity() {
         val disabledDestinationFolderId = navigationArgs.disabledDestinationFolderId.getIntOrNull()
         val disabledNavigationFolderIdsArg = navigationArgs.disabledNavigationFolderIds?.toSet() ?: emptySet()
         val disabledNavigationParentFolderIdArg = navigationArgs.disabledNavigationParentFolderId.getIntOrNull()
+        val exceptedNavigationFolderIdsArg = navigationArgs.exceptedNavigationFolderIds?.toSet() ?: emptySet()
 
         // We're doing this in the mainthread because the FileListFragment rely on mainViewModel.selectFolderUserDrive.
         // Moving this call in a background thread we'll break everything
@@ -80,6 +81,7 @@ class SelectFolderActivity : BaseActivity() {
                 disableSelectedFolderId = disabledDestinationFolderId
                 disabledNavigationFolderIds = disabledNavigationFolderIdsArg
                 disabledNavigationParentFolderId = disabledNavigationParentFolderIdArg
+                exceptedNavigationFolderIds = exceptedNavigationFolderIdsArg
             }
 
             navController.setGraph(
@@ -193,6 +195,7 @@ class SelectFolderActivity : BaseActivity() {
         var disableSelectedFolderId: Int? = null
         var disabledNavigationFolderIds: Set<Int> = emptySet()
         var disabledNavigationParentFolderId: Int? = null
+        var exceptedNavigationFolderIds: Set<Int> = emptySet()
 
         fun getFolderName(folderId: Int): String {
             val selectedFolderName = if (folderId == ROOT_ID) {
