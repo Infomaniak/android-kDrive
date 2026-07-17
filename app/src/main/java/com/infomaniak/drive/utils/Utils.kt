@@ -22,7 +22,6 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import android.view.LayoutInflater
 import androidx.activity.result.ActivityResultLauncher
@@ -232,9 +231,10 @@ object Utils {
         disabledDestinationFolderId: Int?,
         selectFolderResultLauncher: ActivityResultLauncher<Intent>,
         mainViewModel: MainViewModel,
-        disabledNavigationFolderIds: IntArray? = null,
+        filesToMove: List<File> = emptyList(),
     ) {
         mainViewModel.ignoreSyncOffline = true
+        val disabledNavigationFolderIds = filesToMove.filter { it.isFolder() }.map { it.id }.toIntArray()
         Intent(this, SelectFolderActivity::class.java).apply {
             putExtras(
                 SelectFolderActivityArgs(
