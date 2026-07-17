@@ -23,6 +23,7 @@ import android.content.Intent
 import android.os.Build.VERSION.SDK_INT
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
+import android.os.UserManager
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -95,9 +96,12 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
     private val appUpdateWorkerScheduler by lazy { AppUpdateScheduler(applicationContext) }
 
     protected val applicationScope = CoroutineScope(Dispatchers.Default + CoroutineName("MainApplication"))
+    protected val shouldInitializeApplication: Boolean
+        get() = !isPdfServiceProcess() && getSystemService(UserManager::class.java) != null
 
     override fun onCreate() {
         super<Application>.onCreate()
+        if (!shouldInitializeApplication) return
 
         configureInfomaniakCore()
 
@@ -148,6 +152,10 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
         MqttClientWrapper.init(applicationContext)
 
         MyKSuiteDataUtils.initDatabase(this)
+    }
+
+    private fun isPdfServiceProcess(): Boolean {
+        return SDK_INT >= 28 && getProcessName().endsWith(PDF_SERVICE_PROCESS_SUFFIX)
     }
 
     private fun configureInfomaniakCore() {
@@ -244,6 +252,8 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
     }
 
     companion object {
+        private const val PDF_SERVICE_PROCESS_SUFFIX = ":androidx.pdf.service.PdfDocumentServiceImpl"
+
         @JvmStatic
         var userDataCleanableList: List<AssociatedUserDataCleanable> = emptyList()
             protected set

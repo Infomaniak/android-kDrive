@@ -28,6 +28,7 @@ android {
     namespace = "com.infomaniak.drive"
 
     compileSdk = appCompileSdk
+    compileSdkExtension = 19
 
     ndkVersion = "28.0.13004108"
 
@@ -232,6 +233,7 @@ dependencies {
     implementation(libs.exoplayer.media3.session)
 
     implementation(libs.android.pdfview)
+    implementation(libs.androidx.pdf.viewer.fragment)
     implementation(libs.gravity.snap.helper)
     implementation(core.lottie)
     implementation(libs.material.date.time.picker)

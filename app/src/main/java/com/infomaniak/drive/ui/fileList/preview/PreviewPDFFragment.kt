@@ -145,6 +145,8 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         super.onPause()
     }
 
+    override fun canDisplayWithoutCurrentFile() = previewPDFHandler.isExternalFile()
+
     override fun generatePagesAsBitmaps(fileName: String) {
         // When we try to generate bitmaps for a password protected file with the default PDF reader, we don't have a file
         // So we need to pass the file name

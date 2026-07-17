@@ -62,6 +62,12 @@
 
     <style name="AppTheme" parent="AppThemeBase" />
 
+    <style name="PdfViewerTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:fontFamily">@font/suisseintl_regular</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryContainer">@color/backgroundSecondary</item>
+    </style>
+
     <style name="AppTheme.Video" parent="AppTheme">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowDisablePreview">true</item>

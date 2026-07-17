@@ -1,6 +1,7 @@
 [versions]
 androidJunit5 = "1.13.4.0"
 androidPdfview = "3.2.16"
+androidxPdfViewer = "1.0.0-alpha18"
 androidTest = "1.9.0"
 checkerFramework = "3.52.0"
 ddPlist = "1.28"
@@ -27,6 +28,7 @@ webkit = "1.14.0"
 [libraries]
 android-junit5 = { module = "de.mannodermaus.gradle.plugins:android-junit5", version.ref = "androidJunit5" }
 android-pdfview = { module = "com.github.Infomaniak:android-pdfview", version.ref = "androidPdfview" }
+androidx-pdf-viewer-fragment = { module = "androidx.pdf:pdf-viewer-fragment", version.ref = "androidxPdfViewer" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleProcess" }
 androidx-ui-android = { module = "androidx.compose.ui:ui-android", version.ref = "uiAndroid" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }

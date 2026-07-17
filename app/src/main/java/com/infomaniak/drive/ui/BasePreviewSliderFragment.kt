@@ -271,6 +271,11 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         }
     }
 
+    fun setFullscreen(isFullscreen: Boolean) {
+        if (isOverlayShown == !isFullscreen) return
+        toggleFullscreen()
+    }
+
     fun isFullscreenOverlayShown(): Boolean = isOverlayShown
 
     protected fun toggleBottomSheet(shouldShow: Boolean) {
@@ -297,6 +302,11 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         fun Fragment.toggleFullscreen() {
             (parentFragment as? BasePreviewSliderFragment)?.toggleFullscreen()
             (activity as? PreviewPDFActivity)?.toggleFullscreen()
+        }
+
+        fun Fragment.setFullscreen(isFullscreen: Boolean) {
+            (parentFragment as? BasePreviewSliderFragment)?.setFullscreen(isFullscreen)
+            (activity as? PreviewPDFActivity)?.setFullscreen(isFullscreen)
         }
 
         fun Fragment.openWithClicked() {

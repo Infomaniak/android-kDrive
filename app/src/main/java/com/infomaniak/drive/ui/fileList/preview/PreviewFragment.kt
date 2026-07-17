@@ -49,7 +49,9 @@ open class PreviewFragment : Fragment() {
         }
 
         previewViewModel.currentFile?.let { file = it }
-            ?: lifecycleScope.launchWhenResumed { findNavController().popBackStack() }
+        if (previewViewModel.currentFile == null && !canDisplayWithoutCurrentFile()) {
+            lifecycleScope.launchWhenResumed { findNavController().popBackStack() }
+        }
 
         super.onViewCreated(view, savedInstanceState)
     }
@@ -70,4 +72,6 @@ open class PreviewFragment : Fragment() {
     }
 
     protected fun noCurrentFile() = previewViewModel.currentFile == null
+
+    protected open fun canDisplayWithoutCurrentFile() = false
 }

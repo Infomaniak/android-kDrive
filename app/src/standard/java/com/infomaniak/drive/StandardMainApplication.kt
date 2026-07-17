@@ -26,6 +26,8 @@ class StandardMainApplication : MainApplication() {
 
     override fun onCreate() {
         super.onCreate()
+        if (!shouldInitializeApplication) return
+
         userDataCleanableList = userDataCleanableList + NotificationsRegistrationManager
         registerUserDeviceIfNeeded()
     }

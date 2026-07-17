@@ -18,6 +18,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-sdk tools:overrideLibrary="androidx.pdf,androidx.pdf.document.service,androidx.pdf.viewer.fragment" />
+
     <!-- For upload and sync -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"

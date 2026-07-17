@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -89,8 +90,6 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
                 )
             }
 
-            navController.navigate(R.id.previewPDFFragment)
-
             header.setup(onBackClicked = ::finish, onOpenWithClicked = ::openWith)
             header.enableEdgeToEdge(withBottom = false)
         }
@@ -126,6 +125,11 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
         toggleSystemBar(isOverlayShown)
     }
 
+    fun setFullscreen(isFullscreen: Boolean) {
+        if (isOverlayShown == !isFullscreen) return
+        toggleFullscreen()
+    }
+
     // This is necessary to be able to use the same view details we have in kDrive (file name, file type and size)
     private suspend fun getFakeFile(): File = with(previewPDFHandler) {
         val (createdAt, updatedAt) = externalFileUri.getDates()
@@ -146,10 +150,14 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
     private fun setupNavController(): NavController {
         return navHostFragment.navController.apply {
-            setGraph(
-                R.navigation.preview_pdf_navigation,
-                PreviewPDFFragmentArgs(fileUri = previewPDFHandler.externalFileUri).toBundle(),
-            )
+            val graph = navInflater.inflate(R.navigation.preview_pdf_navigation)
+            val startDestination = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                R.id.androidXPreviewPDFFragment
+            } else {
+                R.id.previewPDFFragment
+            }
+            graph.setStartDestination(startDestination)
+            setGraph(graph, PreviewPDFFragmentArgs(fileUri = previewPDFHandler.externalFileUri).toBundle())
         }
     }
 

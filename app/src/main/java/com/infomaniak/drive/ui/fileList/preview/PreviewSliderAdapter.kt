@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
+import android.os.Build
 import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -48,9 +49,17 @@ class PreviewSliderAdapter(
         return when (file.getFileType()) {
             ExtensionType.IMAGE -> PreviewPictureFragment()
             ExtensionType.VIDEO, ExtensionType.AUDIO -> PreviewPlaybackFragment()
-            ExtensionType.PDF -> PreviewPDFFragment()
-            else -> if (file.isOnlyOfficePreview()) PreviewPDFFragment() else PreviewOtherFragment()
+            ExtensionType.PDF -> createPdfFragment()
+            else -> if (file.isOnlyOfficePreview()) createPdfFragment() else PreviewOtherFragment()
         }.apply { arguments = args }
+    }
+
+    private fun createPdfFragment(): Fragment {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            AndroidXPreviewPDFFragment()
+        } else {
+            PreviewPDFFragment()
+        }
     }
 
     fun setFiles(files: ArrayList<File>) {
