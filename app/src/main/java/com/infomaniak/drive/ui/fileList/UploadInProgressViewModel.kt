@@ -49,7 +49,7 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
     private val getFolderJob = Job()
 
     fun getFolder(folderId: Int, userDrive: UserDrive) = liveData(getFolderJob + Dispatchers.IO) {
-        val localFolder = FileController.getFileById(folderId, userDrive)
+        val localFolder = FileController.getFileByUidOrId(folderId, userDrive)
         var remoteFolder: File? = null
 
         if (localFolder == null) {
@@ -156,7 +156,7 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
     }
 
     private fun createFolderFile(fileId: Int, userDrive: UserDrive): File? {
-        val folder = FileController.getFileById(fileId, userDrive)
+        val folder = FileController.getFileByUidOrId(fileId, userDrive)
             ?: FileController.getFileDetails(fileId, userDrive)
             ?: return null
 

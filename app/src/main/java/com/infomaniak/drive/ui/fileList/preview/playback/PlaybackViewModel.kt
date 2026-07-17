@@ -65,7 +65,7 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
     }
 
     private suspend fun loadDriveFile(fileId: Int): File? = runCatching {
-        FileController.getFileById(fileId, userDrive) ?: withContext(Dispatchers.IO) {
+        FileController.getFileByUidOrId(fileId, userDrive) ?: withContext(Dispatchers.IO) {
             val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
             FileController.getRemoteFile(fileId, userDrive.driveId, okHttpClient)?.also { remoteFile ->
                 FileController.saveRemoteFileToDb(remoteFile, userDrive, okHttpClient)

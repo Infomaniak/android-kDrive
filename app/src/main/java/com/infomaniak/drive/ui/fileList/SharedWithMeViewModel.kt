@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ class SharedWithMeViewModel : ViewModel() {
                 FileController.createSharedWithMeFolderIfNeeded(userDrive)
             }
 
-            val folderIsNotEmpty = FileController.getFileById(folderId, userDrive)?.children?.isNotEmpty() == true
+            val folderIsNotEmpty = FileController.getFileByUidOrId(folderId, userDrive)?.children?.isNotEmpty() == true
             if (folderIsNotEmpty) notifyUiToLoadData()
 
             if (!isNewSort) {

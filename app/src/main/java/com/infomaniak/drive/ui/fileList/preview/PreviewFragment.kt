@@ -81,7 +81,7 @@ open class PreviewFragment : Fragment() {
     }
 
     private fun getCurrentFile(fileId: Int): File? = runCatching {
-        FileController.getFileById(fileId, previewSliderViewModel.userDrive) ?: mainViewModel.currentPreviewFileList[fileId]
+        FileController.getFileByUidOrId(fileId, previewSliderViewModel.userDrive) ?: mainViewModel.currentPreviewFileList[fileId]
     }.getOrElse { exception ->
         exception.printStackTrace()
         Sentry.captureException(exception) { scope ->

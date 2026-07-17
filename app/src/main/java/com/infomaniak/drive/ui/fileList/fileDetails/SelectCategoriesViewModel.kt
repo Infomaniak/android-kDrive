@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ class SelectCategoriesViewModel : ViewModel() {
             CategoryRights()
         } else {
             selectedFiles = filesIds?.toList()?.mapNotNull { fileId ->
-                FileController.getFileById(fileId, userDrive)
+                FileController.getFileByUidOrId(fileId, userDrive)
             } ?: emptyList()
 
             if (selectedFiles.isEmpty()) {
