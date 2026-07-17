@@ -435,6 +435,10 @@
             app:argType="integer[]"
             app:nullable="true" />
         <argument
+            android:name="disabledNavigationParentFolderId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
             android:name="fromSaveExternal"
             android:defaultValue="false"
             app:argType="boolean" />

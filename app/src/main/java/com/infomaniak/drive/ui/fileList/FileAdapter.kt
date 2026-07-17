@@ -76,6 +76,7 @@ open class FileAdapter(
 
     var isSelectingFolder = false
     var disabledNavigationFolderIds: Set<Int> = emptySet()
+    var disabledNavigationParentFolderId: Int? = null
     var showShareFileButton = true
     var viewHolderType: DisplayType = DisplayType.LIST
     var uploadInProgress = false
@@ -429,7 +430,10 @@ open class FileAdapter(
         }
         else -> {
             if (isSelectingFolder || offlineMode) {
-                enabledFile((file.isFolder() && file.id !in disabledNavigationFolderIds) || (offlineMode && file.isOffline))
+                val isNavigableFolder = file.isFolder()
+                        && file.id !in disabledNavigationFolderIds
+                        && file.parentId != disabledNavigationParentFolderId
+                enabledFile(isNavigableFolder || (offlineMode && file.isOffline))
             } else {
                 enabledFile()
             }
