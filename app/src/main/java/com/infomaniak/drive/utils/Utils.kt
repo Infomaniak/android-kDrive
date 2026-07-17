@@ -233,6 +233,7 @@ object Utils {
         mainViewModel: MainViewModel,
         filesToMove: List<File> = emptyList(),
         disabledNavigationParentFolderId: Int? = null,
+        exceptedNavigationFolderIds: IntArray? = null,
     ) {
         mainViewModel.ignoreSyncOffline = true
         val disabledNavigationFolderIds = filesToMove.filter { it.isFolder() }.map { it.id }.toIntArray()
@@ -245,6 +246,7 @@ object Utils {
                     disabledDestinationFolderId = disabledDestinationFolderId ?: -1,
                     disabledNavigationFolderIds = disabledNavigationFolderIds,
                     disabledNavigationParentFolderId = disabledNavigationParentFolderId ?: -1,
+                    exceptedNavigationFolderIds = exceptedNavigationFolderIds,
                     customArgs = bundleOf(
                         MultiSelectFragment.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE,
                         SINGLE_OPERATION_CUSTOM_TAG to SingleOperation.MOVE.name,
