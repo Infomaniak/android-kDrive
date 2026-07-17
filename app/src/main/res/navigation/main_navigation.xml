@@ -439,6 +439,11 @@
             android:defaultValue="-1"
             app:argType="integer" />
         <argument
+            android:name="exceptedNavigationFolderIds"
+            android:defaultValue="@null"
+            app:argType="integer[]"
+            app:nullable="true" />
+        <argument
             android:name="fromSaveExternal"
             android:defaultValue="false"
             app:argType="boolean" />
