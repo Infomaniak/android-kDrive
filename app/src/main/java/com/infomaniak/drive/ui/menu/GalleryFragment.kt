@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -280,7 +280,7 @@ class GalleryFragment : MultiSelectFragment(
     override fun getAllSelectedFilesCount(): Int? = null
 
     fun onMoveButtonClicked() = with(multiSelectManager.selectedItems) {
-        moveFiles(disabledFolderId = if (count() == 1) first()?.parentId else null)
+        moveFiles(disabledDestinationFolderId = if (count() == 1) first()?.parentId else null)
     }
 
     override fun performBulkOperation(

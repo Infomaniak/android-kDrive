@@ -75,6 +75,7 @@ open class FileAdapter(
     var onStopUploadButtonClicked: ((fileName: String) -> Unit)? = null
 
     var isSelectingFolder = false
+    var disabledNavigationFolderIds: Set<Int> = emptySet()
     var showShareFileButton = true
     var viewHolderType: DisplayType = DisplayType.LIST
     var uploadInProgress = false
@@ -428,7 +429,7 @@ open class FileAdapter(
         }
         else -> {
             if (isSelectingFolder || offlineMode) {
-                enabledFile(file.isFolder() || (offlineMode && file.isOffline))
+                enabledFile((file.isFolder() && file.id !in disabledNavigationFolderIds) || (offlineMode && file.isOffline))
             } else {
                 enabledFile()
             }
