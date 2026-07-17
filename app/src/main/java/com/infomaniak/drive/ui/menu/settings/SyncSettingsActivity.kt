@@ -34,10 +34,10 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.utils.FORMAT_DATE_CLEAR_MONTH
 import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.common.utils.startOfTheDay
-import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.startAppSettingsConfig
 import com.infomaniak.core.legacy.utils.whenResultIsOk
@@ -311,7 +311,7 @@ class SyncSettingsActivity : BaseActivity() {
             val selectedUserId = selectDriveViewModel.selectedUserId.value
             val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
             if (syncFolderId != null && selectedUserId != null && selectedDriveId != null) {
-                FileController.getFileById(syncFolderId, UserDrive(selectedUserId, selectedDriveId))?.let {
+                FileController.getFileByUidOrId(syncFolderId, UserDrive(selectedUserId, selectedDriveId))?.let {
                     selectPath.setIconColor(it.color?.toColorInt() ?: context.getColor(R.color.folderDefaultColor))
                     selectPath.title = it.name
                     changeSaveButtonStatus()

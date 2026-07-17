@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024-2025 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Bas
     private val folderId: Int by lazy { inputData.getInt(FOLDER_ID, 0) }
     private val files: List<File> by lazy {
         FileController.getFolderOfflineFilesId(folderId = folderId, sortType = UiSettings(context).sortType)
-            .map { FileController.getFileById(it, userDrive)!! }
+            .map { FileController.getFileByUidOrId(it, userDrive)!! }
     }
 
     private val userDrive: UserDrive by lazy {

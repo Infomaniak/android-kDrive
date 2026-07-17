@@ -215,7 +215,7 @@ sealed interface DeeplinkType : Parcelable {
 
                 val deeplinkTargetFile = getDrives(sharedWithMe = withSharedDrives).firstNotNullOfOrNull { userDrive ->
                     newUserId = userDrive.userId
-                    FileController.getFileById(fileId, userDrive = userDrive)
+                    FileController.getFileByUidOrId(fileId, userDrive = userDrive)
                 }
 
                 return deeplinkTargetFile?.let { file ->

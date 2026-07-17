@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ class SelectFolderFragment : FileListFragment() {
         toolbar.menu.findItem(R.id.addFolderItem).apply {
             setOnMenuItemClickListener {
                 val selectFolderActivity = requireActivity() as? SelectFolderActivity
-                if (FileController.getFileById(folderId, userDrive)?.rights?.canCreateDirectory == true) {
+                if (FileController.getFileByUidOrId(folderId, userDrive)?.rights?.canCreateDirectory == true) {
                     selectFolderActivity?.hideSaveButton()
                     trackNewElementEvent(MatomoName.CreateFolderOnTheFly)
                     safeNavigate(
@@ -96,7 +96,7 @@ class SelectFolderFragment : FileListFragment() {
         lifecycleScope.launchWhenResumed {
             with(requireActivity() as SelectFolderActivity) {
                 showSaveButton()
-                val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
+                val currentFolderRights = FileController.getFileByUidOrId(folderId, userDrive)?.rights ?: Rights()
                 val enable = folderId != selectFolderViewModel.disableSelectedFolderId
                         && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
                 enableSaveButton(enable)

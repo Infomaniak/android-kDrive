@@ -205,7 +205,7 @@ open class FileListFragment : MultiSelectFragment(
             is DeeplinkFilePath.FilePreviewInFolder -> fileType.folderId
             else -> navigationArgs.folderId
         }
-        folderName = fileType?.let { FileController.getFileById(folderId, userDrive)?.name } ?: navigationArgs.folderName
+        folderName = fileType?.let { FileController.getFileByUidOrId(folderId, userDrive)?.name } ?: navigationArgs.folderName
     }
 
     override fun initMultiSelectLayout(): MultiSelectLayoutBinding? = binding.multiSelectLayout
@@ -384,7 +384,7 @@ open class FileListFragment : MultiSelectFragment(
             lifecycleScope.launchWhenResumed {
                 with(requireActivity() as SelectFolderActivity) {
                     showSaveButton()
-                    val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
+                    val currentFolderRights = FileController.getFileByUidOrId(folderId, userDrive)?.rights ?: Rights()
                     val enable = folderId != selectFolderViewModel.disableSelectedFolderId
                             && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
                     enableSaveButton(enable)
@@ -654,7 +654,7 @@ open class FileListFragment : MultiSelectFragment(
         activitiesRefreshTimer.cancel()
         isLoadingActivities = true
         mainViewModel.currentFolder.value?.let { localCurrentFolder ->
-            FileController.getFileById(localCurrentFolder.id, userDrive)?.let { updatedFolder ->
+            FileController.getFileByUidOrId(localCurrentFolder.id, userDrive)?.let { updatedFolder ->
                 downloadFolderActivities(updatedFolder)
                 activitiesRefreshTimer.start()
             } ?: run { activitiesRefreshTimer.start() }

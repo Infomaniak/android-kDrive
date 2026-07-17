@@ -89,7 +89,7 @@ class DeeplinkHandler(registryOwner: SavedStateRegistryOwner) : SavedStateRegist
         activity.lifecycleScope.launch(context = Dispatchers.IO) {
             DriveInfosController.getDrive(userId = userId, driveId = driveId, maintenance = false)
                 ?.ensureRightUser()
-                ?.run { FileController.getFileById(fileId = fileId, userDrive = UserDrive(userId = userId, driveId = id)) }
+                ?.run { FileController.getFileByUidOrId(fileId = fileId, userDrive = UserDrive(userId = userId, driveId = id)) }
                 ?.let { Dispatchers.Main { activity.openOnlyOfficeActivity(it) } }
         }
     }

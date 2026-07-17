@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        FileController.getFileById(navigationArgs.fileId, userDrive)?.let { currentFile ->
+        FileController.getFileByUidOrId(navigationArgs.fileId, userDrive)?.let { currentFile ->
 
             title.text = getString(R.string.notSupportedExtensionTitle, currentFile.getFileExtension())
             description.text = getString(R.string.notSupportedExtensionDescription, currentFile.name)

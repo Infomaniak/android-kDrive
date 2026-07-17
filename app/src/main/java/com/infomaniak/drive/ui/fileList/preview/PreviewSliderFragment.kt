@@ -87,7 +87,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         if (previewSliderViewModel.currentPreview == null) {
             userDrive = UserDrive(driveId = navigationArgs.driveId, sharedWithMe = navigationArgs.isSharedWithMe)
 
-            currentFile = FileController.getFileById(navigationArgs.fileId, userDrive)
+            currentFile = FileController.getFileByUidOrId(navigationArgs.fileId, userDrive)
                 ?: mainViewModel.currentPreviewFileList[navigationArgs.fileId] ?: throw Exception("No current preview found")
 
             previewSliderViewModel.currentPreview = currentFile
