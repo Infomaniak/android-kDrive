@@ -315,12 +315,16 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun copyFileToAnotherDrive(
         sourceDriveId: Int,
-        sourceFileId: Int,
+        sourcePath: String,
         destinationDriveId: Int,
         destinationFolderId: Int,
     ): ApiResponse<List<FileExternalImport>> {
-        val body = mapOf("source_drive_id" to sourceDriveId, "source_file_id" to sourceFileId)
-        return callApi(ApiRoutes.copyFileToAnotherDrive(destinationDriveId, destinationFolderId), POST, body)
+        val body = mapOf(
+            "application_drive_id" to sourceDriveId.toString(),
+            "directory_id" to destinationFolderId,
+            "source_path" to sourcePath,
+        )
+        return callApi(ApiRoutes.importKDrive(destinationDriveId), POST, body)
     }
 
     fun moveFile(file: File, newParent: File): ApiResponse<CancellableAction> {

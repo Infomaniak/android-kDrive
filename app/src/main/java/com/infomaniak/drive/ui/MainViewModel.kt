@@ -144,6 +144,7 @@ class MainViewModel(
 
     val deleteFilesFromGallery = SingleLiveEvent<List<Int>>()
     val copyToDriveResult = SingleLiveEvent<FileResult>()
+
     init {
         viewModelScope.launch {
             isNetworkAvailable.collect {
@@ -415,7 +416,20 @@ class MainViewModel(
         destinationDriveId: Int,
         destinationFolderId: Int,
     ) = viewModelScope.launch(Dispatchers.IO) {
-        val apiResponse = ApiRepository.copyFileToAnotherDrive(sourceDriveId, fileId, destinationDriveId, destinationFolderId)
+        val sourcePath = getSourceRemotePath(fileId, sourceDriveId)
+        if (sourcePath.isNullOrBlank()) {
+            copyToDriveResult.postValue(
+                FileResult(isSuccess = false, errorResId = R.string.errorCopyToDrive, fileName = fileName)
+            )
+            return@launch
+        }
+
+        val apiResponse = ApiRepository.copyFileToAnotherDrive(
+            sourceDriveId = sourceDriveId,
+            sourcePath = sourcePath,
+            destinationDriveId = destinationDriveId,
+            destinationFolderId = destinationFolderId,
+        )
 
         apiResponse.data?.firstOrNull()?.let { externalImport ->
             pendingCopyToDriveImport = externalImport.id to fileName
@@ -430,6 +444,18 @@ class MainViewModel(
         }
 
         copyToDriveResult.postValue(mapCopyApiResponseToFileResult(apiResponse, fileName))
+    }
+
+    private fun getSourceRemotePath(fileId: Int, sourceDriveId: Int): String? {
+        val sourceDrive = DriveInfosController.getDrive(driveId = sourceDriveId)
+        val userDrive = UserDrive(
+            userId = sourceDrive?.userId ?: AccountUtils.currentUserId,
+            driveId = sourceDriveId,
+            sharedWithMe = sourceDrive?.sharedWithMe == true,
+        )
+        val path = FileController.getFileById(fileId, userDrive)?.getRemotePath(userDrive) ?: return null
+
+        return path.removePrefix(PRIVATE_FOLDER_PATH_PREFIX)
     }
 
     fun resolveCopyToDriveNotification(notification: MqttNotification): CopyToDriveResult? {
@@ -713,5 +739,6 @@ class MainViewModel(
 
         private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"
         private const val SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY = "mustOpenUploadShortcut"
+        private const val PRIVATE_FOLDER_PATH_PREFIX = "/Private"
     }
 }
