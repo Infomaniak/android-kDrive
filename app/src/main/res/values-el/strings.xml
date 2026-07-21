@@ -204,8 +204,8 @@
     <string name="commonFolderTitle">Φάκελος οργανισμού</string>
     <string name="contentDescriptionIsSelected">Είναι επιλεγμένο</string>
     <string name="convertToDropboxTitle">Μετατροπή σε κουτί παραλαβής %s</string>
-    <string name="copyToDriveStarted">%s μεταφέρεται σε άλλη μονάδα δίσκου</string>
-    <string name="copyToDriveSuccess">%s μεταφέρθηκε σε άλλο δίσκο</string>
+    <string name="copyToDriveStarted">%s αντιγράφεται σε άλλη μονάδα δίσκου</string>
+    <string name="copyToDriveSuccess">%s αντιγράφηκε σε άλλη μονάδα δίσκου</string>
     <string name="createCategoryTitle">Δημιουργία κατηγορίας</string>
     <string name="createCommonFolderAllUsersDescription">Όλοι οι χρήστες του kDrive %s θα έχουν αυτόματα πρόσβαση σε αυτόν τον φάκελο.</string>
     <string name="createCommonFolderSuccess">Ο φάκελος οργανισμού δημιουργήθηκε με επιτυχία</string>

@@ -208,8 +208,8 @@
     <string name="commonFolderTitle">Folder organizacyjny</string>
     <string name="contentDescriptionIsSelected">Jest zaznaczony</string>
     <string name="convertToDropboxTitle">Konwertuj na skrzynkę nadawczą %s</string>
-    <string name="copyToDriveStarted">%s jest w trakcie przesyłania na inny dysk</string>
-    <string name="copyToDriveSuccess">%s przeniesiono na inny dysk</string>
+    <string name="copyToDriveStarted">%s jest w trakcie kopiowania na inny dysk</string>
+    <string name="copyToDriveSuccess">%s został skopiowany na inny dysk</string>
     <string name="createCategoryTitle">Utwórz kategorię</string>
     <string name="createCommonFolderAllUsersDescription">Wszyscy użytkownicy kDrive %s automatycznie otrzymają dostęp do tego folderu.</string>
     <string name="createCommonFolderSuccess">Folder organizacyjny został pomyślnie utworzony</string>

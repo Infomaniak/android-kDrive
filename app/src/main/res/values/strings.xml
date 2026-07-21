@@ -204,8 +204,8 @@
     <string name="commonFolderTitle">Organization folder</string>
     <string name="contentDescriptionIsSelected">Is selected</string>
     <string name="convertToDropboxTitle">Convert to drop box %s</string>
-    <string name="copyToDriveStarted">%s is being transferred to another drive</string>
-    <string name="copyToDriveSuccess">%s has been transferred to another drive</string>
+    <string name="copyToDriveStarted">%s is being copied to another drive</string>
+    <string name="copyToDriveSuccess">%s has been copied to another drive</string>
     <string name="createCategoryTitle">Create a category</string>
     <string name="createCommonFolderAllUsersDescription">All kDrive %s users will automatically have access to this folder.</string>
     <string name="createCommonFolderSuccess">Organization folder created successfully</string>

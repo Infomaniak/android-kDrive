@@ -204,8 +204,8 @@
     <string name="commonFolderTitle">Pasta de organização</string>
     <string name="contentDescriptionIsSelected">Está selecionado</string>
     <string name="convertToDropboxTitle">Converter para caixa de depósito %s</string>
-    <string name="copyToDriveStarted">%s está a ser transferido para outra unidade</string>
-    <string name="copyToDriveSuccess">%s foi transferido para outra unidade</string>
+    <string name="copyToDriveStarted">%s está a ser copiado para outra unidade</string>
+    <string name="copyToDriveSuccess">%s foi copiado para outra unidade</string>
     <string name="createCategoryTitle">Criar uma categoria</string>
     <string name="createCommonFolderAllUsersDescription">Todos os utilizadores do kDrive %s terão automaticamente acesso a esta pasta.</string>
     <string name="createCommonFolderSuccess">Pasta de organização criada com sucesso</string>
