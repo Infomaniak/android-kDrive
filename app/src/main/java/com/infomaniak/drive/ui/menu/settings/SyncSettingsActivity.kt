@@ -160,7 +160,7 @@ class SyncSettingsActivity : BaseActivity() {
         selectDriveViewModel.apply {
             val userId = oldSyncSettings?.userId ?: AccountUtils.currentUserId
             val drive = oldSyncSettings?.run { DriveInfosController.getDrive(userId, driveId) }
-            selectedUserId.value = userId
+            selectedUserId = userId
             selectedDrive.value = drive
         }
     }
@@ -243,7 +243,7 @@ class SyncSettingsActivity : BaseActivity() {
             Intent(this@SyncSettingsActivity, SelectFolderActivity::class.java).apply {
                 putExtras(
                     SelectFolderActivityArgs(
-                        userId = selectDriveViewModel.selectedUserId.value!!,
+                        userId = selectDriveViewModel.selectedUserId!!,
                         driveId = selectDriveViewModel.selectedDrive.value?.id!!,
                         folderId = syncSettingsViewModel.syncFolderId.value ?: -1,
                     ).toBundle()
@@ -264,8 +264,8 @@ class SyncSettingsActivity : BaseActivity() {
                     activeSelectDrive()
                 } else {
                     val firstDrive = currentUserDrives.firstOrNull()
-                    if (selectDriveViewModel.selectedUserId.value != currentUserId) {
-                        selectDriveViewModel.selectedUserId.value = currentUserId
+                    if (selectDriveViewModel.selectedUserId != currentUserId) {
+                        selectDriveViewModel.selectedUserId = currentUserId
                     }
                     if (selectDriveViewModel.selectedDrive.value != firstDrive) {
                         selectDriveViewModel.selectedDrive.value = firstDrive
@@ -295,7 +295,7 @@ class SyncSettingsActivity : BaseActivity() {
                 selectDrive.title = getString(R.string.selectDriveTitle)
                 selectPath.isGone = true
             }
-            if (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId ||
+            if (selectDriveViewModel.selectedUserId != oldSyncSettings?.userId ||
                 selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId ||
                 syncSettingsViewModel.syncFolderId.value != oldSyncSettings?.syncFolder
             ) {
@@ -308,7 +308,7 @@ class SyncSettingsActivity : BaseActivity() {
     private fun observeSyncFolder() = with(binding) {
         syncSettingsViewModel.syncFolderId.observe(this@SyncSettingsActivity) { syncFolderId ->
 
-            val selectedUserId = selectDriveViewModel.selectedUserId.value
+            val selectedUserId = selectDriveViewModel.selectedUserId
             val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
             if (syncFolderId != null && selectedUserId != null && selectedDriveId != null) {
                 FileController.getFileById(syncFolderId, UserDrive(selectedUserId, selectedDriveId))?.let {
@@ -407,7 +407,7 @@ class SyncSettingsActivity : BaseActivity() {
     private fun changeSaveButtonStatus() = with(binding) {
         val allSyncedFoldersCount = MediaFolder.getAllSyncedFoldersCount().toInt()
         val isEdited = (editNumber > 0)
-                || (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId)
+                || (selectDriveViewModel.selectedUserId != oldSyncSettings?.userId)
                 || (selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId)
                 || (syncSettingsViewModel.syncFolderId.value != oldSyncSettings?.syncFolder)
                 || (syncSettingsViewModel.saveOldPictures.value != SavePicturesDate.SINCE_NOW)
@@ -417,7 +417,7 @@ class SyncSettingsActivity : BaseActivity() {
         mediaFolders.title = if (allSyncedFoldersCount == 0) getString(R.string.noSelectMediaFolders)
         else resources.getQuantityString(R.plurals.mediaFoldersSelected, allSyncedFoldersCount, allSyncedFoldersCount)
 
-        saveButton.isEnabled = isEdited && (selectDriveViewModel.selectedUserId.value != null)
+        saveButton.isEnabled = isEdited && (selectDriveViewModel.selectedUserId != null)
                 && (selectDriveViewModel.selectedDrive.value != null)
                 && (syncSettingsViewModel.syncFolderId.value != null)
                 && allSyncedFoldersCount > 0
@@ -488,7 +488,7 @@ class SyncSettingsActivity : BaseActivity() {
             SavePicturesDate.SINCE_DATE -> syncSettingsViewModel.customDate.value ?: Date()
         }
         return SyncSettings(
-            userId = selectDriveViewModel.selectedUserId.value!!,
+            userId = selectDriveViewModel.selectedUserId!!,
             driveId = selectDriveViewModel.selectedDrive.value!!.id,
             lastSync = date,
             syncFolder = syncSettingsViewModel.syncFolderId.value!!,

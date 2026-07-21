@@ -23,16 +23,16 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.drive.Drive
 
 class SelectDriveViewModel : ViewModel() {
-    val selectedUserId = MutableLiveData<Int>()
     val selectedDrive = MutableLiveData<Drive>()
 
+    var selectedUserId: Int? = null
     var excludedDriveId: Int? = null
     var showUserSelection: Boolean = true
     var showSharedWithMe: Boolean = false
 
     fun getDriveList(): List<Drive> {
         return DriveInfosController.getEligibleDestinationDrives(
-            userId = selectedUserId.value,
+            userId = selectedUserId,
             excludedDriveId = excludedDriveId,
             sharedWithMe = if (showSharedWithMe) null else false,
         )

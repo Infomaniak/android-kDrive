@@ -59,7 +59,7 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
 
         AccountUtils.getAllUsers().observe(viewLifecycleOwner) { users ->
             if (users.size > 1 && showUserSelection) {
-                val selectedUser = users.find { it.id == selectedUserId.value } ?: users.first()
+                val selectedUser = users.find { it.id == selectedUserId } ?: users.first()
                 driveListAdapter.setDrives(getDriveList())
                 binding.userCardview.itemViewUser.setUserView(selectedUser) {
                     popupWindow = PopupWindow(
@@ -76,7 +76,7 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
                 binding.userCardview.root.isVisible = true
 
                 popupLayoutBinding.usersRecyclerView.adapter = UserAdapter(users, isCardView = false) { user ->
-                    selectedUserId.value = user.id
+                    selectedUserId = user.id
                     driveListAdapter.setDrives(getDriveList())
 
                     binding.userCardview.itemViewUser.setUserView(user) {
@@ -86,8 +86,8 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
                     popupWindow.dismiss()
                 }
             } else {
-                if (selectedUserId.value == null) {
-                    selectedUserId.value = users.first().id
+                if (selectedUserId == null) {
+                    selectedUserId = users.first().id
                 }
                 driveListAdapter.setDrives(getDriveList())
                 binding.userCardview.root.isVisible = false
