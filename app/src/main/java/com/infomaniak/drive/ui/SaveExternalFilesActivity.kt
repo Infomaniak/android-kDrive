@@ -279,7 +279,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 )
                 driveIdSharedWithMe = FileController.getSharedDrive(userDrive.userId, folderId)?.driveId
 
-                FileController.getFileById(folderId, userDrive) ?: FileController.getFileById(
+                FileController.getFileByUidOrId(folderId, userDrive) ?: FileController.getFileByUidOrId(
                     fileId = folderId,
                     userDrive = UserDrive(
                         userId = selectedUserId.value!!,

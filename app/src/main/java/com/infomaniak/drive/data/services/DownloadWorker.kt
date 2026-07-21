@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDownloadWorker(context, workerParams) {
 
     private val fileId: Int by lazy { inputData.getInt(FILE_ID, 0) }
-    private val file: File? by lazy { FileController.getFileById(fileId) }
+    private val file: File? by lazy { FileController.getFileByUidOrId(fileId) }
     private val fileName: String by lazy { inputData.getString(FILE_NAME) ?: "" }
     private val userDrive: UserDrive by lazy {
         UserDrive(
@@ -47,7 +47,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
         )
     }
 
-    override fun downloadNotification(): DownloadNotification? {
+    override fun downloadNotification(): DownloadNotification {
         return DownloadNotification(id = fileId, notification = downloadProgressNotification)
     }
 

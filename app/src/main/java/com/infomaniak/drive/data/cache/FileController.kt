@@ -157,11 +157,25 @@ object FileController {
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
-    fun getFileById(fileId: Int, userDrive: UserDrive? = null): File? {
-        return getRealmInstance(userDrive).use { realm ->
+    fun getFileByUidOrId(fileId: Int, userDrive: UserDrive? = null): File? {
+        return userDrive?.let { getFileByUid(fileId, userDrive = it) } ?: getFileById(fileId)
+    }
+
+    private fun getFileById(fileId: Int): File? {
+        return getRealmInstance().use { realm ->
             realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()?.let {
                 realm.copyFromRealm(it, 1)
             }
+        }
+    }
+
+    private fun getFileByUid(fileId: Int, userDrive: UserDrive): File? {
+        val uid = "${fileId}_${userDrive.driveId}"
+        return getRealmInstance(userDrive).use { realm ->
+            realm.where(File::class.java)
+                .equalTo(File::uid.name, uid)
+                .findFirst()
+                ?.let { realm.copyFromRealm(it, 1) }
         }
     }
 
@@ -313,7 +327,7 @@ object FileController {
         if (filesToDelete.isEmpty()) return
 
         val file = filesToDelete.removeAt(0)
-        val children = getFileById(file.id, userDrive)?.children ?: emptyList()
+        val children = getFileByUidOrId(file.id, userDrive)?.children ?: emptyList()
 
         filesToDelete.addAll(children)
         file.deleteCaches(context)

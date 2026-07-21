@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,9 +35,9 @@ import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.button.MaterialButton
 import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.extensions.lightStatusBar
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.safeBinding
-import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -68,7 +68,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        FileController.getFileById(fileId, userDrive)?.let(::setFile)
+        FileController.getFileByUidOrId(fileId, userDrive)?.let(::setFile)
 
         mainViewModel.getFileDetails(fileId, userDrive).observe(viewLifecycleOwner) { fileResponse ->
             fileResponse?.let(::setFile)

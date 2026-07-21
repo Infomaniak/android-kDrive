@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -299,11 +299,11 @@ class FileControllerTest : KDriveTest() {
             FileController.saveRemoteFileToDb(remoteFile, userDrive, okHttpClient)
 
             assertNotNull(
-                FileController.getFileById(remoteFile.id, userDrive),
+                FileController.getFileByUidOrId(remoteFile.id, userDrive),
                 "the saved remote file must be stored in realm",
             )
 
-            val localParent = FileController.getFileById(folder.id, userDrive)
+            val localParent = FileController.getFileByUidOrId(folder.id, userDrive)
             assertNotNull(localParent, "the ancestor folder must be fetched and stored in realm")
 
             assertNotNull(

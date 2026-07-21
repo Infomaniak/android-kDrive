@@ -359,7 +359,7 @@ class CloudStorageProvider : DocumentsProvider() {
         val accessMode = ParcelFileDescriptor.parseMode(mode)
         val fileId = getFileIdFromDocumentId(documentId)
         val userDrive = createUserDrive(documentId)
-        val localFile = FileController.getFileById(fileId, userDrive)
+        val localFile = FileController.getFileByUidOrId(fileId, userDrive)
 
         val updatedFile = runCatching {
             getRemoteFile(localFile, fileId, userDrive.driveId)

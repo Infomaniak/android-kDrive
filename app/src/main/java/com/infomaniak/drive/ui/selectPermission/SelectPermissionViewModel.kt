@@ -33,7 +33,7 @@ internal class SelectPermissionViewModel(savedStateHandle: SavedStateHandle) : V
     private val args = SelectPermissionBottomSheetDialogArgs.fromSavedStateHandle(savedStateHandle)
 
     val currentFileFlow = flow {
-        emit(FileController.getFileById(args.currentFileId))
+        emit(FileController.getFileByUidOrId(args.currentFileId))
     }
 
     fun editFileShareLinkOfficePermission(canEdit: Boolean) = liveData(Dispatchers.IO) {

@@ -208,7 +208,7 @@ class MainViewModel(
 
         // Emit destination folder id
         viewModelScope.launch(Dispatchers.IO) {
-            val file = FileController.getFileById(fileId, userDrive)
+            val file = FileController.getFileByUidOrId(fileId, userDrive)
                 ?: FileController.getFileDetails(fileId, userDrive = userDrive)
                 ?: return@launch
             navigateFileListTo.postValue(FileListNavigationType.Folder(file))
@@ -216,7 +216,7 @@ class MainViewModel(
     }
 
     fun loadCurrentFolder(folderId: Int, userDrive: UserDrive) = viewModelScope.launch(Dispatchers.IO) {
-        postCurrentFolder(FileController.getFileById(folderId, userDrive))
+        postCurrentFolder(FileController.getFileByUidOrId(folderId, userDrive))
     }
 
     fun createMultiSelectMediator(): MediatorLiveData<MultiSelectMediatorState> =
@@ -602,7 +602,7 @@ class MainViewModel(
     private fun initCurrentFolderFromRealm() {
         val savedFolderId: Int? = savedStateHandle[SAVED_STATE_FOLDER_ID_KEY]
         if (currentFolder.value == null && savedFolderId != null) {
-            FileController.getFileById(savedFolderId)?.let {
+            FileController.getFileByUidOrId(savedFolderId)?.let {
                 _currentFolder.value = it
                 saveCurrentFolder()
             }

@@ -42,7 +42,7 @@ android {
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "CLIENT_ID", "\"9473D73C-C20F-4971-9E10-D957C563FA68\"")
+        buildConfigField("String", "CLIENT_ID", "\"6B9A260B-EE8C-46C9-8B4F-61B2169B31ED\"")
 
         buildConfigField("String", "BUGTRACKER_DRIVE_BUCKET_ID", "\"app_drive\"")
         buildConfigField("String", "BUGTRACKER_DRIVE_PROJECT_NAME", "\"drive\"")
