@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.services.PeriodicUploadWorker
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.MediaObserverWorker
 import kotlinx.coroutines.flow.first
+import splitties.init.appCtx
 
 object SyncUtils {
 
@@ -89,9 +90,9 @@ object SyncUtils {
         }
     }
 
-    fun Context.cancelPeriodicSync() {
-        WorkManager.getInstance(this).cancelUniqueWork(UploadWorker.TAG)
-        WorkManager.getInstance(this).cancelUniqueWork(PeriodicUploadWorker.TAG)
+    fun cancelPeriodicSync() {
+        WorkManager.getInstance(appCtx).cancelUniqueWork(UploadWorker.TAG)
+        WorkManager.getInstance(appCtx).cancelUniqueWork(PeriodicUploadWorker.TAG)
     }
 
     suspend fun Context.activateSyncIfNeeded() {
@@ -112,8 +113,8 @@ object SyncUtils {
         }
     }
 
-    private fun Context.cancelContentObserver() {
-        MediaObserverWorker.cancelWork(applicationContext)
+    private fun cancelContentObserver() {
+        MediaObserverWorker.cancelWork(appCtx)
     }
 
     suspend fun Context.activateAutoSync(syncSettings: SyncSettings) {
@@ -122,7 +123,7 @@ object SyncUtils {
         startPeriodicSync(context = this, syncSettings.syncInterval)
     }
 
-    fun Context.disableAutoSync() {
+    fun disableAutoSync() {
         UploadFile.removeAppSyncSettings()
         MediaFolder.deleteAll()
         cancelContentObserver()
