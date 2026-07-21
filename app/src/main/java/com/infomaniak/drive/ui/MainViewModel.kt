@@ -48,6 +48,7 @@ import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.CreateFile
@@ -142,7 +143,7 @@ class MainViewModel(
     private var setCurrentFolderJob = Job()
 
     val deleteFilesFromGallery = SingleLiveEvent<List<Int>>()
-
+    val copyToDriveResult = SingleLiveEvent<FileResult>()
     init {
         viewModelScope.launch {
             isNetworkAvailable.collect {
@@ -153,6 +154,11 @@ class MainViewModel(
     }
 
     private fun getContext() = getApplication<MainApplication>()
+
+    fun hasEligibleDestinationDrives(file: File): Boolean {
+        val userId = DriveInfosController.getDrive(driveId = file.driveId)?.userId ?: AccountUtils.currentUserId
+        return DriveInfosController.hasEligibleDestinationDrives(userId)
+    }
 
     fun setCurrentFolder(folder: File?) {
         folder?.let {
@@ -394,13 +400,21 @@ class MainViewModel(
         }
     }
 
+    fun copyFileToAnotherDrive(file: File, destinationFolder: File) = copyFileToAnotherDrive(
+        fileId = file.id,
+        fileName = file.name,
+        sourceDriveId = file.driveId,
+        destinationDriveId = destinationFolder.driveId,
+        destinationFolderId = destinationFolder.id,
+    )
+
     fun copyFileToAnotherDrive(
         fileId: Int,
         fileName: String,
         sourceDriveId: Int,
         destinationDriveId: Int,
         destinationFolderId: Int,
-    ) = liveData(Dispatchers.IO) {
+    ) = viewModelScope.launch(Dispatchers.IO) {
         val apiResponse = ApiRepository.copyFileToAnotherDrive(sourceDriveId, fileId, destinationDriveId, destinationFolderId)
 
         apiResponse.data?.firstOrNull()?.let { externalImport ->
@@ -415,7 +429,7 @@ class MainViewModel(
             )
         }
 
-        emit(mapCopyApiResponseToFileResult(apiResponse))
+        copyToDriveResult.postValue(mapCopyApiResponseToFileResult(apiResponse, fileName))
     }
 
     fun resolveCopyToDriveNotification(notification: MqttNotification): CopyToDriveResult? {
@@ -596,13 +610,14 @@ class MainViewModel(
         }
     }
 
-    private fun mapCopyApiResponseToFileResult(apiResponse: ApiResponse<*>): FileResult {
+    private fun mapCopyApiResponseToFileResult(apiResponse: ApiResponse<*>, fileName: String): FileResult {
         val isSuccess = apiResponse.result == ApiResponseStatus.SUCCESS
                 || apiResponse.result == ApiResponseStatus.ASYNCHRONOUS
         return FileResult(
             isSuccess = isSuccess,
             errorCode = apiResponse.error?.code,
             errorResId = if (isSuccess) null else apiResponse.translateError(defaultMessage = R.string.errorCopyToDrive),
+            fileName = fileName,
         )
     }
 
@@ -681,7 +696,8 @@ class MainViewModel(
         val isSuccess: Boolean,
         val errorResId: Int? = null,
         val data: Any? = null,
-        val errorCode: String? = null
+        val errorCode: String? = null,
+        val fileName: String? = null,
     )
 
     data class CopyToDriveResult(val isSuccess: Boolean, val fileName: String)

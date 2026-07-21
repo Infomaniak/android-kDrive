@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.menu.settings
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.drive.Drive
 
 class SelectDriveViewModel : ViewModel() {
@@ -28,4 +29,12 @@ class SelectDriveViewModel : ViewModel() {
     var excludedDriveId: Int? = null
     var showUserSelection: Boolean = true
     var showSharedWithMe: Boolean = false
+
+    fun getDriveList(): List<Drive> {
+        return DriveInfosController.getEligibleDestinationDrives(
+            userId = selectedUserId.value,
+            excludedDriveId = excludedDriveId,
+            sharedWithMe = if (showSharedWithMe) null else false,
+        )
+    }
 }

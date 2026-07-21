@@ -162,7 +162,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         viewLifecycleOwner.lifecycleScope.launch {
             bottomSheetUpdates.collectLatest { file ->
                 when (val fileActionBottomSheet = bottomSheetView) {
-                    is FileInfoActionsView -> fileActionBottomSheet.updateCurrentFile(file)
+                    is FileInfoActionsView -> fileActionBottomSheet.updateCurrentFile(file, mainViewModel.hasEligibleDestinationDrives(file))
                     is ExternalFileInfoActionsView -> fileActionBottomSheet.updateWithExternalFile(file)
                 }
             }

@@ -125,6 +125,7 @@ import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.utils.copyToDriveResultMessage
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -372,12 +373,7 @@ class MainActivity : BaseActivity() {
     private fun observeCopyToDriveResult() {
         MqttClientWrapper.observe(this) { notification ->
             mainViewModel.resolveCopyToDriveNotification(notification)?.let { result ->
-                val message = if (result.isSuccess) {
-                    getString(R.string.copyToDriveSuccess, result.fileName)
-                } else {
-                    getString(R.string.errorCopyToDrive)
-                }
-                showSnackbar(title = message, anchor = getMainFab())
+                showSnackbar(title = copyToDriveResultMessage(result.isSuccess, result.fileName), anchor = getMainFab())
             }
         }
     }

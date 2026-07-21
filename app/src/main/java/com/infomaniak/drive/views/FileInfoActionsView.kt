@@ -71,7 +71,6 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.SingleOperation
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.Utils.TARGET_DRIVE_ID_TAG
 import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.drive.utils.openOnlyOfficeDocument
@@ -105,7 +104,6 @@ class FileInfoActionsView @JvmOverloads constructor(
     private lateinit var onItemClickListener: OnItemClickListener
     private lateinit var selectFolderResultLauncher: ActivityResultLauncher<Intent>
     private var isSharedWithMe = false
-    private var hasOtherDrivesAvailable = false
 
     private val canCreateDropbox by lazy { AccountUtils.getCurrentDrive(forceRefresh = true)?.canCreateDropbox == true }
 
@@ -133,7 +131,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
-    private fun computeFileRights(file: File, rights: Rights) = with(binding) {
+    private fun computeFileRights(file: File, rights: Rights, hasOtherDrivesAvailable: Boolean) = with(binding) {
         val hasNetwork = mainViewModel.hasNetwork
         displayInfo.isEnabled = hasNetwork
         disabledInfo.isGone = hasNetwork
@@ -173,14 +171,13 @@ class FileInfoActionsView @JvmOverloads constructor(
         leaveShare.isVisible = rights.canLeave == true
         cancelExternalImport.isVisible = file.isImporting()
         moveFile.isVisible = rights.canMove == true && !isSharedWithMe && !file.isImporting()
-        copyToDrive.isVisible = isCopyToDriveVisible(file, rights)
+        copyToDrive.isVisible = isCopyToDriveVisible(file, rights, hasOtherDrivesAvailable)
         renameFile.isVisible = rights.canRename == true && !file.isImporting()
         goToFolder.isVisible = isGoToFolderVisible()
     }
 
-    fun updateCurrentFile(file: File) = with(binding) {
+    fun updateCurrentFile(file: File, hasOtherDrivesAvailable: Boolean) = with(binding) {
         currentFile = file
-        hasOtherDrivesAvailable = computeHasOtherDrivesAvailable()
         refreshBottomSheetUi(currentFile)
         manageCategories.isVisible = DriveInfosController.getCategoryRights(file.driveId).canPutOnFile
                 && !file.isDisabled()
@@ -197,7 +194,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         actionListLayout.isVisible = true
 
         currentFile.rights?.let { rights ->
-            computeFileRights(file, rights)
+            computeFileRights(file, rights, hasOtherDrivesAvailable)
         }
 
         val drive = AccountUtils.getCurrentDrive() ?: return@with
@@ -226,12 +223,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         quickActionsLayout.isVisible = isVisible
     }
 
-    private fun computeHasOtherDrivesAvailable(): Boolean {
-        val userId = DriveInfosController.getDrive(driveId = currentFile.driveId)?.userId ?: AccountUtils.currentUserId
-        return DriveInfosController.hasEligibleDestinationDrives(userId)
-    }
-
-    private fun isCopyToDriveVisible(file: File, rights: Rights): Boolean {
+    private fun isCopyToDriveVisible(file: File, rights: Rights, hasOtherDrivesAvailable: Boolean): Boolean {
         return rights.canRead && !isSharedWithMe && !file.isImporting() && hasOtherDrivesAvailable
     }
 
@@ -599,7 +591,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                         SingleOperation.COPY.name -> onDuplicateFile(file)
                         SingleOperation.MOVE.name -> onMoveFile(file, isSharedWithMe)
                         SingleOperation.COPY_TO_DRIVE.name -> {
-                            val targetDriveId = customArgs.getInt(TARGET_DRIVE_ID_TAG, -1)
+                            val targetDriveId = customArgs.getInt(CopyFileToDriveActivity.TARGET_DRIVE_ID_TAG, -1)
                             if (targetDriveId != -1) {
                                 onCopyFileToDrive(File(id = folderId, name = folderName, driveId = targetDriveId))
                             }

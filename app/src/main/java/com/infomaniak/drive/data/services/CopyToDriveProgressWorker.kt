@@ -51,7 +51,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.ForegroundInfoExt
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.copyToDriveProgressNotification
-import java.util.Date
+import com.infomaniak.drive.utils.copyToDriveResultMessage
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -70,10 +70,8 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     private var fileName: String = ""
     private var destDriveId: Int = 0
     private var destFolderId: Int = 0
-    private var notificationId: Int = 0
     private var mqttNotificationsObserver: Observer<MqttNotification>? = null
     private lateinit var timer: CountDownTimer
-    private lateinit var lastReception: Date
 
     override fun startWork(): ListenableFuture<Result> {
         importId = inputData.getInt(IMPORT_ID_KEY, 0)
@@ -81,26 +79,20 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         destDriveId = inputData.getInt(DEST_DRIVE_ID_KEY, -1)
         destFolderId = inputData.getInt(DEST_FOLDER_ID_KEY, -1)
 
-        notificationId = importId
-
         val notification = buildNotification(progress = null).apply {
             if (SDK_INT >= 31) foregroundServiceBehavior = Notification.FOREGROUND_SERVICE_IMMEDIATE
         }.build()
 
-        val foregroundInfo = ForegroundInfoExt.build(notificationId, notification) {
+        val foregroundInfo = ForegroundInfoExt.build(importId, notification) {
             ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
         }
         setForegroundAsync(foregroundInfo)
 
         MqttClientWrapper.start(externalImportId = importId)
-        lastReception = Date()
 
         return CallbackToFutureAdapter.getFuture { completer ->
-            timer = createRefreshTimer(milliseconds = 1_000L) {
-                if (Date().time - lastReception.time > COPY_TO_DRIVE_TIMEOUT) finish(
-                    completer = completer,
-                    isSuccess = false
-                ) else timer.start()
+            timer = createRefreshTimer(milliseconds = COPY_TO_DRIVE_TIMEOUT) {
+                finish(completer = completer, isSuccess = false)
             }
             timer.start()
 
@@ -125,20 +117,20 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         mqttNotificationsObserver?.let { MqttClientWrapper.removeObserver(it) }
         mqttNotificationsObserver = null
         if (importId > 0) MqttClientWrapper.stopExternalImportTracking(importId)
-        notificationManagerCompat.cancel(notificationId)
+        notificationManagerCompat.cancel(importId)
     }
 
     private fun launchObserver(onOperationFinished: (isSuccess: Boolean) -> Unit) {
         mqttNotificationsObserver = Observer { notification ->
             if (notification.importId != importId) return@Observer
 
-            lastReception = Date()
+            restartTimeout()
             when (notification.action) {
                 MqttAction.EXTERNAL_IMPORT_FINISHED -> onOperationFinished(true)
                 MqttAction.EXTERNAL_IMPORT_ERROR -> onOperationFinished(false)
                 MqttAction.EXTERNAL_IMPORT_CANCELED -> onOperationFinished(false)
                 else -> notification.importProgress?.let { progress ->
-                    notificationManagerCompat.notifyCompat(notificationId, buildNotification(progress))
+                    notificationManagerCompat.notifyCompat(importId, buildNotification(progress))
                 }
             }
         }
@@ -146,12 +138,14 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         MqttClientWrapper.observeForever(mqttNotificationsObserver!!)
     }
 
+    private fun restartTimeout() {
+        timer.cancel()
+        timer.start()
+    }
+
+
     private fun showResultNotification(isSuccess: Boolean) {
-        val description = if (isSuccess) {
-            applicationContext.getString(R.string.copyToDriveSuccess, fileName)
-        } else {
-            applicationContext.getString(R.string.errorCopyToDrive)
-        }
+        val description = applicationContext.copyToDriveResultMessage(isSuccess, fileName)
         val builder = applicationContext.buildGeneralNotification(
             title = applicationContext.getString(R.string.buttonCopyToDrive),
             description = description,
