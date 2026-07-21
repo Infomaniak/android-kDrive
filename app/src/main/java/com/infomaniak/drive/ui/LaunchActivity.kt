@@ -23,13 +23,18 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import com.infomaniak.core.auth.backup.RestoreFromBackupManager
+import com.infomaniak.core.auth.backup.RestoringFromBackupFailedScreen
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponseStatus
+import com.infomaniak.core.network.models.exceptions.NetworkException
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.ui.compose.materialthemefromxml.MaterialThemeFromXml
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
@@ -67,10 +72,11 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.infomaniak.core.network.models.exceptions.NetworkException
 
 @SuppressLint("CustomSplashScreen")
 class LaunchActivity : EdgeToEdgeActivity() {
@@ -93,6 +99,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
         trackScreen()
 
         lifecycleScope.launch {
+            handleRestoreFromBackup()
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
             handleLaunchArgs()
             if (deeplinkType?.isHandled == false) {
@@ -105,6 +112,21 @@ class LaunchActivity : EdgeToEdgeActivity() {
             // so that even when we return, the activity will still be closed.
             finish()
         }
+    }
+
+    private suspend fun handleRestoreFromBackup() {
+        val manager = RestoreFromBackupManager.instance
+        manager.state.transform { state ->
+            when (state) {
+                RestoreFromBackupManager.State.RestoringFromBackup -> {
+                    setContentView(binding.root)
+                }
+                is RestoreFromBackupManager.State.RestoringFromBackupFailed -> {
+                    setContent { MaterialThemeFromXml { RestoringFromBackupFailedScreen(state) } }
+                }
+                RestoreFromBackupManager.State.Settled -> emit(Unit)
+            }
+        }.first()
     }
 
     private suspend fun handleLaunchArgs() {
