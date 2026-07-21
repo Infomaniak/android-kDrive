@@ -204,8 +204,8 @@
     <string name="commonFolderTitle">Dossier d’organisation</string>
     <string name="contentDescriptionIsSelected">Est sélectionné</string>
     <string name="convertToDropboxTitle">Convertir en boîte de dépôt %s</string>
-    <string name="copyToDriveStarted">%s est en cours de transfert vers un autre drive</string>
-    <string name="copyToDriveSuccess">%s a été transféré vers un autre drive</string>
+    <string name="copyToDriveStarted">%s est en cours de copie vers un autre drive</string>
+    <string name="copyToDriveSuccess">%s a été copié vers un autre drive</string>
     <string name="createCategoryTitle">Créer une catégorie</string>
     <string name="createCommonFolderAllUsersDescription">Tous les utilisateurs du kDrive %s auront automatiquement accès à ce dossier.</string>
     <string name="createCommonFolderSuccess">Dossier d’organisation créé avec succès</string>

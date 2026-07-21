@@ -204,8 +204,8 @@
     <string name="commonFolderTitle">Organisasjonsmappe</string>
     <string name="contentDescriptionIsSelected">Er valgt</string>
     <string name="convertToDropboxTitle">Gjør om til dropboks %s</string>
-    <string name="copyToDriveStarted">%s overføres til en annen stasjon</string>
-    <string name="copyToDriveSuccess">%s er overført til en annen stasjon</string>
+    <string name="copyToDriveStarted">%s kopieres til en annen stasjon</string>
+    <string name="copyToDriveSuccess">%s er kopiert til en annen stasjon</string>
     <string name="createCategoryTitle">Opprett en kategori</string>
     <string name="createCommonFolderAllUsersDescription">Alle kDrive %s-brukere vil automatisk ha tilgang til denne mappen.</string>
     <string name="createCommonFolderSuccess">Organisasjonsmappe opprettet</string>

@@ -204,8 +204,8 @@
     <string name="commonFolderTitle">Organisatiemap</string>
     <string name="contentDescriptionIsSelected">Is geselecteerd</string>
     <string name="convertToDropboxTitle">Converteer naar Dropbox %s</string>
-    <string name="copyToDriveStarted">%s wordt naar een ander station overgedragen</string>
-    <string name="copyToDriveSuccess">%s is overgebracht naar een ander station</string>
+    <string name="copyToDriveStarted">%s wordt gekopieerd naar een andere schijf</string>
+    <string name="copyToDriveSuccess">%s is gekopieerd naar een andere schijf</string>
     <string name="createCategoryTitle">Maak een categorie</string>
     <string name="createCommonFolderAllUsersDescription">Alle gebruikers van kDrive %s krijgen automatisch toegang tot deze map.</string>
     <string name="createCommonFolderSuccess">Organisatiemap succesvol aangemaakt</string>

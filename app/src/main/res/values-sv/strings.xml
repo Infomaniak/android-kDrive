@@ -204,8 +204,8 @@
     <string name="commonFolderTitle">Organisationsmapp</string>
     <string name="contentDescriptionIsSelected">Är vald</string>
     <string name="convertToDropboxTitle">Konvertera till dropbox %s</string>
-    <string name="copyToDriveStarted">%s överförs till en annan enhet</string>
-    <string name="copyToDriveSuccess">%s har överförts till en annan enhet</string>
+    <string name="copyToDriveStarted">%s kopieras till en annan enhet</string>
+    <string name="copyToDriveSuccess">%s har kopierats till en annan enhet</string>
     <string name="createCategoryTitle">Skapa en kategori</string>
     <string name="createCommonFolderAllUsersDescription">Alla användare av kDrive %s får automatiskt tillgång till denna mapp.</string>
     <string name="createCommonFolderSuccess">Organisationsmapp skapad</string>

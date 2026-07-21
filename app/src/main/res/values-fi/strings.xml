@@ -204,8 +204,8 @@
     <string name="commonFolderTitle">Organisaatiokansio</string>
     <string name="contentDescriptionIsSelected">On valittu</string>
     <string name="convertToDropboxTitle">Muunna drop boxiksi %s</string>
-    <string name="copyToDriveStarted">%s siirretään toiselle asemalle</string>
-    <string name="copyToDriveSuccess">%s on siirretty toiseen asemaan</string>
+    <string name="copyToDriveStarted">%s kopioidaan toiselle asemalle</string>
+    <string name="copyToDriveSuccess">%s on kopioitu toiselle asemalle</string>
     <string name="createCategoryTitle">Luo kategoria</string>
     <string name="createCommonFolderAllUsersDescription">Kaikilla kDriven %s käyttäjillä on automaattisesti pääsy tähän kansioon.</string>
     <string name="createCommonFolderSuccess">Organisaatiokansio luotu onnistuneesti</string>
