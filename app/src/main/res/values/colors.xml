@@ -29,4 +29,6 @@
     <color name="bottomSheetBackgroundColor">@color/appBar</color>
     <color name="onBottomSheetBackgroundColor">@color/title</color>
     <color name="dragHandleColor">#cedae1</color>
+
+    <color name="pdf_viewer_selection_handles">@color/primary</color>
 </resources>

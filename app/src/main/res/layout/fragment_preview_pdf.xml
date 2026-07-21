@@ -24,7 +24,7 @@
     tools:background="@color/previewBackground"
     tools:context=".ui.fileList.preview.PreviewPDFFragment">
 
-    <com.infomaniak.lib.pdfview.PDFView
+    <com.infomaniak.lib.pdfview.UnifiedPdfPreviewView
         android:id="@+id/pdfView"
         android:layout_width="0dp"
         android:layout_height="0dp"

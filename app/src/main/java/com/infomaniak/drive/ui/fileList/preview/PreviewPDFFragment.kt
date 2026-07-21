@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +17,21 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
-import android.net.Uri
+import android.graphics.RectF
 import android.os.Bundle
+import android.os.OperationCanceledException
+import android.util.SparseArray
+import android.view.ContextThemeWrapper
+import android.view.GestureDetector
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -53,9 +60,13 @@ import com.infomaniak.drive.ui.publicShare.PublicSharePreviewSliderFragment
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.drive.utils.printPdf
-import com.infomaniak.lib.pdfview.PDFView
+import com.infomaniak.lib.pdfview.UnifiedPdfPreviewView
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
 import com.shockwave.pdfium.PdfPasswordException
+import androidx.pdf.ExperimentalPdfApi
+import androidx.pdf.PdfDocument
+import androidx.pdf.view.PdfView
+import androidx.pdf.viewer.fragment.PdfViewerFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -96,6 +107,8 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding.downloadLayout) {
         super.onViewCreated(view, savedInstanceState)
+        binding.pdfView.setNativeFragmentFactory { KDrivePdfViewerFragment() }
+        binding.pdfView.attach(childFragmentManager, viewLifecycleOwner)
 
         if (noCurrentFile() && !previewPDFHandler.isExternalFile()) return@with
 
@@ -121,7 +134,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
             isVisible = true
         }
 
-        initViewsForFullscreen(root, binding.pdfView)
+        initViewsForFullscreen(root)
 
         bigOpenWithButton.apply {
             isGone = true
@@ -145,13 +158,18 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         super.onPause()
     }
 
+    override fun onDestroyView() {
+        view?.findViewById<UnifiedPdfPreviewView>(R.id.pdfView)?.detach()
+        super.onDestroyView()
+    }
+
     override fun canDisplayWithoutCurrentFile() = previewPDFHandler.isExternalFile()
 
     override fun generatePagesAsBitmaps(fileName: String) {
-        // When we try to generate bitmaps for a password protected file with the default PDF reader, we don't have a file
-        // So we need to pass the file name
+        // UnifiedPdfPreviewView does not expose page bitmap extraction from its internal backend.
+        // For password-protected files, fallback to external app handling.
         previewPDFHandler.fileName = fileName
-        binding.pdfView.loadPagesForPrinting()
+        openWithClicked()
     }
 
     private fun initViewsForFullscreen(vararg views: View) {
@@ -163,62 +181,106 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         }
     }
 
-    private fun getConfigurator(fileUri: Uri?, pdfFile: IOFile?): PDFView.Configurator = with(binding.pdfView) {
-        return if (previewPDFHandler.isExternalFile()) fromUri(fileUri) else fromFile(pdfFile)
-    }
-
     private fun showPdf(password: String? = null) = with(previewPDFHandler) {
-        if (!binding.pdfView.isShown || isPasswordProtected) {
-            lifecycleScope.launch {
-                withResumed {
-                    with(getConfigurator(pdfNavigationArgs.fileUri, pdfFile)) {
-                        password(password)
-                        disableLongPress()
-                        enableAnnotationRendering(true)
-                        enableDoubletap(true)
-                        pageFling(false)
-                        pageSnap(false)
-                        scrollHandle(scrollHandle)
-                        pageSeparatorSpacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
-                        startEndSpacing(START_SPACING_DP, END_SPACING_DP)
-                        zoom(MIN_ZOOM, MID_ZOOM, MAX_ZOOM)
-                        swipeHorizontal(false)
-                        touchPriority(true)
-                        thumbnailRatio(THUMBNAIL_RATIO)
-                        onLoad { pageCount ->
-                            // We can arrive here with a file different from a real PDF like OpenOffice documents
-                            shouldHidePrintOption(isGone = !canPrintFile())
+        lifecycleScope.launch {
+            withResumed {
+                val uri = if (previewPDFHandler.isExternalFile()) pdfNavigationArgs.fileUri else pdfFile?.toUri()
+                if (uri == null) {
+                    displayError()
+                    return@withResumed
+                }
+                binding.pdfView.loadFromUri(
+                    uri = uri,
+                    password = password,
+                    fallbackConfigurator = UnifiedPdfPreviewView.FallbackConfigurator { configurator ->
+                        configurator
+                            .disableLongPress()
+                            .enableAnnotationRendering(true)
+                            .enableDoubletap(true)
+                            .pageFling(false)
+                            .pageSnap(false)
+                            .scrollHandle(scrollHandle)
+                            .pageSeparatorSpacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
+                            .startEndSpacing(START_SPACING_DP, END_SPACING_DP)
+                            .zoom(MIN_ZOOM, MID_ZOOM, MAX_ZOOM)
+                            .swipeHorizontal(false)
+                            .touchPriority(true)
+                            .thumbnailRatio(THUMBNAIL_RATIO)
+                            .onTap {
+                                toggleFullscreen()
+                                true
+                            }
+                            .onLoad { pageCount ->
+                                // We can arrive here with a file different from a real PDF like OpenOffice documents
+                                shouldHidePrintOption(isGone = !canPrintFile())
 
-                            dismissPasswordDialog()
-                            updatePageNumber(totalPage = pageCount)
+                                dismissPasswordDialog()
+                                updatePageNumber(totalPage = pageCount)
 
-                            pdfViewPrintListener = this@PreviewPDFFragment
+                                pdfViewPrintListener = this@PreviewPDFFragment
 
-                            binding.downloadLayout.root.isGone = true
+                                binding.downloadLayout.root.isGone = true
 
-                            totalPageCount = pageCount
-                            setPageNumberChipVisibility(true)
-                        }
-                        onPageChange { currentPage, pageCount ->
-                            currentPageIndex = currentPage
-                            updatePageNumber(currentPage = currentPage, totalPage = pageCount)
-                        }
-                        onReadyForPrinting { pagesAsBitmap ->
-                            val fileName = if (isExternalFile()) fileName else file.name
-                            requireContext().printPdf(fileName = fileName, bitmaps = pagesAsBitmap)
-                        }
-                        onError(::handleException)
-                        onAttach {
-                            // This is to handle the case where we swipe in the ViewPager and we want to go back to
-                            // a previously opened PDF. In that case, we want to display the default loader instead of
-                            // an empty screen
-                            if (pdfFile != null && !binding.pdfView.isShown) binding.downloadLayout.root.isVisible = true
-                        }
-                        load()
-                    }
+                                totalPageCount = pageCount
+                                setPageNumberChipVisibility(true)
+                            }
+                            .onPageChange { currentPage, pageCount ->
+                                currentPageIndex = currentPage
+                                updatePageNumber(currentPage = currentPage, totalPage = pageCount)
+                            }
+                            .onReadyForPrinting { pagesAsBitmap ->
+                                val fileName = if (isExternalFile()) fileName else file.name
+                                requireContext().printPdf(fileName = fileName, bitmaps = pagesAsBitmap)
+                            }
+                            .onError(::handleException)
+                            .onAttach {
+                                // This is to handle the case where we swipe in the ViewPager and we want to go back to
+                                // a previously opened PDF. In that case, we want to display the default loader instead of
+                                // an empty screen
+                                if (pdfFile != null && !binding.pdfView.isShown) binding.downloadLayout.root.isVisible = true
+                            }
+                    },
+                )
+                if (binding.pdfView.getCurrentPdfViewerMode() == UnifiedPdfPreviewView.ActivePdfViewerMode.ANDROIDX_NATIVE) {
+                    totalPageCount = null
+                    currentPageIndex = null
+                    setPageNumberChipVisibility(false)
+                    pdfViewPrintListener = null
                 }
             }
         }
+    }
+
+    internal fun onNativeLoadSuccess(document: PdfDocument) {
+        previewPDFHandler.apply {
+            pdfViewPrintListener = null
+            shouldHidePrintOption(isGone = !canPrintFile())
+        }
+        binding.downloadLayout.root.isGone = true
+        totalPageCount = document.pageCount
+        currentPageIndex = 0
+        if (document.pageCount > 0) {
+            updatePageNumber(currentPage = 0, totalPage = document.pageCount)
+            setPageNumberChipVisibility(true)
+        } else {
+            setPageNumberChipVisibility(false)
+        }
+    }
+
+    internal fun onNativeLoadError(error: Throwable) {
+        if (error is OperationCanceledException || error.cause is OperationCanceledException) return
+
+        previewPDFHandler.shouldHidePrintOption(isGone = true)
+        displayError(isEmptyFileError = previewPDFHandler.fileSize == 0L)
+    }
+
+    internal fun onNativeSingleTap() {
+        toggleFullscreen()
+    }
+
+    internal fun onNativePageChanged(currentPage: Int) {
+        currentPageIndex = currentPage
+        totalPageCount?.let { updatePageNumber(currentPage = currentPage, totalPage = it) }
     }
 
     private fun canPrintFile(): Boolean {
@@ -383,4 +445,61 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
 fun interface PDFPrintListener {
     fun generatePagesAsBitmaps(fileName: String)
+}
+
+class KDrivePdfViewerFragment : PdfViewerFragment() {
+
+    override fun onGetLayoutInflater(savedInstanceState: Bundle?): LayoutInflater {
+        val themedContext = ContextThemeWrapper(requireContext(), R.style.PdfViewerTheme)
+        return super.onGetLayoutInflater(savedInstanceState).cloneInContext(themedContext)
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @OptIn(ExperimentalPdfApi::class)
+    override fun onPdfViewCreated(pdfView: PdfView) {
+        super.onPdfViewCreated(pdfView)
+        val horizontalPadding = resources.getDimensionPixelSize(R.dimen.marginStandardMedium)
+        val verticalPadding = resources.getDimensionPixelSize(R.dimen.recyclerViewPaddingBottom)
+        pdfView.clipToPadding = false
+        // Bug in AndroidX PDFViewerFragment, we have to only apply the right padding (x2) to have a centered PDF
+        pdfView.setPadding(0, verticalPadding, horizontalPadding * 2, verticalPadding)
+        pdfView.addOnViewportChangedListener(
+            object : PdfView.OnViewportChangedListener {
+                override fun onViewportChanged(
+                    firstVisiblePage: Int,
+                    visiblePagesCount: Int,
+                    pageLocations: SparseArray<RectF>,
+                    zoomLevel: Float,
+                ) {
+                    (parentFragment as? PreviewPDFFragment)?.onNativePageChanged(firstVisiblePage)
+                }
+            },
+        )
+        val singleTapDetector = GestureDetector(
+            pdfView.context,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onDown(e: MotionEvent): Boolean = true
+
+                override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                    (parentFragment as? PreviewPDFFragment)?.onNativeSingleTap()
+                    return true
+                }
+            },
+        )
+        pdfView.setOnTouchListener { _, event ->
+            singleTapDetector.onTouchEvent(event)
+            false
+        }
+    }
+
+    override fun onLoadDocumentSuccess(document: PdfDocument) {
+        super.onLoadDocumentSuccess(document)
+        (parentFragment as? PreviewPDFFragment)?.onNativeLoadSuccess(document)
+    }
+
+    override fun onLoadDocumentError(error: Throwable) {
+        super.onLoadDocumentError(error)
+        (parentFragment as? PreviewPDFFragment)?.onNativeLoadError(error)
+    }
+
 }

@@ -18,11 +18,9 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -65,12 +63,11 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
     val previewPDFHandler by lazy {
         PreviewPDFHandler(
-            externalFileUri = intent.dataString?.toUri(),
+            externalFileUri = intent.data,
             setPrintVisibility = binding.bottomSheetFileInfos::isPrintingHidden,
         )
     }
 
-    private val navController by lazy { setupNavController() }
     private val navHostFragment by lazy { supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment }
 
     private val bottomSheetBehavior: BottomSheetBehavior<View>
@@ -94,6 +91,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
             header.enableEdgeToEdge(withBottom = false)
         }
 
+        if (savedInstanceState == null) setupNavController()
         initBottomSheet()
     }
 
@@ -151,12 +149,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     private fun setupNavController(): NavController {
         return navHostFragment.navController.apply {
             val graph = navInflater.inflate(R.navigation.preview_pdf_navigation)
-            val startDestination = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                R.id.androidXPreviewPDFFragment
-            } else {
-                R.id.previewPDFFragment
-            }
-            graph.setStartDestination(startDestination)
+            graph.setStartDestination(R.id.previewPDFFragment)
             setGraph(graph, PreviewPDFFragmentArgs(fileUri = previewPDFHandler.externalFileUri).toBundle())
         }
     }

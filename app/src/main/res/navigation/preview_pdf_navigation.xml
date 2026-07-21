@@ -50,10 +50,4 @@
             app:nullable="true" />
 
     </fragment>
-
-    <fragment
-        android:id="@+id/androidXPreviewPDFFragment"
-        android:name="com.infomaniak.drive.ui.fileList.preview.AndroidXPreviewPDFFragment"
-        tools:layout="@layout/fragment_androidx_preview_pdf" />
-
 </navigation>
