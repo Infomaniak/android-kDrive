@@ -193,7 +193,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
 
         selectDriveViewModel.apply {
-            selectedUserId.value = userId
+            selectedUserId = userId
             selectedDrive.value = drive
         }
     }
@@ -206,7 +206,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 binding.pathTitle.isVisible = true
                 setupSelectPath()
                 with(getSelectedFolder()) {
-                    saveExternalFilesViewModel.folderId.value = if (userId == selectedUserId.value && driveId == drive.id) {
+                    saveExternalFilesViewModel.folderId.value = if (userId == selectedUserId && driveId == drive.id) {
                         folderId
                     } else {
                         null
@@ -255,7 +255,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 Intent(this@SaveExternalFilesActivity, SelectFolderActivity::class.java).apply {
                     putExtras(
                         SelectFolderActivityArgs(
-                            userId = selectDriveViewModel.selectedUserId.value!!,
+                            userId = selectDriveViewModel.selectedUserId!!,
                             fromSaveExternal = true,
                             driveId = selectDriveViewModel.selectedDrive.value?.id!!,
                         ).toBundle()
@@ -269,11 +269,11 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun fetchFolder() = with(selectDriveViewModel) {
         saveExternalFilesViewModel.folderId.observe(this@SaveExternalFilesActivity) { folderId ->
 
-            val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null || folderId == null) {
+            val folder = if (selectedUserId == null || selectedDrive.value?.id == null || folderId == null) {
                 null
             } else {
                 val userDrive = UserDrive(
-                    userId = selectedUserId.value!!,
+                    userId = selectedUserId!!,
                     driveId = selectedDrive.value!!.id,
                     sharedWithMe = selectedDrive.value!!.sharedWithMe,
                 )
@@ -282,7 +282,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 FileController.getFileById(folderId, userDrive) ?: FileController.getFileById(
                     fileId = folderId,
                     userDrive = UserDrive(
-                        userId = selectedUserId.value!!,
+                        userId = selectedUserId!!,
                         sharedWithMe = true,
                     )
                 )
@@ -305,7 +305,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                     Intent().apply {
                         putExtra(DESTINATION_DRIVE_ID_KEY, selectDriveViewModel.selectedDrive.value?.id)
                         putExtra(DESTINATION_FOLDER_ID_KEY, saveExternalFilesViewModel.folderId.value)
-                        putExtra(DESTINATION_USER_ID_KEY, selectedUserId.value)
+                        putExtra(DESTINATION_USER_ID_KEY, selectedUserId)
                         setResult(RESULT_OK, this)
                     }
                     finish()
@@ -314,7 +314,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
                 showProgressCatching()
                 if (backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
-                    val userId = selectedUserId.value!!
+                    val userId = selectedUserId!!
                     val driveId = selectedDrive.value?.id!!
                     val folderId = saveExternalFilesViewModel.folderId.value!!
 
@@ -428,7 +428,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun isValidFields(): Boolean {
         return (isMultiple || !binding.fileNameEdit.showOrHideEmptyError() || navigationArgs.isPublicShare) &&
-                selectDriveViewModel.selectedUserId.value != null &&
+                selectDriveViewModel.selectedUserId != null &&
                 selectDriveViewModel.selectedDrive.value != null &&
                 saveExternalFilesViewModel.folderId.value != null &&
                 saveExternalFilesViewModel.folderId.value != OTHER_ROOT_ID

@@ -92,7 +92,7 @@ class CopyFileToDriveActivity : BaseActivity() {
         selectDriveViewModel.apply {
             excludedDriveId = navArgs.sourceDriveId
             showUserSelection = false
-            selectedUserId.value = navArgs.userId
+            selectedUserId = navArgs.userId
         }
 
         setupClickListeners()
