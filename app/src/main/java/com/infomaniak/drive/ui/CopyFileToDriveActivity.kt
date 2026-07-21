@@ -41,7 +41,6 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.SingleOperation
-import com.infomaniak.drive.utils.Utils.TARGET_DRIVE_ID_TAG
 import com.infomaniak.drive.views.FileInfoActionsView.Companion.SINGLE_OPERATION_CUSTOM_TAG
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterNotNull
@@ -171,5 +170,9 @@ class CopyFileToDriveActivity : BaseActivity() {
             setResult(RESULT_OK, this)
         }
         finish()
+    }
+
+    companion object {
+        const val TARGET_DRIVE_ID_TAG = "target_drive_id"
     }
 }

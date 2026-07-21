@@ -75,7 +75,6 @@ object Utils {
 
     const val ROOT_ID = 1
     const val OTHER_ROOT_ID = -1
-    const val TARGET_DRIVE_ID_TAG = "target_drive_id"
 
     const val INDETERMINATE_PROGRESS = -1
 

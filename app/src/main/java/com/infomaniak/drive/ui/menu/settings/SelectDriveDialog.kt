@@ -25,8 +25,6 @@ import android.widget.PopupWindow
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.core.legacy.utils.safeBinding
-import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.FragmentBottomSheetSelectDriveBinding
 import com.infomaniak.drive.databinding.PopupSelectUserBinding
 import com.infomaniak.drive.ui.menu.UserAdapter
@@ -62,7 +60,6 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
         AccountUtils.getAllUsers().observe(viewLifecycleOwner) { users ->
             if (users.size > 1 && showUserSelection) {
                 val selectedUser = users.find { it.id == selectedUserId.value } ?: users.first()
-                selectedUserId.value = selectedUser.id
                 driveListAdapter.setDrives(getDriveList())
                 binding.userCardview.itemViewUser.setUserView(selectedUser) {
                     popupWindow = PopupWindow(
@@ -91,18 +88,10 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
             } else {
                 if (selectedUserId.value == null) {
                     selectedUserId.value = users.first().id
-                    driveListAdapter.setDrives(getDriveList())
                 }
+                driveListAdapter.setDrives(getDriveList())
                 binding.userCardview.root.isVisible = false
             }
         }
-    }
-
-    private fun SelectDriveViewModel.getDriveList(): List<Drive> {
-        return DriveInfosController.getEligibleDestinationDrives(
-            userId = selectedUserId.value,
-            excludedDriveId = excludedDriveId,
-            sharedWithMe = if (showSharedWithMe) null else false,
-        )
     }
 }

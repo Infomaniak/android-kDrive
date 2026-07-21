@@ -194,12 +194,8 @@ open class MultiSelectActionsBottomSheetDialog(
         val hasOtherDrivesAvailable = DriveInfosController.hasEligibleDestinationDrives(userId)
         val showCopyToDrive = isSingleFile && hasOtherDrivesAvailable
         binding.copyToDrive.apply {
-            if (showCopyToDrive) {
-                visibility = View.VISIBLE
-                setOnClickListener { onActionSelected(SelectDialogAction.COPY_TO_DRIVE) }
-            } else {
-                visibility = View.GONE
-            }
+            isVisible = showCopyToDrive
+            if (showCopyToDrive) setOnClickListener { onActionSelected(SelectDialogAction.COPY_TO_DRIVE) }
         }
     }
 

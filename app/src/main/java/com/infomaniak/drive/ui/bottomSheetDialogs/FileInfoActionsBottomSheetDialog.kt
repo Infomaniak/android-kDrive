@@ -62,6 +62,7 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.navigateToParentFolder
+import com.infomaniak.drive.utils.observeCopyToDriveResult
 import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.openWith
 import com.infomaniak.drive.utils.shareText
@@ -115,9 +116,11 @@ class FileInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), FileInfo
                 isSharedWithMe = navigationArgs.userDrive.sharedWithMe,
                 hideActions = navigationArgs.hideActions,
             )
-            updateCurrentFile(currentFile)
+            updateCurrentFile(currentFile, mainViewModel.hasEligibleDestinationDrives(currentFile))
             setPrintVisibility(isGone = true)
         }
+
+        observeCopyToDriveResult(mainViewModel) { snackbarMessage -> transmitActionAndPopBack(snackbarMessage) }
 
         setupBackActionHandler()
     }
@@ -288,20 +291,7 @@ class FileInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), FileInfo
     }
 
     override fun onCopyFileToDrive(destinationFolder: File) {
-        mainViewModel.copyFileToAnotherDrive(
-            fileId = currentFile.id,
-            fileName = currentFile.name,
-            sourceDriveId = currentFile.driveId,
-            destinationDriveId = destinationFolder.driveId,
-            destinationFolderId = destinationFolder.id,
-        ).observe(viewLifecycleOwner) { fileRequest ->
-            val snackbarMessage = if (fileRequest.isSuccess) {
-                getString(R.string.copyToDriveStarted, currentFile.name)
-            } else {
-                getString(fileRequest.errorResId ?: R.string.errorCopyToDrive)
-            }
-            transmitActionAndPopBack(snackbarMessage)
-        }
+        mainViewModel.copyFileToAnotherDrive(currentFile, destinationFolder)
     }
 
     override fun onDuplicateFile(destinationFolder: File) {
