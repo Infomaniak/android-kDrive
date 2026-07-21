@@ -458,6 +458,19 @@ class KDrivePdfViewerFragment : PdfViewerFragment() {
     @OptIn(ExperimentalPdfApi::class)
     override fun onPdfViewCreated(pdfView: PdfView) {
         super.onPdfViewCreated(pdfView)
+        ContextCompat.getDrawable(
+            requireContext(),
+            R.drawable.fast_scroll_thumb_drawable,
+        )?.let {
+            pdfView.fastScrollVerticalThumbDrawable = it
+        }
+
+        ContextCompat.getDrawable(
+            requireContext(),
+            R.drawable.pdf_fast_scroll_page_indicator_background,
+        )?.let {
+            pdfView.fastScrollPageIndicatorBackgroundDrawable = it
+        }
         val horizontalPadding = resources.getDimensionPixelSize(R.dimen.marginStandardMedium)
         val verticalPadding = resources.getDimensionPixelSize(R.dimen.recyclerViewPaddingBottom)
         pdfView.clipToPadding = false
