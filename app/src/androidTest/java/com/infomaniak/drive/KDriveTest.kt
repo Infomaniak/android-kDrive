@@ -103,7 +103,7 @@ open class KDriveTest {
             if (!uiRealm.isClosed) uiRealm.close()
             Realm.deleteRealm(FileController.getRealmConfiguration(userDrive))
             if (!Env.USE_CURRENT_USER) {
-                runBlocking { AccountUtils.removeUser(context, user) }
+                runBlocking { AccountUtils.removeUser(user.id) }
             }
         }
 

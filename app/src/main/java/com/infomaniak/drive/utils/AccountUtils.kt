@@ -59,9 +59,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
+import splitties.init.appCtx
 import com.infomaniak.core.network.networking.HttpClient.okHttpClient as unauthenticatedHttpClient
 
-object AccountUtils : CredentialManager() {
+object AccountUtils : CredentialManager(
+    userDataCleanableList = { MainApplication.userDataCleanableList }
+) {
 
     private const val DISABLE_AUTO_SYNC = "AccountUtils: disableAutoSync"
 
@@ -113,12 +116,10 @@ object AccountUtils : CredentialManager() {
         return currentUser
     }
 
-    suspend fun addUser(user: User) {
+    override suspend fun addUser(user: User) {
         currentDriveId = -1
         currentUser = user
-        val userId = user.id.toLong()
-        MainApplication.userDataCleanableList.forEach { it.resetForUser(userId) }
-        userDatabase.userDao().insert(user)
+        super.addUser(user)
     }
 
     suspend fun updateCurrentUserAndDrives(
@@ -165,7 +166,7 @@ object AccountUtils : CredentialManager() {
         for (driveRemoved in driveRemovedList) {
             if (appSyncSettings?.userId == user.id && appSyncSettings.driveId == driveRemoved.id) {
                 Sentry.captureMessage(DISABLE_AUTO_SYNC)
-                context.disableAutoSync()
+                disableAutoSync()
             }
             if (currentDriveId == driveRemoved.id) {
                 getFirstDrive()
@@ -220,31 +221,29 @@ object AccountUtils : CredentialManager() {
             }
         }
 
-        MyKSuiteDataUtils.deleteData(user.id)
-        removeUser(context, user)
+        removeUser(user.id)
     }
 
-    suspend fun removeUser(context: Context, user: User) {
-        val userId = user.id.toLong()
-        MainApplication.userDataCleanableList.forEach { it.resetForUser(userId) }
-        userDatabase.userDao().delete(user)
-        FileController.deleteUserDriveFiles(user.id)
+    override suspend fun removeUser(userId: Int) {
+        MyKSuiteDataUtils.deleteData(userId)
+        super.removeUser(userId)
+        FileController.deleteUserDriveFiles(userId)
 
-        if (UploadFile.getAppSyncSettings()?.userId == user.id) {
+        if (UploadFile.getAppSyncSettings()?.userId == userId) {
             Sentry.captureMessage(DISABLE_AUTO_SYNC)
-            context.disableAutoSync()
+            disableAutoSync()
         }
 
-        if (currentUserId == user.id) {
+        if (currentUserId == userId) {
             requestCurrentUser()
             currentDriveId = -1
 
-            resetApp(context)
+            resetApp(appCtx)
             scope.launch(Dispatchers.Main) {
                 reloadApp?.invoke(bundleOf())
             }
 
-            CloudStorageProvider.notifyRootsChanged(context)
+            CloudStorageProvider.notifyRootsChanged(appCtx)
         }
     }
 
@@ -281,7 +280,7 @@ object AccountUtils : CredentialManager() {
 
             if (isEnableAppSync()) {
                 Sentry.captureMessage(DISABLE_AUTO_SYNC)
-                context.disableAutoSync()
+                disableAutoSync()
             }
 
             // Delete all app data
