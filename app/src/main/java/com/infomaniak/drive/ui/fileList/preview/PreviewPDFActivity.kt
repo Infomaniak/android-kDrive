@@ -20,18 +20,19 @@ package com.infomaniak.drive.ui.fileList.preview
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.core.common.extensions.isNightModeEnabled
+import com.infomaniak.core.common.extensions.lightStatusBar
 import com.infomaniak.core.common.utils.inWholeSeconds
 import com.infomaniak.core.file.getFileDatesWithFallback
 import com.infomaniak.core.file.retrieveAndUse
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
+import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -54,7 +55,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 import java.util.Date
 
-class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
+class PreviewPDFActivity : EdgeToEdgeActivity(), OnItemClickListener {
 
     val binding: ActivityPreviewPdfBinding by lazy { ActivityPreviewPdfBinding.inflate(layoutInflater) }
 
@@ -79,7 +80,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        window.lightStatusBar(false)
         with(binding) {
             setContentView(root)
             addComposeOverlay {
