@@ -76,7 +76,7 @@ class MediaObserverWorker(appContext: Context, params: WorkerParameters) : Corou
 
             if (syncSetting == null) {
                 Sentry.captureMessage("$TAG: disableAutoSync")
-                context.disableAutoSync()
+                disableAutoSync()
                 return
             }
 

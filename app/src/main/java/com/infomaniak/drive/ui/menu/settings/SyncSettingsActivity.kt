@@ -34,10 +34,10 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.utils.FORMAT_DATE_CLEAR_MONTH
 import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.common.utils.startOfTheDay
-import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.startAppSettingsConfig
 import com.infomaniak.core.legacy.utils.whenResultIsOk
@@ -453,7 +453,7 @@ class SyncSettingsActivity : BaseActivity() {
                         SentryLog.i(TAG, "appSettings updated")
                         if (oldSyncSettings?.driveId != syncSettings.driveId) {
                             UploadFile.deleteAllSyncFile()
-                            applicationContext.cancelPeriodicSync()
+                            cancelPeriodicSync()
                             SentryLog.i(TAG, "New drive detected -> old sync files has been deleted")
                         }
                         applicationContext.activateAutoSync(syncSettings)
