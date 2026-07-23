@@ -88,6 +88,7 @@ import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.core.ui.view.utils.SnackbarUtils.showIndefiniteSnackbar
 import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.drive.GeniusScanUtils.getScanFlowContract
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MainApplication
@@ -184,10 +185,8 @@ class MainActivity : BaseActivity() {
     }
 
     private val scanFlowResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
-            activityResult.whenResultIsOk {
-                it?.let { data -> scanResultProcessing(data, folder = null) }
-            }
+        registerForActivityResult(getScanFlowContract()) { scanFlowOutput ->
+            scanResultProcessing(scanFlowOutput, folder = null)
         }
 
     @Inject
