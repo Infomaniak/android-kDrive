@@ -18,13 +18,14 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.app.Application
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -185,7 +186,9 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                         thumbnailRatio(THUMBNAIL_RATIO)
                         enableTextSelection(true)
                         onSelectionAction { selectedText ->
-                            Toast.makeText(requireContext(), selectedText, Toast.LENGTH_SHORT).show()
+                            requireContext().getSystemService(ClipboardManager::class.java)?.setPrimaryClip(
+                                ClipData.newPlainText(getString(R.string.app_name), selectedText),
+                            )
                         }
                         onLoad { pageCount ->
                             // We can arrive here with a file different from a real PDF like OpenOffice documents
