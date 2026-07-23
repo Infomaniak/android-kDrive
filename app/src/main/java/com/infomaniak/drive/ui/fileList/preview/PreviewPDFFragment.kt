@@ -46,6 +46,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.databinding.FragmentPreviewOthersBinding
 import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.getHeader
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.getPreviewPDFHandler
@@ -64,6 +65,8 @@ import kotlinx.coroutines.launch
 import okio.IOException
 
 class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
+
+    override val noNetworkBinding: FragmentPreviewOthersBinding get() = binding.downloadLayout
 
     private var binding: FragmentPreviewPdfBinding by safeBinding()
 
@@ -99,42 +102,54 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding.downloadLayout) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (noCurrentFile() && !previewPDFHandler.isExternalFile()) return@with
+        val isExternalFile = previewPDFHandler.isExternalFile()
+        if (noCurrentFile() && !isExternalFile) return@with
 
-        if (previewPDFHandler.isExternalFile()) {
-            fileIcon.setImageResource(ExtensionType.PDF.icon)
-            fileName.text = previewPDFHandler.fileName
-            showPdf()
-        } else {
-            container.layoutTransition?.setAnimateParentHierarchy(false)
-
-            fileIcon.setImageResource(file.getFileType().icon)
-            fileName.text = file.name
-            downloadProgressIndicator.isVisible = true
-
-            previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
-                if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
-                downloadProgressIndicator.progress = progress
-            }
-        }
+        if (isExternalFile) setupExternalPdf() else setupDrivePdf()
 
         previewDescription.apply {
             setText(R.string.previewDownloadIndication)
             isVisible = true
         }
 
+        if (!isExternalFile && isFileUnavailableOffline()) showNoNetwork()
+
         initViewsForFullscreen(root, binding.pdfView)
 
         bigOpenWithButton.apply {
             isGone = true
-            setOnClickListener { if (previewPDFHandler.isPasswordProtected) showPasswordDialog() else openWithClicked() }
+            setOnClickListener { onBigOpenWithClicked() }
         }
+    }
+
+    private fun setupExternalPdf() = with(binding.downloadLayout) {
+        fileIcon.setImageResource(ExtensionType.PDF.icon)
+        fileName.text = previewPDFHandler.fileName
+        showPdf()
+    }
+
+    private fun setupDrivePdf() = with(binding.downloadLayout) {
+        container.layoutTransition?.setAnimateParentHierarchy(false)
+
+        fileIcon.setImageResource(file.getFileType().icon)
+        fileName.text = file.name
+        downloadProgressIndicator.isVisible = true
+
+        previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
+            if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
+            downloadProgressIndicator.progress = progress
+        }
+    }
+
+    private fun onBigOpenWithClicked() {
+        if (previewPDFHandler.isPasswordProtected) showPasswordDialog() else openWithClicked()
     }
 
     override fun setMenuVisibility(menuVisible: Boolean) {
         super.setMenuVisibility(menuVisible)
         if (menuVisible) {
             when {
+                !previewPDFHandler.isExternalFile() && isFileUnavailableOffline() -> showNoNetwork()
                 isDownloading -> previewSliderViewModel.pdfIsDownloading.value = isDownloading
                 pdfFile == null -> downloadPdf()
                 else -> showPdf()
@@ -305,6 +320,29 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         setPageNumber(currentPage + 1, totalPage)
     }
 
+    override fun reloadPreviewIfNeeded() = with(binding.downloadLayout) {
+        if (previewPDFHandler.isExternalFile()) return@with
+        if (pdfFile != null) {
+            hideNoNetwork()
+            previewPDFHandler.shouldHidePrintOption(isGone = !canPrintFile())
+            showPdf()
+            return@with
+        }
+        previewDescription.setText(R.string.previewDownloadIndication)
+        downloadProgressIndicator.isVisible = true
+        bigOpenWithButton.isGone = true
+        downloadPdf()
+    }
+
+    override fun showNoNetwork() {
+        previewPDFViewModel.cancelJobs()
+        previewPDFHandler.shouldHidePrintOption(isGone = true)
+        binding.downloadLayout.downloadProgressIndicator.isGone = true
+        previewSliderViewModel.pdfIsDownloading.value = false
+        isDownloading = false
+        super.showNoNetwork()
+    }
+
     private fun downloadPdf() = with(binding.downloadLayout) {
         if (pdfFile == null) {
             previewSliderViewModel.pdfIsDownloading.value = true
@@ -318,6 +356,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                     this@PreviewPDFFragment.pdfFile = pdfFile
                     showPdf()
                 } ?: run {
+                    previewPDFHandler.shouldHidePrintOption(isGone = true)
                     downloadProgressIndicator.isGone = true
                     previewDescription.setText(apiResponse.translateError())
                     bigOpenWithButton.isVisible = true
