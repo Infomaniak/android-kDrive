@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,9 +24,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.checkbox.MaterialCheckBox
-import com.infomaniak.core.legacy.utils.capitalizeFirstChar
 import com.infomaniak.core.legacy.views.LoaderAdapter
-import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.ExtensionType
@@ -40,11 +38,6 @@ class GalleryAdapter(
     private val multiSelectManager: MultiSelectManager,
     private val onFileClicked: (file: File) -> Unit,
 ) : LoaderAdapter<Any>(), RecyclerViewFastScroller.OnPopupTextUpdate {
-
-    var galleryList: ArrayList<File> = arrayListOf()
-    var duplicatedList: ArrayList<File> = arrayListOf()
-
-    private var lastSectionTitle = ""
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GalleryViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -150,62 +143,17 @@ class GalleryAdapter(
         updateMultiSelect?.invoke()
     }
 
-    /**
-     * TODO: Move to viewModel
-     */
-    fun formatList(newGalleryList: ArrayList<File>): ArrayList<Any> {
-        galleryList.addAll(newGalleryList)
-        val addItemList: ArrayList<Any> = arrayListOf()
-
-        for (file in newGalleryList) {
-            val month = file.getMonth()
-            if (lastSectionTitle != month) {
-                addItemList.add(month)
-                lastSectionTitle = month
-            }
-            addItemList.add(file)
-        }
-
-        return addItemList
-    }
-
-    fun addDuplicatedImages() {
-        var newestSectionTitle = itemList.firstOrNull()
-        var index = 1
-        for (file in duplicatedList) {
-            galleryList.add(0, file)
-
-            val month = file.getMonth()
-            if (newestSectionTitle != month) {
-                // This case can only be hit once, when adding duplicated images.
-                // If we need to add a new month section title, it needs to be inserted at position 0.
-                // If we only insert images, without creating a new month section title,
-                // they need to be inserted at position 1, right after the existing month title.
-                index = 0
-                itemList.add(index++, month)
-                newestSectionTitle = month
-            }
-
-            itemList.add(index++, file)
-        }
-
-        duplicatedList.clear()
-    }
-
-    private fun File.getMonth(): String {
-        return getLastModifiedAt().format("MMMM yyyy").capitalizeFirstChar()
+    fun insertDuplicatedImages(prefix: List<Any>) {
+        itemList.addAll(0, prefix)
     }
 
     fun clearGallery() {
         itemList.clear()
-        galleryList.clear()
-        lastSectionTitle = ""
         notifyDataSetChanged()
     }
 
     fun deleteByFileId(fileId: Int) {
         indexOf(fileId)?.let(::deleteAt)
-        galleryList.indexOfFirstOrNull { (it as? File)?.id == fileId }?.let(galleryList::removeAt)
     }
 
     fun deleteAt(position: Int) {
@@ -261,11 +209,17 @@ class GalleryAdapter(
 
     override fun onChange(position: Int): CharSequence {
         return when (val item = itemList.getOrNull(position)) {
-            null -> lastSectionTitle
             is String -> item
-            is File -> item.getMonth()
+            is File, null -> nearestSectionTitleAbove(position)
             else -> ""
         }
+    }
+
+    private fun nearestSectionTitleAbove(position: Int): CharSequence {
+        for (index in position.coerceAtMost(itemList.lastIndex) downTo 0) {
+            (itemList.getOrNull(index) as? String)?.let { return it }
+        }
+        return ""
     }
 
     class GalleryViewHolder(val binding: ViewBinding) : ViewHolder(binding.root)
