@@ -40,6 +40,7 @@ import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.network.NetworkAvailability
 import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
@@ -47,18 +48,22 @@ import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.FileListNavigationType
+import com.infomaniak.drive.data.models.MqttAction
+import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.models.file.SpecialFolder.Trash
+import com.infomaniak.drive.data.services.CopyToDriveProgressWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.utils.AccountUtils
@@ -100,6 +105,8 @@ class MainViewModel(
 
     private val privateFolder = MutableLiveData<File>()
     private val _currentFolder = MutableLiveData<File?>()
+    private var pendingCopyToDriveImport: Pair<Int, String>? = null
+
     val currentFolder: LiveData<File?> = _currentFolder // Use `setCurrentFolder` and `postCurrentFolder` to set value on it
 
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
@@ -111,6 +118,7 @@ class MainViewModel(
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<FileId>()
+
     val updateVisibleFiles = MutableLiveData<Boolean>()
     val isBulkDownloadRunning = MutableLiveData<Boolean>()
 
@@ -135,6 +143,7 @@ class MainViewModel(
     private var setCurrentFolderJob = Job()
 
     val deleteFilesFromGallery = SingleLiveEvent<List<Int>>()
+    val copyToDriveResult = SingleLiveEvent<FileResult>()
 
     init {
         viewModelScope.launch {
@@ -146,6 +155,11 @@ class MainViewModel(
     }
 
     private fun getContext() = getApplication<MainApplication>()
+
+    fun hasEligibleDestinationDrives(file: File): Boolean {
+        val userId = DriveInfosController.getDrive(driveId = file.driveId)?.userId ?: AccountUtils.currentUserId
+        return DriveInfosController.hasEligibleDestinationDrives(userId)
+    }
 
     fun setCurrentFolder(folder: File?) {
         folder?.let {
@@ -387,6 +401,77 @@ class MainViewModel(
         }
     }
 
+    fun copyFileToAnotherDrive(file: File, destinationFolder: File) = copyFileToAnotherDrive(
+        fileId = file.id,
+        fileName = file.name,
+        sourceDriveId = file.driveId,
+        destinationDriveId = destinationFolder.driveId,
+        destinationFolderId = destinationFolder.id,
+    )
+
+    fun copyFileToAnotherDrive(
+        fileId: Int,
+        fileName: String,
+        sourceDriveId: Int,
+        destinationDriveId: Int,
+        destinationFolderId: Int,
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        val sourcePath = getSourceRemotePath(fileId, sourceDriveId)
+        if (sourcePath.isNullOrBlank()) {
+            copyToDriveResult.postValue(
+                FileResult(isSuccess = false, errorResId = R.string.errorCopyToDrive, fileName = fileName)
+            )
+            return@launch
+        }
+
+        val apiResponse = ApiRepository.copyFileToAnotherDrive(
+            sourceDriveId = sourceDriveId,
+            sourcePath = sourcePath,
+            destinationDriveId = destinationDriveId,
+            destinationFolderId = destinationFolderId,
+        )
+
+        apiResponse.data?.firstOrNull()?.let { externalImport ->
+            pendingCopyToDriveImport = externalImport.id to fileName
+            val realDestFolderId = externalImport.directoryId.takeIf { it > 0 } ?: destinationFolderId
+            CopyToDriveProgressWorker.scheduleWork(
+                getContext(),
+                externalImport.id,
+                fileName,
+                destinationDriveId,
+                realDestFolderId
+            )
+        }
+
+        copyToDriveResult.postValue(mapCopyApiResponseToFileResult(apiResponse, fileName))
+    }
+
+    private fun getSourceRemotePath(fileId: Int, sourceDriveId: Int): String? {
+        val sourceDrive = DriveInfosController.getDrive(driveId = sourceDriveId)
+        val userDrive = UserDrive(
+            userId = sourceDrive?.userId ?: AccountUtils.currentUserId,
+            driveId = sourceDriveId,
+            sharedWithMe = sourceDrive?.sharedWithMe == true,
+        )
+        val path = FileController.getFileById(fileId, userDrive)?.getRemotePath(userDrive) ?: return null
+
+        return path.removePrefix(PRIVATE_FOLDER_PATH_PREFIX)
+    }
+
+    fun resolveCopyToDriveNotification(notification: MqttNotification): CopyToDriveResult? {
+        val importId = notification.importId ?: return null
+        val fileName = pendingCopyToDriveImport?.takeIf { it.first == importId }?.second ?: return null
+
+        val isSuccess = when (notification.action) {
+            MqttAction.EXTERNAL_IMPORT_FINISHED -> true
+            MqttAction.EXTERNAL_IMPORT_ERROR, MqttAction.EXTERNAL_IMPORT_CANCELED -> false
+            else -> return null
+        }
+
+        pendingCopyToDriveImport = null
+        return CopyToDriveResult(isSuccess, fileName)
+    }
+
     fun duplicateFile(
         file: File,
         destinationId: Int? = null,
@@ -551,6 +636,17 @@ class MainViewModel(
         }
     }
 
+    private fun mapCopyApiResponseToFileResult(apiResponse: ApiResponse<*>, fileName: String): FileResult {
+        val isSuccess = apiResponse.result == ApiResponseStatus.SUCCESS
+                || apiResponse.result == ApiResponseStatus.ASYNCHRONOUS
+        return FileResult(
+            isSuccess = isSuccess,
+            errorCode = apiResponse.error?.code,
+            errorResId = if (isSuccess) null else apiResponse.translateError(defaultMessage = R.string.errorCopyToDrive),
+            fileName = fileName,
+        )
+    }
+
     private suspend fun onNetworkAvailabilityChanged(isNetworkAvailable: Boolean) {
         SentryLog.d("Internet availability", if (isNetworkAvailable) "Available" else "Unavailable")
         Sentry.addBreadcrumb(Breadcrumb().apply {
@@ -626,8 +722,11 @@ class MainViewModel(
         val isSuccess: Boolean,
         val errorResId: Int? = null,
         val data: Any? = null,
-        val errorCode: String? = null
+        val errorCode: String? = null,
+        val fileName: String? = null,
     )
+
+    data class CopyToDriveResult(val isSuccess: Boolean, val fileName: String)
 
     data class MultiSelectMediatorState(
         var numberOfSuccessfulActions: Int,
@@ -640,5 +739,6 @@ class MainViewModel(
 
         private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"
         private const val SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY = "mustOpenUploadShortcut"
+        private const val PRIVATE_FOLDER_PATH_PREFIX = "/Private"
     }
 }

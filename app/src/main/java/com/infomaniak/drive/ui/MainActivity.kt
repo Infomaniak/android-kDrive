@@ -107,6 +107,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
+import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
@@ -124,6 +125,7 @@ import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.utils.copyToDriveResultMessage
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -220,6 +222,7 @@ class MainActivity : BaseActivity() {
         observeDownloadCancellation()
         observeFailureDownloadWorkerOffline()
         observeCurrentUserAvatar()
+        observeCopyToDriveResult()
 
         AppLockManager.scheduleLockIfNeeded(
             targetActivity = this,
@@ -364,6 +367,14 @@ class MainActivity : BaseActivity() {
     private fun observeCurrentUserAvatar() {
         AccountUtils.currentConnectedUserFlow.observe(this) {
             setBottomNavigationUserAvatar(this@MainActivity)
+        }
+    }
+
+    private fun observeCopyToDriveResult() {
+        MqttClientWrapper.observe(this) { notification ->
+            mainViewModel.resolveCopyToDriveNotification(notification)?.let { result ->
+                showSnackbar(title = copyToDriveResultMessage(result.isSuccess, result.fileName), anchor = getMainFab())
+            }
         }
     }
 

@@ -119,6 +119,7 @@
     <string name="buttonConfirmNotify">Conferma e notifica</string>
     <string name="buttonConvertToDropBox">Converti in deposito file</string>
     <string name="buttonCopy">Copia</string>
+    <string name="buttonCopyToDrive">Copia su un’altra unità</string>
     <string name="buttonCreate">Crea</string>
     <string name="buttonCreateFolder">Crea la cartella</string>
     <string name="buttonCreateOnlyOfficeCopy">Creare una copia .%s</string>
@@ -203,6 +204,8 @@
     <string name="commonFolderTitle">Cartella dell’organizzazione</string>
     <string name="contentDescriptionIsSelected">È selezionata</string>
     <string name="convertToDropboxTitle">Converti in deposito file %s</string>
+    <string name="copyToDriveStarted">%s è in corso di copia su un’altra unità</string>
+    <string name="copyToDriveSuccess">%s è stato copiato su un’altra unità</string>
     <string name="createCategoryTitle">Crea una categoria</string>
     <string name="createCommonFolderAllUsersDescription">Tutti gli utenti del kDrive %s avranno automaticamente accesso a questa cartella.</string>
     <string name="createCommonFolderSuccess">Cartella organizzativa creata con successo</string>
@@ -260,6 +263,7 @@
     <string name="errorCache">Errore durante la memorizzazione nella cache</string>
     <string name="errorCategoryAlreadyExists">Esiste già una categoria con lo stesso nome</string>
     <string name="errorConflict">Un elemento con lo stesso nome esiste già in questa posizione</string>
+    <string name="errorCopyToDrive">Trasferimento verso un’altra unità non riuscito</string>
     <string name="errorDelete">Errore durante l’eliminazione</string>
     <string name="errorDeviceStorage">Memoria del dispositivo insufficiente</string>
     <string name="errorDownloadPermission">Devi aggiungere almeno un file che hai il permesso di scaricare</string>

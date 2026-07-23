@@ -430,6 +430,16 @@
                 app:text="@string/buttonDuplicate" />
 
             <com.infomaniak.drive.views.BottomSheetItemView
+                android:id="@+id/copyToDrive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:icon="@drawable/ic_drive"
+                app:iconTint="@color/iconColor"
+                app:text="@string/buttonCopyToDrive"
+                tools:visibility="visible" />
+
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/renameFile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

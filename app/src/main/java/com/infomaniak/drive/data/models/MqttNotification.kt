@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,10 @@ data class MqttNotification(
     @SerializedName("action_uuid")
     val actionUuid: String? = null,
     val progress: ActionProgress? = null,
+
+    // Only for external import progress notification
+    @SerializedName("import_progress")
+    val importProgress: ImportProgress? = null,
 ) {
     fun isExternalImportNotification() = importId != null
 

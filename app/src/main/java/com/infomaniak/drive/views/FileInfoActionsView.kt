@@ -61,6 +61,8 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.databinding.ViewFileInfoActionsBinding
+import com.infomaniak.drive.ui.CopyFileToDriveActivity
+import com.infomaniak.drive.ui.CopyFileToDriveActivityArgs
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
@@ -129,7 +131,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
-    private fun computeFileRights(file: File, rights: Rights) = with(binding) {
+    private fun computeFileRights(file: File, rights: Rights, hasOtherDrivesAvailable: Boolean) = with(binding) {
         val hasNetwork = mainViewModel.hasNetwork
         displayInfo.isEnabled = hasNetwork
         disabledInfo.isGone = hasNetwork
@@ -169,11 +171,12 @@ class FileInfoActionsView @JvmOverloads constructor(
         leaveShare.isVisible = rights.canLeave == true
         cancelExternalImport.isVisible = file.isImporting()
         moveFile.isVisible = rights.canMove == true && !isSharedWithMe && !file.isImporting()
+        copyToDrive.isVisible = isCopyToDriveVisible(file, rights, hasOtherDrivesAvailable)
         renameFile.isVisible = rights.canRename == true && !file.isImporting()
         goToFolder.isVisible = isGoToFolderVisible()
     }
 
-    fun updateCurrentFile(file: File) = with(binding) {
+    fun updateCurrentFile(file: File, hasOtherDrivesAvailable: Boolean) = with(binding) {
         currentFile = file
         refreshBottomSheetUi(currentFile)
         manageCategories.isVisible = DriveInfosController.getCategoryRights(file.driveId).canPutOnFile
@@ -191,7 +194,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         actionListLayout.isVisible = true
 
         currentFile.rights?.let { rights ->
-            computeFileRights(file, rights)
+            computeFileRights(file, rights, hasOtherDrivesAvailable)
         }
 
         val drive = AccountUtils.getCurrentDrive() ?: return@with
@@ -218,6 +221,10 @@ class FileInfoActionsView @JvmOverloads constructor(
     fun setupActions(isVisible: Boolean) = with(binding) {
         actionListLayout.isVisible = isVisible
         quickActionsLayout.isVisible = isVisible
+    }
+
+    private fun isCopyToDriveVisible(file: File, rights: Rights, hasOtherDrivesAvailable: Boolean): Boolean {
+        return rights.canRead && !isSharedWithMe && !file.isImporting() && hasOtherDrivesAvailable
     }
 
     private fun isGoToFolderVisible(): Boolean {
@@ -300,6 +307,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             onItemClickListener.moveFileClicked(currentFile.parentId, selectFolderResultLauncher, mainViewModel)
         }
         duplicateFile.setOnClickListener { onItemClickListener.duplicateFileClicked(selectFolderResultLauncher, mainViewModel) }
+        copyToDrive.setOnClickListener { onItemClickListener.copyFileToAnotherDriveClicked(selectFolderResultLauncher) }
         renameFile.setOnClickListener { onItemClickListener.renameFileClicked() }
         deleteFile.setOnClickListener { onItemClickListener.deleteFileClicked() }
         goToFolder.setOnClickListener { onItemClickListener.goToFolder() }
@@ -558,6 +566,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onCacheAddedToOffline()
         fun onDeleteFile(onApiResponse: () -> Unit)
         fun onLeaveShare(onApiResponse: () -> Unit)
+        fun onCopyFileToDrive(destinationFolder: File)
         fun onDuplicateFile(destinationFolder: File)
         fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean = false)
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
@@ -581,6 +590,12 @@ class FileInfoActionsView @JvmOverloads constructor(
                     when (customArgs?.getString(SINGLE_OPERATION_CUSTOM_TAG)) {
                         SingleOperation.COPY.name -> onDuplicateFile(file)
                         SingleOperation.MOVE.name -> onMoveFile(file, isSharedWithMe)
+                        SingleOperation.COPY_TO_DRIVE.name -> {
+                            val targetDriveId = customArgs.getInt(CopyFileToDriveActivity.TARGET_DRIVE_ID_TAG, -1)
+                            if (targetDriveId != -1) {
+                                onCopyFileToDrive(File(id = folderId, name = folderName, driveId = targetDriveId))
+                            }
+                        }
                         else -> Unit
                     }
                 }
@@ -624,6 +639,23 @@ class FileInfoActionsView @JvmOverloads constructor(
             trackFileActionEvent(MatomoName.Copy)
             mainViewModel.ignoreSyncOffline = true
             currentContext.duplicateFilesClicked(selectFolderResultLauncher, mainViewModel)
+        }
+
+        fun copyFileToAnotherDriveClicked(selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
+            currentFile?.let { file ->
+                val userId = DriveInfosController.getDrive(driveId = file.driveId)?.userId ?: AccountUtils.currentUserId
+                if (!DriveInfosController.hasEligibleDestinationDrives(userId)) return
+                val intent = Intent(currentContext, CopyFileToDriveActivity::class.java).apply {
+                    putExtras(
+                        CopyFileToDriveActivityArgs(
+                            fileId = file.id,
+                            sourceDriveId = file.driveId,
+                            userId = userId,
+                        ).toBundle()
+                    )
+                }
+                selectFolderResultLauncher.launch(intent)
+            }
         }
 
         @CallSuper

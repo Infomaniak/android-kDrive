@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileList.multiSelect
+package com.infomaniak.drive.data.models
 
-import com.infomaniak.drive.MatomoDrive.MatomoCategory
+import com.google.gson.annotations.SerializedName
 
-class FileListMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.FileListFileAction)
+data class ImportProgress(
+    @SerializedName("total_files")
+    val totalFiles: Int = 0,
+    @SerializedName("total_files_processed")
+    val totalFilesProcessed: Int = 0,
+    @SerializedName("total_successes")
+    val totalSuccesses: Int = 0,
+    @SerializedName("total_errors")
+    val totalErrors: Int = 0,
+) {
+    val percent: Int get() = if (totalFiles > 0) (totalFilesProcessed * 100 / totalFiles).coerceIn(0, 100) else 0
+}

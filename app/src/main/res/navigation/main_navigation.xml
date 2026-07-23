@@ -445,6 +445,22 @@
     </activity>
 
     <activity
+        android:id="@+id/copyFileToDriveActivity"
+        android:name="com.infomaniak.drive.ui.CopyFileToDriveActivity"
+        android:label="CopyFileToDriveActivity"
+        tools:layout="@layout/activity_copy_file_to_drive">
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
+        <argument
+            android:name="sourceDriveId"
+            app:argType="integer" />
+        <argument
+            android:name="userId"
+            app:argType="integer" />
+    </activity>
+
+    <activity
         android:id="@+id/saveExternalFilesActivity"
         android:name="com.infomaniak.drive.ui.SaveExternalFilesActivity"
         android:label="SaveExternalFilesActivity"
@@ -599,8 +615,7 @@
         android:id="@+id/securitySettingsFragment"
         android:name="com.infomaniak.drive.ui.menu.settings.SecuritySettingsFragment"
         android:label="SecuritySettingsFragment"
-        tools:layout="@layout/fragment_settings_security">
-    </fragment>
+        tools:layout="@layout/fragment_settings_security"></fragment>
 
     <fragment
         android:id="@+id/aboutSettingsFragment"

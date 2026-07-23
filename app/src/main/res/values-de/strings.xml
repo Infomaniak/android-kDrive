@@ -119,6 +119,7 @@
     <string name="buttonConfirmNotify">Bestätigen und benachrichtigen</string>
     <string name="buttonConvertToDropBox">In Briefkasten umwandeln</string>
     <string name="buttonCopy">Kopieren</string>
+    <string name="buttonCopyToDrive">Kopieren auf ein anderes Laufwerk</string>
     <string name="buttonCreate">Erstellen</string>
     <string name="buttonCreateFolder">Ordner erstellen</string>
     <string name="buttonCreateOnlyOfficeCopy">Eine .%s-Kopie erstellen</string>
@@ -203,6 +204,8 @@
     <string name="commonFolderTitle">Organisationsordner</string>
     <string name="contentDescriptionIsSelected">Wurde ausgewählt</string>
     <string name="convertToDropboxTitle">In Briefkasten umwandeln %s</string>
+    <string name="copyToDriveStarted">%s wird auf ein anderes Laufwerk kopiert</string>
+    <string name="copyToDriveSuccess">%s wurde auf ein anderes Laufwerk kopiert</string>
     <string name="createCategoryTitle">Kategorie erstellen</string>
     <string name="createCommonFolderAllUsersDescription">Alle Benutzer des kDrive %s erhalten automatisch Zugang zu diesem Ordner.</string>
     <string name="createCommonFolderSuccess">Organisationsordner erfolgreich erstellt</string>
@@ -260,6 +263,7 @@
     <string name="errorCache">Fehler bei der Zwischenspeicherung</string>
     <string name="errorCategoryAlreadyExists">Eine Kategorie mit dem gleichen Namen existiert bereits</string>
     <string name="errorConflict">An dieser Stelle existiert bereits ein Element mit demselben Namen</string>
+    <string name="errorCopyToDrive">Übertragung auf ein anderes Laufwerk fehlgeschlagen</string>
     <string name="errorDelete">Fehler beim Löschen</string>
     <string name="errorDeviceStorage">Unzureichender Gerätespeicher</string>
     <string name="errorDownloadPermission">Sie müssen mindestens eine Datei hinzufügen, die Sie herunterladen dürfen</string>

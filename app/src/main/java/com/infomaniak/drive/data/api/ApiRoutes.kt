@@ -291,6 +291,8 @@ object ApiRoutes {
 
     fun duplicateFile(file: File, destinationId: Int) = "${fileURL(file)}/copy/$destinationId?$fileWithQuery"
 
+    fun importKDrive(destinationDriveId: Int) = "$DRIVE_API_V2/$destinationDriveId/imports/kdrive"
+
     fun renameFile(file: File) = "${fileURLV2(file)}/rename"
 
     fun getFileCount(file: File) = "${fileURLV2(file)}/count"

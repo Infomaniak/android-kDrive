@@ -119,6 +119,7 @@
     <string name="buttonConfirmNotify">Επιβεβαίωση και ειδοποίηση</string>
     <string name="buttonConvertToDropBox">Μετατροπή σε κουτί παρακαταθήκης</string>
     <string name="buttonCopy">Αντιγραφή</string>
+    <string name="buttonCopyToDrive">Αντιγραφή σε άλλη μονάδα</string>
     <string name="buttonCreate">Δημιουργία</string>
     <string name="buttonCreateFolder">Δημιουργία φακέλου</string>
     <string name="buttonCreateOnlyOfficeCopy">Δημιουργία αντιγράφου .%s</string>
@@ -203,6 +204,8 @@
     <string name="commonFolderTitle">Φάκελος οργανισμού</string>
     <string name="contentDescriptionIsSelected">Είναι επιλεγμένο</string>
     <string name="convertToDropboxTitle">Μετατροπή σε κουτί παραλαβής %s</string>
+    <string name="copyToDriveStarted">%s αντιγράφεται σε άλλη μονάδα δίσκου</string>
+    <string name="copyToDriveSuccess">%s αντιγράφηκε σε άλλη μονάδα δίσκου</string>
     <string name="createCategoryTitle">Δημιουργία κατηγορίας</string>
     <string name="createCommonFolderAllUsersDescription">Όλοι οι χρήστες του kDrive %s θα έχουν αυτόματα πρόσβαση σε αυτόν τον φάκελο.</string>
     <string name="createCommonFolderSuccess">Ο φάκελος οργανισμού δημιουργήθηκε με επιτυχία</string>
@@ -260,6 +263,7 @@
     <string name="errorCache">Σφάλμα προσωρινής αποθήκευσης</string>
     <string name="errorCategoryAlreadyExists">Υπάρχει ήδη κατηγορία με το ίδιο όνομα</string>
     <string name="errorConflict">Υπάρχει ήδη ένα στοιχείο με το ίδιο όνομα σε αυτήν την τοποθεσία</string>
+    <string name="errorCopyToDrive">Η μεταφορά σε άλλη μονάδα δίσκου απέτυχε</string>
     <string name="errorDelete">Σφάλμα διαγραφής</string>
     <string name="errorDeviceStorage">Ανεπαρκής αποθήκευση συσκευής</string>
     <string name="errorDownloadPermission">Πρέπει να προσθέσετε τουλάχιστον ένα αρχείο για το οποίο έχετε άδεια λήψης</string>

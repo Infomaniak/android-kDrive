@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,12 +29,12 @@ import com.infomaniak.drive.databinding.CardviewDriveBinding
 import com.infomaniak.drive.utils.AccountUtils
 
 class DriveListAdapter(
-    private var driveList: ArrayList<Drive>,
+    private var driveList: List<Drive>,
     private val hideCurrentDriveChevron: Boolean = true,
     private val onItemClicked: (drive: Drive) -> Unit,
 ) : Adapter<DriveListAdapter.DriveListViewHolder>() {
 
-    fun setDrives(driveList: ArrayList<Drive>) {
+    fun setDrives(driveList: List<Drive>) {
         val max = this.driveList.size
         this.driveList = driveList
         notifyItemRangeChanged(0, maxOf(max, driveList.size))

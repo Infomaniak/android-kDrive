@@ -119,6 +119,7 @@
     <string name="buttonConfirmNotify">Vahvista ja ilmoita</string>
     <string name="buttonConvertToDropBox">Muunna jättölaatikoksi</string>
     <string name="buttonCopy">Kopioi</string>
+    <string name="buttonCopyToDrive">Kopioi toiseen asemaan</string>
     <string name="buttonCreate">Luo</string>
     <string name="buttonCreateFolder">Luo kansio</string>
     <string name="buttonCreateOnlyOfficeCopy">Luo .%s-kopio</string>
@@ -203,6 +204,8 @@
     <string name="commonFolderTitle">Organisaatiokansio</string>
     <string name="contentDescriptionIsSelected">On valittu</string>
     <string name="convertToDropboxTitle">Muunna drop boxiksi %s</string>
+    <string name="copyToDriveStarted">%s kopioidaan toiselle asemalle</string>
+    <string name="copyToDriveSuccess">%s on kopioitu toiselle asemalle</string>
     <string name="createCategoryTitle">Luo kategoria</string>
     <string name="createCommonFolderAllUsersDescription">Kaikilla kDriven %s käyttäjillä on automaattisesti pääsy tähän kansioon.</string>
     <string name="createCommonFolderSuccess">Organisaatiokansio luotu onnistuneesti</string>
@@ -260,6 +263,7 @@
     <string name="errorCache">Välimuistivirhe</string>
     <string name="errorCategoryAlreadyExists">Luokka samalla nimellä on jo olemassa</string>
     <string name="errorConflict">Samanniminen elementti on jo olemassa tässä sijainnissa</string>
+    <string name="errorCopyToDrive">Tiedonsiirto toiselle asemalle epäonnistui</string>
     <string name="errorDelete">Poistovirhe</string>
     <string name="errorDeviceStorage">Laitteen tallennustila ei riitä</string>
     <string name="errorDownloadPermission">Sinun on lisättävä vähintään yksi tiedosto, jonka lataamiseen sinulla on oikeus</string>

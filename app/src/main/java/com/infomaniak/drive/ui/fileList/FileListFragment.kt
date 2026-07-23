@@ -88,7 +88,7 @@ import com.infomaniak.drive.ui.dropbox.DropboxViewModel
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
-import com.infomaniak.drive.ui.fileList.multiSelect.FileListMultiSelectActionsBottomSheetDialog
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.ui.menu.OfflineFileFragment
 import com.infomaniak.drive.utils.AccountUtils
@@ -449,7 +449,10 @@ open class FileListFragment : MultiSelectFragment(
 
             menuButtonMultiSelect.setOnClickListener {
                 onMenuButtonClicked(
-                    multiSelectBottomSheet = FileListMultiSelectActionsBottomSheetDialog(),
+                    multiSelectBottomSheet = MultiSelectActionsBottomSheetDialog(
+                        matomoCategory = MatomoCategory.FileListFileAction,
+                        enableCopyToDrive = true,
+                    ),
                     areAllFromTheSameFolder = true,
                 )
             }
@@ -829,6 +832,7 @@ open class FileListFragment : MultiSelectFragment(
             BulkOperationType.REMOVE_OFFLINE -> lifecycleScope.launch(Dispatchers.Main) { closeMultiSelect() }
             BulkOperationType.MANAGE_CATEGORIES,
             BulkOperationType.COPY,
+            BulkOperationType.COPY_TO_DRIVE,
             BulkOperationType.COLOR_FOLDER,
             BulkOperationType.REMOVE_FAVORITES -> Unit
         }

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -183,6 +183,14 @@ object DriveInfosController {
     ) = getRealmInstance().use { it.getDrivesQuery(userId, driveId, sharedWithMe, maintenance).count() }
 
     fun hasSingleDrive(userId: Int): Boolean = getDrivesCount(userId) == 1L
+
+    fun getEligibleDestinationDrives(userId: Int?, excludedDriveId: Int?, sharedWithMe: Boolean? = null): List<Drive> {
+        return getDrives(userId = userId, sharedWithMe = sharedWithMe).filter { it.id != excludedDriveId && !it.maintenance }
+    }
+
+    fun hasEligibleDestinationDrives(userId: Int, sharedWithMe: Boolean? = null): Boolean {
+        return getDrivesCount(userId = userId, sharedWithMe = sharedWithMe, maintenance = false) > 1
+    }
 
     fun getTeams(drive: Drive): List<Team> {
         val teamList = getRealmInstance().use { realm ->

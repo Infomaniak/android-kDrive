@@ -119,6 +119,7 @@
     <string name="buttonConfirmNotify">Bekräfta och meddela</string>
     <string name="buttonConvertToDropBox">Konvertera till inkorg</string>
     <string name="buttonCopy">Kopiera</string>
+    <string name="buttonCopyToDrive">Kopiera till en annan enhet</string>
     <string name="buttonCreate">Skapa</string>
     <string name="buttonCreateFolder">Skapa mapp</string>
     <string name="buttonCreateOnlyOfficeCopy">Skapa en .%s kopia</string>
@@ -203,6 +204,8 @@
     <string name="commonFolderTitle">Organisationsmapp</string>
     <string name="contentDescriptionIsSelected">Är vald</string>
     <string name="convertToDropboxTitle">Konvertera till dropbox %s</string>
+    <string name="copyToDriveStarted">%s kopieras till en annan enhet</string>
+    <string name="copyToDriveSuccess">%s har kopierats till en annan enhet</string>
     <string name="createCategoryTitle">Skapa en kategori</string>
     <string name="createCommonFolderAllUsersDescription">Alla användare av kDrive %s får automatiskt tillgång till denna mapp.</string>
     <string name="createCommonFolderSuccess">Organisationsmapp skapad</string>
@@ -260,6 +263,7 @@
     <string name="errorCache">Cachningsfel</string>
     <string name="errorCategoryAlreadyExists">En kategori med samma namn finns redan</string>
     <string name="errorConflict">Ett element med samma namn finns redan på den här platsen</string>
+    <string name="errorCopyToDrive">Överföring till en annan enhet misslyckades</string>
     <string name="errorDelete">Borttagningsfel</string>
     <string name="errorDeviceStorage">Otillräcklig enhetslagring</string>
     <string name="errorDownloadPermission">Du måste lägga till minst en fil som du har behörighet att ladda ner</string>

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,6 @@ import android.widget.PopupWindow
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.core.legacy.utils.safeBinding
-import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.FragmentBottomSheetSelectDriveBinding
 import com.infomaniak.drive.databinding.PopupSelectUserBinding
 import com.infomaniak.drive.ui.menu.UserAdapter
@@ -60,8 +58,9 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
         binding.driveList.adapter = driveListAdapter
 
         AccountUtils.getAllUsers().observe(viewLifecycleOwner) { users ->
-            if (users.size > 1) {
+            if (users.size > 1 && showUserSelection) {
                 val selectedUser = users.find { it.id == selectedUserId.value } ?: users.first()
+                driveListAdapter.setDrives(getDriveList())
                 binding.userCardview.itemViewUser.setUserView(selectedUser) {
                     popupWindow = PopupWindow(
                         popupLayoutBinding.root,
@@ -87,12 +86,12 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
                     popupWindow.dismiss()
                 }
             } else {
-                selectedUserId.value = users.first().id
+                if (selectedUserId.value == null) {
+                    selectedUserId.value = users.first().id
+                }
+                driveListAdapter.setDrives(getDriveList())
+                binding.userCardview.root.isVisible = false
             }
         }
-    }
-
-    private fun SelectDriveViewModel.getDriveList(): ArrayList<Drive> {
-        return DriveInfosController.getDrives(selectedUserId.value, sharedWithMe = if (showSharedWithMe) null else false)
     }
 }

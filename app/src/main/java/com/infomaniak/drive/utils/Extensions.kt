@@ -80,9 +80,11 @@ import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.login.InfomaniakLogin
 import com.infomaniak.core.network.LOGIN_ENDPOINT_URL
 import com.infomaniak.core.network.SUPPORT_URL
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
@@ -110,8 +112,6 @@ import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.Shortcuts
-import com.infomaniak.core.login.InfomaniakLogin
-import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import handleActionDone
 import io.realm.RealmList
 import io.sentry.Sentry
@@ -515,6 +515,21 @@ fun Fragment.observeAndDisplayNetworkAvailability(
             noNetworkBinding.noNetwork.isGone = isNetworkAvailable != false
             additionalChanges?.invoke(isNetworkAvailable)
         }
+    }
+}
+
+fun Context.copyToDriveResultMessage(isSuccess: Boolean, fileName: String?): String {
+    return if (isSuccess) getString(R.string.copyToDriveSuccess, fileName) else getString(R.string.errorCopyToDrive)
+}
+
+fun Fragment.observeCopyToDriveResult(mainViewModel: MainViewModel, onResult: (snackbarMessage: String) -> Unit) {
+    mainViewModel.copyToDriveResult.observe(viewLifecycleOwner) { fileResult ->
+        val snackbarMessage = if (fileResult.isSuccess) {
+            getString(R.string.copyToDriveStarted, fileResult.fileName)
+        } else {
+            getString(fileResult.errorResId ?: R.string.errorCopyToDrive)
+        }
+        onResult(snackbarMessage)
     }
 }
 

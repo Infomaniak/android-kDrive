@@ -119,6 +119,7 @@
     <string name="buttonConfirmNotify">Confirm and notify</string>
     <string name="buttonConvertToDropBox">Convert to drop box</string>
     <string name="buttonCopy">Copy</string>
+    <string name="buttonCopyToDrive">Copy to another drive</string>
     <string name="buttonCreate">Create</string>
     <string name="buttonCreateFolder">Create folder</string>
     <string name="buttonCreateOnlyOfficeCopy">Create a .%s copy</string>
@@ -203,6 +204,8 @@
     <string name="commonFolderTitle">Organization folder</string>
     <string name="contentDescriptionIsSelected">Is selected</string>
     <string name="convertToDropboxTitle">Convert to drop box %s</string>
+    <string name="copyToDriveStarted">%s is being copied to another drive</string>
+    <string name="copyToDriveSuccess">%s has been copied to another drive</string>
     <string name="createCategoryTitle">Create a category</string>
     <string name="createCommonFolderAllUsersDescription">All kDrive %s users will automatically have access to this folder.</string>
     <string name="createCommonFolderSuccess">Organization folder created successfully</string>
@@ -260,6 +263,7 @@
     <string name="errorCache">Caching error</string>
     <string name="errorCategoryAlreadyExists">A category with the same name already exists</string>
     <string name="errorConflict">An element with the same name already exists in this location</string>
+    <string name="errorCopyToDrive">Transfer to another drive failed</string>
     <string name="errorDelete">Deletion error</string>
     <string name="errorDeviceStorage">Insufficient device storage</string>
     <string name="errorDownloadPermission">You must add at least one file that you have permission to download</string>

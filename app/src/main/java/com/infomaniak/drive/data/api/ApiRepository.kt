@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.api
 
-import android.util.Log
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.core.auth.api.ApiRepositoryCore
@@ -56,6 +55,7 @@ import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileLastActivityBody
 import com.infomaniak.drive.data.models.file.LastFileAction
 import com.infomaniak.drive.data.models.file.ListingFiles
@@ -311,6 +311,20 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun duplicateFile(file: File, destinationId: Int): ApiResponse<File> {
         return callApi(ApiRoutes.duplicateFile(file, destinationId), POST)
+    }
+
+    fun copyFileToAnotherDrive(
+        sourceDriveId: Int,
+        sourcePath: String,
+        destinationDriveId: Int,
+        destinationFolderId: Int,
+    ): ApiResponse<List<FileExternalImport>> {
+        val body = mapOf(
+            "application_drive_id" to sourceDriveId.toString(),
+            "directory_id" to destinationFolderId,
+            "source_path" to sourcePath,
+        )
+        return callApi(ApiRoutes.importKDrive(destinationDriveId), POST, body)
     }
 
     fun moveFile(file: File, newParent: File): ApiResponse<CancellableAction> {

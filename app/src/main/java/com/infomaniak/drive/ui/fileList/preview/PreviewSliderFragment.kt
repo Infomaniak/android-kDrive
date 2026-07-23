@@ -50,6 +50,7 @@ import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.navigateToParentFolder
+import com.infomaniak.drive.utils.observeCopyToDriveResult
 import com.infomaniak.drive.utils.openWith
 import com.infomaniak.drive.utils.printPdf
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
@@ -115,11 +116,16 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
                 isSharedWithMe = userDrive.sharedWithMe,
                 hideActions = false,
             )
-            updateCurrentFile(currentFile)
+            updateCurrentFile(currentFile, mainViewModel.hasEligibleDestinationDrives(currentFile))
 
             previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
                 openWith.isGone = isDownloading
             }
+        }
+
+        observeCopyToDriveResult(mainViewModel) { message ->
+            showSnackbar(message)
+            toggleBottomSheet(shouldShow = true)
         }
     }
 
@@ -245,6 +251,10 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
                 userDrive = UserDrive(driveId = currentFile.driveId)
             )
         )
+    }
+
+    override fun onCopyFileToDrive(destinationFolder: File) {
+        mainViewModel.copyFileToAnotherDrive(currentFile, destinationFolder)
     }
 
     override fun onDuplicateFile(destinationFolder: File) {

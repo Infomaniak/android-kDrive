@@ -29,6 +29,7 @@ import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponseStatus
+import com.infomaniak.core.network.models.exceptions.NetworkException
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -70,7 +71,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.infomaniak.core.network.models.exceptions.NetworkException
 
 @SuppressLint("CustomSplashScreen")
 class LaunchActivity : EdgeToEdgeActivity() {
@@ -187,6 +187,12 @@ class LaunchActivity : EdgeToEdgeActivity() {
             )
         } else {
             DeeplinkType.Unmanaged.NotAccessible
+        }
+
+        (deeplinkType as? DeeplinkAction.Drive)?.let {
+            it.userId?.let { id -> AccountUtils.currentUserId = id }
+            AccountUtils.currentDriveId = it.driveId
+            AccountUtils.requestCurrentUser()
         }
     }
 

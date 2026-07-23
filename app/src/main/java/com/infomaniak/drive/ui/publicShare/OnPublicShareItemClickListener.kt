@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -135,6 +135,7 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     override fun onCacheAddedToOffline() = Unit
     override fun onDeleteFile(onApiResponse: () -> Unit) = Unit
     override fun onLeaveShare(onApiResponse: () -> Unit) = Unit
+    override fun onCopyFileToDrive(destinationFolder: File) = Unit
     override fun onDuplicateFile(destinationFolder: File) = Unit
     override fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean) = Unit
     override fun onRenameFile(newName: String, onApiResponse: () -> Unit) = Unit

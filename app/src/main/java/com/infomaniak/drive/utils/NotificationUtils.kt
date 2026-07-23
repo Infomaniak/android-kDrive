@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,10 @@ object NotificationUtils : NotificationUtilsCore() {
 
     fun Context.copyOperationProgressNotification(): NotificationCompat.Builder {
         return progressNotification(getString(R.string.fileListCopyStartedSnackbar), R.drawable.ic_copy)
+    }
+
+    fun Context.copyToDriveProgressNotification(): NotificationCompat.Builder {
+        return progressNotification(getString(R.string.buttonCopyToDrive), R.drawable.ic_drive)
     }
 
     fun Context.trashOperationProgressNotification(): NotificationCompat.Builder {

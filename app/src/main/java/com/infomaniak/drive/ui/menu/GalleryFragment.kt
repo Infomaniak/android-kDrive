@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -326,6 +326,7 @@ class GalleryFragment : MultiSelectFragment(
             BulkOperationType.MOVE,
             BulkOperationType.MANAGE_CATEGORIES,
             BulkOperationType.COLOR_FOLDER,
+            BulkOperationType.COPY_TO_DRIVE,
             BulkOperationType.RESTORE_IN, BulkOperationType.RESTORE_TO_ORIGIN, BulkOperationType.DELETE_PERMANENTLY -> Unit
         }
     }
