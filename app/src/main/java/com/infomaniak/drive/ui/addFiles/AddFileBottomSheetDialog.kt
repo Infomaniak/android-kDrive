@@ -37,9 +37,9 @@ import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
-import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeBottomSheetDialog
+import com.infomaniak.drive.GeniusScanUtils.getScanFlowContract
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MainApplication
@@ -93,18 +93,14 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
         if (it.resultCode == Activity.RESULT_OK) onCaptureMediaResult() else dismiss()
     }
 
-    private val scanFlowResultLauncher = registerForActivityResult(StartActivityForResult()) { activityResult ->
+    private val scanFlowResultLauncher = registerForActivityResult(getScanFlowContract()) { scanFlowOutput ->
         backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)
-        activityResult.whenResultIsOk {
-            it?.let { data ->
-                val folder = when (parentFragment?.childFragmentManager?.fragments?.getOrNull(0)?.javaClass) {
-                    FileListFragment::class.java, SharedWithMeFragment::class.java -> currentFolderFile
-                    else -> null
-                }
-
-                requireActivity().scanResultProcessing(data, folder)
-            }
+        val folder = when (parentFragment?.childFragmentManager?.fragments?.getOrNull(0)?.javaClass) {
+            FileListFragment::class.java, SharedWithMeFragment::class.java -> currentFolderFile
+            else -> null
         }
+
+        requireActivity().scanResultProcessing(scanFlowOutput, folder)
         dismiss()
     }
 

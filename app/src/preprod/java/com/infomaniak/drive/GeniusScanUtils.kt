@@ -17,6 +17,11 @@
  */
 package com.infomaniak.drive
 
+import android.content.Intent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.infomaniak.drive.utils.IGeniusScanUtils
 
-object GeniusScanUtils : IGeniusScanUtils
+object GeniusScanUtils : IGeniusScanUtils<Intent, ActivityResult> {
+    override fun getScanFlowContract() = ActivityResultContracts.StartActivityForResult()
+}
