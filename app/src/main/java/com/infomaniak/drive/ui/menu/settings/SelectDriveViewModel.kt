@@ -34,7 +34,7 @@ class SelectDriveViewModel : ViewModel() {
         return DriveInfosController.getEligibleDestinationDrives(
             userId = selectedUserId.value,
             excludedDriveId = excludedDriveId,
-            sharedWithMe = if (showSharedWithMe) null else false,
+            sharedWithMe = if (showSharedWithMe) null else false, // null contains shared with me and non-shared drives
         )
     }
 }

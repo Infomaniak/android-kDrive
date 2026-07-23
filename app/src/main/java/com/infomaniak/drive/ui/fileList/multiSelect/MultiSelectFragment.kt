@@ -109,30 +109,6 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         }
     }
 
-    private fun performCopyToDriveOperation(
-        result: SelectFolderActivityArgs,
-        copyToDriveData: CopyToDriveData,
-        targetDriveId: Int,
-    ) {
-        val destinationFolder = File(id = result.folderId, name = result.folderName, driveId = targetDriveId)
-        val mediator = mainViewModel.createMultiSelectMediator()
-        enableMultiSelectButtons(false)
-
-        mainViewModel.copyFileToAnotherDrive(
-            fileId = copyToDriveData.fileId,
-            fileName = copyToDriveData.fileName,
-            sourceDriveId = copyToDriveData.sourceDriveId,
-            destinationDriveId = targetDriveId,
-            destinationFolderId = result.folderId,
-        )
-        mediator.addSource(
-            mainViewModel.copyToDriveResult,
-            mainViewModel.updateMultiSelectMediator(mediator),
-        )
-
-        observeMediator(mediator, 1, BulkOperationType.COPY_TO_DRIVE, destinationFolder, dialog = null)
-    }
-
     abstract fun initMultiSelectLayout(): MultiSelectLayoutBinding?
     abstract fun initMultiSelectToolbar(): CollapsingToolbarLayout?
     abstract fun initSwipeRefreshLayout(): SwipeRefreshLayout?
@@ -598,6 +574,30 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         closeMultiSelect()
 
         onAllIndividualActionsFinished(type)
+    }
+
+    private fun performCopyToDriveOperation(
+        result: SelectFolderActivityArgs,
+        copyToDriveData: CopyToDriveData,
+        targetDriveId: Int,
+    ) {
+        val destinationFolder = File(id = result.folderId, name = result.folderName, driveId = targetDriveId)
+        val mediator = mainViewModel.createMultiSelectMediator()
+        enableMultiSelectButtons(false)
+
+        mainViewModel.copyFileToAnotherDrive(
+            fileId = copyToDriveData.fileId,
+            fileName = copyToDriveData.fileName,
+            sourceDriveId = copyToDriveData.sourceDriveId,
+            destinationDriveId = targetDriveId,
+            destinationFolderId = result.folderId,
+        )
+        mediator.addSource(
+            mainViewModel.copyToDriveResult,
+            mainViewModel.updateMultiSelectMediator(mediator),
+        )
+
+        observeMediator(mediator, 1, BulkOperationType.COPY_TO_DRIVE, destinationFolder, dialog = null)
     }
 
     private data class CopyToDriveData(
