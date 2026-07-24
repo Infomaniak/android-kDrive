@@ -1,0 +1,5 @@
+- Add ability to copy a file to another drive
+- Add text selection and copying in PDF files
+- Add Picture-in-Picture mode for video files
+- Add foreground service to listen to music files even when the app is in background or the phone is locked
+- Support redirection when the public share has a password and is owned by the current user

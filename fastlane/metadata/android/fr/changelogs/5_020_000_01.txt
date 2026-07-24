@@ -1,0 +1,5 @@
+- Ajout de la possibilité de copier un fichier sur un autre drive
+- Ajout de la sélection et de la copie de texte au sein d'un fichier PDF
+- Ajout du mode « Picture-in-Picture » pour les fichiers vidéo
+- Ajout d'un service au premier plan permettant d'écouter des fichiers musicaux même lorsque l'application est en arrière-plan ou que le téléphone est verrouillé
+- Prise en charge de la redirection lorsque le partage public est protégé par un mot de passe et appartient à l'utilisateur actuel
