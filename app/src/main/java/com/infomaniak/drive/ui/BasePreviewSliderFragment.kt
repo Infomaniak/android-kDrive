@@ -27,7 +27,9 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle.State
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionManager
@@ -168,9 +170,11 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            mainViewModel.isNetworkAvailable.collectLatest { isNetworkAvailable ->
-                (bottomSheetView as? FileInfoActionsView)?.updateNetworkAvailability(isNetworkAvailable)
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(State.STARTED) {
+                mainViewModel.isNetworkAvailable.collectLatest { isNetworkAvailable ->
+                    (bottomSheetView as? FileInfoActionsView)?.updateNetworkAvailability(isNetworkAvailable)
+                }
             }
         }
     }
