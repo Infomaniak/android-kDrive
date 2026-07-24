@@ -280,7 +280,7 @@ class GalleryFragment : MultiSelectFragment(
     override fun getAllSelectedFilesCount(): Int? = null
 
     fun onMoveButtonClicked() = with(multiSelectManager.selectedItems) {
-        moveFiles(disabledFolderId = if (count() == 1) first()?.parentId else null)
+        moveFiles(disabledDestinationFolderId = if (count() == 1) first()?.parentId else null)
     }
 
     override fun performBulkOperation(

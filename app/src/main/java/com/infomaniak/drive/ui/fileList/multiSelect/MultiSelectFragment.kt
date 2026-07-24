@@ -224,8 +224,15 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         ).toBundle()
     }
 
-    fun moveFiles(disabledFolderId: Int?) {
-        requireContext().moveFileClicked(disabledFolderId, selectFolderResultLauncher, mainViewModel)
+    fun moveFiles(disabledDestinationFolderId: Int?) = with(multiSelectManager) {
+        requireContext().moveFileClicked(
+            disabledDestinationFolderId = disabledDestinationFolderId,
+            selectFolderResultLauncher = selectFolderResultLauncher,
+            mainViewModel = mainViewModel,
+            filesToMove = getValidSelectedItems(),
+            disabledNavigationParentFolderId = if (isSelectAllOn) currentFolder?.id else null,
+            exceptedNavigationFolderIds = if (isSelectAllOn) exceptedItemsIds.toIntArray() else null,
+        )
     }
 
     fun deleteFiles(allSelectedFilesCount: Int? = null) {

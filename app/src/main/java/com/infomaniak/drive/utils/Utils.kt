@@ -22,7 +22,6 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import android.view.LayoutInflater
 import androidx.activity.result.ActivityResultLauncher
@@ -229,18 +228,25 @@ object Utils {
     fun convertGigaByteToBytes(gigaBytes: Double) = (gigaBytes * 1024.0.pow(3)).toLong()
 
     fun Context.moveFileClicked(
-        disabledFolderId: Int?,
+        disabledDestinationFolderId: Int?,
         selectFolderResultLauncher: ActivityResultLauncher<Intent>,
         mainViewModel: MainViewModel,
+        filesToMove: List<File> = emptyList(),
+        disabledNavigationParentFolderId: Int? = null,
+        exceptedNavigationFolderIds: IntArray? = null,
     ) {
         mainViewModel.ignoreSyncOffline = true
+        val disabledNavigationFolderIds = filesToMove.filter { it.isFolder() }.map { it.id }.toIntArray()
         Intent(this, SelectFolderActivity::class.java).apply {
             putExtras(
                 SelectFolderActivityArgs(
                     userId = AccountUtils.currentUserId,
                     driveId = AccountUtils.currentDriveId,
-                    folderId = disabledFolderId ?: -1,
-                    disabledFolderId = disabledFolderId ?: -1,
+                    folderId = disabledDestinationFolderId ?: -1,
+                    disabledDestinationFolderId = disabledDestinationFolderId ?: -1,
+                    disabledNavigationFolderIds = disabledNavigationFolderIds,
+                    disabledNavigationParentFolderId = disabledNavigationParentFolderId ?: -1,
+                    exceptedNavigationFolderIds = exceptedNavigationFolderIds,
                     customArgs = bundleOf(
                         MultiSelectFragment.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE,
                         SINGLE_OPERATION_CUSTOM_TAG to SingleOperation.MOVE.name,

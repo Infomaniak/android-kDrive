@@ -631,7 +631,12 @@ class FileInfoActionsView @JvmOverloads constructor(
             mainViewModel: MainViewModel
         ) {
             trackFileActionEvent(MatomoName.Move)
-            currentContext.moveFileClicked(folderId, selectFolderResultLauncher, mainViewModel)
+            currentContext.moveFileClicked(
+                disabledDestinationFolderId = folderId,
+                selectFolderResultLauncher = selectFolderResultLauncher,
+                mainViewModel = mainViewModel,
+                filesToMove = listOfNotNull(currentFile)
+            )
         }
 
         @CallSuper
