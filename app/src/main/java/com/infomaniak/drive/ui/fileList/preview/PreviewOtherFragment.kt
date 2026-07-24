@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentPreviewOthersBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 
 class PreviewOtherFragment : PreviewFragment() {
+
+    override val noNetworkBinding: FragmentPreviewOthersBinding get() = binding
 
     private var binding: FragmentPreviewOthersBinding by safeBinding()
 
@@ -47,6 +50,19 @@ class PreviewOtherFragment : PreviewFragment() {
 
         container.setOnClickListener { toggleFullscreen() }
 
+        if (isFileUnavailableOffline()) {
+            showNoNetwork()
+        } else {
+            showOpenWith()
+        }
+    }
+
+    override fun reloadPreviewIfNeeded() = with(binding) {
+        previewDescription.setText(R.string.previewNoPreview)
+        showOpenWith()
+    }
+
+    private fun FragmentPreviewOthersBinding.showOpenWith() {
         val shouldDisplayOpenWithButton = !file.isPublicShared() || previewSliderViewModel.publicShareCanDownload
         bigOpenWithButton.isVisible = shouldDisplayOpenWithButton
         if (shouldDisplayOpenWithButton) bigOpenWithButton.setOnClickListener { openWithClicked() }
