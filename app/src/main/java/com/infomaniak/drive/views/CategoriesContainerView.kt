@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,10 +76,10 @@ class CategoriesContainerView @JvmOverloads constructor(
     }
 
     private fun setClickListener() {
-        if (canPutCategoryOnFile && isCategoryInteractionEnabled) {
-            binding.categoriesContainerView.setOnClickListener { onClicked?.invoke() }
-        } else {
-            binding.categoriesContainerView.setOnClickListener(null)
+        val canInteract = canPutCategoryOnFile && isCategoryInteractionEnabled
+        binding.categoriesContainerView.apply {
+            if (canInteract) setOnClickListener { onClicked?.invoke() }
+            isClickable = canInteract
         }
     }
 
