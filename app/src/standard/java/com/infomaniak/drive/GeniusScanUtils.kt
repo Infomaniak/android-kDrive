@@ -27,10 +27,12 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import com.geniusscansdk.core.GeniusScanSDK
 import com.geniusscansdk.core.LicenseException
 import com.geniusscansdk.scanflow.ScanActivity
-import com.geniusscansdk.scanflow.ScanConfiguration
-import com.geniusscansdk.scanflow.ScanConfiguration.OcrConfiguration
-import com.geniusscansdk.scanflow.ScanConfiguration.OcrOutputFormat
-import com.geniusscansdk.scanflow.ScanResult
+import com.geniusscansdk.scanflow.FlowOutput
+import com.geniusscansdk.scanflow.ScanFlowConfiguration
+import com.geniusscansdk.scanflow.ScanFlowConfiguration.OcrConfiguration
+import com.geniusscansdk.scanflow.ScanFlowConfiguration.OcrOutputFormat
+import com.geniusscansdk.scanflow.ScanFlowErrorCode
+import com.geniusscansdk.scanflow.ScanFlowResult
 import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.legacy.utils.Utils
@@ -47,11 +49,7 @@ import io.sentry.Sentry
 import java.util.Date
 import java.util.EnumSet
 
-object GeniusScanUtils : IGeniusScanUtils {
-
-    private const val SCAN_CONFIGURATION_KEY = "SCAN_CONFIGURATION_KEY"
-    private const val SCAN_RESULT_KEY = "SCAN_RESULT_KEY"
-    private const val ERROR_KEY = "ERROR_KEY"
+object GeniusScanUtils : IGeniusScanUtils<ScanFlowConfiguration, FlowOutput<ScanFlowResult>> {
 
     /**
      * To keep the OCR process from taking too long, we always include the three languages most commonly used by Infomaniak.
@@ -97,23 +95,40 @@ object GeniusScanUtils : IGeniusScanUtils {
         false
     }
 
-    override fun Activity.startScanFlow(resultLauncher: ActivityResultLauncher<Intent>) {
+    override fun getScanFlowContract() = ScanActivity.Contract()
+
+    override fun Activity.startScanFlow(resultLauncher: ActivityResultLauncher<ScanFlowConfiguration>) {
         ShortcutManagerCompat.reportShortcutUsed(this, Shortcuts.SCAN.id)
 
         removeOldScanFiles()
-        val scanConfiguration = ScanConfiguration().apply {
+        val scanConfiguration = ScanFlowConfiguration().apply {
             backgroundColor = ContextCompat.getColor(this@startScanFlow, R.color.previewBackground)
             foregroundColor = ContextCompat.getColor(this@startScanFlow, R.color.white)
             highlightColor = ContextCompat.getColor(this@startScanFlow, R.color.accent)
             ocrConfiguration = getOcrConfiguration()
-            defaultCurvatureCorrection = ScanConfiguration.CurvatureCorrectionMode.ENABLED
+            defaultCurvatureCorrection = ScanFlowConfiguration.CurvatureCorrectionMode.ENABLED
         }
-        scanWithConfiguration(scanConfiguration, resultLauncher)
+        resultLauncher.launch(scanConfiguration)
     }
 
-    override fun Activity.scanResultProcessing(intent: Intent, folder: File?) {
+    override fun Activity.scanResultProcessing(result: FlowOutput<ScanFlowResult>, folder: File?) {
         try {
-            val geniusScanFile = intent.getScanResult().multiPageDocument!!
+            val scanResult = when (result) {
+                is FlowOutput.Success -> result.result
+                is FlowOutput.Error -> {
+                    if (result.error.code != ScanFlowErrorCode.CANCELLATION) {
+                        result.error.underlyingError?.let { Sentry.captureException(it) }
+                        showSnackbar(R.string.anErrorHasOccurred)
+                    }
+                    return
+                }
+            }
+
+            val geniusScanFile = scanResult.multiPageDocument ?: run {
+                Sentry.captureMessage("GeniusScan SDK v6 returned null multiPageDocument after successful scan flow")
+                showSnackbar(R.string.anErrorHasOccurred)
+                return
+            }
             val newName = "scan_${Date().format(FORMAT_NEW_FILE)}.${geniusScanFile.extension}"
             val scanFile = IOFile(geniusScanFile.parent, newName)
             geniusScanFile.renameTo(scanFile)
@@ -138,21 +153,5 @@ object GeniusScanUtils : IGeniusScanUtils {
             Sentry.captureException(exception)
             showSnackbar(R.string.anErrorHasOccurred)
         }
-    }
-
-    private fun Context.scanWithConfiguration(
-        scanConfiguration: ScanConfiguration,
-        resultLauncher: ActivityResultLauncher<Intent>,
-    ) {
-        Intent(this, ScanActivity::class.java).apply {
-            putExtra(SCAN_CONFIGURATION_KEY, scanConfiguration)
-            resultLauncher.launch(this)
-        }
-    }
-
-    private fun Intent.getScanResult(): ScanResult {
-        (getSerializableExtra(ERROR_KEY) as? Exception)?.let { throw it }
-
-        return getSerializableExtra(SCAN_RESULT_KEY) as ScanResult
     }
 }
