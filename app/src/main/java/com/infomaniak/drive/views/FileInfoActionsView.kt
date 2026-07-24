@@ -133,7 +133,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
-    private fun computeFileRights(file: File, rights: Rights) = with(binding) {
+    private fun computeFileRights(file: File, rights: Rights, hasOtherDrivesAvailable: Boolean) = with(binding) {
         applyNetworkDependentState(file, rights)
 
         if (!file.dropbox?.url.isNullOrBlank()) {
@@ -195,6 +195,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         downloadFile.isEnabled = hasNetwork
         moveFile.isEnabled = hasNetwork
         duplicateFile.isEnabled = hasNetwork
+        copyToDrive.isEnabled = hasNetwork
         renameFile.isEnabled = hasNetwork
         leaveShare.isEnabled = hasNetwork
         deleteFile.isEnabled = hasNetwork

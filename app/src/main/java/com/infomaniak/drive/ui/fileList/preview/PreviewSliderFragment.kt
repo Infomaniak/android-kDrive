@@ -111,7 +111,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             isSharedWithMe = userDrive.sharedWithMe,
             hideActions = false,
         )
-        bottomSheetView.updateCurrentFile(currentFile)
+        bottomSheetView.updateCurrentFile(currentFile, mainViewModel.hasEligibleDestinationDrives(currentFile))
 
         super.onViewCreated(view, savedInstanceState)
 
