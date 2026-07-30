@@ -263,6 +263,7 @@
     <string name="errorCache">Σφάλμα προσωρινής αποθήκευσης</string>
     <string name="errorCategoryAlreadyExists">Υπάρχει ήδη κατηγορία με το ίδιο όνομα</string>
     <string name="errorConflict">Υπάρχει ήδη ένα στοιχείο με το ίδιο όνομα σε αυτήν την τοποθεσία</string>
+    <string name="errorConflictPartOfTheSameSubtree">Η μετακίνηση δεν είναι δυνατή: ο φάκελος προορισμού βρίσκεται μέσα στον φάκελο προέλευσης</string>
     <string name="errorCopyToDrive">Η μεταφορά σε άλλη μονάδα δίσκου απέτυχε</string>
     <string name="errorDelete">Σφάλμα διαγραφής</string>
     <string name="errorDeviceStorage">Ανεπαρκής αποθήκευση συσκευής</string>
