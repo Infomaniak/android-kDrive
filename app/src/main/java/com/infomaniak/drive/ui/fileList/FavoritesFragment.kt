@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.fileList
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -44,6 +45,7 @@ class FavoritesFragment : FileListFragment() {
     override val noItemsRootTitle = R.string.favoritesNoFile
 
     private val navigationArgs: FavoritesFragmentArgs by navArgs()
+    private val selectFolderViewModel: SelectFolderActivity.SelectFolderViewModel by activityViewModels()
     override val fileIdToPreview: Int get() = navigationArgs.previewFileId
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
@@ -68,6 +70,7 @@ class FavoritesFragment : FileListFragment() {
     private fun setupAdapter() {
         fileAdapter.apply {
             isSelectingFolder = requireActivity() is SelectFolderActivity
+            disabledNavigationFolderIds = selectFolderViewModel.disabledNavigationFolderIds
             onEmptyList = { changeNoFilesLayoutVisibility(hideFileList = true, changeControlsVisibility = false) }
 
             onFileClicked = { file ->
