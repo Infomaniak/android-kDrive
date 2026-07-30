@@ -387,12 +387,7 @@ class FileInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), FileInfo
                         (fileRequest.data as? CancellableAction)?.setDriveAndReturn(currentFile.driveId)
                     )
                 } else {
-                    val resource = if (fileRequest.errorCode == LIMIT_EXCEEDED_ERROR_CODE) {
-                        R.string.errorFilesLimitExceeded
-                    } else {
-                        R.string.errorMove
-                    }
-
+                    val resource = fileRequest.errorResId ?: R.string.errorMove
                     transmitActionAndPopBack(getString(resource))
                 }
             }
