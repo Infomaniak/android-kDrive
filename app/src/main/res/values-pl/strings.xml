@@ -273,6 +273,7 @@
     <string name="errorCache">Błąd buforowania</string>
     <string name="errorCategoryAlreadyExists">Kategoria o tej samej nazwie już istnieje</string>
     <string name="errorConflict">Element o tej samej nazwie już istnieje w tym miejscu</string>
+    <string name="errorConflictPartOfTheSameSubtree">Przenoszenie niedostępne: folder docelowy znajduje się wewnątrz folderu źródłowego</string>
     <string name="errorCopyToDrive">Przesyłanie na inny dysk nie powiodło się</string>
     <string name="errorDelete">Błąd usuwania</string>
     <string name="errorDeviceStorage">Niewystarczająca pamięć urządzenia</string>
