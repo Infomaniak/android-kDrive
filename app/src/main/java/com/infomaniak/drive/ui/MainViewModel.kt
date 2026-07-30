@@ -234,7 +234,7 @@ class MainViewModel(
 
     fun createMultiSelectMediator(): MediatorLiveData<MultiSelectMediatorState> =
         MediatorLiveData<MultiSelectMediatorState>().apply {
-            value = MultiSelectMediatorState(numberOfSuccessfulActions = 0, totalOfActions = 0, errorCode = null)
+            value = MultiSelectMediatorState(numberOfSuccessfulActions = 0, totalOfActions = 0, errorResId = null)
         }
 
     fun updateMultiSelectMediator(mediator: MediatorLiveData<MultiSelectMediatorState>): (FileResult) -> Unit = { fileRequest ->
@@ -242,11 +242,12 @@ class MainViewModel(
         if (fileRequest.isSuccess) numberOfSuccessfulActions++
 
         val totalOfActions = mediator.value!!.totalOfActions + 1
+        val currentErrorResId = mediator.value!!.errorResId
 
         mediator.value = MultiSelectMediatorState(
             numberOfSuccessfulActions,
             totalOfActions,
-            fileRequest.errorCode,
+            errorResId = currentErrorResId ?: fileRequest.errorResId.takeIf { !fileRequest.isSuccess },
         )
     }
 
@@ -342,7 +343,7 @@ class MainViewModel(
             onSuccess?.invoke(file.id)
         }
 
-        emit(FileResult(isSuccess = apiResponse.isSuccess(), errorCode = apiResponse.error?.code))
+        emit(FileResult(isSuccess = apiResponse.isSuccess(), errorCode = apiResponse.error?.code, errorResId = apiResponse.translateError().takeIf { !apiResponse.isSuccess() }))
     }
 
     fun renameFile(file: File, newName: String) = liveData(Dispatchers.IO) {
@@ -730,7 +731,7 @@ class MainViewModel(
     data class MultiSelectMediatorState(
         var numberOfSuccessfulActions: Int,
         var totalOfActions: Int,
-        var errorCode: String?,
+        var errorResId: Int? = null,
     )
 
     companion object {

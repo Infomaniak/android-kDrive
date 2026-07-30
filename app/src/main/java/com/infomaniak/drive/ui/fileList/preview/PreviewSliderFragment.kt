@@ -330,12 +330,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
                     mainViewModel.refreshActivities.value = true
                     showSnackbar(getString(R.string.allFileMove, currentFile.name, destinationFolder.name))
                 } else {
-                    val messageRes = if (fileRequest.errorCode == LIMIT_EXCEEDED_ERROR_CODE) {
-                        R.string.errorFilesLimitExceeded
-                    } else {
-                        R.string.errorMove
-                    }
-
+                    val messageRes = fileRequest.errorResId ?: R.string.errorMove
                     showSnackbar(messageRes)
                 }
             }

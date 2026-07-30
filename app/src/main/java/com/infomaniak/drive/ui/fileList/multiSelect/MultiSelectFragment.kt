@@ -494,7 +494,7 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
                     )
                 } else {
                     mediator.value = mediator.value?.let {
-                        MultiSelectMediatorState(it.numberOfSuccessfulActions, it.totalOfActions + 1, it.errorCode)
+                        MultiSelectMediatorState(it.numberOfSuccessfulActions, it.totalOfActions + 1)
                     }
                 }
             }
@@ -556,17 +556,19 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         destinationFolder: File?,
         dialog: Dialog? = null,
     ) {
-        mediator.observe(viewLifecycleOwner) { (success, total, error) ->
-            if (total == fileCount) {
+        mediator.observe(viewLifecycleOwner) { state ->
+            val success = state.numberOfSuccessfulActions
+            val errorResId = state.errorResId
+            if (state.totalOfActions == fileCount) {
                 dialog?.dismiss()
-                handleIndividualActionsResult(success, error, type, destinationFolder)
+                handleIndividualActionsResult(success, errorResId, type, destinationFolder)
             }
         }
     }
 
     private fun handleIndividualActionsResult(
         success: Int,
-        errorCode: String?,
+        errorResId: Int?,
         type: BulkOperationType,
         destinationFolder: File?,
     ) {
