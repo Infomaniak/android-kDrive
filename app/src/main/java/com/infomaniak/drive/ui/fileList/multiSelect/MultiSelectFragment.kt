@@ -494,7 +494,7 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
                     )
                 } else {
                     mediator.value = mediator.value?.let {
-                        MultiSelectMediatorState(it.numberOfSuccessfulActions, it.totalOfActions + 1)
+                        it.copy(totalOfActions = it.totalOfActions + 1)
                     }
                 }
             }

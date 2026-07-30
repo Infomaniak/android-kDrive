@@ -71,6 +71,8 @@ class FavoritesFragment : FileListFragment() {
         fileAdapter.apply {
             isSelectingFolder = requireActivity() is SelectFolderActivity
             disabledNavigationFolderIds = selectFolderViewModel.disabledNavigationFolderIds
+            disabledNavigationParentFolderId = selectFolderViewModel.disabledNavigationParentFolderId
+            exceptedNavigationFolderIds = selectFolderViewModel.exceptedNavigationFolderIds
             onEmptyList = { changeNoFilesLayoutVisibility(hideFileList = true, changeControlsVisibility = false) }
 
             onFileClicked = { file ->

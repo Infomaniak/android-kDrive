@@ -170,13 +170,20 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
     private suspend fun isInsideMovedFolder(file: File): Boolean = withContext(Dispatchers.IO) {
         val movedFolderIds = selectFolderViewModel.disabledNavigationFolderIds
-        if (movedFolderIds.isEmpty()) return@withContext false
+        val movedParentFolderId = selectFolderViewModel.disabledNavigationParentFolderId
+        if (movedFolderIds.isEmpty() && movedParentFolderId == null) return@withContext false
 
+        val visitedIds = mutableSetOf<Int>()
         var current: File? = file
-        while (current != null) {
-            if (current.id in movedFolderIds) return@withContext true
+
+        while (current != null && visitedIds.add(current.id)) {
+            val isMovedChildOfSource = current.parentId == movedParentFolderId
+                    && current.id !in selectFolderViewModel.exceptedNavigationFolderIds
+            if (current.id in movedFolderIds || isMovedChildOfSource) return@withContext true
+
             current = FileController.getParentFile(current.id, navigationArgs.userDrive)
         }
+
         false
     }
 

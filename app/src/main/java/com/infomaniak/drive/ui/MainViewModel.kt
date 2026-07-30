@@ -344,7 +344,13 @@ class MainViewModel(
             onSuccess?.invoke(file.id)
         }
 
-        emit(FileResult(isSuccess = apiResponse.isSuccess(), errorCode = apiResponse.error?.code, errorResId = apiResponse.translateError().takeIf { !apiResponse.isSuccess() }))
+        emit(
+            FileResult(
+                isSuccess = apiResponse.isSuccess(),
+                errorCode = apiResponse.error?.code,
+                errorResId = apiResponse.translateError(defaultMessage = R.string.errorMove).takeIf { !apiResponse.isSuccess() },
+            )
+        )
     }
 
     fun renameFile(file: File, newName: String) = liveData(Dispatchers.IO) {
