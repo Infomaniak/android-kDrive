@@ -417,32 +417,34 @@ open class FileAdapter(
 
     fun contains(fileName: String) = fileList.any { it.name == fileName }
 
-    private fun FileItemViewHolder.checkIfEnableFile(file: File) = when {
-        uploadInProgress -> {
-            if (file.isPendingUploadFolder()) {
-                fileDate?.text = file.path
-            } else {
-                val enable = file.currentProgress > 0 && binding.context.isSyncActive()
-                val title = when {
-                    enable -> R.string.uploadInProgressTitle
-                    pendingWifiConnection -> R.string.uploadNetworkErrorWifiRequired
-                    else -> R.string.uploadInProgressPending
-                }
-                fileDate?.setText(title)
-            }
+    private fun FileItemViewHolder.checkIfEnableFile(file: File) {
+        if (uploadInProgress) {
+            displayUploadStatus(file)
+        } else if (isSelectingFolder || offlineMode) {
+            enabledFile(file.isNavigableFolder() || (offlineMode && file.isOffline))
+        } else {
+            enabledFile()
         }
-        else -> {
-            if (isSelectingFolder || offlineMode) {
-                val isMovedChildOfSource = file.parentId == disabledNavigationParentFolderId
-                        && file.id !in exceptedNavigationFolderIds
-                val isNavigableFolder = file.isFolder()
-                        && file.id !in disabledNavigationFolderIds
-                        && !isMovedChildOfSource
-                enabledFile(isNavigableFolder || (offlineMode && file.isOffline))
-            } else {
-                enabledFile()
+    }
+
+    private fun FileItemViewHolder.displayUploadStatus(file: File) {
+        if (file.isPendingUploadFolder()) {
+            fileDate?.text = file.path
+        } else {
+            val enable = file.currentProgress > 0 && binding.context.isSyncActive()
+            val title = when {
+                enable -> R.string.uploadInProgressTitle
+                pendingWifiConnection -> R.string.uploadNetworkErrorWifiRequired
+                else -> R.string.uploadInProgressPending
             }
+            fileDate?.setText(title)
         }
+    }
+
+    private fun File.isNavigableFolder(): Boolean {
+        val isMovedChildOfSource = parentId == disabledNavigationParentFolderId
+                && id !in exceptedNavigationFolderIds
+        return isFolder() && id !in disabledNavigationFolderIds && !isMovedChildOfSource
     }
 
     private fun FileItemViewHolder.enabledFile(enable: Boolean = true) {
