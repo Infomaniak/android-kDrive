@@ -48,6 +48,7 @@ import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FolderFilesProvider
@@ -347,7 +348,11 @@ class MainViewModel(
             FileResult(
                 isSuccess = apiResponse.isSuccess(),
                 errorCode = apiResponse.error?.code,
-                errorResId = apiResponse.translateError(defaultMessage = R.string.errorMove).takeIf { !apiResponse.isSuccess() },
+                errorResId = when {
+                    apiResponse.isSuccess() -> null
+                    apiResponse.error?.code == ErrorCode.LIMIT_EXCEEDED_ERROR -> R.string.errorFilesLimitExceeded
+                    else -> apiResponse.translateError(defaultMessage = R.string.errorMove)
+                },
             )
         )
     }
