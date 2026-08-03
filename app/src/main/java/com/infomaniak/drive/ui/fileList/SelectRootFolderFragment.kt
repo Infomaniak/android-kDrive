@@ -173,18 +173,20 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
         val movedParentFolderId = selectFolderViewModel.disabledNavigationParentFolderId
         if (movedFolderIds.isEmpty() && movedParentFolderId == null) return@withContext false
 
-        val visitedIds = mutableSetOf<Int>()
-        var current: File? = file
+        FileController.getRealmInstance(navigationArgs.userDrive).use { realm ->
+            val visitedIds = mutableSetOf<Int>()
+            var current: File? = file
 
-        while (current != null && visitedIds.add(current.id)) {
-            val isMovedChildOfSource = current.parentId == movedParentFolderId
-                    && current.id !in selectFolderViewModel.exceptedNavigationFolderIds
-            if (current.id in movedFolderIds || isMovedChildOfSource) return@withContext true
+            while (current != null && visitedIds.add(current.id)) {
+                val isMovedChildOfSource = current.parentId == movedParentFolderId
+                        && current.id !in selectFolderViewModel.exceptedNavigationFolderIds
+                if (current.id in movedFolderIds || isMovedChildOfSource) return@use true
 
-            current = FileController.getParentFile(current.id, navigationArgs.userDrive)
+                current = FileController.getParentFileProxy(current.id, realm = realm)
+            }
+
+            false
         }
-
-        false
     }
 
     override fun fileListDirections(
