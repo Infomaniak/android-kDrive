@@ -491,7 +491,18 @@ class MainViewModel(
     ) = liveData(Dispatchers.IO) {
         ApiRepository.duplicateFile(file, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
-            emit(FileResult(isSuccess = apiResponse.isSuccess(), data = apiResponse.data, errorCode = apiResponse.error?.code))
+            emit(
+                FileResult(
+                    isSuccess = apiResponse.isSuccess(),
+                    data = apiResponse.data,
+                    errorCode = apiResponse.error?.code,
+                    errorResId = when {
+                        apiResponse.isSuccess() -> null
+                        apiResponse.error?.code == ErrorCode.LIMIT_EXCEEDED_ERROR -> R.string.errorFilesLimitExceeded
+                        else -> apiResponse.translateError(defaultMessage = R.string.errorDuplicate)
+                    },
+                )
+            )
         }
     }
 
