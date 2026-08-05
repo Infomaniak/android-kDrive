@@ -175,10 +175,11 @@ class GalleryFragment : MultiSelectFragment(
     private fun observeApiResultPagination() {
         var dataAlreadyLoaded = galleryViewModel.needToRestoreFiles
 
-        if (galleryViewModel.needToRestoreFiles && galleryViewModel.galleryList.isEmpty()) {
+        if (galleryViewModel.needToRestoreFiles && galleryAdapter.itemList.isEmpty()) {
             // When the activity is recreated, the old data needs to be restored.
             // The livedata will return the last page, which is not what is needed.
             // TODO: (Realm kotlin) - Should be improved with realm kotlin, the current problem will no longer exist
+            galleryViewModel.clearGallery()
             galleryViewModel.restoreGalleryFiles()
             dataAlreadyLoaded = false
         }
