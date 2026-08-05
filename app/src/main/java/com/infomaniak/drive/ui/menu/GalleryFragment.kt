@@ -274,6 +274,13 @@ class GalleryFragment : MultiSelectFragment(
         }
     }
 
+    val currentPeriod get() = galleryViewModel.period
+
+    fun onPeriodSelected(newPeriod: GalleryPeriod) {
+        val displayList = galleryViewModel.updatePeriod(newPeriod) ?: return
+        galleryAdapter.setDisplayList(displayList)
+    }
+
     fun onRefreshGallery() {
         if (isResumed) {
             galleryViewModel.clearGallery()
@@ -342,15 +349,8 @@ class GalleryFragment : MultiSelectFragment(
     override fun onAllIndividualActionsFinished(type: BulkOperationType) {
 
         if (type == BulkOperationType.COPY) {
-            val oldTotal = galleryAdapter.itemList.size
-            val oldFirstItem = galleryAdapter.itemList.firstOrNull()
-
-            galleryAdapter.insertDuplicatedImages(galleryViewModel.prependDuplicatedImages(oldFirstItem))
-            val newTotal = galleryAdapter.itemList.count()
-            val newFirstItem = galleryAdapter.itemList.firstOrNull()
-
-            val positionStart = if (oldFirstItem != newFirstItem) 0 else 1
-            galleryAdapter.notifyItemRangeInserted(positionStart, newTotal - oldTotal)
+            val (prefix, offset) = galleryViewModel.prependDuplicatedImages(galleryAdapter.itemList.firstOrNull())
+            galleryAdapter.insertDuplicatedImages(prefix, offset)
         }
     }
 

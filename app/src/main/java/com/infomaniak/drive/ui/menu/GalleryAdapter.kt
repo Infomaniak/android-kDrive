@@ -143,9 +143,15 @@ class GalleryAdapter(
         updateMultiSelect?.invoke()
     }
 
-    fun insertDuplicatedImages(prefix: List<Any>) {
-        val index = if (prefix.firstOrNull() is File && itemList.firstOrNull() is String) 1 else 0
-        itemList.addAll(index, prefix)
+    fun setDisplayList(displayList: List<Any>) {
+        itemList.clear()
+        itemList.addAll(displayList)
+        notifyDataSetChanged()
+    }
+
+    fun insertDuplicatedImages(prefix: List<Any>, offset: Int) {
+        itemList.addAll(offset, prefix)
+        notifyItemRangeInserted(offset, prefix.size)
     }
 
     fun clearGallery() {

@@ -1175,7 +1175,22 @@
         android:id="@+id/menuGalleryFragment"
         android:name="com.infomaniak.drive.ui.menu.MenuGalleryFragment"
         android:label="MenuGalleryFragment"
-        tools:layout="@layout/fragment_menu_gallery" />
+        tools:layout="@layout/fragment_menu_gallery">
+        <action
+            android:id="@+id/action_menuGalleryFragment_to_galleryPeriodBottomSheetDialog"
+            app:destination="@id/galleryPeriodBottomSheetDialog" />
+    </fragment>
+
+    <dialog
+        android:id="@+id/galleryPeriodBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.menu.GalleryPeriodBottomSheetDialog"
+        android:label="GalleryPeriodBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_select">
+        <argument
+            android:name="period"
+            android:defaultValue="MONTH"
+            app:argType="com.infomaniak.drive.ui.menu.GalleryPeriod" />
+    </dialog>
 
     <fragment
         android:id="@+id/rootFilesFragment"

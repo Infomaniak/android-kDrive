@@ -35,6 +35,9 @@ class GalleryViewModel : ViewModel() {
     val galleryList = arrayListOf<File>()
     val duplicatedList = arrayListOf<File>()
 
+    var period: GalleryPeriod = GalleryPeriod.MONTH
+        private set
+
     private var getGalleryJob: Job? = null
 
     private var currentCursor: String? = null
@@ -69,35 +72,48 @@ class GalleryViewModel : ViewModel() {
 
         val displayList = arrayListOf<Any>()
         for (file in newFiles) {
-            val month = file.getMonth()
-            if (lastSectionTitle != month) {
-                displayList.add(month)
-                lastSectionTitle = month
+            val sectionTitle = file.getSectionTitle()
+            if (lastSectionTitle != sectionTitle) {
+                displayList.add(sectionTitle)
+                lastSectionTitle = sectionTitle
             }
             displayList.add(file)
         }
 
         return displayList
     }
+    
+    fun updatePeriod(newPeriod: GalleryPeriod): List<Any>? {
+        if (newPeriod == period) return null
 
-    fun prependDuplicatedImages(currentTopTitle: Any?): List<Any> {
+        period = newPeriod
+
+        val files = ArrayList(galleryList)
+        galleryList.clear()
+        lastSectionTitle = ""
+
+        return formatList(files)
+    }
+
+    fun prependDuplicatedImages(currentTopTitle: Any?): Pair<List<Any>, Int> {
         val prefix = arrayListOf<Any>()
         var newestSectionTitle = currentTopTitle
 
         galleryList.addAll(0, duplicatedList)
 
         for (file in duplicatedList) {
-            val month = file.getMonth()
-            if (newestSectionTitle != month) {
-                prefix.add(month)
-                newestSectionTitle = month
+            val sectionTitle = file.getSectionTitle()
+            if (newestSectionTitle != sectionTitle) {
+                prefix.add(sectionTitle)
+                newestSectionTitle = sectionTitle
             }
             prefix.add(file)
         }
 
         duplicatedList.clear()
 
-        return prefix
+        val offset = if (prefix.firstOrNull() is String) 0 else 1
+        return prefix to offset
     }
 
     fun removeFileFromGallery(fileId: Int) {
@@ -109,8 +125,8 @@ class GalleryViewModel : ViewModel() {
         lastSectionTitle = ""
     }
 
-    fun File.getMonth(): String {
-        return getLastModifiedAt().format("MMMM yyyy").capitalizeFirstChar()
+    private fun File.getSectionTitle(): String {
+        return getLastModifiedAt().format(period.pattern).capitalizeFirstChar()
     }
 
     private fun loadLastGallery(

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,9 @@ import androidx.core.view.isGone
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
+import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.toPx
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
@@ -64,6 +66,23 @@ class MenuGalleryFragment : Fragment() {
     private fun setUi(galleryFragment: GalleryFragment) = with(binding) {
 
         swipeRefreshLayout.setOnRefreshListener(galleryFragment::onRefreshGallery)
+
+        toolbar.setOnMenuItemClickListener { menuItem ->
+            if (menuItem.itemId == R.id.selectGalleryPeriod) {
+                safeNavigate(
+                    MenuGalleryFragmentDirections.actionMenuGalleryFragmentToGalleryPeriodBottomSheetDialog(
+                        galleryFragment.currentPeriod,
+                    )
+                )
+                true
+            } else {
+                false
+            }
+        }
+
+        getBackNavigationResult<GalleryPeriod>(GalleryPeriodBottomSheetDialog.GALLERY_PERIOD_KEY) {
+            galleryFragment.onPeriodSelected(it)
+        }
 
         multiSelectLayout.apply {
             selectAllButton.isGone = true
