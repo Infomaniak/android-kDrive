@@ -573,8 +573,8 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         destinationFolder: File?,
     ) {
         val title = when {
-            errorResId != null -> getString(errorResId)
-            success == 0 -> getString(R.string.anErrorHasOccurred)
+            errorResId == R.string.errorFilesLimitExceeded -> getString(errorResId)
+            success == 0 -> getString(errorResId ?: R.string.anErrorHasOccurred)
             type == BulkOperationType.COPY_TO_DRIVE -> getString(R.string.copyToDriveStarted, pendingCopyToDriveData?.fileName)
             else -> resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
         }
