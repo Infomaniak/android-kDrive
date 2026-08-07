@@ -109,9 +109,14 @@ abstract class CreateFolderFragment : Fragment() {
             onPermissionChanged = { toggleCreateFolderButton() },
         )
         if (permissionDependOnShare) {
-            getShare { share ->
-                adapter.updateData(buildPermissionList(share), share.users)
-            }
+            getShare(
+                onSuccess = { share ->
+                    adapter.updateData(buildPermissionList(share), share.users)
+                },
+                onError = {
+                    adapter.updateData(buildPermissionList(null))
+                }
+            )
         } else {
             adapter.updateData(buildPermissionList(null))
         }
@@ -122,14 +127,14 @@ abstract class CreateFolderFragment : Fragment() {
         createFolderButton.isEnabled = adapter.currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
     }
 
-    protected fun getShare(onSuccess: (share: Share) -> Unit) {
+    protected fun getShare(onSuccess: (share: Share) -> Unit, onError: () -> Unit) {
         newFolderViewModel.currentFolderId.value?.let { currentFolderId ->
             mainViewModel.getFileShare(currentFolderId, userDrive = newFolderViewModel.userDrive)
                 .observe(viewLifecycleOwner) { apiResponse ->
                     val share = apiResponse.data
                     when {
                         share != null -> onSuccess(share)
-                        else -> showSnackbar(apiResponse.translateError())
+                        else -> onError()
                     }
                 }
         }
