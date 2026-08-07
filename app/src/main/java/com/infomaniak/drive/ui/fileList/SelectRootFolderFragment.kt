@@ -151,7 +151,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
     private suspend fun CardviewFileListBinding.setupRecentFolderView(file: File) {
         root.isVisible = true
 
-        val isForbiddenDestination = isInsideMovedFolder(file)
+        val isForbiddenDestination = isInsideMovedFolder(file.id)
         disabled.isVisible = isForbiddenDestination
 
         root.setOnClickListener {
@@ -168,14 +168,14 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
         itemViewFile.setFileItem(file = file, typeFolder = TypeFolder.recentFolder)
     }
 
-    private suspend fun isInsideMovedFolder(file: File): Boolean = withContext(Dispatchers.IO) {
+    private suspend fun isInsideMovedFolder(fileId: Int): Boolean = withContext(Dispatchers.IO) {
         val movedFolderIds = selectFolderViewModel.disabledNavigationFolderIds
         val movedParentFolderId = selectFolderViewModel.disabledNavigationParentFolderId
         if (movedFolderIds.isEmpty() && movedParentFolderId == null) return@withContext false
 
         FileController.getRealmInstance(navigationArgs.userDrive).use { realm ->
             val visitedIds = mutableSetOf<Int>()
-            var current: File? = file
+            var current = FileController.getFileProxyById(fileId, customRealm = realm)
 
             while (current != null && visitedIds.add(current.id)) {
                 val isMovedChildOfSource = current.parentId == movedParentFolderId
