@@ -144,7 +144,8 @@ class GalleryAdapter(
     }
 
     fun insertDuplicatedImages(prefix: List<Any>) {
-        itemList.addAll(0, prefix)
+        val index = if (prefix.firstOrNull() is File && itemList.firstOrNull() is String) 1 else 0
+        itemList.addAll(index, prefix)
     }
 
     fun clearGallery() {
