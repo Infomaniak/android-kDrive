@@ -1,0 +1,1 @@
+- Fix the impossibility of creating folders / drop boxes at the root of private files
