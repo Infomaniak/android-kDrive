@@ -51,6 +51,8 @@ import com.infomaniak.core.ui.view.extension.hideProgressCatching
 import com.infomaniak.core.ui.view.extension.initProgress
 import com.infomaniak.core.ui.view.extension.showProgressCatching
 import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.drive.MatomoDrive.MatomoName
+import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -301,6 +303,12 @@ class SaveExternalFilesActivity : BaseActivity() {
         binding.saveButton.apply {
             initProgress(this@SaveExternalFilesActivity)
             setOnClickListener {
+                if (getDestinationDrive()?.isDriveFull == true) {
+                    trackMyKSuiteEvent(MatomoName.TryAddingFileWithDriveFull.value)
+                    showSnackbar(R.string.errorQuotaExceeded)
+                    return@setOnClickListener
+                }
+
                 if (navigationArgs.isPublicShare) {
                     Intent().apply {
                         putExtra(DESTINATION_DRIVE_ID_KEY, selectDriveViewModel.selectedDrive.value?.id)
@@ -334,6 +342,11 @@ class SaveExternalFilesActivity : BaseActivity() {
                 }
             }
         }
+    }
+    
+    private fun getDestinationDrive(): Drive? = with(selectDriveViewModel) {
+        val sharedDriveId = driveIdSharedWithMe ?: return selectedDrive.value
+        return DriveInfosController.getDrive(userId = selectedUserId.value, driveId = sharedDriveId)
     }
 
     override fun onResume() {
