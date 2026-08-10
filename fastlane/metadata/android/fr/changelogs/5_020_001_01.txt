@@ -1,0 +1,1 @@
+- Fix de création des dossiers / boîtes de dépôt à la racine des fichiers privés
