@@ -84,9 +84,9 @@ class GalleryViewModel : ViewModel() {
         val prefix = arrayListOf<Any>()
         var newestSectionTitle = currentTopTitle
 
-        for (file in duplicatedList) {
-            galleryList.add(0, file)
+        galleryList.addAll(0, duplicatedList)
 
+        for (file in duplicatedList) {
             val month = file.getMonth()
             if (newestSectionTitle != month) {
                 prefix.add(month)
