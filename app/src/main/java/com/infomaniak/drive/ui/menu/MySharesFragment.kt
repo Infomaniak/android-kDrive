@@ -79,9 +79,7 @@ class MySharesFragment : FileSubTypeListFragment() {
             }
         }
         fileAdapter.isSelectingFolder = requireActivity() is SelectFolderActivity
-        fileAdapter.disabledNavigationFolderIds = selectFolderViewModel.disabledNavigationFolderIds
-        fileAdapter.disabledNavigationParentFolderId = selectFolderViewModel.disabledNavigationParentFolderId
-        fileAdapter.exceptedNavigationFolderIds = selectFolderViewModel.exceptedNavigationFolderIds
+        fileAdapter.navigationRestrictions = selectFolderViewModel.navigationRestrictions
     }
 
     override fun onMenuButtonClicked(
