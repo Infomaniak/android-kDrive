@@ -418,8 +418,8 @@ open class FileAdapter(
     private fun FileItemViewHolder.checkIfEnableFile(file: File) {
         when {
             uploadInProgress -> displayUploadStatus(file)
-            isSelectingFolder || offlineMode -> enabledFile(file.isNavigableFolder() || (offlineMode && file.isOffline))
-            else -> enabledFile()
+            isSelectingFolder || offlineMode -> enableFile(file.isNavigableFolder() || (offlineMode && file.isOffline))
+            else -> enableFile()
         }
     }
 
@@ -443,9 +443,9 @@ open class FileAdapter(
         return isFolder() && id !in navigationRestrictions.disabledFolderIds && !isMovedChildOfSource
     }
 
-    private fun FileItemViewHolder.enabledFile(shouldEnable: Boolean = true) {
-        disabledView.isGone = shouldEnable
-        cardView.isEnabled = shouldEnable
+    private fun FileItemViewHolder.enableFile(shouldEnabled: Boolean = true) {
+        disabledView.isGone = shouldEnabled
+        cardView.isEnabled = shouldEnabled
     }
 
     private fun onFileSelected(file: File, isSelected: Boolean) = with(multiSelectManager) {
