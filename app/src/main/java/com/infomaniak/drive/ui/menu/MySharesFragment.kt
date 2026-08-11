@@ -27,6 +27,7 @@ import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.file.SpecialFolder.MyShares
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MySharesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
@@ -43,7 +44,7 @@ class MySharesFragment : FileSubTypeListFragment() {
     override val noItemsRootTitle = R.string.mySharesNoFile
 
     private val navigationArgs: MySharesFragmentArgs by navArgs()
-    private val selectFolderViewModel: SelectFolderActivity.SelectFolderViewModel by activityViewModels()
+    private val selectFolderViewModel: SelectFolderViewModel by activityViewModels()
     override val fileIdToPreview: Int get() = navigationArgs.previewFileId
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout

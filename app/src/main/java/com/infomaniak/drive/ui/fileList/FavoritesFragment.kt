@@ -30,6 +30,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.file.SpecialFolder.Favorites
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
 import com.infomaniak.drive.ui.fileList.multiSelect.FavoritesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
@@ -45,7 +46,7 @@ class FavoritesFragment : FileListFragment() {
     override val noItemsRootTitle = R.string.favoritesNoFile
 
     private val navigationArgs: FavoritesFragmentArgs by navArgs()
-    private val selectFolderViewModel: SelectFolderActivity.SelectFolderViewModel by activityViewModels()
+    private val selectFolderViewModel: SelectFolderViewModel by activityViewModels()
     override val fileIdToPreview: Int get() = navigationArgs.previewFileId
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
