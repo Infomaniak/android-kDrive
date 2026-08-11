@@ -19,11 +19,11 @@ package com.infomaniak.drive
 
 import com.infomaniak.core.auth.TokenInterceptorListener
 import com.infomaniak.core.auth.models.user.User
+import com.infomaniak.core.login.ApiToken
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.AccountUtils.getUserById
 import com.infomaniak.drive.utils.AccountUtils.setUserToken
-import com.infomaniak.core.login.ApiToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 
@@ -35,7 +35,7 @@ object TokenInterceptorListenerProvider {
     fun tokenInterceptorListener(
         refreshTokenError: (User) -> Unit,
         coroutineScope: CoroutineScope,
-    ): TokenInterceptorListener = object : TokenInterceptorListener {
+    ): TokenInterceptorListener = object : TokenInterceptorListener(dedicatedUserId = null) {
         val userTokenFlow by lazy { AppSettings.currentUserIdFlow.mapToApiToken(coroutineScope) }
 
         override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
@@ -55,7 +55,7 @@ object TokenInterceptorListenerProvider {
 
     fun publicShareTokenInterceptorListener(
         coroutineScope: CoroutineScope,
-    ): TokenInterceptorListener = object : TokenInterceptorListener {
+    ): TokenInterceptorListener = object : TokenInterceptorListener(dedicatedUserId = null) {
         val userTokenFlow by lazy { AppSettings.currentUserIdFlow.mapToApiToken(coroutineScope) }
 
         override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
@@ -71,7 +71,7 @@ object TokenInterceptorListenerProvider {
     fun tokenInterceptorListenerByUserId(
         refreshTokenError: (User) -> Unit,
         userId: Int,
-    ): TokenInterceptorListener = object : TokenInterceptorListener {
+    ): TokenInterceptorListener = object : TokenInterceptorListener(dedicatedUserId = userId) {
         override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
             val user = getUserById(userId)
             onRefreshTokenSuccessCommon(apiToken, user)
