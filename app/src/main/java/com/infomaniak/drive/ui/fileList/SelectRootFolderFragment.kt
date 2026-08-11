@@ -41,6 +41,7 @@ import com.infomaniak.drive.databinding.FragmentSelectRootFolderBinding
 import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseRootFolderFragment
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
 import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
 import com.infomaniak.drive.utils.TypeFolder
 import com.infomaniak.drive.utils.setFileItem
@@ -57,7 +58,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
     override val fileListViewModel: FileListViewModel by viewModels()
     private val selectRootFolderViewModel: SelectRootFolderViewModel by viewModels()
-    private val selectFolderViewModel: SelectFolderActivity.SelectFolderViewModel by activityViewModels()
+    private val selectFolderViewModel: SelectFolderViewModel by activityViewModels()
 
     private val navigationArgs: SelectRootFolderFragmentArgs by navArgs()
 
