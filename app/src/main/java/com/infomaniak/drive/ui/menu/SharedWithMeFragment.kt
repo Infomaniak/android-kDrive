@@ -36,7 +36,7 @@ import com.infomaniak.drive.data.models.deeplink.DeeplinkExternalFilePath
 import com.infomaniak.drive.data.models.file.SpecialFolder.SharedWithMe
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
+import com.infomaniak.drive.ui.fileList.SelectFolderViewModel
 import com.infomaniak.drive.ui.fileList.SharedWithMeViewModel
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.SharedWithMeMultiSelectActionsBottomSheetDialog

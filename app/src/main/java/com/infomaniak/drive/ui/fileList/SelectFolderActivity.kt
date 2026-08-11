@@ -22,7 +22,6 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
 import com.infomaniak.core.common.extensions.isNightModeEnabled
@@ -31,7 +30,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ActivitySelectFolderBinding
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.BaseActivity
@@ -188,26 +186,4 @@ class SelectFolderActivity : BaseActivity() {
     fun hideSaveButton() {
         binding.saveButton.isGone = true
     }
-
-    class SelectFolderViewModel : ViewModel() {
-        var userDrive: UserDrive? = null
-        var currentDrive: Drive? = null
-        var disableSelectedFolderId: Int? = null
-        var navigationRestrictions = FolderNavigationRestrictions()
-
-        fun getFolderName(folderId: Int): String {
-            val selectedFolderName = if (folderId == ROOT_ID) {
-                currentDrive?.name
-            } else {
-                FileController.getFileById(folderId, userDrive)?.name
-            }
-            return selectedFolderName ?: "/"
-        }
-    }
 }
-
-data class FolderNavigationRestrictions(
-    val disabledFolderIds: Set<Int> = emptySet(),
-    val disabledParentFolderId: Int? = null,
-    val exceptedFolderIds: Set<Int> = emptySet(),
-)
