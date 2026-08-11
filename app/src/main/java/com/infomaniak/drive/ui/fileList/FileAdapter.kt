@@ -418,12 +418,10 @@ open class FileAdapter(
     fun contains(fileName: String) = fileList.any { it.name == fileName }
 
     private fun FileItemViewHolder.checkIfEnableFile(file: File) {
-        if (uploadInProgress) {
-            displayUploadStatus(file)
-        } else if (isSelectingFolder || offlineMode) {
-            enabledFile(file.isNavigableFolder() || (offlineMode && file.isOffline))
-        } else {
-            enabledFile()
+        when {
+            uploadInProgress -> displayUploadStatus(file)
+            isSelectingFolder || offlineMode -> enabledFile(file.isNavigableFolder() || (offlineMode && file.isOffline))
+            else -> enabledFile()
         }
     }
 
