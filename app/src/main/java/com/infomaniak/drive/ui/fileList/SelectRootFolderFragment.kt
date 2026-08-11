@@ -170,8 +170,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
     }
 
     private suspend fun isInsideMovedFolder(fileId: Int): Boolean = withContext(Dispatchers.IO) {
-        val movedFolderIds = selectFolderViewModel.disabledNavigationFolderIds
-        val movedParentFolderId = selectFolderViewModel.disabledNavigationParentFolderId
+        val (movedFolderIds, movedParentFolderId, exceptedFolderIds) = selectFolderViewModel.navigationRestrictions
         if (movedFolderIds.isEmpty() && movedParentFolderId == null) return@withContext false
 
         FileController.getRealmInstance(navigationArgs.userDrive).use { realm ->
@@ -179,8 +178,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
             var current = FileController.getFileProxyById(fileId, customRealm = realm)
 
             while (current != null && visitedIds.add(current.id)) {
-                val isMovedChildOfSource = current.parentId == movedParentFolderId
-                        && current.id !in selectFolderViewModel.exceptedNavigationFolderIds
+                val isMovedChildOfSource = current.parentId == movedParentFolderId && current.id !in exceptedFolderIds
                 if (current.id in movedFolderIds || isMovedChildOfSource) return@use true
 
                 current = FileController.getParentFileProxy(current.id, realm = realm)

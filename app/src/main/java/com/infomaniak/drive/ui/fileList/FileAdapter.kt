@@ -75,9 +75,7 @@ open class FileAdapter(
     var onStopUploadButtonClicked: ((fileName: String) -> Unit)? = null
 
     var isSelectingFolder = false
-    var disabledNavigationFolderIds: Set<Int> = emptySet()
-    var disabledNavigationParentFolderId: Int? = null
-    var exceptedNavigationFolderIds: Set<Int> = emptySet()
+    var navigationRestrictions = FolderNavigationRestrictions()
     var showShareFileButton = true
     var viewHolderType: DisplayType = DisplayType.LIST
     var uploadInProgress = false
@@ -440,9 +438,9 @@ open class FileAdapter(
     }
 
     private fun File.isNavigableFolder(): Boolean {
-        val isMovedChildOfSource = parentId == disabledNavigationParentFolderId
-                && id !in exceptedNavigationFolderIds
-        return isFolder() && id !in disabledNavigationFolderIds && !isMovedChildOfSource
+        val isMovedChildOfSource = parentId == navigationRestrictions.disabledParentFolderId
+                && id !in navigationRestrictions.exceptedFolderIds
+        return isFolder() && id !in navigationRestrictions.disabledFolderIds && !isMovedChildOfSource
     }
 
     private fun FileItemViewHolder.enabledFile(enable: Boolean = true) {

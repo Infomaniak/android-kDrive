@@ -64,9 +64,11 @@ class SelectFolderActivity : BaseActivity() {
         val customArgs = navigationArgs.customArgs
         val currentFolderId = navigationArgs.folderId.getIntOrNull()
         val disabledDestinationFolderId = navigationArgs.disabledDestinationFolderId.getIntOrNull()
-        val disabledNavigationFolderIdsArg = navigationArgs.disabledNavigationFolderIds?.toSet() ?: emptySet()
-        val disabledNavigationParentFolderIdArg = navigationArgs.disabledNavigationParentFolderId.getIntOrNull()
-        val exceptedNavigationFolderIdsArg = navigationArgs.exceptedNavigationFolderIds?.toSet() ?: emptySet()
+        val navigationRestrictionsArg = FolderNavigationRestrictions(
+            disabledFolderIds = navigationArgs.disabledNavigationFolderIds?.toSet() ?: emptySet(),
+            disabledParentFolderId = navigationArgs.disabledNavigationParentFolderId.getIntOrNull(),
+            exceptedFolderIds = navigationArgs.exceptedNavigationFolderIds?.toSet() ?: emptySet(),
+        )
 
         // We're doing this in the mainthread because the FileListFragment rely on mainViewModel.selectFolderUserDrive.
         // Moving this call in a background thread we'll break everything
@@ -79,9 +81,7 @@ class SelectFolderActivity : BaseActivity() {
                 userDrive = currentUserDrive
                 currentDrive = DriveInfosController.getDrive(userId, driveId)
                 disableSelectedFolderId = disabledDestinationFolderId
-                disabledNavigationFolderIds = disabledNavigationFolderIdsArg
-                disabledNavigationParentFolderId = disabledNavigationParentFolderIdArg
-                exceptedNavigationFolderIds = exceptedNavigationFolderIdsArg
+                navigationRestrictions = navigationRestrictionsArg
             }
 
             navController.setGraph(
@@ -193,9 +193,7 @@ class SelectFolderActivity : BaseActivity() {
         var userDrive: UserDrive? = null
         var currentDrive: Drive? = null
         var disableSelectedFolderId: Int? = null
-        var disabledNavigationFolderIds: Set<Int> = emptySet()
-        var disabledNavigationParentFolderId: Int? = null
-        var exceptedNavigationFolderIds: Set<Int> = emptySet()
+        var navigationRestrictions = FolderNavigationRestrictions()
 
         fun getFolderName(folderId: Int): String {
             val selectedFolderName = if (folderId == ROOT_ID) {
@@ -207,3 +205,9 @@ class SelectFolderActivity : BaseActivity() {
         }
     }
 }
+
+data class FolderNavigationRestrictions(
+    val disabledFolderIds: Set<Int> = emptySet(),
+    val disabledParentFolderId: Int? = null,
+    val exceptedFolderIds: Set<Int> = emptySet(),
+)
