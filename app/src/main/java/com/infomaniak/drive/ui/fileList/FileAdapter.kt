@@ -443,9 +443,9 @@ open class FileAdapter(
         return isFolder() && id !in navigationRestrictions.disabledFolderIds && !isMovedChildOfSource
     }
 
-    private fun FileItemViewHolder.enabledFile(enable: Boolean = true) {
-        disabledView.isGone = enable
-        cardView.isEnabled = enable
+    private fun FileItemViewHolder.enabledFile(shouldEnable: Boolean = true) {
+        disabledView.isGone = shouldEnable
+        cardView.isEnabled = shouldEnable
     }
 
     private fun onFileSelected(file: File, isSelected: Boolean) = with(multiSelectManager) {
