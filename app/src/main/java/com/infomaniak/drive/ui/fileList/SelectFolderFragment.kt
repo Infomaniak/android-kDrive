@@ -29,7 +29,6 @@ import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 
