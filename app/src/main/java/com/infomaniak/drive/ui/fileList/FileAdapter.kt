@@ -418,7 +418,7 @@ open class FileAdapter(
     private fun FileItemViewHolder.checkIfEnableFile(file: File) {
         when {
             uploadInProgress -> displayUploadStatus(file)
-            isSelectingFolder || offlineMode -> enableFile(file.isNavigableFolder() || (offlineMode && file.isOffline))
+            isSelectingFolder || offlineMode -> enableFile(file.isFolderPartOfTheMove() || (offlineMode && file.isOffline))
             else -> enableFile()
         }
     }
@@ -437,10 +437,10 @@ open class FileAdapter(
         }
     }
 
-    private fun File.isNavigableFolder(): Boolean {
-        val isMovedChildOfSource = parentId == navigationRestrictions.disabledParentFolderId
+    private fun File.isFolderPartOfTheMove(): Boolean {
+        val isChildOfMovedFolder = parentId == navigationRestrictions.disabledParentFolderId
                 && id !in navigationRestrictions.exceptedFolderIds
-        return isFolder() && id !in navigationRestrictions.disabledFolderIds && !isMovedChildOfSource
+        return isFolder() && id !in navigationRestrictions.disabledFolderIds && !isChildOfMovedFolder
     }
 
     private fun FileItemViewHolder.enableFile(shouldEnabled: Boolean = true) {
