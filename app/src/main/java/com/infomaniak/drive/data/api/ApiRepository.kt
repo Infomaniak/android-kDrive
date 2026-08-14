@@ -84,7 +84,7 @@ object ApiRepository : ApiRepositoryCore() {
         url: String,
         method: ApiController.ApiMethod,
         body: Any? = null,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+        okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
     ): T = ApiController.callApi(url, method, body, okHttpClient)
 
     private inline fun <reified T> callApiWithCursor(
@@ -107,7 +107,7 @@ object ApiRepository : ApiRepositoryCore() {
         url: String,
         method: ApiController.ApiMethod,
         body: Any? = null,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+        okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
     ): T {
         return ApiController.callApi(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
             CursorApiResponse<Any>(

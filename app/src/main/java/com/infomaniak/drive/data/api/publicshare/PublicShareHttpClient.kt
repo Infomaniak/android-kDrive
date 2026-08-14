@@ -30,8 +30,8 @@ object PublicShareHttpClient : BaseHttpClientProvider() {
     override var tokenInterceptorListener: TokenInterceptorListener? = publicShareTokenInterceptorListener(scope)
 
     override fun addTokenInterceptor(builder: OkHttpClient.Builder, tokenInterceptorListener: TokenInterceptorListener?) {
-        super.addTokenInterceptor(builder, tokenInterceptorListener)
         if (AccountUtils.currentUser == null) return
+        super.addTokenInterceptor(builder, tokenInterceptorListener)
 
         tokenInterceptorListener?.let { listener ->
             builder.addInterceptor(PublicShareTokenInterceptor(listener))
