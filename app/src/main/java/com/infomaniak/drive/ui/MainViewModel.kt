@@ -85,7 +85,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -122,7 +121,7 @@ class MainViewModel(
     val updateVisibleFiles = MutableLiveData<Boolean>()
     val isBulkDownloadRunning = MutableLiveData<Boolean>()
 
-    val isNetworkAvailable = NetworkAvailability(this@MainViewModel.getContext()).isNetworkAvailable.distinctUntilChanged()
+    val isNetworkAvailable = NetworkAvailability.isNetworkAvailable
     var hasNetwork: Boolean = true
         private set
 
