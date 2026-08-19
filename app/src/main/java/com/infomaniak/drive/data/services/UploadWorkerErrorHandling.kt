@@ -53,7 +53,7 @@ object UploadWorkerErrorHandling {
                 UploadFile.deleteAll(uploadFile.remoteFolder, permanently = true)
                 if (uploadFile.isSync()) {
                     Sentry.captureMessage("FolderNotFoundNotification: disableAutoSync")
-                    applicationContext.disableAutoSync()
+                    disableAutoSync()
                 }
                 uploadFile.folderNotFoundNotification(applicationContext)
             }
