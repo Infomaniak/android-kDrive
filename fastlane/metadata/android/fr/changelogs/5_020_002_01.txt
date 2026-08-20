@@ -1,0 +1,2 @@
+- Correction de la bannière de réseau indisponible
+- Fixes divers
