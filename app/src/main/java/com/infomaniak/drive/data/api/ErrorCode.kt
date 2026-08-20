@@ -42,6 +42,7 @@ object ErrorCode {
     const val SHARE_LINK_ALREADY_EXISTS = "file_share_link_already_exists"
     const val STILL_UPLOADING_ERROR = "still_uploading_error"
     const val YOU_MUST_ADD_AT_LEAST_ONE_FILE = "you_must_add_at_least_one_file"
+    const val CONFLICT_PART_OF_THE_SAME_SUBTREE = "conflict_part_of_the_same_subtree_error"
 
     val apiErrorCodes = listOf(
         ApiErrorCode(CATEGORY_ALREADY_EXISTS, R.string.errorCategoryAlreadyExists),
@@ -63,5 +64,6 @@ object ErrorCode {
         ApiErrorCode(SHARE_LINK_ALREADY_EXISTS, R.string.errorShareLink),
         ApiErrorCode(STILL_UPLOADING_ERROR, R.string.errorStillUploading),
         ApiErrorCode(YOU_MUST_ADD_AT_LEAST_ONE_FILE, R.string.errorDownloadPermission),
+        ApiErrorCode(CONFLICT_PART_OF_THE_SAME_SUBTREE, R.string.errorConflictPartOfTheSameSubtree)
     )
 }
