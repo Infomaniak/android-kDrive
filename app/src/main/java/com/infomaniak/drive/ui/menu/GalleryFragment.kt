@@ -109,7 +109,7 @@ class GalleryFragment : MultiSelectFragment(
             galleryAdapter = GalleryAdapter(
                 multiSelectManager = multiSelectManager,
                 onFileClicked = { file ->
-                    Utils.displayFile(mainViewModel, findNavController(), file, galleryAdapter.galleryList)
+                    Utils.displayFile(mainViewModel, findNavController(), file, galleryViewModel.galleryList)
                 },
             ).apply {
                 numberItemLoader = NUMBER_ITEMS_LOADER
@@ -156,7 +156,10 @@ class GalleryFragment : MultiSelectFragment(
         observeApiResultPagination()
 
         mainViewModel.deleteFilesFromGallery.observe(viewLifecycleOwner) { filesId ->
-            filesId.forEach(galleryAdapter::deleteByFileId)
+            filesId.forEach { fileId ->
+                galleryViewModel.removeFileFromGallery(fileId)
+                galleryAdapter.deleteByFileId(fileId)
+            }
         }
 
         binding.galleryRecyclerView.onApplyWindowInsetsListener { galleryRecyclerView, windowInsets ->
@@ -172,10 +175,11 @@ class GalleryFragment : MultiSelectFragment(
     private fun observeApiResultPagination() {
         var dataAlreadyLoaded = galleryViewModel.needToRestoreFiles
 
-        if (galleryViewModel.needToRestoreFiles && galleryAdapter.galleryList.isEmpty()) {
+        if (galleryViewModel.needToRestoreFiles && galleryAdapter.itemList.isEmpty()) {
             // When the activity is recreated, the old data needs to be restored.
             // The livedata will return the last page, which is not what is needed.
             // TODO: (Realm kotlin) - Should be improved with realm kotlin, the current problem will no longer exist
+            galleryViewModel.clearGallery()
             galleryViewModel.restoreGalleryFiles()
             dataAlreadyLoaded = false
         }
@@ -189,15 +193,15 @@ class GalleryFragment : MultiSelectFragment(
                     return@observe
                 }
                 galleryAdapter.isComplete = isComplete
-                val galleryList = galleryAdapter.formatList(galleryFiles)
+                val galleryList = galleryViewModel.formatList(galleryFiles)
                 if (galleryFiles.isNotEmpty()) galleryAdapter.addAll(galleryList)
-                binding.noGalleryLayout.toggleVisibility(galleryAdapter.galleryList.isEmpty())
+                binding.noGalleryLayout.toggleVisibility(galleryViewModel.galleryList.isEmpty())
             } ?: run {
                 galleryAdapter.isComplete = true
 
                 binding.noGalleryLayout.toggleVisibility(
                     noNetwork = !mainViewModel.hasNetwork,
-                    isVisible = galleryAdapter.galleryList.isEmpty(),
+                    isVisible = galleryViewModel.galleryList.isEmpty(),
                     showRefreshButton = true,
                 )
             }
@@ -272,6 +276,7 @@ class GalleryFragment : MultiSelectFragment(
 
     fun onRefreshGallery() {
         if (isResumed) {
+            galleryViewModel.clearGallery()
             galleryAdapter.clearGallery()
             loadGallery(AccountUtils.currentDriveId, isRefresh = true)
         }
@@ -307,10 +312,13 @@ class GalleryFragment : MultiSelectFragment(
     override fun onIndividualActionSuccess(type: BulkOperationType, data: Any?) {
         when (type) {
             BulkOperationType.TRASH -> {
-                runBlocking(Dispatchers.Main) { galleryAdapter.deleteByFileId(data as Int) }
+                runBlocking(Dispatchers.Main) {
+                    galleryViewModel.removeFileFromGallery(data as Int)
+                    galleryAdapter.deleteByFileId(data)
+                }
             }
             BulkOperationType.COPY -> {
-                galleryAdapter.duplicatedList.add(0, data as File)
+                galleryViewModel.duplicatedList.add(0, data as File)
             }
             BulkOperationType.ADD_FAVORITES -> {
                 lifecycleScope.launch(Dispatchers.Main) {
@@ -337,7 +345,7 @@ class GalleryFragment : MultiSelectFragment(
             val oldTotal = galleryAdapter.itemList.size
             val oldFirstItem = galleryAdapter.itemList.firstOrNull()
 
-            galleryAdapter.addDuplicatedImages()
+            galleryAdapter.insertDuplicatedImages(galleryViewModel.prependDuplicatedImages(oldFirstItem))
             val newTotal = galleryAdapter.itemList.count()
             val newFirstItem = galleryAdapter.itemList.firstOrNull()
 

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@ package com.infomaniak.drive.ui.menu
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.infomaniak.core.common.utils.format
+import com.infomaniak.core.legacy.utils.capitalizeFirstChar
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.cache.FileController
@@ -30,12 +32,16 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class GalleryViewModel : ViewModel() {
+    val galleryList = arrayListOf<File>()
+    val duplicatedList = arrayListOf<File>()
 
     private var getGalleryJob: Job? = null
 
     private var currentCursor: String? = null
 
     private var lastGalleryFiles = arrayListOf<File>()
+
+    private var lastSectionTitle = ""
 
     val galleryApiResult = MutableLiveData<Pair<ArrayList<File>, IsComplete>>()
     val needToRestoreFiles get() = galleryApiResult.isInitialized
@@ -56,6 +62,55 @@ class GalleryViewModel : ViewModel() {
             val isComplete = galleryApiResult.value?.second ?: true
             galleryApiResult.value = lastGalleryFiles to isComplete
         }
+    }
+
+    fun formatList(newFiles: List<File>): ArrayList<Any> {
+        galleryList.addAll(newFiles)
+
+        val displayList = arrayListOf<Any>()
+        for (file in newFiles) {
+            val month = file.getMonth()
+            if (lastSectionTitle != month) {
+                displayList.add(month)
+                lastSectionTitle = month
+            }
+            displayList.add(file)
+        }
+
+        return displayList
+    }
+
+    fun prependDuplicatedImages(currentTopTitle: Any?): List<Any> {
+        val prefix = arrayListOf<Any>()
+        var newestSectionTitle = currentTopTitle
+
+        galleryList.addAll(0, duplicatedList)
+
+        for (file in duplicatedList) {
+            val month = file.getMonth()
+            if (newestSectionTitle != month) {
+                prefix.add(month)
+                newestSectionTitle = month
+            }
+            prefix.add(file)
+        }
+
+        duplicatedList.clear()
+
+        return prefix
+    }
+
+    fun removeFileFromGallery(fileId: Int) {
+        galleryList.indexOfFirst { it.id == fileId }.takeIf { it >= 0 }?.let(galleryList::removeAt)
+    }
+
+    fun clearGallery() {
+        galleryList.clear()
+        lastSectionTitle = ""
+    }
+
+    fun File.getMonth(): String {
+        return getLastModifiedAt().format("MMMM yyyy").capitalizeFirstChar()
     }
 
     private fun loadLastGallery(
