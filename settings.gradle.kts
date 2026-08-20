@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.maven
+
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -15,6 +17,18 @@ dependencyResolutionManagement {
         // mavenLocal() // Only used when we want to use a local version of a library (./gradlew publishToMavenLocal)
         maven(url = "https://jitpack.io")
         maven(url = "https://s3.amazonaws.com/tgl.maven")
+        maven {
+            name = "infomaniakReposiliteRepository"
+            url = uri("https://maven.infomaniak.app/releases")
+            content { includeGroup("com.infomaniak.pdfview") }
+            content { includeGroup("com.infomaniak.pdfiumandroid") }
+        }
+        maven {
+            name = "infomaniakReposiliteRepositorySnapshots"
+            url = uri("https://maven.infomaniak.app/snapshots")
+            content { includeGroup("com.infomaniak.pdfview") }
+            content { includeGroup("com.infomaniak.pdfiumandroid") }
+        }
     }
     versionCatalogs {
         create("core") { from(files("Core/gradle/core.versions.toml")) }
