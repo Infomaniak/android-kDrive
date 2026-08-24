@@ -263,7 +263,7 @@
     <string name="errorCache">Välimuistivirhe</string>
     <string name="errorCategoryAlreadyExists">Luokka samalla nimellä on jo olemassa</string>
     <string name="errorConflict">Samanniminen elementti on jo olemassa tässä sijainnissa</string>
-    <string name="errorConflictPartOfTheSameSubtree">Siirto ei ole käytettävissä: kohdekansio on lähdekansion sisällä</string>
+    <string name="errorConflictPartOfTheSameSubtree">Kohdekansio on lähdekansion sisällä</string>
     <string name="errorCopyToDrive">Tiedonsiirto toiselle asemalle epäonnistui</string>
     <string name="errorDelete">Poistovirhe</string>
     <string name="errorDeviceStorage">Laitteen tallennustila ei riitä</string>

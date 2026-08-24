@@ -263,7 +263,7 @@
     <string name="errorCache">Caching error</string>
     <string name="errorCategoryAlreadyExists">A category with the same name already exists</string>
     <string name="errorConflict">An element with the same name already exists in this location</string>
-    <string name="errorConflictPartOfTheSameSubtree">Move not available: the target folder is inside the source folder</string>
+    <string name="errorConflictPartOfTheSameSubtree">The target folder is inside the source folder</string>
     <string name="errorCopyToDrive">Transfer to another drive failed</string>
     <string name="errorDelete">Deletion error</string>
     <string name="errorDeviceStorage">Insufficient device storage</string>

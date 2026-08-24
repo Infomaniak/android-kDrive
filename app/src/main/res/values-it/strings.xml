@@ -263,7 +263,7 @@
     <string name="errorCache">Errore durante la memorizzazione nella cache</string>
     <string name="errorCategoryAlreadyExists">Esiste già una categoria con lo stesso nome</string>
     <string name="errorConflict">Un elemento con lo stesso nome esiste già in questa posizione</string>
-    <string name="errorConflictPartOfTheSameSubtree">Spostamento non disponibile: la cartella di destinazione si trova all’interno della cartella di origine</string>
+    <string name="errorConflictPartOfTheSameSubtree">La cartella di destinazione si trova all’interno della cartella di origine</string>
     <string name="errorCopyToDrive">Trasferimento verso un’altra unità non riuscito</string>
     <string name="errorDelete">Errore durante l’eliminazione</string>
     <string name="errorDeviceStorage">Memoria del dispositivo insufficiente</string>

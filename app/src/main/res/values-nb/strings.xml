@@ -263,7 +263,7 @@
     <string name="errorCache">Feil ved mellomlagring</string>
     <string name="errorCategoryAlreadyExists">En kategori med samme navn finnes allerede</string>
     <string name="errorConflict">Et element med samme navn finnes allerede på denne plasseringen</string>
-    <string name="errorConflictPartOfTheSameSubtree">Flytting ikke mulig: målmappen ligger inne i kildemappen</string>
+    <string name="errorConflictPartOfTheSameSubtree">Målmappen ligger inne i kildemappen</string>
     <string name="errorCopyToDrive">Overføring til en annen stasjon mislyktes</string>
     <string name="errorDelete">Feil ved sletting</string>
     <string name="errorDeviceStorage">Manglende lagringsplass på enheten</string>

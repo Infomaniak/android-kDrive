@@ -263,7 +263,7 @@
     <string name="errorCache">Erro de cache</string>
     <string name="errorCategoryAlreadyExists">Já existe uma categoria com o mesmo nome</string>
     <string name="errorConflict">Já existe um elemento com o mesmo nome neste local</string>
-    <string name="errorConflictPartOfTheSameSubtree">Não é possível mover: a pasta de destino encontra-se dentro da pasta de origem</string>
+    <string name="errorConflictPartOfTheSameSubtree">A pasta de destino encontra-se dentro da pasta de origem</string>
     <string name="errorCopyToDrive">A transferência para outra unidade falhou</string>
     <string name="errorDelete">Erro ao eliminar</string>
     <string name="errorDeviceStorage">Armazenamento do dispositivo insuficiente</string>
