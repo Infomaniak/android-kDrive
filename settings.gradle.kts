@@ -5,6 +5,16 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
+        maven {
+            name = "infomaniakReposiliteRepositorySnapshots"
+            url = uri("https://maven.infomaniak.app/snapshots")
+            content { includeGroup("io.realm") }
+        }
+        maven {
+            name = "infomaniakReposiliteRepository"
+            url = uri("https://maven.infomaniak.app/releases")
+            content { includeGroup("io.realm") }
+        }
     }
     includeBuild("Core/build-logic")
 }
@@ -14,7 +24,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // mavenLocal() // Only used when we want to use a local version of a library (./gradlew publishToMavenLocal)
         maven(url = "https://jitpack.io")
         maven(url = "https://s3.amazonaws.com/tgl.maven")
         maven {
@@ -22,12 +31,14 @@ dependencyResolutionManagement {
             url = uri("https://maven.infomaniak.app/releases")
             content { includeGroup("com.infomaniak.pdfview") }
             content { includeGroup("com.infomaniak.pdfiumandroid") }
+            content { includeGroup("io.realm") }
         }
         maven {
             name = "infomaniakReposiliteRepositorySnapshots"
             url = uri("https://maven.infomaniak.app/snapshots")
             content { includeGroup("com.infomaniak.pdfview") }
             content { includeGroup("com.infomaniak.pdfiumandroid") }
+            content { includeGroup("io.realm") }
         }
     }
     versionCatalogs {

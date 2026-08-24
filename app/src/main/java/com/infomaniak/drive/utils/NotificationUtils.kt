@@ -35,7 +35,7 @@ object NotificationUtils : NotificationUtilsCore() {
 
     const val ELAPSED_TIME = 500L
 
-    private const val DEFAULT_SMALL_ICON = R.drawable.ic_logo_notification
+    private val DEFAULT_SMALL_ICON = R.drawable.ic_logo_notification
 
     fun Context.moveOperationProgressNotification(): NotificationCompat.Builder {
         return progressNotification(getString(R.string.fileListMoveStartedSnackbar), R.drawable.ic_folder_select)
