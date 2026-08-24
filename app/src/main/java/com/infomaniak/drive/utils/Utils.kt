@@ -60,6 +60,7 @@ import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
 import com.infomaniak.drive.databinding.DialogNamePromptBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.MainViewModel.FileResult
+import com.infomaniak.drive.ui.fileList.FolderNavigationRestrictions
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
@@ -231,12 +232,9 @@ object Utils {
         disabledDestinationFolderId: Int?,
         selectFolderResultLauncher: ActivityResultLauncher<Intent>,
         mainViewModel: MainViewModel,
-        filesToMove: List<File> = emptyList(),
-        disabledNavigationParentFolderId: Int? = null,
-        exceptedNavigationFolderIds: IntArray? = null,
+        navigationRestrictions: FolderNavigationRestrictions = FolderNavigationRestrictions(),
     ) {
         mainViewModel.ignoreSyncOffline = true
-        val disabledNavigationFolderIds = filesToMove.filter { it.isFolder() }.map { it.id }.toIntArray()
         Intent(this, SelectFolderActivity::class.java).apply {
             putExtras(
                 SelectFolderActivityArgs(
@@ -244,9 +242,7 @@ object Utils {
                     driveId = AccountUtils.currentDriveId,
                     folderId = disabledDestinationFolderId ?: -1,
                     disabledDestinationFolderId = disabledDestinationFolderId ?: -1,
-                    disabledNavigationFolderIds = disabledNavigationFolderIds,
-                    disabledNavigationParentFolderId = disabledNavigationParentFolderId ?: -1,
-                    exceptedNavigationFolderIds = exceptedNavigationFolderIds,
+                    navigationRestrictions = navigationRestrictions,
                     customArgs = bundleOf(
                         MultiSelectFragment.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE,
                         SINGLE_OPERATION_CUSTOM_TAG to SingleOperation.MOVE.name,

@@ -430,18 +430,9 @@
             android:defaultValue="-1"
             app:argType="integer" />
         <argument
-            android:name="disabledNavigationFolderIds"
+            android:name="navigationRestrictions"
             android:defaultValue="@null"
-            app:argType="integer[]"
-            app:nullable="true" />
-        <argument
-            android:name="disabledNavigationParentFolderId"
-            android:defaultValue="-1"
-            app:argType="integer" />
-        <argument
-            android:name="exceptedNavigationFolderIds"
-            android:defaultValue="@null"
-            app:argType="integer[]"
+            app:argType="com.infomaniak.drive.ui.fileList.FolderNavigationRestrictions"
             app:nullable="true" />
         <argument
             android:name="fromSaveExternal"

@@ -62,11 +62,7 @@ class SelectFolderActivity : BaseActivity() {
         val customArgs = navigationArgs.customArgs
         val currentFolderId = navigationArgs.folderId.getIntOrNull()
         val disabledDestinationFolderId = navigationArgs.disabledDestinationFolderId.getIntOrNull()
-        val navigationRestrictionsArg = FolderNavigationRestrictions(
-            disabledFolderIds = navigationArgs.disabledNavigationFolderIds?.toSet() ?: emptySet(),
-            disabledParentFolderId = navigationArgs.disabledNavigationParentFolderId.getIntOrNull(),
-            exceptedFolderIds = navigationArgs.exceptedNavigationFolderIds?.toSet() ?: emptySet(),
-        )
+        val navigationRestrictionsArg = navigationArgs.navigationRestrictions ?: FolderNavigationRestrictions()
 
         // We're doing this in the mainthread because the FileListFragment rely on mainViewModel.selectFolderUserDrive.
         // Moving this call in a background thread we'll break everything

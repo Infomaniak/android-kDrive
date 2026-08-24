@@ -17,11 +17,13 @@
  */
 package com.infomaniak.drive.ui.fileList
 
+import android.os.Parcelable
 import androidx.lifecycle.ViewModel
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import kotlinx.parcelize.Parcelize
 
 class SelectFolderViewModel : ViewModel() {
     var userDrive: UserDrive? = null
@@ -39,8 +41,9 @@ class SelectFolderViewModel : ViewModel() {
     }
 }
 
+@Parcelize
 data class FolderNavigationRestrictions(
     val disabledFolderIds: Set<Int> = emptySet(),
     val disabledParentFolderId: Int? = null,
     val exceptedFolderIds: Set<Int> = emptySet(),
-)
+) : Parcelable

@@ -50,6 +50,7 @@ import com.infomaniak.drive.ui.CopyFileToDriveActivity
 import com.infomaniak.drive.ui.CopyFileToDriveActivityArgs
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.MainViewModel.MultiSelectMediatorState
+import com.infomaniak.drive.ui.fileList.FolderNavigationRestrictions
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
@@ -226,14 +227,22 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
 
     fun moveFiles(disabledDestinationFolderId: Int?) = with(multiSelectManager) {
         val movedParentFolderId = if (isSelectAllOn) currentFolder?.id else null
+        val navigationRestrictions = if (movedParentFolderId == null) {
+            FolderNavigationRestrictions(
+                disabledFolderIds = getValidSelectedItems().filter { it.isFolder() }.map { it.id }.toSet(),
+            )
+        } else {
+            FolderNavigationRestrictions(
+                disabledParentFolderId = movedParentFolderId,
+                exceptedFolderIds = exceptedItemsIds.toSet(),
+            )
+        }
 
         requireContext().moveFileClicked(
             disabledDestinationFolderId = disabledDestinationFolderId,
             selectFolderResultLauncher = selectFolderResultLauncher,
             mainViewModel = mainViewModel,
-            filesToMove = if (movedParentFolderId == null) getValidSelectedItems() else emptyList(),
-            disabledNavigationParentFolderId = movedParentFolderId,
-            exceptedNavigationFolderIds = if (movedParentFolderId == null) null else exceptedItemsIds.toIntArray(),
+            navigationRestrictions = navigationRestrictions,
         )
     }
 

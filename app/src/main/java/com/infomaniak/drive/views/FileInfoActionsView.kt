@@ -64,6 +64,7 @@ import com.infomaniak.drive.databinding.ViewFileInfoActionsBinding
 import com.infomaniak.drive.ui.CopyFileToDriveActivity
 import com.infomaniak.drive.ui.CopyFileToDriveActivityArgs
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.fileList.FolderNavigationRestrictions
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.utils.AccountUtils
@@ -668,7 +669,9 @@ class FileInfoActionsView @JvmOverloads constructor(
                 disabledDestinationFolderId = folderId,
                 selectFolderResultLauncher = selectFolderResultLauncher,
                 mainViewModel = mainViewModel,
-                filesToMove = listOfNotNull(currentFile)
+                navigationRestrictions = FolderNavigationRestrictions(
+                    disabledFolderIds = setOfNotNull(currentFile?.takeIf { it.isFolder() }?.id),
+                ),
             )
         }
 
