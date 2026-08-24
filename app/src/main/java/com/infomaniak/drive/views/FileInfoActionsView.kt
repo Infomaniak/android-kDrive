@@ -670,7 +670,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 selectFolderResultLauncher = selectFolderResultLauncher,
                 mainViewModel = mainViewModel,
                 navigationRestrictions = FolderNavigationRestrictions(
-                    disabledFolderIds = setOfNotNull(currentFile?.takeIf { it.isFolder() }?.id),
+                    disabledFolderIds = setOfNotNull(currentFile?.takeIf(File::isFolder)?.id)
                 ),
             )
         }

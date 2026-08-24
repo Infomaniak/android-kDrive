@@ -22,6 +22,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.compose.ui.util.fastFilteredMap
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
@@ -229,7 +230,7 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         val movedParentFolderId = if (isSelectAllOn) currentFolder?.id else null
         val navigationRestrictions = if (movedParentFolderId == null) {
             FolderNavigationRestrictions(
-                disabledFolderIds = getValidSelectedItems().filter { it.isFolder() }.map { it.id }.toSet(),
+                disabledFolderIds = getValidSelectedItems().fastFilteredMap({ it.isFolder() }, { it.id }).toSet(),
             )
         } else {
             FolderNavigationRestrictions(
