@@ -40,6 +40,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
+                app:menu="@menu/gallery_menu"
                 app:navigationIcon="@null" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>

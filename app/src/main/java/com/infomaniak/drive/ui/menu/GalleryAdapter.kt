@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ import com.infomaniak.drive.utils.loadAny
 
 class GalleryAdapter(
     private val multiSelectManager: MultiSelectManager,
+    private var period: GalleryPeriod,
     private val onFileClicked: (file: File) -> Unit,
 ) : LoaderAdapter<Any>(), RecyclerViewFastScroller.OnPopupTextUpdate {
 
@@ -158,10 +159,10 @@ class GalleryAdapter(
         val addItemList: ArrayList<Any> = arrayListOf()
 
         for (file in newGalleryList) {
-            val month = file.getMonth()
-            if (lastSectionTitle != month) {
-                addItemList.add(month)
-                lastSectionTitle = month
+            val sectionTitle = file.getSectionTitle()
+            if (lastSectionTitle != sectionTitle) {
+                addItemList.add(sectionTitle)
+                lastSectionTitle = sectionTitle
             }
             addItemList.add(file)
         }
@@ -175,15 +176,15 @@ class GalleryAdapter(
         for (file in duplicatedList) {
             galleryList.add(0, file)
 
-            val month = file.getMonth()
-            if (newestSectionTitle != month) {
+            val sectionTitle = file.getSectionTitle()
+            if (newestSectionTitle != sectionTitle) {
                 // This case can only be hit once, when adding duplicated images.
-                // If we need to add a new month section title, it needs to be inserted at position 0.
-                // If we only insert images, without creating a new month section title,
-                // they need to be inserted at position 1, right after the existing month title.
+                // If we need to add a new section title, it needs to be inserted at position 0.
+                // If we only insert images, without creating a new section title,
+                // they need to be inserted at position 1, right after the existing section title.
                 index = 0
-                itemList.add(index++, month)
-                newestSectionTitle = month
+                itemList.add(index++, sectionTitle)
+                newestSectionTitle = sectionTitle
             }
 
             itemList.add(index++, file)
@@ -192,8 +193,20 @@ class GalleryAdapter(
         duplicatedList.clear()
     }
 
-    private fun File.getMonth(): String {
-        return getLastModifiedAt().format("MMMM yyyy").capitalizeFirstChar()
+    fun updatePeriod(newPeriod: GalleryPeriod) {
+        period = newPeriod
+
+        val files = ArrayList(galleryList)
+        galleryList.clear()
+        lastSectionTitle = ""
+
+        itemList.clear()
+        itemList.addAll(formatList(files))
+        notifyDataSetChanged()
+    }
+
+    private fun File.getSectionTitle(): String {
+        return getLastModifiedAt().format(period.pattern).capitalizeFirstChar()
     }
 
     fun clearGallery() {
@@ -263,7 +276,7 @@ class GalleryAdapter(
         return when (val item = itemList.getOrNull(position)) {
             null -> lastSectionTitle
             is String -> item
-            is File -> item.getMonth()
+            is File -> item.getSectionTitle()
             else -> ""
         }
     }

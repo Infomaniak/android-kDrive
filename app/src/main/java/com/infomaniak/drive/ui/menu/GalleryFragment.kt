@@ -108,6 +108,7 @@ class GalleryFragment : MultiSelectFragment(
         if (!isGalleryAdapterInitialized) {
             galleryAdapter = GalleryAdapter(
                 multiSelectManager = multiSelectManager,
+                period = galleryViewModel.period,
                 onFileClicked = { file ->
                     Utils.displayFile(mainViewModel, findNavController(), file, galleryAdapter.galleryList)
                 },
@@ -268,6 +269,15 @@ class GalleryFragment : MultiSelectFragment(
             refreshTimer.cancel()
             binding.swipeRefreshLayout.isRefreshing = false
         }
+    }
+
+    val currentPeriod get() = galleryViewModel.period
+
+    fun onPeriodSelected(newPeriod: GalleryPeriod) {
+        if (newPeriod == galleryViewModel.period) return
+
+        galleryViewModel.period = newPeriod
+        galleryAdapter.updatePeriod(newPeriod)
     }
 
     fun onRefreshGallery() {
