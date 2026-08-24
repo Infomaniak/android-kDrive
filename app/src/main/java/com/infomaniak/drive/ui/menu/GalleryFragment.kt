@@ -53,7 +53,6 @@ import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.views.NoItemsLayoutView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class GalleryFragment : MultiSelectFragment(
     matomoCategory = MatomoCategory.PicturesFileAction,
@@ -317,15 +316,13 @@ class GalleryFragment : MultiSelectFragment(
     override fun onIndividualActionSuccess(type: BulkOperationType, data: Any?) {
         when (type) {
             BulkOperationType.TRASH -> {
-                runBlocking(Dispatchers.Main) { galleryAdapter.deleteByFileId(data as Int) }
+                lifecycleScope.launch(Dispatchers.Main) { galleryAdapter.deleteByFileId(data as Int) }
             }
             BulkOperationType.COPY -> {
                 galleryAdapter.duplicatedList.add(0, data as File)
             }
             BulkOperationType.ADD_FAVORITES -> {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    galleryAdapter.notifyFileChanged(data as Int) { it.isFavorite = true }
-                }
+                lifecycleScope.launch(Dispatchers.Main) { galleryAdapter.notifyFileChanged(data as Int) { it.isFavorite = true } }
             }
             BulkOperationType.REMOVE_FAVORITES -> {
                 lifecycleScope.launch(Dispatchers.Main) {
