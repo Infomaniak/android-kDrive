@@ -18,4 +18,5 @@
 <full-backup-content>
     <include domain="sharedpref" path="." />
     <include domain="file" path="datastore/" />
+    <include domain="file" path="tmp_backup_agent/" />
 </full-backup-content>
