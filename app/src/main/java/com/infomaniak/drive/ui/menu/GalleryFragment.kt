@@ -67,7 +67,7 @@ class GalleryFragment : MultiSelectFragment(
     override val noItemsTitle = R.string.picturesNoFile
     override val noItemsInitialListView: View by lazy { binding.galleryFastScroller }
 
-    private val galleryViewModel: GalleryViewModel by viewModels()
+    private val galleryViewModel: GalleryViewModel by viewModels(ownerProducer = { requireParentFragment() })
     private lateinit var galleryAdapter: GalleryAdapter
 
     private var paginationListener: RecyclerView.OnScrollListener? = null
@@ -271,12 +271,6 @@ class GalleryFragment : MultiSelectFragment(
             refreshTimer.cancel()
             binding.swipeRefreshLayout.isRefreshing = false
         }
-    }
-
-    val currentPeriod get() = galleryViewModel.period.value
-
-    fun onPeriodSelected(newPeriod: GalleryPeriod) {
-        galleryViewModel.period.value = newPeriod
     }
 
     private fun observePeriod() {

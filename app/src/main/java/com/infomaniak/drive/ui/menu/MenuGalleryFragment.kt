@@ -25,6 +25,7 @@ import androidx.core.view.isGone
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
@@ -39,6 +40,8 @@ import com.infomaniak.drive.ui.fileList.multiSelect.GalleryMultiSelectActionsBot
 class MenuGalleryFragment : Fragment() {
 
     private var binding: FragmentMenuGalleryBinding by safeBinding()
+
+    private val galleryViewModel: GalleryViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentMenuGalleryBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -71,7 +74,7 @@ class MenuGalleryFragment : Fragment() {
             if (menuItem.itemId == R.id.selectGalleryPeriod) {
                 safeNavigate(
                     MenuGalleryFragmentDirections.actionMenuGalleryFragmentToGalleryPeriodBottomSheetDialog(
-                        galleryFragment.currentPeriod,
+                        galleryViewModel.period.value,
                     )
                 )
                 true
@@ -81,7 +84,7 @@ class MenuGalleryFragment : Fragment() {
         }
 
         getBackNavigationResult<GalleryPeriod>(GalleryPeriodBottomSheetDialog.GALLERY_PERIOD_KEY) {
-            galleryFragment.onPeriodSelected(it)
+            galleryViewModel.period.value = it
         }
 
         multiSelectLayout.apply {
