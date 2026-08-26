@@ -27,11 +27,12 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.IsComplete
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class GalleryViewModel : ViewModel() {
 
-    var period: GalleryPeriod = GalleryPeriod.MONTH
+    val period = MutableStateFlow(GalleryPeriod.MONTH)
 
     private var getGalleryJob: Job? = null
 

@@ -194,6 +194,8 @@ class GalleryAdapter(
     }
 
     fun updatePeriod(newPeriod: GalleryPeriod) {
+        if (newPeriod == period) return
+
         period = newPeriod
 
         val files = ArrayList(galleryList)

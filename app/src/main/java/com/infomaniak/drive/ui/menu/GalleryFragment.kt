@@ -26,7 +26,9 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.core.view.updatePadding
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -107,7 +109,7 @@ class GalleryFragment : MultiSelectFragment(
         if (!isGalleryAdapterInitialized) {
             galleryAdapter = GalleryAdapter(
                 multiSelectManager = multiSelectManager,
-                period = galleryViewModel.period,
+                period = galleryViewModel.period.value,
                 onFileClicked = { file ->
                     Utils.displayFile(mainViewModel, findNavController(), file, galleryAdapter.galleryList)
                 },
@@ -154,6 +156,7 @@ class GalleryFragment : MultiSelectFragment(
         }
 
         observeApiResultPagination()
+        observePeriod()
 
         mainViewModel.deleteFilesFromGallery.observe(viewLifecycleOwner) { filesId ->
             filesId.forEach(galleryAdapter::deleteByFileId)
@@ -270,13 +273,18 @@ class GalleryFragment : MultiSelectFragment(
         }
     }
 
-    val currentPeriod get() = galleryViewModel.period
+    val currentPeriod get() = galleryViewModel.period.value
 
     fun onPeriodSelected(newPeriod: GalleryPeriod) {
-        if (newPeriod == galleryViewModel.period) return
+        galleryViewModel.period.value = newPeriod
+    }
 
-        galleryViewModel.period = newPeriod
-        galleryAdapter.updatePeriod(newPeriod)
+    private fun observePeriod() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                galleryViewModel.period.collect(galleryAdapter::updatePeriod)
+            }
+        }
     }
 
     fun onRefreshGallery() {
