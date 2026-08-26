@@ -26,7 +26,9 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.core.view.updatePadding
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -53,7 +55,6 @@ import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.views.NoItemsLayoutView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class GalleryFragment : MultiSelectFragment(
     matomoCategory = MatomoCategory.PicturesFileAction,
@@ -66,7 +67,7 @@ class GalleryFragment : MultiSelectFragment(
     override val noItemsTitle = R.string.picturesNoFile
     override val noItemsInitialListView: View by lazy { binding.galleryFastScroller }
 
-    private val galleryViewModel: GalleryViewModel by viewModels()
+    private val galleryViewModel: GalleryViewModel by viewModels(ownerProducer = { requireParentFragment() })
     private lateinit var galleryAdapter: GalleryAdapter
 
     private var paginationListener: RecyclerView.OnScrollListener? = null
@@ -108,6 +109,7 @@ class GalleryFragment : MultiSelectFragment(
         if (!isGalleryAdapterInitialized) {
             galleryAdapter = GalleryAdapter(
                 multiSelectManager = multiSelectManager,
+                period = galleryViewModel.period.value,
                 onFileClicked = { file ->
                     Utils.displayFile(mainViewModel, findNavController(), file, galleryAdapter.galleryList)
                 },
@@ -154,6 +156,7 @@ class GalleryFragment : MultiSelectFragment(
         }
 
         observeApiResultPagination()
+        observePeriod()
 
         mainViewModel.deleteFilesFromGallery.observe(viewLifecycleOwner) { filesId ->
             filesId.forEach(galleryAdapter::deleteByFileId)
@@ -270,6 +273,14 @@ class GalleryFragment : MultiSelectFragment(
         }
     }
 
+    private fun observePeriod() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                galleryViewModel.period.collect(galleryAdapter::updatePeriod)
+            }
+        }
+    }
+
     fun onRefreshGallery() {
         if (isResumed) {
             galleryAdapter.clearGallery()
@@ -307,15 +318,13 @@ class GalleryFragment : MultiSelectFragment(
     override fun onIndividualActionSuccess(type: BulkOperationType, data: Any?) {
         when (type) {
             BulkOperationType.TRASH -> {
-                runBlocking(Dispatchers.Main) { galleryAdapter.deleteByFileId(data as Int) }
+                lifecycleScope.launch(Dispatchers.Main) { galleryAdapter.deleteByFileId(data as Int) }
             }
             BulkOperationType.COPY -> {
                 galleryAdapter.duplicatedList.add(0, data as File)
             }
             BulkOperationType.ADD_FAVORITES -> {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    galleryAdapter.notifyFileChanged(data as Int) { it.isFavorite = true }
-                }
+                lifecycleScope.launch(Dispatchers.Main) { galleryAdapter.notifyFileChanged(data as Int) { it.isFavorite = true } }
             }
             BulkOperationType.REMOVE_FAVORITES -> {
                 lifecycleScope.launch(Dispatchers.Main) {
