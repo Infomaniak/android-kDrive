@@ -86,6 +86,13 @@ class LaunchActivity : EdgeToEdgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // The app is already running: the launcher (or the tablet/foldable taskbar) re-sends the MAIN/LAUNCHER intent.
+        // Without this, we'd start a new MainActivity on top of the existing one, and the user would lose their navigation.
+        if (!isTaskRoot && intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_LAUNCHER)) {
+            finish()
+            return
+        }
+
         setContentView(binding.root)
 
         setDefaultLocaleIfNeeded()
