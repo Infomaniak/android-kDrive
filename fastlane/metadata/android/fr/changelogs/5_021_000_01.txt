@@ -1,0 +1,2 @@
+- Ajout du tri par période dans la vue galerie
+- Corrections de bugs
