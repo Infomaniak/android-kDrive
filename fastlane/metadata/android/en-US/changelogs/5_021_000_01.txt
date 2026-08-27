@@ -1,0 +1,2 @@
+- Add sort by time period in gallery view
+- Bugs fixes
