@@ -64,6 +64,7 @@ import com.infomaniak.drive.databinding.ViewFileInfoActionsBinding
 import com.infomaniak.drive.ui.CopyFileToDriveActivity
 import com.infomaniak.drive.ui.CopyFileToDriveActivityArgs
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.fileList.FolderNavigationRestrictions
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.utils.AccountUtils
@@ -664,7 +665,14 @@ class FileInfoActionsView @JvmOverloads constructor(
             mainViewModel: MainViewModel
         ) {
             trackFileActionEvent(MatomoName.Move)
-            currentContext.moveFileClicked(folderId, selectFolderResultLauncher, mainViewModel)
+            currentContext.moveFileClicked(
+                disabledDestinationFolderId = folderId,
+                selectFolderResultLauncher = selectFolderResultLauncher,
+                mainViewModel = mainViewModel,
+                navigationRestrictions = FolderNavigationRestrictions(
+                    disabledFolderIds = setOfNotNull(currentFile?.takeIf(File::isFolder)?.id)
+                ),
+            )
         }
 
         @CallSuper

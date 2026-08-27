@@ -22,7 +22,6 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
 import com.infomaniak.core.common.extensions.isNightModeEnabled
@@ -31,7 +30,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ActivitySelectFolderBinding
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.BaseActivity
@@ -63,7 +61,8 @@ class SelectFolderActivity : BaseActivity() {
         val driveId = navigationArgs.driveId
         val customArgs = navigationArgs.customArgs
         val currentFolderId = navigationArgs.folderId.getIntOrNull()
-        val disabledFolderId = navigationArgs.disabledFolderId.getIntOrNull()
+        val disabledDestinationFolderId = navigationArgs.disabledDestinationFolderId.getIntOrNull()
+        val navigationRestrictionsArg = navigationArgs.navigationRestrictions ?: FolderNavigationRestrictions()
 
         // We're doing this in the mainthread because the FileListFragment rely on mainViewModel.selectFolderUserDrive.
         // Moving this call in a background thread we'll break everything
@@ -75,7 +74,8 @@ class SelectFolderActivity : BaseActivity() {
             selectFolderViewModel.apply {
                 userDrive = currentUserDrive
                 currentDrive = DriveInfosController.getDrive(userId, driveId)
-                disableSelectedFolderId = disabledFolderId
+                disableSelectedFolderId = disabledDestinationFolderId
+                navigationRestrictions = navigationRestrictionsArg
             }
 
             navController.setGraph(
@@ -181,20 +181,5 @@ class SelectFolderActivity : BaseActivity() {
 
     fun hideSaveButton() {
         binding.saveButton.isGone = true
-    }
-
-    class SelectFolderViewModel : ViewModel() {
-        var userDrive: UserDrive? = null
-        var currentDrive: Drive? = null
-        var disableSelectedFolderId: Int? = null
-
-        fun getFolderName(folderId: Int): String {
-            val selectedFolderName = if (folderId == ROOT_ID) {
-                currentDrive?.name
-            } else {
-                FileController.getFileById(folderId, userDrive)?.name
-            }
-            return selectedFolderName ?: "/"
-        }
     }
 }

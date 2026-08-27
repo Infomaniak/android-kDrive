@@ -263,6 +263,7 @@
     <string name="errorCache">Fehler bei der Zwischenspeicherung</string>
     <string name="errorCategoryAlreadyExists">Eine Kategorie mit dem gleichen Namen existiert bereits</string>
     <string name="errorConflict">An dieser Stelle existiert bereits ein Element mit demselben Namen</string>
+    <string name="errorConflictPartOfTheSameSubtree">Der Zielordner befindet sich im Quellordner</string>
     <string name="errorCopyToDrive">Übertragung auf ein anderes Laufwerk fehlgeschlagen</string>
     <string name="errorDelete">Fehler beim Löschen</string>
     <string name="errorDeviceStorage">Unzureichender Gerätespeicher</string>

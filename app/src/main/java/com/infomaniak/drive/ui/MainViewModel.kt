@@ -48,6 +48,7 @@ import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FolderFilesProvider
@@ -234,7 +235,7 @@ class MainViewModel(
 
     fun createMultiSelectMediator(): MediatorLiveData<MultiSelectMediatorState> =
         MediatorLiveData<MultiSelectMediatorState>().apply {
-            value = MultiSelectMediatorState(numberOfSuccessfulActions = 0, totalOfActions = 0, errorCode = null)
+            value = MultiSelectMediatorState(numberOfSuccessfulActions = 0, totalOfActions = 0, errorResId = null)
         }
 
     fun updateMultiSelectMediator(mediator: MediatorLiveData<MultiSelectMediatorState>): (FileResult) -> Unit = { fileRequest ->
@@ -242,11 +243,12 @@ class MainViewModel(
         if (fileRequest.isSuccess) numberOfSuccessfulActions++
 
         val totalOfActions = mediator.value!!.totalOfActions + 1
+        val currentErrorResId = mediator.value!!.errorResId
 
         mediator.value = MultiSelectMediatorState(
             numberOfSuccessfulActions,
             totalOfActions,
-            fileRequest.errorCode,
+            errorResId = currentErrorResId ?: fileRequest.errorResId.takeIf { !fileRequest.isSuccess },
         )
     }
 
@@ -342,7 +344,17 @@ class MainViewModel(
             onSuccess?.invoke(file.id)
         }
 
-        emit(FileResult(isSuccess = apiResponse.isSuccess(), errorCode = apiResponse.error?.code))
+        emit(
+            FileResult(
+                isSuccess = apiResponse.isSuccess(),
+                errorCode = apiResponse.error?.code,
+                errorResId = when {
+                    apiResponse.isSuccess() -> null
+                    apiResponse.error?.code == ErrorCode.LIMIT_EXCEEDED_ERROR -> R.string.errorFilesLimitExceeded
+                    else -> apiResponse.translateError(defaultMessage = R.string.errorMove)
+                },
+            )
+        )
     }
 
     fun renameFile(file: File, newName: String) = liveData(Dispatchers.IO) {
@@ -478,7 +490,18 @@ class MainViewModel(
     ) = liveData(Dispatchers.IO) {
         ApiRepository.duplicateFile(file, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
-            emit(FileResult(isSuccess = apiResponse.isSuccess(), data = apiResponse.data, errorCode = apiResponse.error?.code))
+            emit(
+                FileResult(
+                    isSuccess = apiResponse.isSuccess(),
+                    data = apiResponse.data,
+                    errorCode = apiResponse.error?.code,
+                    errorResId = when {
+                        apiResponse.isSuccess() -> null
+                        apiResponse.error?.code == ErrorCode.LIMIT_EXCEEDED_ERROR -> R.string.errorFilesLimitExceeded
+                        else -> apiResponse.translateError(defaultMessage = R.string.errorDuplicate)
+                    },
+                )
+            )
         }
     }
 
@@ -730,7 +753,7 @@ class MainViewModel(
     data class MultiSelectMediatorState(
         var numberOfSuccessfulActions: Int,
         var totalOfActions: Int,
-        var errorCode: String?,
+        var errorResId: Int? = null,
     )
 
     companion object {

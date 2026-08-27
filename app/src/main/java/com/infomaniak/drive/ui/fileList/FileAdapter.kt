@@ -75,6 +75,7 @@ open class FileAdapter(
     var onStopUploadButtonClicked: ((fileName: String) -> Unit)? = null
 
     var isSelectingFolder = false
+    var navigationRestrictions = FolderNavigationRestrictions()
     var showShareFileButton = true
     var viewHolderType: DisplayType = DisplayType.LIST
     var uploadInProgress = false
@@ -414,32 +415,37 @@ open class FileAdapter(
 
     fun contains(fileName: String) = fileList.any { it.name == fileName }
 
-    private fun FileItemViewHolder.checkIfEnableFile(file: File) = when {
-        uploadInProgress -> {
-            if (file.isPendingUploadFolder()) {
-                fileDate?.text = file.path
-            } else {
-                val enable = file.currentProgress > 0 && binding.context.isSyncActive()
-                val title = when {
-                    enable -> R.string.uploadInProgressTitle
-                    pendingWifiConnection -> R.string.uploadNetworkErrorWifiRequired
-                    else -> R.string.uploadInProgressPending
-                }
-                fileDate?.setText(title)
-            }
-        }
-        else -> {
-            if (isSelectingFolder || offlineMode) {
-                enabledFile(file.isFolder() || (offlineMode && file.isOffline))
-            } else {
-                enabledFile()
-            }
+    private fun FileItemViewHolder.checkIfEnableFile(file: File) {
+        when {
+            uploadInProgress -> displayUploadStatus(file)
+            isSelectingFolder || offlineMode -> enableFile(file.isFolderPartOfTheMove() || (offlineMode && file.isOffline))
+            else -> enableFile()
         }
     }
 
-    private fun FileItemViewHolder.enabledFile(enable: Boolean = true) {
-        disabledView.isGone = enable
-        cardView.isEnabled = enable
+    private fun FileItemViewHolder.displayUploadStatus(file: File) {
+        if (file.isPendingUploadFolder()) {
+            fileDate?.text = file.path
+        } else {
+            val enable = file.currentProgress > 0 && binding.context.isSyncActive()
+            val title = when {
+                enable -> R.string.uploadInProgressTitle
+                pendingWifiConnection -> R.string.uploadNetworkErrorWifiRequired
+                else -> R.string.uploadInProgressPending
+            }
+            fileDate?.setText(title)
+        }
+    }
+
+    private fun File.isFolderPartOfTheMove(): Boolean {
+        val isChildOfMovedFolder = parentId == navigationRestrictions.disabledParentFolderId
+                && id !in navigationRestrictions.exceptedFolderIds
+        return isFolder() && id !in navigationRestrictions.disabledFolderIds && !isChildOfMovedFolder
+    }
+
+    private fun FileItemViewHolder.enableFile(shouldEnabled: Boolean = true) {
+        disabledView.isGone = shouldEnabled
+        cardView.isEnabled = shouldEnabled
     }
 
     private fun onFileSelected(file: File, isSelected: Boolean) = with(multiSelectManager) {

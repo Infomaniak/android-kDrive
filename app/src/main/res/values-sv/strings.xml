@@ -263,6 +263,7 @@
     <string name="errorCache">Cachningsfel</string>
     <string name="errorCategoryAlreadyExists">En kategori med samma namn finns redan</string>
     <string name="errorConflict">Ett element med samma namn finns redan på den här platsen</string>
+    <string name="errorConflictPartOfTheSameSubtree">Målmappen finns inuti källmappen</string>
     <string name="errorCopyToDrive">Överföring till en annan enhet misslyckades</string>
     <string name="errorDelete">Borttagningsfel</string>
     <string name="errorDeviceStorage">Otillräcklig enhetslagring</string>

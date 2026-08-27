@@ -22,6 +22,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.compose.ui.util.fastFilteredMap
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
@@ -50,6 +51,7 @@ import com.infomaniak.drive.ui.CopyFileToDriveActivity
 import com.infomaniak.drive.ui.CopyFileToDriveActivityArgs
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.MainViewModel.MultiSelectMediatorState
+import com.infomaniak.drive.ui.fileList.FolderNavigationRestrictions
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
@@ -224,8 +226,25 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         ).toBundle()
     }
 
-    fun moveFiles(disabledFolderId: Int?) {
-        requireContext().moveFileClicked(disabledFolderId, selectFolderResultLauncher, mainViewModel)
+    fun moveFiles(disabledDestinationFolderId: Int?) = with(multiSelectManager) {
+        val movedParentFolderId = if (isSelectAllOn) currentFolder?.id else null
+        val navigationRestrictions = if (movedParentFolderId == null) {
+            FolderNavigationRestrictions(
+                disabledFolderIds = getValidSelectedItems().fastFilteredMap({ it.isFolder() }, { it.id }).toSet(),
+            )
+        } else {
+            FolderNavigationRestrictions(
+                disabledParentFolderId = movedParentFolderId,
+                exceptedFolderIds = exceptedItemsIds.toSet(),
+            )
+        }
+
+        requireContext().moveFileClicked(
+            disabledDestinationFolderId = disabledDestinationFolderId,
+            selectFolderResultLauncher = selectFolderResultLauncher,
+            mainViewModel = mainViewModel,
+            navigationRestrictions = navigationRestrictions,
+        )
     }
 
     fun deleteFiles(allSelectedFilesCount: Int? = null) {
@@ -487,7 +506,7 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
                     )
                 } else {
                     mediator.value = mediator.value?.let {
-                        MultiSelectMediatorState(it.numberOfSuccessfulActions, it.totalOfActions + 1, it.errorCode)
+                        it.copy(totalOfActions = it.totalOfActions + 1)
                     }
                 }
             }
@@ -549,23 +568,25 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         destinationFolder: File?,
         dialog: Dialog? = null,
     ) {
-        mediator.observe(viewLifecycleOwner) { (success, total, error) ->
-            if (total == fileCount) {
+        mediator.observe(viewLifecycleOwner) { state ->
+            val success = state.numberOfSuccessfulActions
+            val errorResId = state.errorResId
+            if (state.totalOfActions == fileCount) {
                 dialog?.dismiss()
-                handleIndividualActionsResult(success, error, type, destinationFolder)
+                handleIndividualActionsResult(success, errorResId, type, destinationFolder)
             }
         }
     }
 
     private fun handleIndividualActionsResult(
         success: Int,
-        errorCode: String?,
+        errorResId: Int?,
         type: BulkOperationType,
         destinationFolder: File?,
     ) {
         val title = when {
-            errorCode == LIMIT_EXCEEDED_ERROR_CODE -> getString(R.string.errorFilesLimitExceeded)
-            success == 0 -> getString(R.string.anErrorHasOccurred)
+            errorResId == R.string.errorFilesLimitExceeded -> getString(errorResId)
+            success == 0 -> getString(errorResId ?: R.string.anErrorHasOccurred)
             type == BulkOperationType.COPY_TO_DRIVE -> getString(R.string.copyToDriveStarted, pendingCopyToDriveData?.fileName)
             else -> resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
         }

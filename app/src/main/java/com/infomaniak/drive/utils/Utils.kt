@@ -22,7 +22,6 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import android.view.LayoutInflater
 import androidx.activity.result.ActivityResultLauncher
@@ -61,6 +60,7 @@ import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
 import com.infomaniak.drive.databinding.DialogNamePromptBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.MainViewModel.FileResult
+import com.infomaniak.drive.ui.fileList.FolderNavigationRestrictions
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
@@ -229,9 +229,10 @@ object Utils {
     fun convertGigaByteToBytes(gigaBytes: Double) = (gigaBytes * 1024.0.pow(3)).toLong()
 
     fun Context.moveFileClicked(
-        disabledFolderId: Int?,
+        disabledDestinationFolderId: Int?,
         selectFolderResultLauncher: ActivityResultLauncher<Intent>,
         mainViewModel: MainViewModel,
+        navigationRestrictions: FolderNavigationRestrictions = FolderNavigationRestrictions(),
     ) {
         mainViewModel.ignoreSyncOffline = true
         Intent(this, SelectFolderActivity::class.java).apply {
@@ -239,8 +240,9 @@ object Utils {
                 SelectFolderActivityArgs(
                     userId = AccountUtils.currentUserId,
                     driveId = AccountUtils.currentDriveId,
-                    folderId = disabledFolderId ?: -1,
-                    disabledFolderId = disabledFolderId ?: -1,
+                    folderId = disabledDestinationFolderId ?: -1,
+                    disabledDestinationFolderId = disabledDestinationFolderId ?: -1,
+                    navigationRestrictions = navigationRestrictions,
                     customArgs = bundleOf(
                         MultiSelectFragment.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE,
                         SINGLE_OPERATION_CUSTOM_TAG to SingleOperation.MOVE.name,

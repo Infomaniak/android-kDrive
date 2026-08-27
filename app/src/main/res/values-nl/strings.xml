@@ -263,6 +263,7 @@
     <string name="errorCache">Cachingfout</string>
     <string name="errorCategoryAlreadyExists">Een categorie met dezelfde naam bestaat al</string>
     <string name="errorConflict">Een element met dezelfde naam bestaat al op deze locatie</string>
+    <string name="errorConflictPartOfTheSameSubtree">De doelmap bevindt zich in de bronmap</string>
     <string name="errorCopyToDrive">Overdracht naar een ander station mislukt</string>
     <string name="errorDelete">Verwijderfout</string>
     <string name="errorDeviceStorage">Onvoldoende apparaatopslag</string>

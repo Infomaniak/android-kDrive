@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.addCallback
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.core.legacy.utils.safeNavigate
@@ -30,8 +29,6 @@ import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.Rights
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 
@@ -79,6 +76,7 @@ class SelectFolderFragment : FileListFragment() {
 
         fileAdapter.apply {
             isSelectingFolder = true
+            navigationRestrictions = selectFolderViewModel.navigationRestrictions
             onFileClicked = { file ->
                 if (file.isFolder() && !file.isDisabled()) {
                     fileListViewModel.cancelDownloadFiles()
@@ -93,15 +91,7 @@ class SelectFolderFragment : FileListFragment() {
             }
         }
 
-        lifecycleScope.launchWhenResumed {
-            with(requireActivity() as SelectFolderActivity) {
-                showSaveButton()
-                val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
-                val enable = folderId != selectFolderViewModel.disableSelectedFolderId
-                        && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
-                enableSaveButton(enable)
-            }
-        }
+        setupSaveButton()
     }
 
     private fun onBackPressed() {

@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -26,6 +27,7 @@ import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.file.SpecialFolder.MyShares
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
+import com.infomaniak.drive.ui.fileList.SelectFolderViewModel
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MySharesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
@@ -42,6 +44,7 @@ class MySharesFragment : FileSubTypeListFragment() {
     override val noItemsRootTitle = R.string.mySharesNoFile
 
     private val navigationArgs: MySharesFragmentArgs by navArgs()
+    private val selectFolderViewModel: SelectFolderViewModel by activityViewModels()
     override val fileIdToPreview: Int get() = navigationArgs.previewFileId
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
@@ -76,6 +79,7 @@ class MySharesFragment : FileSubTypeListFragment() {
             }
         }
         fileAdapter.isSelectingFolder = requireActivity() is SelectFolderActivity
+        fileAdapter.navigationRestrictions = selectFolderViewModel.navigationRestrictions
     }
 
     override fun onMenuButtonClicked(

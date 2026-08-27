@@ -263,6 +263,7 @@
     <string name="errorCache">Erreur lors de la mise en cache</string>
     <string name="errorCategoryAlreadyExists">Une catégorie avec le même nom existe déjà</string>
     <string name="errorConflict">Un élément du même nom existe déjà à cet emplacement</string>
+    <string name="errorConflictPartOfTheSameSubtree">Le dossier ciblé se trouve dans le dossier source</string>
     <string name="errorCopyToDrive">Le transfert vers un autre drive a échoué</string>
     <string name="errorDelete">Erreur lors de la suppression</string>
     <string name="errorDeviceStorage">Stockage de l’appareil insuffisant</string>

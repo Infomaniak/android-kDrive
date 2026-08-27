@@ -23,14 +23,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ui.view.extension.setMargins
+import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.CardviewFileListBinding
@@ -42,8 +45,10 @@ import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
 import com.infomaniak.drive.utils.TypeFolder
 import com.infomaniak.drive.utils.setFileItem
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SelectRootFolderFragment : BaseRootFolderFragment() {
 
@@ -52,6 +57,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
     override val fileListViewModel: FileListViewModel by viewModels()
     private val selectRootFolderViewModel: SelectRootFolderViewModel by viewModels()
+    private val selectFolderViewModel: SelectFolderViewModel by activityViewModels()
 
     private val navigationArgs: SelectRootFolderFragmentArgs by navArgs()
 
@@ -144,6 +150,10 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
     private suspend fun CardviewFileListBinding.setupRecentFolderView(file: File) {
         root.isVisible = true
+
+        val isForbiddenDestination = isInsideMovedFolder(file.id)
+        disabled.isVisible = isForbiddenDestination
+
         root.setOnClickListener {
             safelyNavigate(
                 SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(
@@ -153,7 +163,28 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
                 )
             )
         }
+        disabled.setOnClickListener { showSnackbar(R.string.errorConflictPartOfTheSameSubtree) }
+
         itemViewFile.setFileItem(file = file, typeFolder = TypeFolder.recentFolder)
+    }
+
+    private suspend fun isInsideMovedFolder(fileId: Int): Boolean = withContext(Dispatchers.IO) {
+        val (movedFolderIds, movedParentFolderId, exceptedFolderIds) = selectFolderViewModel.navigationRestrictions
+        if (movedFolderIds.isEmpty() && movedParentFolderId == null) return@withContext false
+
+        FileController.getRealmInstance(navigationArgs.userDrive).use { realm ->
+            val visitedIds = mutableSetOf<Int>()
+            var current = FileController.getFileProxyById(fileId, customRealm = realm)
+
+            while (current != null && visitedIds.add(current.id)) {
+                val isMovedChildOfSource = current.parentId == movedParentFolderId && current.id !in exceptedFolderIds
+                if (current.id in movedFolderIds || isMovedChildOfSource) return@use true
+
+                current = FileController.getParentFileProxy(current.id, realm = realm)
+            }
+
+            false
+        }
     }
 
     override fun fileListDirections(

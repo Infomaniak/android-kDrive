@@ -263,6 +263,7 @@
     <string name="errorCache">Cache-fejl</string>
     <string name="errorCategoryAlreadyExists">En kategori med samme navn findes allerede</string>
     <string name="errorConflict">Der findes allerede et element med samme navn på dette sted</string>
+    <string name="errorConflictPartOfTheSameSubtree">Destinationsmappen ligger inden i kildemappen</string>
     <string name="errorCopyToDrive">Overførsel til et andet drev mislykkedes</string>
     <string name="errorDelete">Sletningsfejl</string>
     <string name="errorDeviceStorage">Utilstrækkelig enhedslagerplads</string>
