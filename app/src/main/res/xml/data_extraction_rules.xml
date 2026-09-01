@@ -24,12 +24,10 @@
 
         <include domain="file" path="AppSettings.realm" />
         <include domain="file" path="AppSettings.realm.lock" />
-        <include domain="file" path="AppSettings.realm.note" />
         <include domain="file" path="AppSettings.realm.management/" />
 
         <include domain="file" path="DrivesInfo.realm" />
         <include domain="file" path="DrivesInfo.realm.lock" />
-        <include domain="file" path="DrivesInfo.realm.note" />
         <include domain="file" path="DrivesInfo.realm.management/" />
     </cloud-backup>
 
@@ -41,17 +39,14 @@
 
         <include domain="file" path="AppSettings.realm" />
         <include domain="file" path="AppSettings.realm.lock" />
-        <include domain="file" path="AppSettings.realm.note" />
         <include domain="file" path="AppSettings.realm.management/" />
 
         <include domain="file" path="DrivesInfo.realm" />
         <include domain="file" path="DrivesInfo.realm.lock" />
-        <include domain="file" path="DrivesInfo.realm.note" />
         <include domain="file" path="DrivesInfo.realm.management/" />
 
         <include domain="file" path="Sync.realm" />
         <include domain="file" path="Sync.realm.lock" />
-        <include domain="file" path="Sync.realm.note" />
         <include domain="file" path="Sync.realm.management/" />
     </device-transfer>
 </data-extraction-rules>
