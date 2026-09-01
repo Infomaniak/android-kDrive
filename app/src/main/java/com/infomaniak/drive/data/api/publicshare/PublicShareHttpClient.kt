@@ -31,7 +31,6 @@ object PublicShareHttpClient : BaseHttpClientProvider() {
 
     override fun addTokenInterceptor(builder: OkHttpClient.Builder, tokenInterceptorListener: TokenInterceptorListener?) {
         if (AccountUtils.currentUser == null) return
-        super.addTokenInterceptor(builder, tokenInterceptorListener)
 
         tokenInterceptorListener?.let { listener ->
             builder.addInterceptor(PublicShareTokenInterceptor(listener))
