@@ -385,9 +385,10 @@ class MainActivity : BaseActivity() {
         lifecycleScope.launch {
             inAppReviewManager.shouldDisplayReviewDialog
                 .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
-                .collectLatest { shouldDisplayReviewDialog ->
+                .collect { shouldDisplayReviewDialog ->
                     if (shouldDisplayReviewDialog) {
                         trackInAppReview(MatomoName.PresentAlert)
+                        inAppReviewManager.onReviewDialogShown()
                         when (askForAppReview()) {
                             ReviewAlertDialog.DialogAction.Positive -> inAppReviewManager.onUserWantsToReview()
                             ReviewAlertDialog.DialogAction.Negative -> {
@@ -402,7 +403,6 @@ class MainActivity : BaseActivity() {
         inAppReviewManager.init(
             countdownBehavior = BaseInAppReviewManager.Behavior.LifecycleBased,
             appReviewThreshold = DEFAULT_APP_REVIEW_LAUNCHES,
-            maxAppReviewThreshold = MAX_APP_REVIEW_LAUNCHES,
             onUserWantToReview = { trackInAppReview(MatomoName.Like) },
             onUserWantToGiveFeedback = { trackInAppReview(MatomoName.Dislike) },
         )
@@ -743,6 +743,5 @@ class MainActivity : BaseActivity() {
         private const val MEDIASTORE_DELETE_BATCH_LIMIT = 2_000
 
         private const val DEFAULT_APP_REVIEW_LAUNCHES = 20
-        private const val MAX_APP_REVIEW_LAUNCHES = 100
     }
 }
