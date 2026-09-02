@@ -45,9 +45,9 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
-import com.infomaniak.core.auth.networking.HttpClient
-import com.infomaniak.core.network.networking.HttpClient.okHttpClient as unauthenticatedHttpClient
+import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
+import com.infomaniak.core.network.networking.DefaultHttpClientProvider
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.core.sentry.SentryLog
@@ -200,8 +200,8 @@ object PlaybackUtils {
     }
 
     private fun getOkHttpClient(isPublicShared: Boolean) = when {
-        isPublicShared -> unauthenticatedHttpClient
-        else -> HttpClient.okHttpClientWithTokenInterceptor
+        isPublicShared -> DefaultHttpClientProvider.okHttpClient
+        else -> AuthHttpClientProvider.authOkHttpClient
     }
 
     private fun getMediaSessionCallback() = object : MediaSession.Callback {

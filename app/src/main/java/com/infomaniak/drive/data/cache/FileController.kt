@@ -18,7 +18,7 @@
 package com.infomaniak.drive.data.cache
 
 import android.content.Context
-import com.infomaniak.core.auth.networking.HttpClient
+import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.legacy.utils.removeAccents
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.exceptions.NetworkException
@@ -908,7 +908,7 @@ object FileController {
     suspend fun saveRemoteFileToDb(
         remoteFile: File,
         userDrive: UserDrive,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+        okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
     ) = Dispatchers.IO {
         getRealmInstance(userDrive).use { realm ->
             val localFile = getFileById(realm, remoteFile.id)
@@ -960,14 +960,14 @@ object FileController {
 
     suspend fun createFolder(name: String, parentId: Int, onlyForMe: Boolean, userDrive: UserDrive?): ApiResponse<File> {
         val okHttpClient =
-            userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
+            userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: AuthHttpClientProvider.authOkHttpClient
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         return ApiRepository.createFolder(okHttpClient, driveId, parentId, name, onlyForMe)
     }
 
     suspend fun createCommonFolder(name: String, forAllUsers: Boolean, userDrive: UserDrive?): ApiResponse<File> {
         val okHttpClient =
-            userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
+            userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: AuthHttpClientProvider.authOkHttpClient
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         return ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers)
     }
