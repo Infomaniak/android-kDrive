@@ -241,12 +241,12 @@
     </plurals>
     <plurals name="driveBlockedTitle">
         <item quantity="one">kDrive %s er for øyeblikket blokkert</item>
-        <item quantity="other">Alle kDrive-ene dine er for øyeblikket blokkert</item>
+        <item quantity="other">Alle dine kDrive er for øyeblikket blokkert</item>
     </plurals>
     <string name="driveMaintenanceDescription">En oppdatering pågår for å forbedre kDrive. Denne prosessen kan ta noen minutter. Takk for tålmodigheten.</string>
     <plurals name="driveMaintenanceTitle">
         <item quantity="one">kDrive %s er for øyeblikket under vedlikehold</item>
-        <item quantity="other">Alle kDrive-ene dine er for øyeblikket under vedlikehold</item>
+        <item quantity="other">Alle dine kDrive er for øyeblikket under vedlikehold</item>
     </plurals>
     <string name="dropBoxDescription">Inviter partnerne, brukerne eller kundene dine til å overføre filer til kDrive-en din, selv om de ikke har en Infomaniak-konto.</string>
     <string name="dropBoxLinkTitle">Dropboks-link</string>
@@ -685,7 +685,7 @@
     <string name="supportTitle">Hjelp og support</string>
     <string name="switchAccountTitle">Bytt konto</string>
     <string name="switchDriveSearchViewHint">Søk etter en kDrive</string>
-    <string name="switchUserDescription">Se kDrive-ene til de andre Infomaniak-profilene dine. Du kan legge til så mange brukerprofiler du vil.</string>
+    <string name="switchUserDescription">Se kDrive for de andre Infomaniak-profilene dine. Du kan legge til så mange brukerprofiler du vil.</string>
     <string name="syncConfigureDescription">Bildene, videoene og skjermbildene dine vil automatisk lagres i kDrive %s.</string>
     <string name="syncConfigureTitle">Lagre minnene dine på et trygt sted</string>
     <string name="syncOnlyWifiDescription">Frakoblede filer vil kun synkroniseres via Wi-Fi</string>
