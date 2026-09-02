@@ -241,12 +241,12 @@
     </plurals>
     <plurals name="driveBlockedTitle">
         <item quantity="one">De kDrive %s is momenteel geblokkeerd</item>
-        <item quantity="other">Al je kDrives zijn momenteel geblokkeerd</item>
+        <item quantity="other">Al je kDrive zijn momenteel geblokkeerd</item>
     </plurals>
     <string name="driveMaintenanceDescription">Een update is bezig om kDrive te verbeteren. Dit proces kan enkele minuten duren. Bedankt voor je geduld.</string>
     <plurals name="driveMaintenanceTitle">
         <item quantity="one">De kDrive %s is momenteel in onderhoud</item>
-        <item quantity="other">Al je kDrives zijn momenteel in onderhoud</item>
+        <item quantity="other">Al je kDrive zijn momenteel in onderhoud</item>
     </plurals>
     <string name="dropBoxDescription">Nodig je partners, gebruikers of klanten uit om bestanden over te zetten naar je kDrive, zelfs als ze geen Infomaniak-account hebben.</string>
     <string name="dropBoxLinkTitle">Dropbox-link</string>
@@ -685,7 +685,7 @@
     <string name="supportTitle">Help &amp; ondersteuning</string>
     <string name="switchAccountTitle">Wissel van account</string>
     <string name="switchDriveSearchViewHint">Zoek een kDrive</string>
-    <string name="switchUserDescription">Bekijk de kDrives van je andere Infomaniak-profielen. Je kunt zoveel gebruikersprofielen toevoegen als je wilt.</string>
+    <string name="switchUserDescription">Bekijk de kDrive van je andere Infomaniak-profielen. Je kunt zoveel gebruikersprofielen toevoegen als je wilt.</string>
     <string name="syncConfigureDescription">Je foto’s, video’s en schermafbeeldingen worden automatisch opgeslagen in je kDrive %s.</string>
     <string name="syncConfigureTitle">Sla je herinneringen op een veilige plek op</string>
     <string name="syncOnlyWifiDescription">Offline bestanden worden alleen gesynchroniseerd via Wi-Fi</string>

@@ -241,12 +241,12 @@
     </plurals>
     <plurals name="driveBlockedTitle">
         <item quantity="one">kDrive %s on tällä hetkellä estetty</item>
-        <item quantity="other">Kaikki kDrivet ovat tällä hetkellä estettyjä</item>
+        <item quantity="other">Kaikki kDrive ovat tällä hetkellä estettyjä</item>
     </plurals>
     <string name="driveMaintenanceDescription">Päivitys on käynnissä kDriven parantamiseksi. Tämä prosessi voi kestää muutaman minuutin. Kiitos kärsivällisyydestäsi.</string>
     <plurals name="driveMaintenanceTitle">
         <item quantity="one">kDrive %s on tällä hetkellä huollossa</item>
-        <item quantity="other">Kaikki kDrivet ovat tällä hetkellä huollossa</item>
+        <item quantity="other">Kaikki kDrive ovat tällä hetkellä huollossa</item>
     </plurals>
     <string name="dropBoxDescription">Kutsu yhteistyökumppanisi, käyttäjät tai asiakkaat siirtämään tiedostoja kDriveesi, vaikka heillä ei olisi Infomaniak-tiliä.</string>
     <string name="dropBoxLinkTitle">Dropbox-linkki</string>
@@ -685,7 +685,7 @@
     <string name="supportTitle">Ohje ja tuki</string>
     <string name="switchAccountTitle">Vaihda tiliä</string>
     <string name="switchDriveSearchViewHint">Etsi kDrive</string>
-    <string name="switchUserDescription">Näytä kDrivet muista Infomaniak-profiileistasi. Voit lisätä niin monta käyttäjäprofiilia kuin haluat.</string>
+    <string name="switchUserDescription">Näytä kDrive muista Infomaniak-profiileistasi. Voit lisätä niin monta käyttäjäprofiilia kuin haluat.</string>
     <string name="syncConfigureDescription">Kuvasi, videosi ja kuvakaappaustesi tallennetaan automaattisesti kDrive %s -palveluun.</string>
     <string name="syncConfigureTitle">Tallenna muistosi turvalliseen paikkaan</string>
     <string name="syncOnlyWifiDescription">Offline-tiedostot synkronoidaan vain Wi-Fi-yhteydellä</string>

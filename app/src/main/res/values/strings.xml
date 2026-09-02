@@ -241,12 +241,12 @@
     </plurals>
     <plurals name="driveBlockedTitle">
         <item quantity="one">The kDrive %s is currently blocked</item>
-        <item quantity="other">All your kDrives are currently blocked</item>
+        <item quantity="other">All your kDrive are currently blocked</item>
     </plurals>
     <string name="driveMaintenanceDescription">An update is in progress to improve kDrive. This process may take a few minutes. Thank you for your patience.</string>
     <plurals name="driveMaintenanceTitle">
         <item quantity="one">The kDrive %s is currently under maintenance</item>
-        <item quantity="other">All your kDrives are currently under maintenance</item>
+        <item quantity="other">All your kDrive are currently under maintenance</item>
     </plurals>
     <string name="dropBoxDescription">Invite your partners, users or customers to transfer files to your kDrive even if they don’t have an Infomaniak account.</string>
     <string name="dropBoxLinkTitle">Drop box link</string>
@@ -685,7 +685,7 @@
     <string name="supportTitle">Help &amp; support</string>
     <string name="switchAccountTitle">Switch account</string>
     <string name="switchDriveSearchViewHint">Search a kDrive</string>
-    <string name="switchUserDescription">View the kDrives of your other Infomaniak profiles. You can add as many user profiles as you like.</string>
+    <string name="switchUserDescription">View the kDrive of your other Infomaniak profiles. You can add as many user profiles as you like.</string>
     <string name="syncConfigureDescription">Your photos, videos and screenshots will be automatically saved in your kDrive %s.</string>
     <string name="syncConfigureTitle">Save your memories in a safe place</string>
     <string name="syncOnlyWifiDescription">Offline files will be only synchronized with Wi-Fi</string>

@@ -241,12 +241,12 @@
     </plurals>
     <plurals name="driveBlockedTitle">
         <item quantity="one">kDrive %s er i øjeblikket blokeret</item>
-        <item quantity="other">Alle dine kDrives er i øjeblikket blokeret</item>
+        <item quantity="other">Alle dine kDrive er i øjeblikket blokeret</item>
     </plurals>
     <string name="driveMaintenanceDescription">En opdatering er i gang for at forbedre kDrive. Processen kan tage et par minutter. Tak for din tålmodighed.</string>
     <plurals name="driveMaintenanceTitle">
         <item quantity="one">kDrive %s er i øjeblikket under vedligeholdelse</item>
-        <item quantity="other">Alle dine kDrives er i øjeblikket under vedligeholdelse</item>
+        <item quantity="other">Alle dine kDrive er i øjeblikket under vedligeholdelse</item>
     </plurals>
     <string name="dropBoxDescription">Inviter dine partnere, brugere eller kunder til at overføre filer til din kDrive, selvom de ikke har en Infomaniak-konto.</string>
     <string name="dropBoxLinkTitle">Link til indleveringsboks</string>
@@ -685,7 +685,7 @@
     <string name="supportTitle">Hjælp &amp;amp; support</string>
     <string name="switchAccountTitle">Skift konto</string>
     <string name="switchDriveSearchViewHint">Søg efter en kDrive</string>
-    <string name="switchUserDescription">Se kDrives fra dine andre Infomaniak-profiler. Du kan tilføje så mange brugerprofiler, som du vil.</string>
+    <string name="switchUserDescription">Se kDrive fra dine andre Infomaniak-profiler. Du kan tilføje så mange brugerprofiler, som du vil.</string>
     <string name="syncConfigureDescription">Dine fotos, videoer og skærmbilleder vil automatisk blive gemt i din kDrive %s.</string>
     <string name="syncConfigureTitle">Gem dine minder på et sikkert sted</string>
     <string name="syncOnlyWifiDescription">Offline filer vil kun blive synkroniseret med Wi-Fi</string>

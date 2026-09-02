@@ -241,12 +241,12 @@
     </plurals>
     <plurals name="driveBlockedTitle">
         <item quantity="one">Das kDrive %s ist derzeit gesperrt</item>
-        <item quantity="other">Alle Ihre kDrives sind derzeit gesperrt</item>
+        <item quantity="other">Alle Ihre kDrive sind derzeit gesperrt</item>
     </plurals>
     <string name="driveMaintenanceDescription">Ein Update zur Verbesserung von kDrive ist in Arbeit. Dieser Vorgang kann ein paar Minuten dauern. Wir danken Ihnen für Ihre Geduld.</string>
     <plurals name="driveMaintenanceTitle">
         <item quantity="one">Das kDrive %s wird derzeit gewartet</item>
-        <item quantity="other">Alle Ihre kDrives sind derzeit in Wartung</item>
+        <item quantity="other">Alle Ihre kDrive sind derzeit in Wartung</item>
     </plurals>
     <string name="dropBoxDescription">Laden Sie Ihre Partner, Benutzer oder Kunden ein, Dateien in Ihren kDrive zu übertragen, auch wenn sie kein Infomaniak-Konto besitzen.</string>
     <string name="dropBoxLinkTitle">Link des Briefkastens</string>
@@ -685,7 +685,7 @@
     <string name="supportTitle">Hilfe und Unterstützung</string>
     <string name="switchAccountTitle">Konto wechseln</string>
     <string name="switchDriveSearchViewHint">kDrive suchen</string>
-    <string name="switchUserDescription">Sehen Sie die kDrives Ihrer anderen Infomaniak-Profile. Sie können so viele Benutzerprofile hinzufügen wie Sie möchten.</string>
+    <string name="switchUserDescription">Sehen Sie die kDrive Ihrer anderen Infomaniak-Profile. Sie können so viele Benutzerprofile hinzufügen wie Sie möchten.</string>
     <string name="syncConfigureDescription">Ihre Fotos, Videos und Screenshots werden automatisch in Ihrem kDrive %s gespeichert.</string>
     <string name="syncConfigureTitle">Speichern Sie Ihre Erinnerungen an einem sicheren Ort</string>
     <string name="syncOnlyWifiDescription">Offline-Dateien werden nur mit Wi-Fi synchronisiert</string>
