@@ -7,8 +7,6 @@ import java.util.Properties
 plugins {
     alias(core.plugins.android.application)
     alias(libs.plugins.junit5)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.navigation.safeargs)
     alias(libs.plugins.realm.android)
     alias(core.plugins.ksp)
@@ -29,7 +27,7 @@ android {
 
     compileSdk = appCompileSdk
 
-    ndkVersion = "28.0.13004108"
+    ndkVersion = "30.0.14904198"
 
     defaultConfig {
         testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
@@ -38,8 +36,6 @@ android {
         targetSdk = appTargetSdk
         versionCode = 5_021_001_01
         versionName = "5.21.1"
-
-        setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "CLIENT_ID", "\"9473D73C-C20F-4971-9E10-D957C563FA68\"")
@@ -96,6 +92,7 @@ android {
         viewBinding = true
         buildConfig = true
         compose = true
+        resValues = true
     }
 
     packaging {
@@ -111,6 +108,10 @@ android {
     testOptions.unitTests.all {
         it.testLogging { events("passed", "skipped", "failed", "standardOut", "standardError") }
     }
+}
+
+base {
+    archivesName = "kdrive-${android.defaultConfig.versionName} (${android.defaultConfig.versionCode})"
 }
 
 kotlin {
