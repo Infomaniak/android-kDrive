@@ -151,14 +151,14 @@ object AccountUtils : CredentialManager(
         user: User,
         driveInfo: DriveInfo,
     ) {
-        deleteFiles(user, driveInfo, context)
+        deleteFiles(user, driveInfo)
         reloadAppIfNeeded(fromMaintenance, driveInfo)
         MqttClientWrapper.updateToken(driveInfo.ipsToken)
         requestUser(user)
-        if (!fromCloudStorage) CloudStorageProvider.notifyRootsChanged(context)
+        if (!fromCloudStorage) CloudStorageProvider.notifyRootsChanged()
     }
 
-    private fun deleteFiles(user: User, driveInfo: DriveInfo, context: Context) {
+    private fun deleteFiles(user: User, driveInfo: DriveInfo) {
 
         val driveRemovedList = DriveInfosController.storeDriveInfos(user.id, driveInfo)
         val appSyncSettings = UploadFile.getAppSyncSettings()
@@ -243,7 +243,7 @@ object AccountUtils : CredentialManager(
                 reloadApp?.invoke(bundleOf())
             }
 
-            CloudStorageProvider.notifyRootsChanged(appCtx)
+            CloudStorageProvider.notifyRootsChanged()
         }
     }
 

@@ -232,7 +232,7 @@ class LoginActivity : ComponentActivity() {
         infomaniakLogin: InfomaniakLogin,
         withRedirection: Boolean = true,
     ) = Dispatchers.Default {
-        when (val result: Xor<User, ApiResponse<*>> = authenticateUser(this@LoginActivity, token)) {
+        when (val result: Xor<User, ApiResponse<*>> = authenticateUser(token)) {
             is Xor.First -> {
                 if (withRedirection) {
                     val deeplink = navigationArgs?.publicShareDeeplink
@@ -298,7 +298,7 @@ class LoginActivity : ComponentActivity() {
 
     private fun onGetTokenSuccess(apiToken: ApiToken) {
         lifecycleScope.launch(Dispatchers.IO) {
-            when (val result: Xor<User, ApiResponse<*>> = authenticateUser(this@LoginActivity, apiToken)) {
+            when (val result: Xor<User, ApiResponse<*>> = authenticateUser(apiToken)) {
                 is Xor.First -> {
                     val deeplink = navigationArgs?.publicShareDeeplink
                     if (deeplink.isNullOrBlank()) {
@@ -360,7 +360,7 @@ class LoginActivity : ComponentActivity() {
     companion object {
         private val TAG = LoginActivity::class.java.simpleName
 
-        suspend fun authenticateUser(context: Context, apiToken: ApiToken): Xor<User, ApiResponse<*>> {
+        suspend fun authenticateUser(apiToken: ApiToken): Xor<User, ApiResponse<*>> {
 
             val dbUser = AccountUtils.getUserById(apiToken.userId)
             if (dbUser != null) return Xor.Second(getErrorResponse(R.string.errorUserAlreadyPresent))
@@ -407,7 +407,7 @@ class LoginActivity : ComponentActivity() {
                     val driveInfo = allDrivesDataResponse.data ?: return Xor.Second(getErrorResponse(R.string.serverError))
 
                     Dispatchers.IO { DriveInfosController.storeDriveInfos(user.id, driveInfo) }
-                    CloudStorageProvider.notifyRootsChanged(context)
+                    CloudStorageProvider.notifyRootsChanged()
 
                     AccountUtils.addUser(user)
                     Xor.First(user)
