@@ -29,8 +29,6 @@
     <string name="actionPrint">Print</string>
     <string name="addCategoriesTitle">Add categories</string>
     <string name="addPassword">Protect with a password</string>
-    <string name="alertRemoveUserDescription">Are you sure you want to remove the user “%s” from this application?</string>
-    <string name="alertRemoveUserTitle">Remove user</string>
     <string name="all3DModel">3D Models</string>
     <string name="allActivated">Enabled</string>
     <string name="allAddExpirationDateTitle">Add an expiry date</string>
@@ -139,7 +137,6 @@
     <string name="buttonLeaveShare">Leave share</string>
     <string name="buttonLike">Like</string>
     <string name="buttonLogin">Log in</string>
-    <string name="buttonLogout">Log off</string>
     <string name="buttonManageDropBox">Manage the drop box</string>
     <string name="buttonMenu">Menu</string>
     <string name="buttonMove">Move</string>

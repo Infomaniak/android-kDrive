@@ -40,6 +40,7 @@ import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
+import com.infomaniak.core.common.R as RCore
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.databinding.FragmentMenuBinding
 import com.infomaniak.drive.ui.MenuViewModel
@@ -87,9 +88,9 @@ class MenuFragment : Fragment() {
 
         logout.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext(), R.style.DeleteDialogStyle)
-                .setTitle(getString(R.string.alertRemoveUserTitle))
-                .setMessage(getString(R.string.alertRemoveUserDescription, user.displayName))
-                .setPositiveButton(R.string.buttonConfirm) { _, _ -> menuViewModel.logout(user) }
+                .setTitle(getString(RCore.string.confirmLogoutTitle))
+                .setMessage(getString(RCore.string.confirmLogoutDescription, user.displayName))
+                .setPositiveButton(RCore.string.buttonLogOut) { _, _ -> menuViewModel.logout(user) }
                 .setNegativeButton(R.string.buttonCancel) { _, _ -> }
                 .setCancelable(false).show()
         }

@@ -29,8 +29,6 @@
     <string name="actionPrint">Afdrukken</string>
     <string name="addCategoriesTitle">Categorieën toevoegen</string>
     <string name="addPassword">Beveiligen met een wachtwoord</string>
-    <string name="alertRemoveUserDescription">Weet u zeker dat u de gebruiker \"%s\" uit deze applicatie wilt verwijderen?</string>
-    <string name="alertRemoveUserTitle">Gebruiker verwijderen</string>
     <string name="all3DModel">3D-modellen</string>
     <string name="allActivated">Ingeschakeld</string>
     <string name="allAddExpirationDateTitle">Vervaldatum toevoegen</string>
@@ -139,7 +137,6 @@
     <string name="buttonLeaveShare">Delen verlaten</string>
     <string name="buttonLike">Vind ik leuk</string>
     <string name="buttonLogin">Inloggen</string>
-    <string name="buttonLogout">Uitloggen</string>
     <string name="buttonManageDropBox">Dropbox beheren</string>
     <string name="buttonMenu">Menu</string>
     <string name="buttonMove">Verplaatsen</string>

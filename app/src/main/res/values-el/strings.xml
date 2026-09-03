@@ -29,8 +29,6 @@
     <string name="actionPrint">Εκτύπωση</string>
     <string name="addCategoriesTitle">Προσθήκη κατηγοριών</string>
     <string name="addPassword">Προστασία με κωδικό πρόσβασης</string>
-    <string name="alertRemoveUserDescription">Είστε βέβαιοι ότι θέλετε να αφαιρέσετε τον χρήστη \"%s\" από αυτήν την εφαρμογή;</string>
-    <string name="alertRemoveUserTitle">Αφαίρεση χρήστη</string>
     <string name="all3DModel">Μοντέλα 3D</string>
     <string name="allActivated">Ενεργοποιημένο</string>
     <string name="allAddExpirationDateTitle">Προσθήκη ημερομηνίας λήξης</string>
@@ -139,7 +137,6 @@
     <string name="buttonLeaveShare">Αποχώρηση από κοινή χρήση</string>
     <string name="buttonLike">Μου αρέσει</string>
     <string name="buttonLogin">Σύνδεση</string>
-    <string name="buttonLogout">Αποσύνδεση</string>
     <string name="buttonManageDropBox">Διαχείριση της \"λίστας\" αποθήκευσης</string>
     <string name="buttonMenu">Μενού</string>
     <string name="buttonMove">Μετακίνηση</string>
