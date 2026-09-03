@@ -39,6 +39,7 @@ import java.util.Date
 class KDriveFullBackupAgent : FullBackupAgent() {
 
     override fun onFullBackup(data: FullBackupDataOutput) {
+        backupTmpDir.deleteRecursively() // Ensure there are no leftovers from a previous aborted backup.
         val mightBeCloudBackup = data.isDeviceToDeviceTransfer != true
         if (mightBeCloudBackup) {
             backupTmpDir.mkdir()
