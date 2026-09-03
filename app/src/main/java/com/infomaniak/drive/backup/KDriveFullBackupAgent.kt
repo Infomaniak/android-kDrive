@@ -60,7 +60,6 @@ class KDriveFullBackupAgent : FullBackupAgent() {
         mode: Long,
         mtime: Long
     ) {
-        println("onRestoreFile($destination)")
         when (destination.canonicalFile) {
             syncDbBackupFile -> restoreSyncDb(data.toByteArray(size))
             else -> super.onRestoreFile(data, size, destination, type, mode, mtime)
