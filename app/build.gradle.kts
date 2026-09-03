@@ -237,7 +237,6 @@ dependencies {
     implementation(core.lottie)
     implementation(libs.material.date.time.picker)
     implementation(libs.touch.image.view)
-    implementation(core.splitties.bitflags)
 
     implementation(libs.realm.android.adapters)
 
