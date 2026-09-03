@@ -98,7 +98,7 @@ open class MediaFolder(
         }
 
         fun putAll(folders: List<MediaFolder>) {
-            getRealmInstance().executeTransaction { it.insertOrUpdate(folders) }
+            getRealmInstance().use { realm -> realm.executeTransaction { it.insertOrUpdate(folders) } }
         }
     }
 }
