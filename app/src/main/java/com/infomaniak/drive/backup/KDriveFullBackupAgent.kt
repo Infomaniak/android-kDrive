@@ -40,8 +40,7 @@ class KDriveFullBackupAgent : FullBackupAgent() {
 
     override fun onFullBackup(data: FullBackupDataOutput) {
         backupTmpDir.deleteRecursively() // Ensure there are no leftovers from a previous aborted backup.
-        val mightBeCloudBackup = data.isDeviceToDeviceTransfer != true
-        if (mightBeCloudBackup) {
+        if (!data.isDeviceToDeviceTransfer) {
             backupTmpDir.mkdir()
             extractSyncDbToFile()
         }
