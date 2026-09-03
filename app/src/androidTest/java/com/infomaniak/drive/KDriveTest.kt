@@ -69,7 +69,7 @@ open class KDriveTest {
                 )
 
                 val okhttpClient = HttpClient.okHttpClientNoTokenInterceptor.newBuilder().addInterceptor { chain ->
-                    val newRequest = changeAccessToken(chain.request(), apiToken)
+                    val newRequest = changeAccessToken(chain.request(), apiToken.accessToken)
                     chain.proceed(newRequest)
                 }.build()
 
@@ -103,7 +103,7 @@ open class KDriveTest {
             if (!uiRealm.isClosed) uiRealm.close()
             Realm.deleteRealm(FileController.getRealmConfiguration(userDrive))
             if (!Env.USE_CURRENT_USER) {
-                runBlocking { AccountUtils.removeUser(context, user) }
+                runBlocking { AccountUtils.removeUser(user.id) }
             }
         }
 

@@ -48,6 +48,8 @@ import com.infomaniak.core.common.observe
 import com.infomaniak.core.crossapplogin.back.CrossAppLoginFacade
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.legacy.utils.Utils.lockOrientationForSmallScreens
+import com.infomaniak.core.login.ApiToken
+import com.infomaniak.core.login.InfomaniakLogin
 import com.infomaniak.core.network.api.InternalTranslatedErrorCode
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponse
@@ -58,6 +60,7 @@ import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.ui.compose.basics.CallableState
+import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.CREATE_ACCOUNT_CANCEL_HOST
 import com.infomaniak.drive.CREATE_ACCOUNT_SUCCESS_HOST
 import com.infomaniak.drive.CREATE_ACCOUNT_URL
@@ -78,9 +81,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
 import com.infomaniak.drive.utils.openSupport
-import com.infomaniak.core.login.ApiToken
-import com.infomaniak.core.login.InfomaniakLogin
-import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -232,7 +232,7 @@ class LoginActivity : ComponentActivity() {
         infomaniakLogin: InfomaniakLogin,
         withRedirection: Boolean = true,
     ) = Dispatchers.Default {
-        when (val result: Xor<User, ApiResponse<*>> = authenticateUser(this@LoginActivity, token)) {
+        when (val result: Xor<User, ApiResponse<*>> = authenticateUser(token)) {
             is Xor.First -> {
                 if (withRedirection) {
                     val deeplink = navigationArgs?.publicShareDeeplink
@@ -298,7 +298,7 @@ class LoginActivity : ComponentActivity() {
 
     private fun onGetTokenSuccess(apiToken: ApiToken) {
         lifecycleScope.launch(Dispatchers.IO) {
-            when (val result: Xor<User, ApiResponse<*>> = authenticateUser(this@LoginActivity, apiToken)) {
+            when (val result: Xor<User, ApiResponse<*>> = authenticateUser(apiToken)) {
                 is Xor.First -> {
                     val deeplink = navigationArgs?.publicShareDeeplink
                     if (deeplink.isNullOrBlank()) {
@@ -360,7 +360,7 @@ class LoginActivity : ComponentActivity() {
     companion object {
         private val TAG = LoginActivity::class.java.simpleName
 
-        suspend fun authenticateUser(context: Context, apiToken: ApiToken): Xor<User, ApiResponse<*>> {
+        suspend fun authenticateUser(apiToken: ApiToken): Xor<User, ApiResponse<*>> {
 
             val dbUser = AccountUtils.getUserById(apiToken.userId)
             if (dbUser != null) return Xor.Second(getErrorResponse(R.string.errorUserAlreadyPresent))
@@ -368,7 +368,7 @@ class LoginActivity : ComponentActivity() {
             val okhttpClient = DefaultHttpClientProvider.okHttpClient
                 .newBuilder()
                 .addInterceptor { chain ->
-                    val newRequest = changeAccessToken(chain.request(), apiToken)
+                    val newRequest = changeAccessToken(chain.request(), apiToken.accessToken)
                     chain.proceed(newRequest)
                 }
                 .build()
@@ -407,7 +407,7 @@ class LoginActivity : ComponentActivity() {
                     val driveInfo = allDrivesDataResponse.data ?: return Xor.Second(getErrorResponse(R.string.serverError))
 
                     Dispatchers.IO { DriveInfosController.storeDriveInfos(user.id, driveInfo) }
-                    CloudStorageProvider.notifyRootsChanged(context)
+                    CloudStorageProvider.notifyRootsChanged()
 
                     AccountUtils.addUser(user)
                     Xor.First(user)

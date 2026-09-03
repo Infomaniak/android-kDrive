@@ -30,7 +30,7 @@ open class MediaFolder(
 ) : RealmObject() {
 
     fun storeOrUpdate(newPath: String? = null) {
-        return UploadFile.getRealmInstance().use {
+        return getRealmInstance().use {
             it.executeTransaction { realm ->
                 findByIdQuery(realm, id)?.let { queryMedia ->
                     isSynced = queryMedia.isSynced
@@ -55,7 +55,7 @@ open class MediaFolder(
 
         private inline val Realm.mediaFolderTable get() = where(MediaFolder::class.java)
 
-        fun getRealmInstance() = UploadFile.getRealmInstance()
+        fun getRealmInstance(): Realm = UploadFile.getRealmInstance()
 
         private fun findByIdQuery(realm: Realm, id: Long) = realm.mediaFolderTable.equalTo(MediaFolder::id.name, id).findFirst()
 
@@ -95,6 +95,10 @@ open class MediaFolder(
                     realm.delete(MediaFolder::class.java)
                 }
             }
+        }
+
+        fun putAll(folders: List<MediaFolder>) {
+            getRealmInstance().use { realm -> realm.executeTransaction { it.insertOrUpdate(folders) } }
         }
     }
 }

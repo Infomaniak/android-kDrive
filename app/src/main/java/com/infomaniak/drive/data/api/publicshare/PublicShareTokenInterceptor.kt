@@ -36,7 +36,7 @@ class PublicShareTokenInterceptor(
         }?.let { apiToken ->
             val authorization = request.header("Authorization")
             if (apiToken.accessToken != authorization?.replaceFirst("Bearer ", "")) {
-                request = changeAccessToken(request, apiToken)
+                request = changeAccessToken(request, apiToken.accessToken)
             }
         }
 

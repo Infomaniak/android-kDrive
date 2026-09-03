@@ -77,6 +77,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import splitties.init.appCtx
 import java.io.IOException
 import java.net.URLEncoder
 import java.util.Date
@@ -1090,21 +1091,21 @@ class CloudStorageProvider : DocumentsProvider() {
             if (old == disabled) return
 
             prefs.edit { putBoolean(KEY_PROVIDER_DISABLED, disabled) }
-            notifyProviderChanged(context)
+            notifyProviderChanged()
         }
 
-        fun notifyProviderChanged(context: Context) {
-            val authority = context.getString(R.string.CLOUD_STORAGE_AUTHORITY)
+        fun notifyProviderChanged() {
+            val authority = appCtx.getString(R.string.CLOUD_STORAGE_AUTHORITY)
             val docBase = "content://$authority/document".toUri()
             val rootsUri = DocumentsContract.buildRootsUri(authority)
-            context.contentResolver.notifyChange(docBase, null)
-            context.contentResolver.notifyChange(rootsUri, null)
+            appCtx.contentResolver.notifyChange(docBase, null)
+            appCtx.contentResolver.notifyChange(rootsUri, null)
         }
 
-        fun notifyRootsChanged(context: Context) {
-            val authority = context.getString(R.string.CLOUD_STORAGE_AUTHORITY)
+        fun notifyRootsChanged() {
+            val authority = appCtx.getString(R.string.CLOUD_STORAGE_AUTHORITY)
             val rootsUri = DocumentsContract.buildRootsUri(authority)
-            context.contentResolver.notifyChange(rootsUri, null)
+            appCtx.contentResolver.notifyChange(rootsUri, null)
         }
     }
 }

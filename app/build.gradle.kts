@@ -15,6 +15,7 @@ plugins {
     alias(core.plugins.dagger.hilt)
     alias(core.plugins.compose.compiler)
     alias(core.plugins.kotlin.parcelize)
+    alias(core.plugins.kotlin.serialization)
     alias(core.plugins.sentry.plugin)
 }
 
