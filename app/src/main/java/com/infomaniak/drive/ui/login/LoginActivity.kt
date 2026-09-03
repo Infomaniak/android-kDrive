@@ -48,6 +48,8 @@ import com.infomaniak.core.common.observe
 import com.infomaniak.core.crossapplogin.back.CrossAppLoginFacade
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.legacy.utils.Utils.lockOrientationForSmallScreens
+import com.infomaniak.core.login.ApiToken
+import com.infomaniak.core.login.InfomaniakLogin
 import com.infomaniak.core.network.api.InternalTranslatedErrorCode
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponse
@@ -58,6 +60,7 @@ import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.ui.compose.basics.CallableState
+import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.CREATE_ACCOUNT_CANCEL_HOST
 import com.infomaniak.drive.CREATE_ACCOUNT_SUCCESS_HOST
 import com.infomaniak.drive.CREATE_ACCOUNT_URL
@@ -78,9 +81,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
 import com.infomaniak.drive.utils.openSupport
-import com.infomaniak.core.login.ApiToken
-import com.infomaniak.core.login.InfomaniakLogin
-import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -368,7 +368,7 @@ class LoginActivity : ComponentActivity() {
             val okhttpClient = DefaultHttpClientProvider.okHttpClient
                 .newBuilder()
                 .addInterceptor { chain ->
-                    val newRequest = changeAccessToken(chain.request(), apiToken)
+                    val newRequest = changeAccessToken(chain.request(), apiToken.accessToken)
                     chain.proceed(newRequest)
                 }
                 .build()

@@ -69,7 +69,7 @@ open class KDriveTest {
                 )
 
                 val okhttpClient = HttpClient.okHttpClientNoTokenInterceptor.newBuilder().addInterceptor { chain ->
-                    val newRequest = changeAccessToken(chain.request(), apiToken)
+                    val newRequest = changeAccessToken(chain.request(), apiToken.accessToken)
                     chain.proceed(newRequest)
                 }.build()
 
