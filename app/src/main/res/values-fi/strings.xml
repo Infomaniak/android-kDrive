@@ -29,8 +29,6 @@
     <string name="actionPrint">Tulosta</string>
     <string name="addCategoriesTitle">Lisää luokkia</string>
     <string name="addPassword">Suojaa salasanalla</string>
-    <string name="alertRemoveUserDescription">Haluatko varmasti poistaa käyttäjän \"%s\" tästä sovelluksesta?</string>
-    <string name="alertRemoveUserTitle">Poista käyttäjä</string>
     <string name="all3DModel">3D-mallit</string>
     <string name="allActivated">Käytössä</string>
     <string name="allAddExpirationDateTitle">Lisää vanhenemispäivämäärä</string>
@@ -139,7 +137,6 @@
     <string name="buttonLeaveShare">Poistu jaosta</string>
     <string name="buttonLike">Tykkää</string>
     <string name="buttonLogin">Kirjaudu sisään</string>
-    <string name="buttonLogout">Kirjaudu ulos</string>
     <string name="buttonManageDropBox">Hallitse jättölaatikkoa</string>
     <string name="buttonMenu">Valikko</string>
     <string name="buttonMove">Siirrä</string>

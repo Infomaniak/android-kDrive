@@ -347,7 +347,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
                         android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/buttonLogout"
+                        android:text="@string/buttonLogOut"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/logoutChevron"
                         app:layout_constraintStart_toEndOf="@id/logoutIcon"

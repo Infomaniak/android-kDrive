@@ -29,8 +29,6 @@
     <string name="actionPrint">Skriv ut</string>
     <string name="addCategoriesTitle">Lägg till kategorier</string>
     <string name="addPassword">Skydda med ett lösenord</string>
-    <string name="alertRemoveUserDescription">Är du säker på att du vill ta bort användaren \"%s\" från denna applikation?</string>
-    <string name="alertRemoveUserTitle">Ta bort användare</string>
     <string name="all3DModel">3D-modeller</string>
     <string name="allActivated">Aktiverad</string>
     <string name="allAddExpirationDateTitle">Lägg till ett utgångsdatum</string>
@@ -139,7 +137,6 @@
     <string name="buttonLeaveShare">Lämna delning</string>
     <string name="buttonLike">Gilla</string>
     <string name="buttonLogin">Logga in</string>
-    <string name="buttonLogout">Logga ut</string>
     <string name="buttonManageDropBox">Hantera inkorgen</string>
     <string name="buttonMenu">Meny</string>
     <string name="buttonMove">Flytta</string>

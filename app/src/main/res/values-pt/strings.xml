@@ -29,8 +29,6 @@
     <string name="actionPrint">Imprimir</string>
     <string name="addCategoriesTitle">Adicionar categorias</string>
     <string name="addPassword">Proteger com palavra-passe</string>
-    <string name="alertRemoveUserDescription">Tem a certeza de que deseja remover o utilizador \"%s\" desta aplicação?</string>
-    <string name="alertRemoveUserTitle">Remover utilizador</string>
     <string name="all3DModel">Modelos 3D</string>
     <string name="allActivated">Ativado</string>
     <string name="allAddExpirationDateTitle">Adicionar data de validade</string>
@@ -139,7 +137,6 @@
     <string name="buttonLeaveShare">Sair da partilha</string>
     <string name="buttonLike">Gosto</string>
     <string name="buttonLogin">Iniciar sessão</string>
-    <string name="buttonLogout">Terminar sessão</string>
     <string name="buttonManageDropBox">Gerir a drop box</string>
     <string name="buttonMenu">Menu</string>
     <string name="buttonMove">Mover</string>
