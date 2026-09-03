@@ -18,6 +18,7 @@
 <full-backup-content>
     <include domain="sharedpref" path="." />
     <include domain="file" path="datastore/" />
+    <include domain="database" path="user_database" />
     <include domain="file" path="tmp_backup_agent/" />
 
     <include domain="file" path="AppSettings.realm" />
