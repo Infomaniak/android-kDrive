@@ -38,6 +38,9 @@ import java.util.Date
 
 class KDriveFullBackupAgent : FullBackupAgent() {
 
+    private val backupTmpDir by lazy { filesDir.resolve("tmp_backup_agent").canonicalFile }
+    private val syncDbBackupFile by lazy { backupTmpDir.resolve("sync_db.pb") }
+
     override fun onFullBackup(data: FullBackupDataOutput) {
         backupTmpDir.deleteRecursively() // Ensure there are no leftovers from a previous aborted backup.
         if (!data.isDeviceToDeviceTransfer) {
@@ -65,9 +68,6 @@ class KDriveFullBackupAgent : FullBackupAgent() {
             else -> super.onRestoreFile(data, size, destination, type, mode, mtime)
         }
     }
-
-    private val backupTmpDir by lazy { filesDir.resolve("tmp_backup_agent").canonicalFile }
-    private val syncDbBackupFile by lazy { backupTmpDir.resolve("sync_db.pb") }
 
     private fun extractSyncDbToFile() {
         val syncSettingsBackupModel = UploadFile.getAppSyncSettings()?.toBackupModel() ?: return
