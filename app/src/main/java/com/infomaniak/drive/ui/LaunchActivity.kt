@@ -122,8 +122,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
     }
 
     private suspend fun handleRestoreFromBackup() {
-        val manager = RestoreFromBackupManager.instance
-        manager.state.transform { state ->
+        RestoreFromBackupManager.instance.state.transform { state ->
             when (state) {
                 RestoreFromBackupManager.State.RestoringFromBackup -> {
                     setContentView(binding.root)
