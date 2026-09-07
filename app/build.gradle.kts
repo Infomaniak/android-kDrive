@@ -17,10 +17,10 @@ plugins {
     alias(core.plugins.sentry.plugin)
 }
 
-val appCompileSdk: Int by rootProject.extra
-val appTargetSdk: Int by rootProject.extra
-val appMinSdk: Int by rootProject.extra
-val javaVersion: JavaVersion by rootProject.extra
+val appCompileSdk: Int = rootProject.extra["appCompileSdk"] as Int
+val appTargetSdk: Int = rootProject.extra["appTargetSdk"] as Int
+val appMinSdk: Int = rootProject.extra["appMinSdk"] as Int
+val javaVersion: JavaVersion = rootProject.extra["javaVersion"] as JavaVersion
 
 android {
 
