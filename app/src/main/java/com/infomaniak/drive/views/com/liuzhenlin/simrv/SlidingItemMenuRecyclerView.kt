@@ -642,17 +642,17 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(
         /**
          * Tag used to get the width of an item view's menu
          */
-        private const val TAG_ITEM_MENU_WIDTH = R.id.tag_itemMenuWidth
+        private val TAG_ITEM_MENU_WIDTH = R.id.tag_itemMenuWidth
 
         /**
          * Tag used to get the widths of the menu items of an item view
          */
-        private const val TAG_MENU_ITEM_WIDTHS = R.id.tag_menuItemWidths
+        private val TAG_MENU_ITEM_WIDTHS = R.id.tag_menuItemWidths
 
         /**
          * Tag used to get the animator of the item view to which it associated
          */
-        private const val TAG_ITEM_ANIMATOR = R.id.tag_itemAnimator
+        private val TAG_ITEM_ANIMATOR = R.id.tag_itemAnimator
 
         private val sViscousFluidInterpolator: Interpolator = ViscousFluidInterpolator(6.66f)
         private val sOvershootInterpolator: Interpolator = OvershootInterpolator(1.0f)

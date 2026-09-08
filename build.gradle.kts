@@ -2,8 +2,8 @@
 buildscript {
 
     extra.apply {
-        set("appCompileSdk", 36) // Ensure any extra configChanges are added into Activities' manifests.
-        set("appTargetSdk", 35)
+        set("appCompileSdk", 37) // Ensure any extra configChanges are added into Activities' manifests.
+        set("appTargetSdk", 36)
         set("appMinSdk", 27)
         set("legacyMinSdk", 27) // Duplicated from `Core/Legacy/build.gradle` : `legacyMinSdk = 27`
         set("javaVersion", JavaVersion.VERSION_17)
@@ -13,6 +13,7 @@ buildscript {
         classpath(libs.realm.gradle.plugin)
         classpath(libs.google.services)
         classpath(libs.android.junit5)
+        classpath(core.kotlin.gradle.plugin)
     }
 }
 
