@@ -36,7 +36,7 @@ import kotlinx.serialization.protobuf.ProtoBuf
 import java.io.File
 import java.util.Date
 
-class KDriveFullBackupAgent : FullBackupAgent() {
+class KDriveFullBackupAgent : FullBackupAgent(RestorationPolicy.FilteredFilesOnly) {
 
     private val backupTmpDir by lazy { filesDir.resolve("tmp_backup_agent").canonicalFile }
     private val syncDbBackupFile by lazy { backupTmpDir.resolve("sync_db.pb") }
