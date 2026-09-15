@@ -6,6 +6,7 @@ import java.util.Properties
  */
 plugins {
     alias(core.plugins.android.application)
+    alias(core.plugins.infomaniak.android.debug.signing)
     alias(libs.plugins.junit5)
     alias(libs.plugins.navigation.safeargs)
     alias(libs.plugins.realm.android)
