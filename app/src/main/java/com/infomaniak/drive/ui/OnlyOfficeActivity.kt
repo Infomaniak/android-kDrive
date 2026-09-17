@@ -82,7 +82,9 @@ class OnlyOfficeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager, isInDarkTheme = isNightModeEnabled()) }
+        addComposeOverlay {
+            TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager, isInDarkTheme = isNightModeEnabled())
+        }
 
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
 
