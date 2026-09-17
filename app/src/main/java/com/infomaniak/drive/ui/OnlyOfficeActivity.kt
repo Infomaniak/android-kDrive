@@ -41,6 +41,7 @@ import androidx.activity.addCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
 import androidx.webkit.WebSettingsCompat
@@ -54,6 +55,7 @@ import com.infomaniak.core.legacy.utils.showToast
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
+import com.infomaniak.drive.KDRIVE_WEBAPP
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityOnlyOfficeBinding
 import com.infomaniak.drive.twoFactorAuthManager
@@ -71,6 +73,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityOnlyOfficeBinding.inflate(layoutInflater) }
     private var filePathCallback: ValueCallback<Array<out Uri?>?>? = null
+    private val kDriveHost = KDRIVE_WEBAPP.toUri().host
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
         filePathCallback?.onReceiveValue(uris.toTypedArray())
         filePathCallback = null
@@ -79,7 +82,9 @@ class OnlyOfficeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager, isInDarkTheme = isNightModeEnabled()) }
+        addComposeOverlay {
+            TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager, isInDarkTheme = isNightModeEnabled())
+        }
 
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
 
@@ -114,8 +119,9 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
     private fun buildWebViewClient(): WebViewClient = object : WebViewClientCompat() {
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-            popBackIfNeeded(request.url.toString())
-            view.loadUrl(request.url.toString())
+            val uri = request.url
+            if (uri.scheme == "https" && uri.host == kDriveHost) return false
+            openUrl(uri.toString())
             return true
         }
     }
@@ -220,11 +226,6 @@ class OnlyOfficeActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback {
             with(binding.webView) { if (canGoBack()) goBack() else finish() }
         }
-    }
-
-    private fun popBackIfNeeded(url: String) {
-        val popBackNeeded = !url.contains(Regex("^https.*/app/(office/\\d+|share/\\d+/[a-z0-9\\-]+/preview/text)/\\d+"))
-        if (popBackNeeded) finish()
     }
 
     private inner class OnlyOfficeWebChromeClient : WebChromeClient() {
