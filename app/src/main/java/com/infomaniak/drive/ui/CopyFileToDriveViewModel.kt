@@ -92,7 +92,7 @@ class CopyFileToDriveViewModel(val savedStateHandle: SavedStateHandle) : ViewMod
                 val isSourceSharedWithMe = DriveInfosController.getDrive(driveId = sourceDriveId)?.sharedWithMe == true
                 val sourceUserDrive = UserDrive(userId = userId, driveId = sourceDriveId, sharedWithMe = isSourceSharedWithMe)
 
-                sourceFile.emit(FileController.getFileById(fileId, sourceUserDrive))
+                sourceFile.emit(FileController.getFileByUidOrId(fileId, sourceUserDrive))
             }
         }
     }
@@ -113,7 +113,7 @@ class CopyFileToDriveViewModel(val savedStateHandle: SavedStateHandle) : ViewMod
 
     private fun getFolder(drive: Drive, folderId: Int): File? {
         val userDrive = UserDrive(userId = userId, driveId = drive.id, sharedWithMe = drive.sharedWithMe)
-        return FileController.getFileById(folderId, userDrive)
+        return FileController.getFileByUidOrId(folderId, userDrive)
     }
 
     data class CopyDestination(val folderId: Int, val folderName: String?, val driveId: Int)

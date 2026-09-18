@@ -35,7 +35,7 @@ class SelectFolderViewModel : ViewModel() {
         val selectedFolderName = if (folderId == ROOT_ID) {
             currentDrive?.name
         } else {
-            FileController.getFileById(folderId, userDrive)?.name
+            FileController.getFileByUidOrId(folderId, userDrive)?.name
         }
         return selectedFolderName ?: "/"
     }

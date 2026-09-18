@@ -72,7 +72,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        FileController.getFileById(fileId, userDrive)?.let(::setFile)
+        FileController.getFileByUidOrId(fileId, userDrive)?.let(::setFile)
 
         mainViewModel.getFileDetails(fileId, userDrive).observe(viewLifecycleOwner) { fileResponse ->
             fileResponse?.let(::setFile)

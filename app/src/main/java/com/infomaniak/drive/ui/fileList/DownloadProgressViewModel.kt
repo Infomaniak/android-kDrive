@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024-2025 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ class DownloadProgressViewModel : ViewModel() {
     val localFile = SingleLiveEvent<File?>()
 
     fun getLocalFile(fileId: Int, userDrive: UserDrive) {
-        localFile.value = FileController.getFileById(fileId, userDrive)
+        localFile.value = FileController.getFileByUidOrId(fileId, userDrive)
     }
 
     fun downloadFile(context: Context, file: File, userDrive: UserDrive) = viewModelScope.launch(Dispatchers.IO) {

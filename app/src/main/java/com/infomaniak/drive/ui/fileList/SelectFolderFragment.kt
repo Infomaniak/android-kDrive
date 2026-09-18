@@ -54,7 +54,7 @@ class SelectFolderFragment : FileListFragment() {
         toolbar.menu.findItem(R.id.addFolderItem).apply {
             setOnMenuItemClickListener {
                 val selectFolderActivity = requireActivity() as? SelectFolderActivity
-                if (FileController.getFileById(folderId, userDrive)?.rights?.canCreateDirectory == true) {
+                if (FileController.getFileByUidOrId(folderId, userDrive)?.rights?.canCreateDirectory == true) {
                     selectFolderActivity?.hideSaveButton()
                     trackNewElementEvent(MatomoName.CreateFolderOnTheFly)
                     safeNavigate(
