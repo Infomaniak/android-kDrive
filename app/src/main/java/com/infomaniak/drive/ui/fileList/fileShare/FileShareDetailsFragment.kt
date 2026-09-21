@@ -107,8 +107,11 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
             setBackPressedHandlers()
         }
 
-        binding.root.enableEdgeToEdge(withPadding = true, withBottom = false) {
+        binding.root.enableEdgeToEdge(withBottom = false) {
             binding.closeButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + it.bottom)
+            binding.sharedUsersCardView.setMargins(
+                bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + it.bottom
+            )
         }
     }
 
