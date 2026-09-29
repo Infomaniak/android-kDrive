@@ -77,8 +77,10 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         mainViewModel.getFileDetails(fileId, userDrive).observe(viewLifecycleOwner) { fileResponse ->
             fileResponse?.let(::setFile)
 
-            mainViewModel.getFileShare(fileId).observe(viewLifecycleOwner) { shareResponse ->
-                shareResponse.data?.let { fileDetailsViewModel.currentFileShare.value = it }
+            if (fileResponse?.rights?.canShare == true) {
+                mainViewModel.getFileShare(fileId).observe(viewLifecycleOwner) { shareResponse ->
+                    shareResponse.data?.let { fileDetailsViewModel.currentFileShare.value = it }
+                }
             }
         }
 

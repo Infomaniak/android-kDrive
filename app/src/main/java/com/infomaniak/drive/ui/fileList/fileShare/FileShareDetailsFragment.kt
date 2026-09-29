@@ -152,6 +152,16 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
         sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
         sharedUsersRecyclerView.adapter = sharedItemsAdapter
 
+        if (file.rights?.canShare == true) {
+            getFileShare()
+        }
+
+        shareLinkViewModel.getShareLink(file).observe(viewLifecycleOwner) {
+            it?.data?.let(::setupShareLink)
+        }
+    }
+
+    private fun getFileShare() = with(binding) {
         mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) { apiResponse ->
             apiResponse.data?.let { share ->
                 val itemList = if (file.rights?.canUseTeam == true) allUserList + allTeams else allUserList
@@ -172,10 +182,6 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
                 sharedUsersTitle.isVisible = true
                 sharedItemsAdapter.setAll(ArrayList(share.members))
             }
-        }
-
-        shareLinkViewModel.getShareLink(file).observe(viewLifecycleOwner) {
-            it?.data?.let(::setupShareLink)
         }
     }
 
