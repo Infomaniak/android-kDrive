@@ -152,10 +152,12 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
         sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
         sharedUsersRecyclerView.adapter = sharedItemsAdapter
 
-        if (file.rights?.canShare == true) getFileShare()
+        if (file.rights?.canShare == true) {
+            getFileShare()
 
-        shareLinkViewModel.getShareLink(file).observe(viewLifecycleOwner) {
-            it?.data?.let(::setupShareLink)
+            shareLinkViewModel.getShareLink(file).observe(viewLifecycleOwner) {
+                it?.data?.let(::setupShareLink)
+            }
         }
     }
 
