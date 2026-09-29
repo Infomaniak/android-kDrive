@@ -154,10 +154,10 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
 
         if (file.rights?.canShare == true) {
             getFileShare()
+        }
 
-            shareLinkViewModel.getShareLink(file).observe(viewLifecycleOwner) {
-                it?.data?.let(::setupShareLink)
-            }
+        shareLinkViewModel.getShareLink(file).observe(viewLifecycleOwner) {
+            it?.data?.let(::setupShareLink)
         }
     }
 
