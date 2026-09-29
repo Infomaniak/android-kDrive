@@ -24,12 +24,15 @@ import android.os.ParcelFileDescriptor
 import com.infomaniak.core.auth.backup.withBlockStoreCredentialsBackup
 import com.infomaniak.core.common.backup.FullBackupAgent
 import com.infomaniak.core.common.backup.isDeviceToDeviceTransfer
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.backup.models.MediaFolderBackupModel
 import com.infomaniak.drive.backup.models.SyncDbBackupModel
 import com.infomaniak.drive.backup.models.SyncSettingsBackupModel
+import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
@@ -41,6 +44,12 @@ class KDriveFullBackupAgent : FullBackupAgent(RestorationPolicy.FilteredFilesOnl
 
     private val backupTmpDir by lazy { filesDir.resolve("tmp_backup_agent").canonicalFile }
     private val syncDbBackupFile by lazy { backupTmpDir.resolve("sync_db.pb") }
+
+    override fun onCreate() {
+        super.onCreate()
+        MainApplication.configureSentry()
+        runBlocking { initRealm() }
+    }
 
     override fun onFullBackup(data: FullBackupDataOutput) = withBlockStoreCredentialsBackup {
         backupTmpDir.deleteRecursively() // Ensure there are no leftovers from a previous aborted backup.

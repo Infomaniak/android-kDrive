@@ -19,6 +19,8 @@ package com.infomaniak.drive
 
 import android.app.Application
 import android.app.PendingIntent
+import android.app.backup.BackupAgent
+import android.content.Context
 import android.content.Intent
 import android.os.Build.VERSION.SDK_INT
 import android.os.StrictMode
@@ -229,17 +231,22 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
         }
     }
 
-    private fun configureSentry() {
-        val uiSettings = UiSettings(applicationContext)
-        this.configureSentry(
-            isDebug = BuildConfig.DEBUG,
-            isSentryTrackingEnabled = { uiSettings.isSentryTrackingEnabled },
-        )
-    }
-
     companion object {
         @JvmStatic
         var userDataCleanableList: List<AssociatedUserDataCleanable> = emptyList()
             protected set
+
+        context(context: BackupAgent)
+        fun configureSentry() {
+            context.configureSentry()
+        }
+
+        private fun Context.configureSentry() {
+            val uiSettings = UiSettings(this)
+            configureSentry(
+                isDebug = BuildConfig.DEBUG,
+                isSentryTrackingEnabled = { uiSettings.isSentryTrackingEnabled },
+            )
+        }
     }
 }
