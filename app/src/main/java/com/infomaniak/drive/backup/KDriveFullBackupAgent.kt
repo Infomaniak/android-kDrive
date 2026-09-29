@@ -21,6 +21,7 @@ package com.infomaniak.drive.backup
 
 import android.app.backup.FullBackupDataOutput
 import android.os.ParcelFileDescriptor
+import com.infomaniak.core.auth.backup.withBlockStoreCredentialsBackup
 import com.infomaniak.core.common.backup.FullBackupAgent
 import com.infomaniak.core.common.backup.isDeviceToDeviceTransfer
 import com.infomaniak.drive.backup.models.MediaFolderBackupModel
@@ -41,7 +42,7 @@ class KDriveFullBackupAgent : FullBackupAgent(RestorationPolicy.FilteredFilesOnl
     private val backupTmpDir by lazy { filesDir.resolve("tmp_backup_agent").canonicalFile }
     private val syncDbBackupFile by lazy { backupTmpDir.resolve("sync_db.pb") }
 
-    override fun onFullBackup(data: FullBackupDataOutput) {
+    override fun onFullBackup(data: FullBackupDataOutput) = withBlockStoreCredentialsBackup {
         backupTmpDir.deleteRecursively() // Ensure there are no leftovers from a previous aborted backup.
         if (!data.isDeviceToDeviceTransfer) {
             backupTmpDir.mkdir()
