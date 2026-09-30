@@ -1,0 +1,3 @@
+- Sauvegarde des jetons via l'API Block Store lors d'un transfert vers un nouvel appareil
+- Correction de la barre d'outils qui ne se repliait pas dans les détails de partage de fichier
+- Correction d'un crash potentiel dans un cas limite de restauration

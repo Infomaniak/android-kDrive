@@ -1,0 +1,3 @@
+- Backup tokens with the Block Store API when transferring to a new device
+- Fix the toolbar that didn't collapse in file share details
+- Fix a potential crash in restoration edge case
