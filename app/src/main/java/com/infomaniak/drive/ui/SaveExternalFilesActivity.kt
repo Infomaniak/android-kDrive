@@ -77,6 +77,7 @@ import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.isUrlFile
 import com.infomaniak.drive.utils.isValidUrl
 import com.infomaniak.drive.utils.showOrHideEmptyError
+import com.infomaniak.drive.utils.toSafeFileName
 import dagger.hilt.android.AndroidEntryPoint
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -520,7 +521,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         return false
     }
 
-    private fun getOutputFile(fileName: String) = IOFile(sharedFolder, fileName).also { if (it.exists()) it.delete() }
+    private fun getOutputFile(fileName: String) = IOFile(sharedFolder, fileName.toSafeFileName()).also { if (it.exists()) it.delete() }
 
     private fun store(uri: Uri, fileName: String?, userId: Int, driveId: Int, folderId: Int): Boolean {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->

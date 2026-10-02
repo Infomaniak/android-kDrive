@@ -47,6 +47,10 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.downloadFile
 import com.infomaniak.drive.utils.isUrlFile
 import com.infomaniak.drive.utils.isWeblocFile
+import com.infomaniak.drive.utils.resolveContainedFileName
+import com.infomaniak.drive.utils.resolveContainedPath
+import com.infomaniak.drive.utils.toSafeFileName
+import com.infomaniak.drive.utils.toSafeRelativePath
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.RealmResults
@@ -303,11 +307,12 @@ open class File(
 
         if (path.isEmpty()) return null
 
-        val child = if (isFolder()) path else path.substringBeforeLast("/")
-        val folder = IOFile(rootFolder, child)
+        val sanitizedPath = path.toSafeRelativePath()
+        val child = if (isFolder()) sanitizedPath else sanitizedPath.substringBeforeLast("/")
+        val folder = rootFolder.resolveContainedPath(child) ?: return null
 
         if (!folder.exists()) folder.mkdirs()
-        return if (isFolder()) folder else IOFile(folder, name)
+        return if (isFolder()) folder else folder.resolveContainedFileName(name)
     }
 
     fun getCacheFile(context: Context, userDrive: UserDrive = UserDrive()): IOFile {
@@ -324,7 +329,7 @@ open class File(
     private fun getPublicShareCache(context: Context): IOFile {
         val folder = IOFile(context.filesDir, context.getString(R.string.EXPOSED_PUBLIC_SHARE_DIR))
         if (!folder.exists()) folder.mkdirs()
-        return IOFile(folder, name)
+        return IOFile(folder, name.toSafeFileName())
     }
 
     fun isDisabled(): Boolean {
@@ -509,7 +514,7 @@ open class File(
             cacheFile = when {
                 isPublicShared -> getPublicShareCache(context)
                 isOnlyOfficePreview() -> getConvertedPdfCache(context, userDrive)
-                isOffline -> getOfflineFile(context, userDrive.userId)!!
+                isOffline -> getOfflineFile(context, userDrive.userId) ?: getCacheFile(context, userDrive)
                 else -> getCacheFile(context, userDrive)
             }
 

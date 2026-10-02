@@ -63,6 +63,7 @@ import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.copyToCancellable
+import com.infomaniak.drive.utils.toSafeFileName
 import io.realm.Realm
 import io.sentry.Sentry
 import io.sentry.SentryEvent
@@ -454,7 +455,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
     private fun generateThumbnail(fileId: Int, file: File, userId: String, signal: CancellationSignal?): ParcelFileDescriptor? {
         val outputFolder = IOFile(context?.cacheDir, "thumbnails").apply { if (!exists()) mkdirs() }
-        val name = "${fileId}_${file.name}"
+        val name = "${fileId}_${file.name.toSafeFileName()}"
         val outputFile = IOFile(outputFolder, name)
         val thumbnailUrl = ApiRoutes.getThumbnailUrl(file)
 
@@ -681,7 +682,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
     private fun createTempFile(parentFileId: Int, displayName: String): IOFile {
         val tempFileFolder = IOFile(cacheDir, "$parentFileId").apply { if (!exists()) mkdirs() }
-        return IOFile(tempFileFolder, displayName).apply { if (!exists()) createNewFile() }
+        return IOFile(tempFileFolder, displayName.toSafeFileName()).apply { if (!exists()) createNewFile() }
     }
 
     private fun writeDataFile(context: Context, file: File, userDrive: UserDrive, accessMode: Int): ParcelFileDescriptor? {
