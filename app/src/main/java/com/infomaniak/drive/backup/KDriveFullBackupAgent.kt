@@ -51,7 +51,7 @@ class KDriveFullBackupAgent : FullBackupAgent(RestorationPolicy.FilteredFilesOnl
         runBlocking { initRealm() }
     }
 
-    override fun onFullBackup(data: FullBackupDataOutput) = withBlockStoreCredentialsBackup {
+    override fun onFullBackup(data: FullBackupDataOutput) = withBlockStoreCredentialsBackup(data) {
         backupTmpDir.deleteRecursively() // Ensure there are no leftovers from a previous aborted backup.
         if (!data.isDeviceToDeviceTransfer) {
             backupTmpDir.mkdir()
