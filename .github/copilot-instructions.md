@@ -28,7 +28,7 @@ CI runs on every non-draft PR:
 ```bash
 ./gradlew clean
 ./gradlew build
-./gradlew testDebugUnitTest --stacktrace   # JUnit 5 — use @Test from org.junit.jupiter.api
+./gradlew testStandardDebugUnitTest --stacktrace   # JUnit 5 — use @Test from org.junit.jupiter.api
 ```
 
 Flavor-specific commands:
