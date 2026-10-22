@@ -63,9 +63,14 @@ class ApiTimestampDateSerializerTest {
     }
 
     @Test
-    fun `alternate string timestamp representation is rejected`() {
+    fun `quoted numeric timestamp is accepted like Gson did`() {
+        assertEquals(Date(1_792_675_175_000L), SerializationUtils.decodeFromString<DateValue>("""{"date":"1792675175"}""").date)
+    }
+
+    @Test
+    fun `non numeric string timestamp is rejected`() {
         assertThrows(SerializationException::class.java) {
-            SerializationUtils.decodeFromString<DateValue>("""{"date":"1792675175"}""")
+            SerializationUtils.decodeFromString<DateValue>("""{"date":"2026-01-01"}""")
         }
     }
 

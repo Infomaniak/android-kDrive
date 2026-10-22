@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.core.common.utils.enumValueOfOrNull
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.file.sharelink.ShareLinkCapabilities
@@ -43,18 +42,14 @@ import java.util.Date
 open class ShareLink(
     var url: String = "",
     @SerialName("file_id")
-    @SerializedName("file_id")
     var fileId: Int? = null,
     @SerialName("right")
-    @SerializedName("right")
     var _right: String = ShareLinkFilePermission.RESTRICTED.name,
     @Serializable(with = ApiTimestampDateSerializer::class)
     @SerialName("valid_until")
-    @SerializedName("valid_until")
     var validUntil: Date? = null,
     var capabilities: ShareLinkCapabilities? = null,
     @SerialName("access_blocked")
-    @SerializedName("access_blocked")
     var accessBlocked: Boolean = false,
 ) : RealmObject(), Parcelable {
 
@@ -82,21 +77,18 @@ open class ShareLink(
         override val description: Int
     ) : Permission {
 
-        @SerializedName("public")
         PUBLIC(
             R.drawable.ic_unlock,
             R.string.shareLinkPublicRightTitle,
             R.string.shareLinkPublicRightFileDescriptionShort
         ),
 
-        @SerializedName("inherit")
         RESTRICTED(
             R.drawable.ic_lock,
             R.string.shareLinkPrivateRightTitle,
             R.string.shareLinkRestrictedRightFileDescriptionShort
         ),
 
-        @SerializedName("password")
         PASSWORD(-1, -1, -1)
     }
 
@@ -107,14 +99,12 @@ open class ShareLink(
         override val description: Int
     ) : Permission {
 
-        @SerializedName("public")
         PUBLIC(
             R.drawable.ic_unlock,
             R.string.shareLinkPublicRightTitle,
             R.string.shareLinkPublicRightFolderDescriptionShort
         ),
 
-        @SerializedName("inherit")
         RESTRICTED(
             R.drawable.ic_lock,
             R.string.shareLinkPrivateRightTitle,
@@ -129,14 +119,12 @@ open class ShareLink(
         override val description: Int
     ) : Permission {
 
-        @SerializedName("public")
         PUBLIC(
             R.drawable.ic_unlock,
             R.string.shareLinkPublicRightTitle,
             R.string.shareLinkPublicRightDocumentDescriptionShort
         ),
 
-        @SerializedName("inherit")
         RESTRICTED(
             R.drawable.ic_lock,
             R.string.shareLinkPrivateRightTitle,
@@ -191,15 +179,11 @@ open class ShareLink(
     }
 
     inner class ShareLinkSettings(
-        @SerializedName("can_download")
         var canDownload: Boolean? = capabilities?.canDownload,
-        @SerializedName("can_edit")
         var canEdit: Boolean? = capabilities?.canEdit,
-        @SerializedName("can_see_stats")
         var canSeeStats: Boolean? = capabilities?.canSeeStats,
         var password: String? = newPassword,
         var right: ShareLinkFilePermission? = newRight,
-        @SerializedName("valid_until")
         var validUntil: Date? = this@ShareLink.validUntil,
     ) {
         fun toJsonElement() = buildShareLinkSettingsJsonElement(

@@ -24,14 +24,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UploadSegment(
-    val number: Int,
-    val status: ChunkStatus,
+    val number: Int = 0,
+    val status: ChunkStatus = ChunkStatus.ERROR,
     @Serializable(with = ApiTimestampDateSerializer::class)
     @SerialName("created_at")
-    val createdAt: Date,
-    val size: Int,
+    val createdAt: Date = Date(0),
+    val size: Int = 0,
     /** Chunk uploaded md5 hash, computed */
-    val hash: String
+    val hash: String = ""
 ) {
 
     @Serializable
