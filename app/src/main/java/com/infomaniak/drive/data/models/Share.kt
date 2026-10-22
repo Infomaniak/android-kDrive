@@ -17,6 +17,10 @@
  */
 package com.infomaniak.drive.data.models
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+
+@Serializable
 data class Share(
     val teams: ArrayList<Team> = arrayListOf(),
     val users: ArrayList<UserFileAccess> = arrayListOf(),
@@ -24,6 +28,7 @@ data class Share(
     /**
      * Local
      */
+    @Transient
     var driveUsers: ArrayList<DriveUser> = arrayListOf()
 ) {
 
