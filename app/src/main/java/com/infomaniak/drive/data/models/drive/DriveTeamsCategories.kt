@@ -17,12 +17,17 @@
  */
 package com.infomaniak.drive.data.models.drive
 
+import com.infomaniak.drive.utils.serialization.RealmIntListSerializer
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
+import kotlinx.serialization.Serializable
 
+@Serializable
 @RealmClass(embedded = true)
 open class DriveTeamsCategories(
+    @Serializable(with = RealmIntListSerializer::class)
     var account: RealmList<Int> = RealmList(),
+    @Serializable(with = RealmIntListSerializer::class)
     var drive: RealmList<Int> = RealmList(),
 ) : RealmObject()

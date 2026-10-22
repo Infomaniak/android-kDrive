@@ -19,7 +19,10 @@ package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 data class Invitation(
     override var id: Int = -1,
@@ -29,6 +32,7 @@ data class Invitation(
     val status: String = "",
     val email: String = "",
     val user: DriveUser? = null,
+    @SerialName("invitation_drive_id")
     @SerializedName("invitation_drive_id")
     val invitationDriveId: Int = -1,
     override val isExternalUser: Boolean = true
