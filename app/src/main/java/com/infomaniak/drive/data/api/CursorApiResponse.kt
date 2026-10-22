@@ -21,20 +21,62 @@ import com.google.gson.annotations.SerializedName
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
-class CursorApiResponse<T>(
-    result: ApiResponseStatus = ApiResponseStatus.UNKNOWN,
-    data: T? = null,
-    error: ApiError? = null,
-    responseAt: Long = 0,
+/**
+ * It extends [ApiResponse] so that Core can still set the headers and the translated error on it. The superclass properties
+ * are (de)serialized by [ApiResponse]'s own serializer, so the primary constructor only declares the cursor fields and a
+ * transient holder used to feed the superclass when the object is built by hand through the public constructor.
+ */
+@Serializable
+class CursorApiResponse<T> private constructor(
     val cursor: String? = null, // TODO: It's only temporarily nullable, pending a change on the API side.
+    @SerialName("has_more")
     @SerializedName("has_more")
     val hasMore: Boolean = false,
+    @Transient private val base: ApiResponse<T>? = null,
 ) : ApiResponse<T>(
-    result = result,
-    data = data,
-    error = error,
-    responseAt = responseAt,
+    result = base?.result ?: ApiResponseStatus.UNKNOWN,
+    data = base?.data,
+    uri = base?.uri,
+    error = base?.error,
+    page = base?.page ?: 0,
+    pages = base?.pages ?: 0,
+    responseAt = base?.responseAt ?: 0,
+    total = base?.total ?: 0,
+    itemsPerPage = base?.itemsPerPage ?: 0,
 ) {
+
+    @JvmOverloads // Keeps the no-arg constructor Gson relies on
+    constructor(
+        result: ApiResponseStatus = ApiResponseStatus.UNKNOWN,
+        data: T? = null,
+        error: ApiError? = null,
+        responseAt: Long = 0,
+        cursor: String? = null,
+        hasMore: Boolean = false,
+        uri: String? = null,
+        page: Int = 0,
+        pages: Int = 0,
+        total: Int = 0,
+        itemsPerPage: Int = 0,
+    ) : this(
+        cursor = cursor,
+        hasMore = hasMore,
+        base = ApiResponse(
+            result = result,
+            data = data,
+            uri = uri,
+            error = error,
+            page = page,
+            pages = pages,
+            responseAt = responseAt,
+            total = total,
+            itemsPerPage = itemsPerPage,
+        ),
+    )
+
     val hasMoreAndCursorExists inline get() = hasMore && cursor != null
 }

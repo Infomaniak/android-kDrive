@@ -18,10 +18,16 @@
 package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
+import com.infomaniak.drive.utils.serialization.ApiTimestampDateSerializer
 import java.util.Date
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 class IpsToken(
     val uuid: String,
+    @Serializable(with = ApiTimestampDateSerializer::class)
+    @SerialName("valid_until")
     @SerializedName("valid_until")
     val validUntil: Date,
 )
