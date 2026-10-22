@@ -19,9 +19,10 @@ package com.infomaniak.drive.data.models.drive
 
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
+import kotlinx.serialization.Serializable
 
+@Serializable
 @RealmClass(embedded = true)
 open class DriveRights(
     var technical: Boolean = false,
 ) : RealmObject()
-

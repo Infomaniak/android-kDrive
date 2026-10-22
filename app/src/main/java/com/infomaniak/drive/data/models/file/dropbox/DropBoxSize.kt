@@ -21,7 +21,9 @@ import android.os.Parcelable
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 @RealmClass(embedded = true)
 open class DropBoxSize(

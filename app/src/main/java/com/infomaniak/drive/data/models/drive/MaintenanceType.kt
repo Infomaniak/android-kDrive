@@ -23,12 +23,16 @@ import com.infomaniak.core.common.utils.apiEnum
 import io.realm.RealmObject
 import io.realm.annotations.Ignore
 import io.realm.annotations.RealmClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @RealmClass(embedded = true)
-open class MaintenanceType : RealmObject() {
+open class MaintenanceType(
+    @SerialName("code")
     @SerializedName("code")
-    private var _code: String? = null
-
+    private var _code: String? = null,
+) : RealmObject() {
     @delegate:Ignore
     val type: MaintenanceTypeValue? by apiEnum(::_code)
 
