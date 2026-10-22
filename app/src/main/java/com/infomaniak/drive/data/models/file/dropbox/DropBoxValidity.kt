@@ -21,13 +21,19 @@ import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
+import com.infomaniak.drive.utils.serialization.ApiTimestampDateSerializer
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import java.util.Date
 
+@Serializable
 @Parcelize
 @RealmClass(embedded = true)
 open class DropBoxValidity(
+    @Serializable(with = ApiTimestampDateSerializer::class)
     var date: Date? = null,
+    @SerialName("has_expired")
     @SerializedName("has_expired")
     var hasExpired: Boolean? = null,
 ) : RealmObject(), Parcelable

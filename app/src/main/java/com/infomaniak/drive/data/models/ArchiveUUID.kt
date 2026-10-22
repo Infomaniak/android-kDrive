@@ -18,7 +18,9 @@
 package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ArchiveUUID(val uuid: String) {
 
     class ArchiveBody private constructor(
