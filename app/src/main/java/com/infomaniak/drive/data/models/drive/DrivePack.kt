@@ -21,11 +21,15 @@ import com.google.gson.annotations.SerializedName
 import com.infomaniak.core.legacy.utils.Utils.enumValueOfOrNull
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @RealmClass(embedded = true)
 open class DrivePack(
     var id: Int = 0,
     var name: String = "",
+    @SerialName("capabilities")
     @SerializedName("capabilities")
     private var _capabilities: DrivePackCapabilities? = DrivePackCapabilities()
 ) : RealmObject() {

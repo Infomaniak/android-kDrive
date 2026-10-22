@@ -21,11 +21,16 @@ import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 open class TeamDetails(
+    @SerialName("drive_id")
     @SerializedName("drive_id")
     var driveId: Int = -1,
+    @SerialName("users_count")
     @SerializedName("users_count")
     var usersCount: Int = 0
 ) : RealmObject(), Parcelable
