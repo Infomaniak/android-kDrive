@@ -18,23 +18,27 @@
 package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
+import com.infomaniak.drive.utils.serialization.ApiTimestampDateSerializer
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import java.util.Date
 
+@Serializable
 @Parcelize
 @RealmClass(embedded = true)
 open class FileCategory(
-    @SerializedName("category_id")
+    @SerialName("category_id")
     var categoryId: Int = -1,
-    @SerializedName("user_validation")
+    @SerialName("user_validation")
     var userValidation: String = "", // State of user validation after auto assignment from AI
-    @SerializedName("is_generated_by_ai")
+    @SerialName("is_generated_by_ai")
     var isGeneratedByAI: Boolean = false,
-    @SerializedName("user_id")
+    @SerialName("user_id")
     var userId: Int? = null,
-    @SerializedName("added_at")
+    @Serializable(with = ApiTimestampDateSerializer::class)
+    @SerialName("added_at")
     var addedAt: Date = Date(), // Date when the category was added to file
 ) : RealmObject(), Parcelable

@@ -46,14 +46,12 @@ import com.infomaniak.core.crossapplogin.back.internal.deviceinfo.DeviceInfoUpda
 import com.infomaniak.core.inappupdate.AppUpdateScheduler
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import com.infomaniak.core.network.NetworkConfiguration
-import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.networking.HttpClientConfig
 import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryConfig.configureSentry
 import com.infomaniak.core.twofactorauth.back.TwoFactorAuthManager
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.data.api.ErrorCode
-import com.infomaniak.drive.data.api.FileDeserialization
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
@@ -118,7 +116,6 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
             StrictMode.setVmPolicy(VmPolicy.Builder().build())
         }
 
-        ApiController.init(typeAdapterList = arrayListOf(File::class.java to FileDeserialization()))
         configureSentry()
         runBlocking { initRealm() }
 

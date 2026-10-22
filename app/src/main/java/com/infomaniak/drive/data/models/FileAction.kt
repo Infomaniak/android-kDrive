@@ -18,18 +18,20 @@
 package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 data class FileAction(
-    @SerializedName("action")
-    val actionString: String,
-    @SerializedName("file_id")
-    val fileId: Int,
-    @SerializedName("parent_id")
-    val parentId: Int,
-    val path: String,
+    @SerialName("action")
+    val actionString: String = "",
+    @SerialName("file_id")
+    val fileId: Int = 0,
+    @SerialName("parent_id")
+    val parentId: Int = 0,
+    val path: String = "",
 ) : Parcelable {
     val actionType get() = FileActivityType.fromAction(actionString)
 }

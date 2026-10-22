@@ -23,16 +23,16 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ValidChunks(
     @SerialName("expected_chunks")
-    val expectedChunksCount: Int,
+    val expectedChunksCount: Int = 0,
     @SerialName("uploading_chunks")
-    val uploadedChunkCount: Int,
+    val uploadedChunkCount: Int = 0,
     @SerialName("failed_chunks")
-    val failedChunks: Long,
+    val failedChunks: Long = 0,
     @SerialName("expected_size")
-    val expectedSize: Long,
+    val expectedSize: Long = 0,
     @SerialName("uploaded_size")
-    val uploadedSize: Long,
-    val chunks: ArrayList<UploadSegment>
+    val uploadedSize: Long = 0,
+    val chunks: ArrayList<UploadSegment> = arrayListOf()
 ) {
     inline val validChunksIds get() = chunks.map { it.number }
 

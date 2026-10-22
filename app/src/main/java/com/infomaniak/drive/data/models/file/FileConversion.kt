@@ -18,22 +18,26 @@
 package com.infomaniak.drive.data.models.file
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
+import com.infomaniak.drive.utils.serialization.RealmStringListSerializer
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 @RealmClass(embedded = true)
 open class FileConversion(
-    @SerializedName("when_downloading")
+    @SerialName("when_downloading")
     var whenDownload: Boolean = false,
-    @SerializedName("download_extensions")
+    @Serializable(with = RealmStringListSerializer::class)
+    @SerialName("download_extensions")
     var downloadExtensions: @RawValue RealmList<String> = RealmList(),
-    @SerializedName("when_onlyoffice_opening")
+    @SerialName("when_onlyoffice_opening")
     var whenOnlyoffice: Boolean = false,
-    @SerializedName("onlyoffice_extension")
+    @SerialName("onlyoffice_extension")
     var onlyofficeExtension: String? = null,
 ) : RealmObject(), Parcelable

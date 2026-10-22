@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.legacy.utils.Utils.enumValueOfOrNull
 import com.infomaniak.core.legacy.utils.firstOrEmpty
@@ -34,12 +33,10 @@ import kotlinx.serialization.Serializable
 open class DriveUser(
     @PrimaryKey final override var id: Int = -1,
     @SerialName("display_name")
-    @SerializedName("display_name")
     var displayName: String = "",
     var avatar: String? = "",
     var email: String = "",
     @SerialName("role")
-    @SerializedName("role")
     private var _role: String = "",
     /** Never used */
     override var right: String = "",
@@ -69,15 +66,12 @@ open class DriveUser(
     @Serializable
     enum class Role {
         @SerialName("admin")
-        @SerializedName("admin")
         ADMIN,
 
         @SerialName("user")
-        @SerializedName("user")
         USER,
 
         @SerialName("external")
-        @SerializedName("external")
         EXTERNAL,
 
         /** Only for [Drive], the current user has no role */

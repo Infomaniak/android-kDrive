@@ -18,18 +18,20 @@
 package com.infomaniak.drive.data.models.file
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivityType
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 data class LastFileAction(
-    @SerializedName("file_id")
-    val fileId: Int,
-    @SerializedName("last_action")
+    @SerialName("file_id")
+    val fileId: Int = 0,
+    @SerialName("last_action")
     val lastAction: FileActivityType? = null,
-    @SerializedName("last_action_at")
+    @SerialName("last_action_at")
     val lastActionAt: Long? = null,
     val file: File? = null
 ) : Parcelable

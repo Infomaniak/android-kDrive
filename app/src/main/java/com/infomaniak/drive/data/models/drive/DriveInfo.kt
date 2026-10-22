@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.models.drive
 
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.IpsToken
 import com.infomaniak.drive.data.models.Team
@@ -30,6 +29,5 @@ data class DriveInfo(
     val users: List<DriveUser> = emptyList(),
     val teams: List<Team> = emptyList(),
     @SerialName("ips")
-    @SerializedName("ips")
     val ipsToken: IpsToken
 )
