@@ -17,23 +17,18 @@
  */
 package com.infomaniak.drive.data.models
 
-import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ImportProgress(
     @SerialName("total_files")
-    @SerializedName("total_files")
     val totalFiles: Int = 0,
     @SerialName("total_files_processed")
-    @SerializedName("total_files_processed")
     val totalFilesProcessed: Int = 0,
     @SerialName("total_successes")
-    @SerializedName("total_successes")
     val totalSuccesses: Int = 0,
     @SerialName("total_errors")
-    @SerializedName("total_errors")
     val totalErrors: Int = 0,
 ) {
     val percent: Int get() = if (totalFiles > 0) (totalFilesProcessed * 100 / totalFiles).coerceIn(0, 100) else 0

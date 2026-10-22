@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.api
 
 import androidx.collection.arrayMapOf
-import com.google.gson.JsonElement
 import com.infomaniak.core.auth.api.ApiRepositoryCore
 import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
@@ -65,6 +64,7 @@ import com.infomaniak.drive.data.models.upload.UploadSession.StartSessionBody
 import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.utils.AccountUtils
+import kotlinx.serialization.json.JsonElement
 import okhttp3.OkHttpClient
 import java.util.Date
 import com.infomaniak.core.ksuite.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes

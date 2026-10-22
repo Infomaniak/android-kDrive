@@ -20,13 +20,14 @@ package com.infomaniak.drive.ui.selectPermission
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
-import com.google.gson.JsonObject
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.Shareable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 internal class SelectPermissionViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
@@ -38,7 +39,7 @@ internal class SelectPermissionViewModel(savedStateHandle: SavedStateHandle) : V
 
     fun editFileShareLinkOfficePermission(canEdit: Boolean) = liveData(Dispatchers.IO) {
         currentFileFlow.first()?.let { file ->
-            val body = JsonObject().apply { addProperty("can_edit", canEdit) }
+            val body = buildJsonObject { put("can_edit", canEdit) }
             val apiResponse = ApiRepository.updateShareLink(file, body)
             if (apiResponse.data == true) FileController.updateShareLinkWithRemote(file.id)
             emit(apiResponse)
