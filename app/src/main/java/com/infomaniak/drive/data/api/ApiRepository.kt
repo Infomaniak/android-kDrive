@@ -76,8 +76,9 @@ object ApiRepository : ApiRepositoryCore() {
         method: ApiController.ApiMethod,
         body: Any? = null,
         okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
+        useKotlinxSerialization: Boolean = false,
     ): T {
-        return callApiBlocking(url, method, body, okHttpClient)
+        return callApiBlocking(url, method, body, okHttpClient, useKotlinxSerialization)
     }
 
     private suspend inline fun <reified T> callApiSuspend(
@@ -218,7 +219,7 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun getValidChunks(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<ValidChunks> {
         val url = "${ApiRoutes.getSession(driveId, uploadToken)}?status[]=${ChunkStatus.OK}&with=chunks"
-        return callApi(url, GET, okHttpClient = okHttpClient)
+        return callApi(url, GET, okHttpClient = okHttpClient, useKotlinxSerialization = true)
     }
 
     fun startUploadSession(driveId: Int, body: StartSessionBody, okHttpClient: OkHttpClient): ApiResponse<StartUploadSession> {
@@ -348,11 +349,16 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun postFileComment(file: File, body: String): ApiResponse<FileComment> {
-        return callApi(ApiRoutes.fileComments(file), POST, mapOf("body" to body))
+        return callApi(ApiRoutes.fileComments(file), POST, mapOf("body" to body), useKotlinxSerialization = true)
     }
 
     fun answerComment(file: File, commentId: Int, body: String): ApiResponse<FileComment> {
-        return callApi(ApiRoutes.answerComment(file, commentId), POST, mapOf("body" to body))
+        return callApi(
+            ApiRoutes.answerComment(file, commentId),
+            POST,
+            mapOf("body" to body),
+            useKotlinxSerialization = true
+        )
     }
 
     fun putFileComment(file: File, commentId: Int, body: String): ApiResponse<Boolean> {
