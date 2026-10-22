@@ -47,12 +47,9 @@ object ApiTimestampDateSerializer : KSerializer<Date> {
 
         return when (element) {
             JsonNull -> throw SerializationException("Unexpected null for a non-null API date")
-            is JsonPrimitive -> if (!element.isString) {
-                element.longOrNull?.let { Date(it * 1_000L) }
-                    ?: throw SerializationException("Expected an integer Unix timestamp in seconds")
-            } else {
-                throw SerializationException("Expected an integer Unix timestamp in seconds")
-            }
+            is JsonPrimitive -> (element.longOrNull ?: element.content.toDoubleOrNull()?.toLong())
+                ?.let { Date(it * 1_000L) }
+                ?: throw SerializationException("Expected an integer Unix timestamp in seconds")
             else -> throw SerializationException("Expected an integer Unix timestamp in seconds")
         }
     }

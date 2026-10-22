@@ -17,6 +17,9 @@
  */
 package com.infomaniak.drive.data.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class CreateFile(var name: String, val type: String) {
     init {
         name += ".$type"

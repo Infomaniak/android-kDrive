@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.models.file.dropbox
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import com.infomaniak.drive.utils.serialization.ApiTimestampDateSerializer
@@ -34,6 +33,5 @@ open class DropBoxValidity(
     @Serializable(with = ApiTimestampDateSerializer::class)
     var date: Date? = null,
     @SerialName("has_expired")
-    @SerializedName("has_expired")
     var hasExpired: Boolean? = null,
 ) : RealmObject(), Parcelable

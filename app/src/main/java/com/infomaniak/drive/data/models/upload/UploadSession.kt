@@ -17,48 +17,54 @@
  */
 package com.infomaniak.drive.data.models.upload
 
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.models.File
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-open class UploadSession(
-    open val file: File,
-    open val token: String,
-    @SerializedName("result")
-    open val isSuccess: Boolean,
-    open val message: String? = null
+/** API payload of the end of an upload session. All fields are lenient: only the surrounding API status matters. */
+@Serializable
+class UploadSession(
+    val file: File? = null,
+    val token: String? = null,
+    @SerialName("result")
+    val isSuccess: Boolean = false,
+    val message: String? = null
 ) {
 
+    @Serializable
     class StartUploadSession(
-        @SerializedName("directory_id")
-        val directoryId: Long?,
-        @SerializedName("directory_path")
-        val directoryPath: String?,
-        @SerializedName("file_name")
-        val fileName: String?,
-        @SerializedName("upload_url")
+        @SerialName("directory_id")
+        val directoryId: Long? = null,
+        @SerialName("directory_path")
+        val directoryPath: String? = null,
+        @SerialName("file_name")
+        val fileName: String? = null,
+        @SerialName("upload_url")
         val uploadHost: String,
-        file: File,
-        token: String,
-        isSuccess: Boolean,
-        message: String? = null
-    ) : UploadSession(file, token, isSuccess, message)
+        val file: File? = null,
+        val token: String? = null,
+        @SerialName("result")
+        val isSuccess: Boolean = false,
+        val message: String? = null
+    )
 
+    @Serializable
     data class StartSessionBody(
         val conflict: UploadTask.Companion.ConflictOption,
-        @SerializedName("created_at")
+        @SerialName("created_at")
         val createdAt: Long?,
-        @SerializedName("directory_id")
+        @SerialName("directory_id")
         val directoryId: Int,
-        @SerializedName("directory_path")
+        @SerialName("directory_path")
         val subDirectoryPath: String,
-        @SerializedName("file_name")
+        @SerialName("file_name")
         val fileName: String,
-        @SerializedName("last_modified_at")
+        @SerialName("last_modified_at")
         val lastModifiedAt: Long,
-        @SerializedName("total_chunks")
+        @SerialName("total_chunks")
         val totalChunks: Int,
-        @SerializedName("total_size")
+        @SerialName("total_size")
         val totalSize: Long,
     )
 }

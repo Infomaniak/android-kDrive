@@ -43,7 +43,6 @@ import com.infomaniak.core.file.getFileDatesWithFallback
 import com.infomaniak.core.file.getFileName
 import com.infomaniak.core.file.getPreciseFileSize
 import com.infomaniak.core.legacy.utils.hasPermissions
-import com.infomaniak.core.network.api.ApiController.gson
 import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
@@ -150,7 +149,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
             if (retryError == MAX_RETRY_COUNT) {
                 SentryLog.e(TAG, "A file has been restarted several times") { scope ->
-                    scope.setExtra("appSettings", gson.toJson(UploadFile.getAppSyncSettings()))
+                    scope.setExtra("appSettings", UploadFile.getAppSyncSettings().toString())
                 }
                 result = Result.failure()
             }

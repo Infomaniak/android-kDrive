@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.models.drive
 
-import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import kotlinx.serialization.SerialName
@@ -27,33 +26,23 @@ import kotlinx.serialization.Serializable
 @RealmClass(embedded = true)
 open class DrivePackCapabilities(
     @SerialName("use_vault")
-    @SerializedName("use_vault")
     var useVault: Boolean = false,
     @SerialName("use_manage_right")
-    @SerializedName("use_manage_right")
     var useManageRight: Boolean = false,
     @SerialName("can_set_trash_duration")
-    @SerializedName("can_set_trash_duration")
     var canSetTrashDuration: Boolean = false,
     @SerialName("use_dropbox")
-    @SerializedName("use_dropbox")
     var useDropbox: Boolean = false,
     @SerialName("can_rewind")
-    @SerializedName("can_rewind")
     var canRewind: Boolean = false,
     @SerialName("use_folder_custom_color")
-    @SerializedName("use_folder_custom_color")
     var useFolderCustomColor: Boolean = false,
     @SerialName("can_access_dashboard")
-    @SerializedName("can_access_dashboard")
     var canAccessDashboard: Boolean = false,
     @SerialName("can_set_sharelink_password")
-    @SerializedName("can_set_sharelink_password")
     var canSetSharelinkPassword: Boolean = false,
     @SerialName("can_set_sharelink_expiration")
-    @SerializedName("can_set_sharelink_expiration")
     var canSetSharelinkExpiration: Boolean = false,
     @SerialName("can_set_sharelink_custom_url")
-    @SerializedName("can_set_sharelink_custom_url")
     var canSetSharelinkCustomUrl: Boolean = false
 ) : RealmObject()
