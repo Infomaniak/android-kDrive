@@ -20,10 +20,18 @@ package com.infomaniak.drive.utils
 import com.infomaniak.core.network.api.ApiController
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 
 object SerializationUtils {
 
     inline fun <reified T> decodeFromString(json: String): T = ApiController.json.decodeFromString(json)
 
     inline fun <reified T> encodeToString(value: T): String = ApiController.json.encodeToString(value)
+
+    fun parseToJsonElement(json: String): JsonElement = ApiController.json.parseToJsonElement(json)
+
+    fun JsonObject.getStringOrNull(key: String): String? = this[key]?.jsonPrimitive?.contentOrNull
 }
