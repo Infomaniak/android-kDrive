@@ -20,21 +20,31 @@ package com.infomaniak.drive.data.models.drive
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @RealmClass(embedded = true)
 open class DriveCapabilities(
+    @SerialName("use_versioning")
     @SerializedName("use_versioning")
     var useVersioning: Boolean = false,
+    @SerialName("use_upload_compression")
     @SerializedName("use_upload_compression")
     var useUploadCompression: Boolean = false,
+    @SerialName("use_team_space")
     @SerializedName("use_team_space")
     var useTeamSpace: Boolean = false,
+    @SerialName("can_add_user")
     @SerializedName("can_add_user")
     var canAddUser: Boolean = false,
+    @SerialName("can_see_stats")
     @SerializedName("can_see_stats")
     var canSeeStats: Boolean = false,
+    @SerialName("can_upgrade_to_ksuite")
     @SerializedName("can_upgrade_to_ksuite")
     var canUpgradeToKsuite: Boolean = false,
+    @SerialName("can_rewind")
     @SerializedName("can_rewind")
     var canRewind: Boolean = false
 ) : RealmObject()

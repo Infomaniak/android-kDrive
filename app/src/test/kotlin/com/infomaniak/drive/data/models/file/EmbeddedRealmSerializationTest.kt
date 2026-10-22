@@ -18,12 +18,140 @@
 package com.infomaniak.drive.data.models.file
 
 import com.infomaniak.core.network.api.ApiController
+import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.drive.data.models.Rights
+import com.infomaniak.drive.data.models.TeamDetails
+import com.infomaniak.drive.data.models.drive.CategoryRights
+import com.infomaniak.drive.data.models.drive.DriveAccount
+import com.infomaniak.drive.data.models.drive.DriveCapabilities
+import com.infomaniak.drive.data.models.drive.DrivePack
+import com.infomaniak.drive.data.models.drive.DrivePackCapabilities
+import com.infomaniak.drive.data.models.drive.DrivePreferences
+import com.infomaniak.drive.data.models.drive.DriveQuota
+import com.infomaniak.drive.data.models.drive.DriveQuotas
+import com.infomaniak.drive.data.models.drive.DriveRights
+import com.infomaniak.drive.data.models.drive.MaintenanceType
+import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.data.models.file.sharelink.ShareLinkCapabilities
+import com.infomaniak.drive.data.models.file.dropbox.DropBoxSize
 import com.infomaniak.drive.utils.SerializationUtils
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class EmbeddedRealmSerializationTest {
+
+    @Test
+    fun `decode remaining scalar Realm models with API field names`() {
+        val rights = SerializationUtils.decodeFromString<Rights>(
+            """{"can_become_dropbox":true,"can_create_directory":true,"can_write":true}"""
+        )
+        val categoryRights = SerializationUtils.decodeFromString<CategoryRights>(
+            """{"can_create":true,"can_put_on_file":true,"can_read_on_file":true}"""
+        )
+        val driveCapabilities = SerializationUtils.decodeFromString<DriveCapabilities>(
+            """{"use_versioning":true,"use_upload_compression":true,"can_upgrade_to_ksuite":true}"""
+        )
+        val packCapabilities = SerializationUtils.decodeFromString<DrivePackCapabilities>(
+            """{"use_vault":true,"can_set_sharelink_expiration":true,"can_set_sharelink_custom_url":true}"""
+        )
+        val fileVersion = SerializationUtils.decodeFromString<FileVersion>(
+            """{"is_multiple":true,"number":4,"total_size":2048}"""
+        )
+        val driveQuotas = SerializationUtils.decodeFromString<DriveQuotas>(
+            """{"dropbox":{"current":1,"max":2},"shared_link":{"current":3,"max":4}}"""
+        )
+        val driveQuota = SerializationUtils.decodeFromString<DriveQuota>("""{"current":5,"max":6}""")
+        val dropboxSize = SerializationUtils.decodeFromString<DropBoxSize>(
+            """{"limit":4096,"remaining":1024}"""
+        )
+        val teamDetails = SerializationUtils.decodeFromString<TeamDetails>(
+            """{"drive_id":42,"users_count":7}"""
+        )
+        val driveRights = SerializationUtils.decodeFromString<DriveRights>("""{"technical":true}""")
+
+        assertEquals(true, rights.canBecomeDropbox)
+        assertEquals(true, rights.canCreateDirectory)
+        assertEquals(true, rights.canWrite)
+        assertEquals(true, categoryRights.canCreate)
+        assertEquals(true, categoryRights.canPutOnFile)
+        assertEquals(true, categoryRights.canReadOnFile)
+        assertEquals(true, driveCapabilities.useVersioning)
+        assertEquals(true, driveCapabilities.useUploadCompression)
+        assertEquals(true, driveCapabilities.canUpgradeToKsuite)
+        assertEquals(true, packCapabilities.useVault)
+        assertEquals(true, packCapabilities.canSetSharelinkExpiration)
+        assertEquals(true, packCapabilities.canSetSharelinkCustomUrl)
+        assertEquals(true, fileVersion.isMultiple)
+        assertEquals(4, fileVersion.number)
+        assertEquals(2048L, fileVersion.totalSize)
+        assertEquals(1, driveQuotas.dropbox?.current)
+        assertEquals(2, driveQuotas.dropbox?.max)
+        assertEquals(3, driveQuotas.sharedLink?.current)
+        assertEquals(4, driveQuotas.sharedLink?.max)
+        assertEquals(5, driveQuota.current)
+        assertEquals(6, driveQuota.max)
+        assertEquals(4096L, dropboxSize.limit)
+        assertEquals(1024L, dropboxSize.remaining)
+        assertEquals(42, teamDetails.driveId)
+        assertEquals(7, teamDetails.usersCount)
+        assertEquals(true, driveRights.technical)
+    }
+
+    @Test
+    fun `decode and encode Realm models with private API backing fields`() {
+        val account = SerializationUtils.decodeFromString<DriveAccount>(
+            """{"id":12,"name":"Example","legal_entity_type":"company"}"""
+        )
+        val preferences = SerializationUtils.decodeFromString<DrivePreferences>(
+            """{"color":"#123456","hide":true}"""
+        )
+        val pack = SerializationUtils.decodeFromString<DrivePack>(
+            """{"id":3,"name":"KSUITE_PRO","capabilities":{"use_dropbox":true}}"""
+        )
+        val user = SerializationUtils.decodeFromString<DriveUser>(
+            """{"id":5,"display_name":"User","role":"external"}"""
+        )
+
+        assertEquals(DriveAccount.LegalEntityType.COMPANY, account.legalEntityType)
+        assertEquals("#123456", preferences.color)
+        assertEquals(true, preferences.hide)
+        assertEquals(true, pack.capabilities.useDropbox)
+        assertEquals(DriveUser.Role.EXTERNAL, user.role)
+        assertEquals(
+            """{"id":12,"name":"Example","legal_entity_type":"company"}""",
+            SerializationUtils.encodeToString(account)
+        )
+        assertEquals(
+            """{"color":"#123456","hide":true}""",
+            SerializationUtils.encodeToString(preferences)
+        )
+        assertEquals(
+            """{"id":3,"name":"KSUITE_PRO","capabilities":{"use_vault":false,"use_manage_right":false,"can_set_trash_duration":false,"use_dropbox":true,"can_rewind":false,"use_folder_custom_color":false,"can_access_dashboard":false,"can_set_sharelink_password":false,"can_set_sharelink_expiration":false,"can_set_sharelink_custom_url":false}}""",
+            SerializationUtils.encodeToString(pack)
+        )
+    }
+
+    @Test
+    fun `decode and encode DriveUser role API enum values`() {
+        assertEquals(
+            DriveUser.Role.ADMIN,
+            SerializationUtils.decodeFromString<DriveUser.Role>(""" "admin" """)
+        )
+        assertEquals(
+            """"external"""",
+            SerializationUtils.encodeToString(DriveUser.Role.EXTERNAL)
+        )
+    }
+
+    @Test
+    fun `decode and encode maintenance type API code`() {
+        val maintenanceType = SerializationUtils.decodeFromString<MaintenanceType>(
+            """{"code":"move_ns"}"""
+        )
+
+        assertEquals(MaintenanceType.MaintenanceTypeValue.MoveNs, maintenanceType.type)
+        assertEquals("""{"code":"move_ns"}""", SerializationUtils.encodeToString(maintenanceType))
+    }
 
     @Test
     fun `decode embedded models with API field names`() {
@@ -106,5 +234,35 @@ class EmbeddedRealmSerializationTest {
         assertEquals(true, capabilities.canEdit)
         assertEquals(true, capabilities.canSeeStats)
         assertEquals(false, capabilities.canDownload)
+    }
+
+    @Test
+    fun `Gson keeps private field and enum mappings during gradual migration`() {
+        val account = ApiController.gson.fromJson(
+            """{"legal_entity_type":"company"}""",
+            DriveAccount::class.java
+        )
+        val preferences = ApiController.gson.fromJson(
+            """{"color":"#123456"}""",
+            DrivePreferences::class.java
+        )
+        val pack = ApiController.gson.fromJson(
+            """{"capabilities":{"use_dropbox":true}}""",
+            DrivePack::class.java
+        )
+        val user = ApiController.gson.fromJson(
+            """{"role":"external"}""",
+            DriveUser::class.java
+        )
+        val maintenanceType = ApiController.gson.fromJson(
+            """{"code":"move_ns"}""",
+            MaintenanceType::class.java
+        )
+
+        assertEquals(DriveAccount.LegalEntityType.COMPANY, account.legalEntityType)
+        assertEquals("#123456", preferences.color)
+        assertEquals(true, pack.capabilities.useDropbox)
+        assertEquals(DriveUser.Role.EXTERNAL, user.role)
+        assertEquals(MaintenanceType.MaintenanceTypeValue.MoveNs, maintenanceType.type)
     }
 }
