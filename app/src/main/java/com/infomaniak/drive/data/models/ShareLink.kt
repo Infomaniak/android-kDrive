@@ -26,24 +26,34 @@ import com.infomaniak.drive.utils.AccountUtils
 import io.realm.RealmObject
 import io.realm.annotations.Ignore
 import io.realm.annotations.RealmClass
+import com.infomaniak.drive.utils.serialization.ApiTimestampDateSerializer
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import java.util.Date
 
+@Serializable
 @Parcelize
 @RealmClass(embedded = true)
 open class ShareLink(
     var url: String = "",
+    @SerialName("file_id")
     @SerializedName("file_id")
     var fileId: Int? = null,
+    @SerialName("right")
     @SerializedName("right")
     var _right: String = ShareLinkFilePermission.RESTRICTED.name,
+    @Serializable(with = ApiTimestampDateSerializer::class)
+    @SerialName("valid_until")
     @SerializedName("valid_until")
     var validUntil: Date? = null,
     var capabilities: ShareLinkCapabilities? = null,
+    @SerialName("access_blocked")
     @SerializedName("access_blocked")
     var accessBlocked: Boolean = false,
 ) : RealmObject(), Parcelable {
@@ -58,9 +68,11 @@ open class ShareLink(
      * Local properties
      */
     @Ignore
+    @Transient
     var newPassword: String? = null
 
     @Ignore
+    @Transient
     var newRight: ShareLinkFilePermission? = null
 
     @Parcelize

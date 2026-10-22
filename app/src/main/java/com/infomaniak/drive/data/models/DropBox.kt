@@ -20,12 +20,17 @@ package com.infomaniak.drive.data.models
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxCapabilities
+import com.infomaniak.drive.utils.serialization.ApiTimestampDateSerializer
 import io.realm.RealmObject
 import io.realm.annotations.Ignore
 import io.realm.annotations.RealmClass
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.util.Date
 
+@Serializable
 @Parcelize
 @RealmClass(embedded = true)
 open class DropBox(
@@ -34,14 +39,21 @@ open class DropBox(
     var capabilities: DropBoxCapabilities? = null,
     var url: String = "",
     var uuid: String = "",
+    @Serializable(with = ApiTimestampDateSerializer::class)
+    @SerialName("created_at")
     @SerializedName("created_at")
     var createdAt: Date? = null,
+    @SerialName("created_by")
     @SerializedName("created_by")
     var createdBy: Int = -1,
+    @SerialName("last_uploaded_at")
     @SerializedName("last_uploaded_at")
     var lastUploadedAt: Long? = null,
+    @SerialName("nb_users")
     @SerializedName("nb_users")
     var collaborativeUsersCount: Int = 0,
+    @Serializable(with = ApiTimestampDateSerializer::class)
+    @SerialName("updated_at")
     @SerializedName("updated_at")
     var updatedAt: Date? = null,
 ) : RealmObject(), Parcelable {
@@ -55,18 +67,23 @@ open class DropBox(
      * Local
      */
     @Ignore
+    @Transient
     var newPassword = false
 
     @Ignore
+    @Transient
     var newPasswordValue: String? = null
 
     @Ignore
+    @Transient
     var newHasNotification = false
 
     @Ignore
+    @Transient
     var newLimitFileSize: Long? = null
 
     @Ignore
+    @Transient
     var newValidUntil: Date? = null
 
     fun initLocalValue() {

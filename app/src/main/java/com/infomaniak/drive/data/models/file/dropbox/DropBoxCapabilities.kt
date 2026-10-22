@@ -22,16 +22,23 @@ import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 @RealmClass(embedded = true)
 open class DropBoxCapabilities(
+    @SerialName("has_password")
     @SerializedName("has_password")
     var hasPassword: Boolean = false,
+    @SerialName("has_notification")
     @SerializedName("has_notification")
     var hasNotification: Boolean = false,
+    @SerialName("has_validity")
     @SerializedName("has_validity")
     var hasValidity: Boolean = false,
+    @SerialName("has_size_limit")
     @SerializedName("has_size_limit")
     var hasSizeLimit: Boolean = false,
     var validity: DropBoxValidity? = null,
