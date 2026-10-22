@@ -21,15 +21,21 @@ import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import kotlinx.parcelize.Parcelize
 
+@Serializable
 @Parcelize
 @RealmClass(embedded = true)
 open class ShareLinkCapabilities(
+    @SerialName("can_edit")
     @SerializedName("can_edit")
     var canEdit: Boolean = false,
+    @SerialName("can_see_stats")
     @SerializedName("can_see_stats")
     var canSeeStats: Boolean = false,
+    @SerialName("can_download")
     @SerializedName("can_download")
     var canDownload: Boolean = false,
 ) : RealmObject(), Parcelable
