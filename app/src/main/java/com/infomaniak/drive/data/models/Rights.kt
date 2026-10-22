@@ -22,40 +22,59 @@ import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 @RealmClass(embedded = true)
 open class Rights(
+    @SerialName("can_become_dropbox")
     @SerializedName("can_become_dropbox")
     var canBecomeDropbox: Boolean = false,
+    @SerialName("can_become_sharelink")
     @SerializedName("can_become_sharelink")
     var canBecomeShareLink: Boolean = false,
+    @SerialName("can_create_directory")
     @SerializedName("can_create_directory")
     var canCreateDirectory: Boolean = false,
+    @SerialName("can_create_file")
     @SerializedName("can_create_file")
     var canCreateFile: Boolean = false,
+    @SerialName("can_delete")
     @SerializedName("can_delete")
     var canDelete: Boolean = false,
+    @SerialName("can_leave")
     @SerializedName("can_leave")
     var canLeave: Boolean = false,
+    @SerialName("can_move")
     @SerializedName("can_move")
     var canMove: Boolean = false,
+    @SerialName("can_move_into")
     @SerializedName("can_move_into")
     var canMoveInto: Boolean = false,
+    @SerialName("can_read")
     @SerializedName("can_read")
     var canRead: Boolean = false,
+    @SerialName("can_rename")
     @SerializedName("can_rename")
     var canRename: Boolean = false,
+    @SerialName("can_share")
     @SerializedName("can_share")
     var canShare: Boolean = false,
+    @SerialName("can_show")
     @SerializedName("can_show")
     var canShow: Boolean = false,
+    @SerialName("can_upload")
     @SerializedName("can_upload")
     var canUpload: Boolean = false,
+    @SerialName("can_use_favorite")
     @SerializedName("can_use_favorite")
     var canUseFavorite: Boolean = false,
+    @SerialName("can_use_team")
     @SerializedName("can_use_team")
     var canUseTeam: Boolean = false,
+    @SerialName("can_write")
     @SerializedName("can_write")
     var canWrite: Boolean = false,
     var colorable: Boolean = false,

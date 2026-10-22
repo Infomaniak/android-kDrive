@@ -20,10 +20,14 @@ package com.infomaniak.drive.data.models.drive
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @RealmClass(embedded = true)
 open class DriveQuotas(
     var dropbox: DriveQuota? = null,
+    @SerialName("shared_link")
     @SerializedName("shared_link")
     var sharedLink: DriveQuota? = null,
 ) : RealmObject() {
