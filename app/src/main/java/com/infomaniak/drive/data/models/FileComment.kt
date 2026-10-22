@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.models
 
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.utils.serialization.ApiTimestampDateSerializer
 import java.util.Date
 import kotlinx.serialization.SerialName
@@ -25,30 +24,24 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FileComment(
-    val id: Int,
-    val user: DriveUser,
-    var body: String,
-    var liked: Boolean,
+    val id: Int = 0,
+    val user: DriveUser = DriveUser(),
+    var body: String = "",
+    var liked: Boolean = false,
     var likes: ArrayList<DriveUser>? = null,
     val responses: List<FileComment> = emptyList(),
     @SerialName("parent_id")
-    @SerializedName("parent_id")
-    val parentId: Int,
+    val parentId: Int = 0,
     @Serializable(with = ApiTimestampDateSerializer::class)
     @SerialName("updated_at")
-    @SerializedName("updated_at")
-    val updatedAt: Date,
+    val updatedAt: Date = Date(0),
     @Serializable(with = ApiTimestampDateSerializer::class)
     @SerialName("created_at")
-    @SerializedName("created_at")
-    val createdAt: Date,
+    val createdAt: Date = Date(0),
     @SerialName("likes_count")
-    @SerializedName("likes_count")
-    var likesCount: Int,
+    var likesCount: Int = 0,
     @SerialName("is_resolved")
-    @SerializedName("is_resolved")
-    val isResolved: Boolean,
+    val isResolved: Boolean = false,
     @SerialName("responses_count")
-    @SerializedName("responses_count")
-    val responsesCount: Int
+    val responsesCount: Int = 0
 )

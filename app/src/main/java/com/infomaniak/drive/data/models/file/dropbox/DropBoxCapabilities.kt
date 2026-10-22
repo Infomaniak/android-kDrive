@@ -18,9 +18,10 @@
 package com.infomaniak.drive.data.models.file.dropbox
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
+import com.infomaniak.drive.utils.serialization.LenientDropBoxSizeSerializer
+import com.infomaniak.drive.utils.serialization.LenientDropBoxValiditySerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -30,17 +31,15 @@ import kotlinx.serialization.Serializable
 @RealmClass(embedded = true)
 open class DropBoxCapabilities(
     @SerialName("has_password")
-    @SerializedName("has_password")
     var hasPassword: Boolean = false,
     @SerialName("has_notification")
-    @SerializedName("has_notification")
     var hasNotification: Boolean = false,
     @SerialName("has_validity")
-    @SerializedName("has_validity")
     var hasValidity: Boolean = false,
     @SerialName("has_size_limit")
-    @SerializedName("has_size_limit")
     var hasSizeLimit: Boolean = false,
+    @Serializable(with = LenientDropBoxValiditySerializer::class)
     var validity: DropBoxValidity? = null,
+    @Serializable(with = LenientDropBoxSizeSerializer::class)
     var size: DropBoxSize? = null,
 ) : RealmObject(), Parcelable

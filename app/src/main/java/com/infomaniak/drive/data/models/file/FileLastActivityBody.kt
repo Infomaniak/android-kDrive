@@ -17,9 +17,11 @@
  */
 package com.infomaniak.drive.data.models.file
 
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.FileActivityType
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class FileLastActivityBody(
     var actions: List<FileActivityType> = listOf(
         FileActivityType.FILE_DELETE,
@@ -31,9 +33,10 @@ data class FileLastActivityBody(
     ),
     var files: List<FileActionBody> = emptyList(),
 ) {
+    @Serializable
     data class FileActionBody(
         val id: Int,
-        @SerializedName("from_date")
+        @SerialName("from_date")
         val fromDate: Long,
     )
 }

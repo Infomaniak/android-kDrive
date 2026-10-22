@@ -18,12 +18,18 @@
 package com.infomaniak.drive.utils
 
 import com.infomaniak.core.network.api.ApiController
+import com.infomaniak.core.network.models.ApiResponse
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
 
 object SerializationUtils {
 
@@ -32,6 +38,23 @@ object SerializationUtils {
     inline fun <reified T> encodeToString(value: T): String = ApiController.json.encodeToString(value)
 
     fun parseToJsonElement(json: String): JsonElement = ApiController.json.parseToJsonElement(json)
+
+    /** Json used for request bodies: nulls are omitted. */
+    val bodyJson: Json by lazy { Json(ApiController.json) { explicitNulls = false } }
+
+    inline fun <reified T> encodeBody(value: T): String = bodyJson.encodeToString(value)
+
+    /** Builds a diagnostic string of a response (generic [ApiResponse] can't be encoded without its data type). */
+    fun describeForReport(response: ApiResponse<*>): String = buildJsonObject {
+        put("result", response.result.name.lowercase())
+        response.error?.let { error ->
+            putJsonObject("error") {
+                put("code", error.code)
+                put("description", error.description)
+                put("context", error.contextJson ?: JsonNull)
+            }
+        }
+    }.toString()
 
     fun JsonObject.getStringOrNull(key: String): String? = this[key]?.jsonPrimitive?.contentOrNull
 }

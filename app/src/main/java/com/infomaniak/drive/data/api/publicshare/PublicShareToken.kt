@@ -19,8 +19,37 @@ package com.infomaniak.drive.data.api.publicshare
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 
+@Serializable(with = PublicShareTokenSerializer::class)
 @Parcelize
 data class PublicShareToken(
     val token: String = "",
 ) : Parcelable
+
+/** The OpenAPI spec documents the auth `data` as a boolean while the app reads a `token` object: accept both. */
+object PublicShareTokenSerializer : KSerializer<PublicShareToken> {
+
+    private val delegate = kotlinx.serialization.json.JsonElement.serializer()
+
+    override val descriptor: SerialDescriptor = delegate.descriptor
+
+    override fun serialize(encoder: Encoder, value: PublicShareToken) {
+        encoder.encodeSerializableValue(delegate, JsonObject(mapOf("token" to JsonPrimitive(value.token))))
+    }
+
+    override fun deserialize(decoder: Decoder): PublicShareToken {
+        val element = (decoder as JsonDecoder).decodeJsonElement()
+        val token = (element as? JsonObject)?.get("token")?.jsonPrimitive?.contentOrNull
+        return PublicShareToken(token ?: "")
+    }
+}

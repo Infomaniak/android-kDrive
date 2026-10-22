@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.models.drive
 
-import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import kotlinx.serialization.SerialName
@@ -27,18 +26,13 @@ import kotlinx.serialization.Serializable
 @RealmClass(embedded = true)
 open class CategoryRights(
     @SerialName("can_create")
-    @SerializedName("can_create")
     var canCreate: Boolean = false,
     @SerialName("can_delete")
-    @SerializedName("can_delete")
     var canDelete: Boolean = false,
     @SerialName("can_edit")
-    @SerializedName("can_edit")
     var canEdit: Boolean = false,
     @SerialName("can_put_on_file")
-    @SerializedName("can_put_on_file")
     var canPutOnFile: Boolean = false,
     @SerialName("can_read_on_file")
-    @SerializedName("can_read_on_file")
     var canReadOnFile: Boolean = false,
 ) : RealmObject()

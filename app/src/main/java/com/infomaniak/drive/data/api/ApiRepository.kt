@@ -64,6 +64,7 @@ import com.infomaniak.drive.data.models.upload.UploadSession.StartSessionBody
 import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.SerializationUtils
 import kotlinx.serialization.json.JsonElement
 import okhttp3.OkHttpClient
 import java.util.Date
@@ -76,7 +77,7 @@ object ApiRepository : ApiRepositoryCore() {
         method: ApiController.ApiMethod,
         body: Any? = null,
         okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
-        useKotlinxSerialization: Boolean = false,
+        useKotlinxSerialization: Boolean = true,
     ): T {
         return callApiBlocking(url, method, body, okHttpClient, useKotlinxSerialization)
     }
@@ -86,14 +87,15 @@ object ApiRepository : ApiRepositoryCore() {
         method: ApiController.ApiMethod,
         body: Any? = null,
         okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
-    ): T = ApiController.callApi(url, method, body, okHttpClient)
+        useKotlinxSerialization: Boolean = true,
+    ): T = ApiController.callApi(url, method, body, okHttpClient, useKotlinxSerialization)
 
     private inline fun <reified T> callApiWithCursor(
         url: String,
         method: ApiController.ApiMethod,
         body: Any? = null,
         okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
-        useKotlinxSerialization: Boolean = false,
+        useKotlinxSerialization: Boolean = true,
     ): T {
         return callApiBlocking(url, method, body, okHttpClient, useKotlinxSerialization, buildErrorResult = { apiError, translatedErrorRes ->
             CursorApiResponse<Any>(
@@ -110,7 +112,7 @@ object ApiRepository : ApiRepositoryCore() {
         method: ApiController.ApiMethod,
         body: Any? = null,
         okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
-        useKotlinxSerialization: Boolean = false,
+        useKotlinxSerialization: Boolean = true,
     ): T {
         return ApiController.callApi(url, method, body, okHttpClient, useKotlinxSerialization, buildErrorResult = { apiError, translatedErrorRes ->
             CursorApiResponse<Any>(
@@ -200,7 +202,7 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun getFilesLastActivities(driveId: Int, body: FileLastActivityBody): ApiResponse<List<LastFileAction>> {
         val url = "${ApiRoutes.getFilesLastActivities(driveId)}?with=file"
-        return callApi(url, POST, body)
+        return callApi(url, POST, SerializationUtils.encodeBody(body))
     }
 
     // For sync offline service
@@ -231,7 +233,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun startUploadSession(driveId: Int, body: StartSessionBody, okHttpClient: OkHttpClient): ApiResponse<StartUploadSession> {
-        return callApi(ApiRoutes.startUploadSession(driveId), POST, body, okHttpClient = okHttpClient)
+        return callApi(ApiRoutes.startUploadSession(driveId), POST, SerializationUtils.encodeBody(body), okHttpClient = okHttpClient)
     }
 
     fun finishSession(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<UploadSession> {
@@ -257,7 +259,12 @@ object ApiRepository : ApiRepositoryCore() {
             lastModifiedAt = Date(uploadFile.getLastModified()),
         )
 
-        ApiController.callApi<ApiResponse<File>>(uploadUrl, POST, okHttpClient = AuthHttpClientProvider.authOkHttpClient)
+        ApiController.callApi<ApiResponse<File>>(
+            uploadUrl,
+            POST,
+            okHttpClient = AuthHttpClientProvider.authOkHttpClient,
+            useKotlinxSerialization = true,
+        )
     }
 
     fun createFolder(
@@ -276,7 +283,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun createOfficeFile(driveId: Int, folderId: Int, createFile: CreateFile): ApiResponse<File> {
-        return callApi(ApiRoutes.createOfficeFile(driveId, folderId), POST, createFile)
+        return callApi(ApiRoutes.createOfficeFile(driveId, folderId), POST, SerializationUtils.encodeBody(createFile))
     }
 
     fun createTeamFolder(
@@ -526,7 +533,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApiWithCursorSuspend("${ApiRoutes.trashedFolderFiles(file, order)}&${loadCursor(cursor)}", GET)
     }
 
-    fun postRestoreTrashFile(file: File, body: Map<String, Int>?): ApiResponse<Any> =
+    fun postRestoreTrashFile(file: File, body: Map<String, Int>?): ApiResponse<JsonElement> =
         callApi(ApiRoutes.restoreTrashFile(file), POST, body)
 
     fun emptyTrash(driveId: Int): ApiResponse<Boolean> =
@@ -570,7 +577,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun buildArchive(driveId: Int, archiveBody: ArchiveBody): ApiResponse<ArchiveUUID> {
-        return callApi(ApiRoutes.buildArchive(driveId), POST, archiveBody, useKotlinxSerialization = true)
+        return callApi(ApiRoutes.buildArchive(driveId), POST, SerializationUtils.encodeBody(archiveBody))
     }
 
     fun cancelExternalImport(driveId: Int, importId: Int): ApiResponse<Boolean> {

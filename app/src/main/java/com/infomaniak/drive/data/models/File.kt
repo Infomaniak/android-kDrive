@@ -22,8 +22,6 @@ import android.net.Uri
 import android.os.Parcelable
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import com.google.gson.annotations.Expose
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.core.legacy.utils.contains
 import com.infomaniak.core.legacy.utils.guessMimeType
 import com.infomaniak.core.sentry.SentryLog
@@ -47,6 +45,7 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.downloadFile
 import com.infomaniak.drive.utils.isUrlFile
 import com.infomaniak.drive.utils.isWeblocFile
+import com.infomaniak.drive.utils.serialization.FileSerializer
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.RealmResults
@@ -59,43 +58,34 @@ import kotlinx.coroutines.withContext
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.util.Date
 
+/** Decoded through [FileSerializer], which only reads the API properties and derives [uid] once the payload is read. */
+@Serializable(with = FileSerializer::class)
 @Parcelize
 open class File(
     @PrimaryKey
-    @Expose(serialize = false, deserialize = false)
     var uid: String = "", // Need migration for any update
     var id: Int = 0,
-    @SerializedName("parent_id")
     var parentId: Int = 0,
-    @SerializedName("drive_id")
     var driveId: Int = 0,
     var name: String = "",
-    @SerializedName("sorted_name")
     var sortedName: String = name,
     var path: String = "", // remote path or Uri for uploadFile
     var type: String = "file",
     var status: String? = null,
     var visibility: String = "",
-    @SerializedName("created_by")
     var createdBy: Int = 0,
-    @SerializedName("created_at")
     var createdAt: Long = 0,
-    @SerializedName("added_at")
     var addedAt: Long = 0,
-    @SerializedName("last_modified_at")
     var lastModifiedAt: Long = 0,
-    @SerializedName("deleted_by")
     var deletedBy: Int = 0,
-    @SerializedName("deleted_at")
     var deletedAt: Long = 0,
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
-    @SerializedName("is_favorite")
     var isFavorite: Boolean = false,
-    @SerializedName("sharelink")
     var shareLink: ShareLink? = null,
-    @SerializedName("capabilities")
     var rights: Rights? = null,
     var categories: @WriteWith<FileCategoryRealmListParceler> RealmList<FileCategory> = RealmList(),
     var cursor: String? = null,
@@ -105,27 +95,21 @@ open class File(
      */
     var color: String? = null,
     var dropbox: DropBox? = null,
-    @SerializedName("external_import")
     var externalImport: FileExternalImport? = null,
 
     /**
      * FILE ONLY
      */
     var size: Long? = null,
-    @SerializedName("supported_by")
     var supportedBy: @WriteWith<StringRealmListParceler> RealmList<String>? = null,
-    @SerializedName("extension_type")
     var extensionType: String = "",
     var version: FileVersion? = null,
-    @SerializedName("conversion_capabilities")
     var conversion: FileConversion? = null,
 
     /**
      * OFFLINE
      */
-    @SerializedName("revised_at")
     var revisedAt: Long = 0,
-    @SerializedName("updated_at")
     var updatedAt: Long = 0,
 
     /**
@@ -146,12 +130,15 @@ open class File(
     val hasOnlyoffice inline get() = supportedBy?.contains(SupportedByType.ONLYOFFICE.apiValue) ?: false
 
     @LinkingObjects("children")
+    @Transient
     val localParent: RealmResults<File>? = null
 
     @Ignore
+    @Transient
     var driveColor: String = "#5C89F7"
 
     @Ignore
+    @Transient
     var currentProgress: Int = INDETERMINATE_PROGRESS
 
     @IgnoredOnParcel

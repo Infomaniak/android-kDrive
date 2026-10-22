@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.models.file
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import kotlinx.serialization.SerialName
@@ -32,27 +31,20 @@ open class FileExternalImport(
     var id: Int = 0,
     var application: String = "",
     @SerialName("account_name")
-    @SerializedName("account_name")
     var accountName: String = "",
     var status: String = "",
     var path: String = "",
     @SerialName("directory_id")
-    @SerializedName("directory_id")
     var directoryId: Int = 0,
     @SerialName("has_shared_files")
-    @SerializedName("has_shared_files")
     var hasSharedFiles: String = "",
     @SerialName("created_at")
-    @SerializedName("created_at")
     var createdAt: Long = 0,
     @SerialName("updated_at")
-    @SerializedName("updated_at")
     var updatedAt: Long = 0,
     @SerialName("count_success_files")
-    @SerializedName("count_success_files")
     var countSuccessFiles: Int = 0,
     @SerialName("count_failed_files")
-    @SerializedName("count_failed_files")
     var countFailedFiles: Int = 0,
 ) : RealmObject(), Parcelable {
 

@@ -17,16 +17,13 @@
  */
 package com.infomaniak.drive.data.models
 
-import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class FileCheckResult(
     @SerialName("user_id")
-    @SerializedName("user_id")
     val userId: Int = 0,
     @SerialName("is_conflict")
-    @SerializedName("is_conflict")
     val isConflict: Boolean = false
 )

@@ -35,6 +35,10 @@ open class SyncSettings(
     var onlyWifiSyncMedia: Boolean = false,
 ) : RealmObject() {
 
+    override fun toString(): String = "SyncSettings(userId=$userId, driveId=$driveId, syncFolder=$syncFolder, " +
+        "syncImmediately=$syncImmediately, syncInterval=$syncInterval, syncVideo=$syncVideo, " +
+        "createDatedSubFolders=$createDatedSubFolders, deleteAfterSync=$deleteAfterSync, onlyWifiSyncMedia=$onlyWifiSyncMedia)"
+
     fun setIntervalType(intervalType: IntervalType) {
         syncImmediately = intervalType.immediately
         syncInterval = intervalType.interval
