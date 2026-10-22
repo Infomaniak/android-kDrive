@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxCapabilities
 import com.infomaniak.drive.utils.serialization.ApiTimestampDateSerializer
 import io.realm.RealmObject
@@ -41,20 +40,15 @@ open class DropBox(
     var uuid: String = "",
     @Serializable(with = ApiTimestampDateSerializer::class)
     @SerialName("created_at")
-    @SerializedName("created_at")
     var createdAt: Date? = null,
     @SerialName("created_by")
-    @SerializedName("created_by")
     var createdBy: Int = -1,
     @SerialName("last_uploaded_at")
-    @SerializedName("last_uploaded_at")
     var lastUploadedAt: Long? = null,
     @SerialName("nb_users")
-    @SerializedName("nb_users")
     var collaborativeUsersCount: Int = 0,
     @Serializable(with = ApiTimestampDateSerializer::class)
     @SerialName("updated_at")
-    @SerializedName("updated_at")
     var updatedAt: Date? = null,
 ) : RealmObject(), Parcelable {
 

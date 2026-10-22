@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.models
 
-import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -42,32 +41,26 @@ data class UserFileAccess(
     enum class UserFileAccessStatus {
         /** User has access to the Drive */
         @SerialName("active")
-        @SerializedName("active")
         ACTIVE,
 
         /** User has been removed but his data remain in the drive */
         @SerialName("deleted_kept")
-        @SerializedName("deleted_kept")
         DELETED_KEPT,
 
         /** User has been removed */
         @SerialName("deleted_removed")
-        @SerializedName("deleted_removed")
         DELETED_REMOVED,
 
         /** User has been removed and his data has been transferred to another user */
         @SerialName("deleted_transferred")
-        @SerializedName("deleted_transferred")
         DELETED_TRANSFERRED,
 
         /** User has been locked, user can no longer access to the drive */
         @SerialName("locked")
-        @SerializedName("locked")
         LOCKED,
 
         /** User has not accepted the invitation request */
         @SerialName("pending")
-        @SerializedName("pending")
         PENDING
     }
 }

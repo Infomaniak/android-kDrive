@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
+import com.infomaniak.drive.utils.SerializationUtils
 import okhttp3.OkHttpClient
 
 object PublicShareApiRepository {
@@ -106,7 +107,7 @@ object PublicShareApiRepository {
         return callPublicShareApi(
             url = ApiRoutes.buildPublicShareArchive(driveId, linkUuid),
             method = POST,
-            body = archiveBody,
+            body = SerializationUtils.encodeBody(archiveBody),
             authToken = authToken,
         )
     }
@@ -154,7 +155,7 @@ object PublicShareApiRepository {
         okHttpClient: OkHttpClient = DefaultHttpClientProvider.okHttpClient,
     ): T {
         val authentifiedUrl = authToken?.let { token -> url.appendQueryParams(mapOf("sharelink_token" to token)) } ?: url
-        return ApiController.callApi(authentifiedUrl, method, body, okHttpClient)
+        return ApiController.callApi(authentifiedUrl, method, body, okHttpClient, useKotlinxSerialization = true)
     }
 
     private suspend inline fun <reified T> callApiWithCursor(
@@ -167,6 +168,7 @@ object PublicShareApiRepository {
             method = method,
             body = body,
             okHttpClient = DefaultHttpClientProvider.okHttpClient,
+            useKotlinxSerialization = true,
             buildErrorResult = { apiError, translatedErrorRes ->
                 CursorApiResponse<Any>(
                     result = ApiResponseStatus.ERROR,

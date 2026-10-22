@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.api
 
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
@@ -34,7 +33,6 @@ import kotlinx.serialization.Transient
 class CursorApiResponse<T> private constructor(
     val cursor: String? = null, // TODO: It's only temporarily nullable, pending a change on the API side.
     @SerialName("has_more")
-    @SerializedName("has_more")
     val hasMore: Boolean = false,
     @Transient private val base: ApiResponse<T>? = null,
 ) : ApiResponse<T>(
@@ -49,7 +47,7 @@ class CursorApiResponse<T> private constructor(
     itemsPerPage = base?.itemsPerPage ?: 0,
 ) {
 
-    @JvmOverloads // Keeps the no-arg constructor Gson relies on
+    @JvmOverloads // Keeps a no-arg constructor
     constructor(
         result: ApiResponseStatus = ApiResponseStatus.UNKNOWN,
         data: T? = null,
