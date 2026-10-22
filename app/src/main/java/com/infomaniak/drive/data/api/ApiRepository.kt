@@ -149,9 +149,15 @@ object ApiRepository : ApiRepositoryCore() {
         )
     }
 
-    fun postFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), POST)
+    fun postFavoriteFile(file: File): ApiResponse<Boolean> = callApi(
+        ApiRoutes.favorite(file), POST,
+        useKotlinxSerialization = true,
+    )
 
-    fun deleteFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), DELETE)
+    fun deleteFavoriteFile(file: File): ApiResponse<Boolean> = callApi(
+        ApiRoutes.favorite(file), DELETE,
+        useKotlinxSerialization = true,
+    )
 
     fun getFolderFiles(
         okHttpClient: OkHttpClient,
@@ -231,7 +237,10 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun cancelSession(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.getSession(driveId, uploadToken), DELETE, okHttpClient = okHttpClient)
+        return callApi(
+            ApiRoutes.getSession(driveId, uploadToken), DELETE, okHttpClient = okHttpClient,
+            useKotlinxSerialization = true,
+        )
     }
 
     suspend fun uploadEmptyFile(uploadFile: UploadFile) = with(uploadFile) {
@@ -298,15 +307,15 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun deleteFile(file: File): ApiResponse<CancellableAction> {
-        return callApi(ApiRoutes.fileURLV2(file), DELETE)
+        return callApi(ApiRoutes.fileURLV2(file), DELETE, useKotlinxSerialization = true)
     }
 
     fun renameFile(file: File, newName: String): ApiResponse<CancellableAction> {
-        return callApi(ApiRoutes.renameFile(file), POST, mapOf("name" to newName))
+        return callApi(ApiRoutes.renameFile(file), POST, mapOf("name" to newName), useKotlinxSerialization = true)
     }
 
     fun updateFolderColor(file: File, color: String): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.updateFolderColor(file), POST, mapOf("color" to color))
+        return callApi(ApiRoutes.updateFolderColor(file), POST, mapOf("color" to color), useKotlinxSerialization = true)
     }
 
     fun duplicateFile(file: File, destinationId: Int): ApiResponse<File> {
@@ -328,7 +337,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun moveFile(file: File, newParent: File): ApiResponse<CancellableAction> {
-        return callApi(ApiRoutes.moveFile(file, newParent.id), POST)
+        return callApi(ApiRoutes.moveFile(file, newParent.id), POST, useKotlinxSerialization = true)
     }
 
     fun getFileShare(okHttpClient: OkHttpClient, file: File): ApiResponse<Share> {
@@ -340,7 +349,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun getFileCount(file: File): ApiResponse<FileCount> {
-        return callApi(ApiRoutes.getFileCount(file), GET)
+        return callApi(ApiRoutes.getFileCount(file), GET, useKotlinxSerialization = true)
     }
 
     fun getFileComments(file: File, cursor: String?): CursorApiResponse<ArrayList<FileComment>> {
@@ -362,39 +371,39 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun putFileComment(file: File, commentId: Int, body: String): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.fileComment(file, commentId), PUT, mapOf("body" to body))
+        return callApi(ApiRoutes.fileComment(file, commentId), PUT, mapOf("body" to body), useKotlinxSerialization = true)
     }
 
     fun deleteFileComment(file: File, commentId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.fileComment(file, commentId), DELETE)
+        return callApi(ApiRoutes.fileComment(file, commentId), DELETE, useKotlinxSerialization = true)
     }
 
     fun postLikeComment(file: File, commentId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.likeComment(file, commentId), POST)
+        return callApi(ApiRoutes.likeComment(file, commentId), POST, useKotlinxSerialization = true)
     }
 
     fun postUnlikeComment(file: File, commentId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.unLikeComment(file, commentId), POST)
+        return callApi(ApiRoutes.unLikeComment(file, commentId), POST, useKotlinxSerialization = true)
     }
 
     fun getShareLink(file: File): ApiResponse<ShareLink> {
-        return callApi(ApiRoutes.shareLink(file), GET)
+        return callApi(ApiRoutes.shareLink(file), GET, useKotlinxSerialization = true)
     }
 
     fun createShareLink(file: File, body: ShareLink.ShareLinkSettings): ApiResponse<ShareLink> {
-        return callApi(ApiRoutes.shareLink(file), POST, body)
+        return callApi(ApiRoutes.shareLink(file), POST, body, useKotlinxSerialization = true)
     }
 
     fun updateShareLink(file: File, body: JsonElement): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.shareLink(file), PUT, body)
+        return callApi(ApiRoutes.shareLink(file), PUT, body, useKotlinxSerialization = true)
     }
 
     fun deleteFileShareLink(file: File): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.shareLink(file), DELETE)
+        return callApi(ApiRoutes.shareLink(file), DELETE, useKotlinxSerialization = true)
     }
 
     fun postFileShareCheck(file: File, body: Map<String, Any>): ApiResponse<ArrayList<FileCheckResult>> {
-        return callApi(ApiRoutes.checkFileShare(file), POST, body)
+        return callApi(ApiRoutes.checkFileShare(file), POST, body, useKotlinxSerialization = true)
     }
 
     fun addMultiAccess(file: File, body: Map<String, Any?>): ApiResponse<ShareableItems> {
@@ -407,14 +416,16 @@ object ApiRepository : ApiRepositoryCore() {
                 is Team -> ApiRoutes.teamAccess(file, shareableItem.id)
                 is Invitation -> ApiRoutes.fileInvitationAccess(file, shareableItem.id)
                 else -> ApiRoutes.userAccess(file, shareableItem.id)
-            }, DELETE
+            }, DELETE,
+            useKotlinxSerialization = true,
         )
     }
 
     fun deleteDriveUser(file: File, shareableItem: Shareable): ApiResponse<Boolean> {
         return callApi(
             url = ApiRoutes.driveUser(driveId = file.driveId, driveUserId = shareableItem.id),
-            method = DELETE
+            method = DELETE,
+            useKotlinxSerialization = true,
         )
     }
 
@@ -424,24 +435,25 @@ object ApiRepository : ApiRepositoryCore() {
                 is Team -> ApiRoutes.teamAccess(file, shareableItem.id)
                 is Invitation -> ApiRoutes.fileInvitationAccess(file, shareableItem.id)
                 else -> ApiRoutes.userAccess(file, shareableItem.id)
-            }, PUT, body
+            }, PUT, body,
+            useKotlinxSerialization = true,
         )
     }
 
     fun createCategory(driveId: Int, name: String, color: String): ApiResponse<Category> {
         val body = mapOf("name" to name, "color" to color)
-        return callApi(ApiRoutes.categories(driveId), POST, body)
+        return callApi(ApiRoutes.categories(driveId), POST, body, useKotlinxSerialization = true)
     }
 
     fun editCategory(driveId: Int, categoryId: Int, name: String?, color: String): ApiResponse<Category> {
         val body = arrayMapOf("color" to color).apply {
             name?.let { put("name", it) }
         }
-        return callApi(ApiRoutes.category(driveId, categoryId), PUT, body)
+        return callApi(ApiRoutes.category(driveId, categoryId), PUT, body, useKotlinxSerialization = true)
     }
 
     fun deleteCategory(driveId: Int, categoryId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.category(driveId, categoryId), DELETE)
+        return callApi(ApiRoutes.category(driveId, categoryId), DELETE, useKotlinxSerialization = true)
     }
 
     fun addCategory(file: File, categoryId: Int): ApiResponse<ShareableItems.FeedbackAccessResource<Int, Unit>> {
@@ -454,7 +466,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun removeCategory(file: File, categoryId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.fileCategory(file, categoryId), DELETE)
+        return callApi(ApiRoutes.fileCategory(file, categoryId), DELETE, useKotlinxSerialization = true)
     }
 
     fun removeCategory(
@@ -471,23 +483,23 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun forceFolderAccess(file: File): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.forceFolderAccess(file), POST)
+        return callApi(ApiRoutes.forceFolderAccess(file), POST, useKotlinxSerialization = true)
     }
 
     fun getDropBox(file: File): ApiResponse<DropBox> {
-        return callApi(ApiRoutes.dropBox(file), GET)
+        return callApi(ApiRoutes.dropBox(file), GET, useKotlinxSerialization = true)
     }
 
     fun updateDropBox(file: File, body: JsonElement): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.dropBox(file), PUT, body)
+        return callApi(ApiRoutes.dropBox(file), PUT, body, useKotlinxSerialization = true)
     }
 
     fun postDropBox(file: File, body: Map<String, Any?>): ApiResponse<DropBox> {
-        return callApi(ApiRoutes.dropBox(file), POST, body)
+        return callApi(ApiRoutes.dropBox(file), POST, body, useKotlinxSerialization = true)
     }
 
     fun deleteDropBox(file: File): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.dropBox(file), DELETE)
+        return callApi(ApiRoutes.dropBox(file), DELETE, useKotlinxSerialization = true)
     }
 
     fun convertFile(file: File): ApiResponse<File> {
@@ -514,9 +526,13 @@ object ApiRepository : ApiRepositoryCore() {
             url = ApiRoutes.emptyTrash(driveId),
             method = DELETE,
             okHttpClient = AuthHttpClientProvider.authOkHttpClientLongTimeout,
+            useKotlinxSerialization = true,
         )
 
-    fun deleteTrashFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.trashURLV2(file), DELETE)
+    fun deleteTrashFile(file: File): ApiResponse<Boolean> = callApi(
+        ApiRoutes.trashURLV2(file), DELETE,
+        useKotlinxSerialization = true,
+    )
 
     fun getMySharedFiles(
         okHttpClient: OkHttpClient,
@@ -532,19 +548,25 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun undoAction(action: CancellableAction): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.undoAction(action.driveId), POST, mapOf("cancel_id" to action.cancelId))
+        return callApi(
+            ApiRoutes.undoAction(action.driveId), POST, mapOf("cancel_id" to action.cancelId),
+            useKotlinxSerialization = true,
+        )
     }
 
     fun performCancellableBulkOperation(bulkOperation: BulkOperation): ApiResponse<CancellableAction> {
-        return callApi(ApiRoutes.bulkAction(bulkOperation.parent.driveId), POST, bulkOperation.toMap())
+        return callApi(
+            ApiRoutes.bulkAction(bulkOperation.parent.driveId), POST, bulkOperation.toMap(),
+            useKotlinxSerialization = true,
+        )
     }
 
     fun buildArchive(driveId: Int, archiveBody: ArchiveBody): ApiResponse<ArchiveUUID> {
-        return callApi(ApiRoutes.buildArchive(driveId), POST, archiveBody)
+        return callApi(ApiRoutes.buildArchive(driveId), POST, archiveBody, useKotlinxSerialization = true)
     }
 
     fun cancelExternalImport(driveId: Int, importId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.cancelExternalImport(driveId, importId), PUT)
+        return callApi(ApiRoutes.cancelExternalImport(driveId, importId), PUT, useKotlinxSerialization = true)
     }
 
     suspend fun getMyKSuiteData(okHttpClient: OkHttpClient): ApiResponse<MyKSuiteData> {
