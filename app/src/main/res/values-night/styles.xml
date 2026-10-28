@@ -23,6 +23,7 @@
 
     <style name="AppTheme" parent="AppThemeBase">
         <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">shortEdges</item>
+        <item name="colorOnBackground">@android:color/white</item>
         <item name="colorOnSurface">@android:color/white</item>
     </style>
 
