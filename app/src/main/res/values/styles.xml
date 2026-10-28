@@ -26,7 +26,7 @@
 
     <style name="AppTheme.Launcher" parent="AppTheme.LauncherBase" />
 
-    <style name="AppThemeBase" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="AppThemeBase" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:adjustViewBounds">true</item>
         <item name="android:colorBackground">@color/background</item>
         <item name="android:fontFamily">@font/suisseintl_regular</item>
@@ -56,6 +56,7 @@
         <item name="toolbarStyle">@style/AppTheme.ToolbarTheme</item>
 
         <!--Material 3 theme-->
+        <item name="colorOnBackground">@color/title</item>
         <item name="colorOnSurface">@color/title</item> <!--Bottom sheet content color-->
         <item name="colorSurfaceContainerLow">@color/bottomSheetBackgroundColor</item> <!--Bottom sheet container color-->
     </style>
