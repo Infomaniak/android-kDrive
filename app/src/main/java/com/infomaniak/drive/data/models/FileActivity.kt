@@ -54,7 +54,6 @@ open class FileActivity(
 ) : RealmObject() {
 
     @Ignore
-    @Transient
     var user: DriveUser? = null
 
     @Ignore
