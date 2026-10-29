@@ -25,6 +25,8 @@ import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.buildShareLinkSettingsJsonElement
+import com.infomaniak.drive.data.services.CopyToDriveOutcome
+import com.infomaniak.drive.data.services.reconcileCopyToDrive
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockkObject
@@ -32,6 +34,7 @@ import io.mockk.Runs
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
@@ -286,5 +289,48 @@ class MigrationJourneyRegressionTest {
                 null,
             )
         }
+    }
+
+    @Test
+    fun `MQTT silence reconciles successful remote copy using the exact import and list endpoint`() = runBlocking {
+        responseBody = """{"result":"success","page":1,"pages":1,"data":[
+            {"id":44,"status":"failed"},{"id":45,"status":"done","directory_id":99}]}"""
+        val outcome = reconcileCopyToDrive(45) { page ->
+            ApiRepository.getExternalImports(10, page, AuthHttpClientProvider.authOkHttpClient)
+        }
+        assertEquals(CopyToDriveOutcome.SUCCESS, outcome)
+        assertTrue(request.url.encodedPath.endsWith("/10/imports"))
+        assertEquals("1", request.url.queryParameter("page"))
+        assertEquals("100", request.url.queryParameter("per_page"))
+        assertEquals("true", request.url.queryParameter("total"))
+        assertEquals("GET", request.method)
+    }
+
+    @Test
+    fun `reconciliation API error remains unknown not failed or successful transfer`() = runBlocking {
+        responseCode = 403
+        responseBody = """{"result":"error","error":{"code":"access_denied"}}"""
+        val outcome = reconcileCopyToDrive(45) { page ->
+            ApiRepository.getExternalImports(10, page, AuthHttpClientProvider.authOkHttpClient)
+        }
+        assertEquals(CopyToDriveOutcome.UNKNOWN, outcome)
+    }
+
+    @Test
+    fun `reconciliation transport and decoder failures cannot determine transfer outcome`() = runBlocking {
+        responseBody = """{"result":"success","data":{"unexpected":"shape"}}"""
+        assertEquals(
+            CopyToDriveOutcome.UNKNOWN,
+            reconcileCopyToDrive(45) { page ->
+                ApiRepository.getExternalImports(10, page, AuthHttpClientProvider.authOkHttpClient)
+            },
+        )
+        failTransport = true
+        assertEquals(
+            CopyToDriveOutcome.UNKNOWN,
+            reconcileCopyToDrive(45) { page ->
+                ApiRepository.getExternalImports(10, page, AuthHttpClientProvider.authOkHttpClient)
+            },
+        )
     }
 }
