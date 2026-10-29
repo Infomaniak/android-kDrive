@@ -400,7 +400,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun createShareLink(file: File, body: ShareLink.ShareLinkSettings): ApiResponse<ShareLink> {
-        return callApi(ApiRoutes.shareLink(file), POST, body, useKotlinxSerialization = true)
+        return callApi(ApiRoutes.shareLink(file), POST, body.toJsonElement(), useKotlinxSerialization = true)
     }
 
     fun updateShareLink(file: File, body: JsonElement): ApiResponse<Boolean> {
