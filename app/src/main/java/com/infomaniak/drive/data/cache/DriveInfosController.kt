@@ -25,6 +25,7 @@ import com.infomaniak.core.common.DynamicLazyMap
 import com.infomaniak.core.common.flowForKey
 import com.infomaniak.core.common.maxElements
 import com.infomaniak.core.common.sharedFlow
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Team
@@ -48,6 +49,9 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.job
+
+internal fun List<Drive>.filterEligibleDestinations(excludedDriveId: Int?): List<Drive> =
+    filter { it.id != excludedDriveId && !it.maintenance }
 
 object DriveInfosController {
 
@@ -185,7 +189,18 @@ object DriveInfosController {
     fun hasSingleDrive(userId: Int): Boolean = getDrivesCount(userId) == 1L
 
     fun getEligibleDestinationDrives(userId: Int?, excludedDriveId: Int?, sharedWithMe: Boolean? = null): List<Drive> {
-        return getDrives(userId = userId, sharedWithMe = sharedWithMe).filter { it.id != excludedDriveId && !it.maintenance }
+        val drives = getDrives(userId = userId, sharedWithMe = sharedWithMe)
+        return drives.filterEligibleDestinations(excludedDriveId).also { eligible ->
+            if (excludedDriveId != null) {
+                SentryLog.i(
+                    "CopyToDrive",
+                    "stage=destination_filter account_scoped=${userId != null} " +
+                            "shared_excluded=${sharedWithMe == false} cached_scope_count=${drives.size} " +
+                            "source_count=${drives.count { it.id == excludedDriveId }} " +
+                            "maintenance_count=${drives.count { it.maintenance }} eligible_count=${eligible.size}",
+                )
+            }
+        }
     }
 
     fun hasEligibleDestinationDrives(userId: Int, sharedWithMe: Boolean? = null): Boolean {
