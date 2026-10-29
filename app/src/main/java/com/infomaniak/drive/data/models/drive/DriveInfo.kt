@@ -21,11 +21,15 @@ import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.IpsToken
 import com.infomaniak.drive.data.models.Team
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class DriveInfo(
     val drives: List<Drive> = emptyList(),
     val users: List<DriveUser> = emptyList(),
     val teams: List<Team> = emptyList(),
+    @SerialName("ips")
     @SerializedName("ips")
     val ipsToken: IpsToken
 )

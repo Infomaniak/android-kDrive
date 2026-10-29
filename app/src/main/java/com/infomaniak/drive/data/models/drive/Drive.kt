@@ -23,11 +23,16 @@ import com.infomaniak.core.legacy.utils.Utils.enumValueOfOrNull
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.drive.DrivePack.DrivePackType
 import com.infomaniak.drive.data.models.drive.MaintenanceType.MaintenanceTypeValue
+import com.infomaniak.drive.utils.serialization.RealmCategoryListSerializer
+import com.infomaniak.drive.utils.serialization.RealmMaintenanceTypeListSerializer
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import java.util.Date
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 open class Drive(
 
     @PrimaryKey var objectId: String = "",
@@ -35,51 +40,70 @@ open class Drive(
     /**
      * User data
      */
+    @SerialName("account_admin")
     @SerializedName("account_admin")
     var isOrganisationAdmin: Boolean = false,
+    @SerialName("rights")
     @SerializedName("rights")
     private var _rights: DriveRights? = DriveRights(),
     var name: String = "",
+    @SerialName("preferences")
     @SerializedName("preferences")
     private var _preferences: DrivePreferences? = DrivePreferences(),
+    @SerialName("role")
     @SerializedName("role")
     private var _role: String = "",
+    @SerialName("capabilities")
     @SerializedName("capabilities")
     private var _capabilities: DriveCapabilities? = DriveCapabilities(),
+    @SerialName("quota")
     @SerializedName("quota")
     private var _quotas: DriveQuotas? = DriveQuotas(),
     var sharedWithMe: Boolean = false,
     var userId: Int = 0,
+    @SerialName("categories_permissions")
     @SerializedName("categories_permissions")
     private var _categoryRights: CategoryRights? = CategoryRights(),
 
     /**
      * Drive data
      */
+    @SerialName("account_id")
     @SerializedName("account_id")
     var accountId: Int = -1,
+    @SerialName("account")
     @SerializedName("account")
     private var _driveAccount: DriveAccount? = null,
+    @SerialName("created_at")
     @SerializedName("created_at")
     var createdAt: Long = 0,
+    @SerialName("updated_at")
     @SerializedName("updated_at")
     var updatedAt: Long = 0,
+    @SerialName("used_size")
     @SerializedName("used_size")
     var usedSize: Long = 0,
     var id: Int = -1,
+    @SerialName("in_maintenance")
     @SerializedName("in_maintenance")
     var maintenance: Boolean = false,
+    @SerialName("maintenance_reason")
     @SerializedName("maintenance_reason")
     var maintenanceReason: String = "",
+    @SerialName("maintenance_types")
     @SerializedName("maintenance_types")
+    @Serializable(with = RealmMaintenanceTypeListSerializer::class)
     var maintenanceTypes: RealmList<MaintenanceType> = RealmList(),
     var pack: DrivePack? = DrivePack(),
     var size: Long = 0,
     var version: String = "",
+    @SerialName("users")
     @SerializedName("users")
     private var _users: DriveUsersCategories? = DriveUsersCategories(),
+    @SerialName("teams")
     @SerializedName("teams")
     private var _teams: DriveTeamsCategories? = DriveTeamsCategories(),
+    @Serializable(with = RealmCategoryListSerializer::class)
     var categories: RealmList<Category> = RealmList(),
 ) : RealmObject() {
 
