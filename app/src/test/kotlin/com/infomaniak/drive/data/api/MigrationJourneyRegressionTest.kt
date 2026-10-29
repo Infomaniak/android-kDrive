@@ -254,4 +254,37 @@ class MigrationJourneyRegressionTest {
         verify { SentryLog.w("CopyToDrive", "stage=response outcome=transport_failure http_status=none result=ERROR", null) }
         assertFalse(diagnosticMessages.any { it.contains("private-fixture") || it.contains("fixture-user") })
     }
+
+    @Test
+    fun `drive init preserves every decoded drive and reports refresh count`() {
+        responseBody = """{"result":"success","data":{"ips":{"uuid":"fixture","valid_until":1792675175},
+            "drives":[{"id":1,"role":"admin"},{"id":2,"role":"user"},{"id":3,"role":"user"},
+            {"id":4,"role":"external"},{"id":5,"role":"none"}]}}"""
+        val response = ApiRepository.getAllDrivesData(AuthHttpClientProvider.authOkHttpClient)
+        assertTrue(response.isSuccess())
+        assertEquals(listOf(1, 2, 3, 4, 5), response.data!!.drives.map { it.id })
+        verify {
+            SentryLog.i(
+                "CopyToDrive",
+                "stage=drive_api_refresh result=SUCCESS data_present=true drive_count=5 failure=none_or_api",
+                null,
+            )
+        }
+    }
+
+    @Test
+    fun `drive init decoding failure rejects entire envelope instead of silently returning a partial list`() {
+        responseBody = """{"result":"success","data":{"ips":{"uuid":"fixture","valid_until":1792675175},
+            "drives":[{"id":1,"role":"admin"},{"id":{},"role":"user"}]}}"""
+        val response = ApiRepository.getAllDrivesData(AuthHttpClientProvider.authOkHttpClient)
+        assertEquals(ApiResponseStatus.ERROR, response.result)
+        assertEquals(null, response.data)
+        verify {
+            SentryLog.i(
+                "CopyToDrive",
+                "stage=drive_api_refresh result=ERROR data_present=false drive_count=0 failure=decoder",
+                null,
+            )
+        }
+    }
 }
