@@ -429,7 +429,6 @@ class MainViewModel(
     ) = viewModelScope.launch(Dispatchers.IO) {
         val sourcePath = getSourceRemotePath(fileId, sourceDriveId)
         if (sourcePath.isNullOrBlank()) {
-            SentryLog.w("CopyToDrive", "stage=pre_request failure=source_path_unavailable")
             copyToDriveResult.postValue(
                 FileResult(isSuccess = false, errorResId = R.string.errorCopyToDrive, fileName = fileName)
             )
@@ -465,13 +464,7 @@ class MainViewModel(
             driveId = sourceDriveId,
             sharedWithMe = sourceDrive?.sharedWithMe == true,
         )
-        val file = FileController.getFileByUidOrId(fileId, userDrive)
-        SentryLog.i(
-            "CopyToDrive",
-            "stage=source_lookup drive_cached=${sourceDrive != null} " +
-                    "account_matches_active=${userDrive.userId == AccountUtils.currentUserId} file_cached=${file != null}",
-        )
-        val path = file?.getRemotePath(userDrive) ?: return null
+        val path = FileController.getFileByUidOrId(fileId, userDrive)?.getRemotePath(userDrive) ?: return null
 
         return path.removePrefix(PRIVATE_FOLDER_PATH_PREFIX)
     }
