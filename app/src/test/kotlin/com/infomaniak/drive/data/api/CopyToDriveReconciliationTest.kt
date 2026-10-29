@@ -20,6 +20,7 @@ package com.infomaniak.drive.data.api
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.services.CopyToDriveOutcome
+import com.infomaniak.drive.data.services.completeCopyToDrive
 import com.infomaniak.drive.data.services.reconcileCopyToDrive
 import com.infomaniak.drive.utils.SerializationUtils
 import kotlinx.coroutines.awaitCancellation
@@ -33,6 +34,30 @@ import org.junit.jupiter.api.Test
 class CopyToDriveReconciliationTest {
     private fun response(json: String) =
         SerializationUtils.decodeFromString<ApiResponse<List<FileExternalImport>>>(json)
+
+    @Test
+    fun `unknown outcome cleans up ongoing notification without sending a final notification`() {
+        val actions = mutableListOf<String>()
+        completeCopyToDrive(
+            CopyToDriveOutcome.UNKNOWN,
+            releaseResources = { actions.add("cleanup") },
+            notifyResult = { actions.add("notify:$it") },
+        )
+        assertEquals(listOf("cleanup"), actions)
+    }
+
+    @Test
+    fun `confirmed outcomes clean up before notifying the actual result`() {
+        listOf(CopyToDriveOutcome.SUCCESS to true, CopyToDriveOutcome.FAILURE to false).forEach { (outcome, success) ->
+            val actions = mutableListOf<String>()
+            completeCopyToDrive(
+                outcome,
+                releaseResources = { actions.add("cleanup") },
+                notifyResult = { actions.add("notify:$it") },
+            )
+            assertEquals(listOf("cleanup", "notify:$success"), actions)
+        }
+    }
 
     @Test
     fun `successful import without MQTT events is confirmed by server status`() = runBlocking {

@@ -202,7 +202,6 @@
     <string name="contentDescriptionIsSelected">Is selected</string>
     <string name="convertToDropboxTitle">Convert to drop box %s</string>
     <string name="copyToDriveStarted">%s is being copied to another drive</string>
-    <string name="copyToDriveStatusUnknown">The transfer status could not be confirmed. Check the destination drive.</string>
     <string name="copyToDriveSuccess">%s has been copied to another drive</string>
     <string name="createCategoryTitle">Create a category</string>
     <string name="createCommonFolderAllUsersDescription">All kDrive %s users will automatically have access to this folder.</string>
