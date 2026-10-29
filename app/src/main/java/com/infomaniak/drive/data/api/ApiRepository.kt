@@ -342,7 +342,14 @@ object ApiRepository : ApiRepositoryCore() {
             "directory_id" to destinationFolderId,
             "source_path" to sourcePath,
         )
-        return callApi(ApiRoutes.importKDrive(destinationDriveId), POST, body)
+        val diagnostics = CopyToDriveDiagnostics()
+        val client = AuthHttpClientProvider.authOkHttpClient.newBuilder().apply {
+            interceptors().add(0, diagnostics)
+        }.build()
+        SentryLog.i(CopyToDriveDiagnostics.TAG, "stage=request_started")
+        return callApi<ApiResponse<List<FileExternalImport>>>(
+            ApiRoutes.importKDrive(destinationDriveId), POST, body, okHttpClient = client,
+        ).also(diagnostics::report)
     }
 
     fun moveFile(file: File, newParent: File): ApiResponse<CancellableAction> {
