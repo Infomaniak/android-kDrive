@@ -128,7 +128,18 @@ object ApiRepository : ApiRepositoryCore() {
         okHttpClient: OkHttpClient
     ): ApiResponse<DriveInfo> {
         val url = ApiRoutes.getAllDrivesData()
-        return callApi(url, GET, okHttpClient = okHttpClient, useKotlinxSerialization = true)
+        return callApi<ApiResponse<DriveInfo>>(url, GET, okHttpClient = okHttpClient, useKotlinxSerialization = true).also {
+            val failure = when (it.error?.exception) {
+                is kotlinx.serialization.SerializationException -> "decoder"
+                null -> "none_or_api"
+                else -> "client_or_transport"
+            }
+            SentryLog.i(
+                "CopyToDrive",
+                "stage=drive_api_refresh result=${it.result.name} data_present=${it.data != null} " +
+                        "drive_count=${it.data?.drives?.size ?: 0} failure=$failure",
+            )
+        }
     }
 
     fun getFavoriteFiles(
