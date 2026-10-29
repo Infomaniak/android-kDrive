@@ -293,6 +293,9 @@ object ApiRoutes {
 
     fun importKDrive(destinationDriveId: Int) = "$DRIVE_API_V2/$destinationDriveId/imports/kdrive"
 
+    fun getExternalImports(driveId: Int, page: Int) =
+        "$DRIVE_API_V2/$driveId/imports?page=$page&per_page=100&total=true"
+
     fun renameFile(file: File) = "${fileURLV2(file)}/rename"
 
     fun getFileCount(file: File) = "${fileURLV2(file)}/count"
