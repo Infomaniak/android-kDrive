@@ -26,11 +26,8 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
-import com.google.gson.reflect.TypeToken
 import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.common.cancellable
-import com.infomaniak.core.network.api.ApiController
-import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.exceptions.NetworkException
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
@@ -155,9 +152,8 @@ class DownloadOfflineFileManager(
             if (fileDetails.error?.exception is NetworkException) throw UploadTask.NetworkException()
 
             val translateError = fileDetails.translateError()
-            val responseGsonType = object : TypeToken<ApiResponse<File>>() {}.type
             val translatedErrorText = context.getString(translateError)
-            val responseJson = ApiController.gson.toJson(fileDetails, responseGsonType)
+            val responseJson = SerializationUtils.describeForReport(fileDetails)
             throw RemoteFileException("$responseJson $translatedErrorText")
         }
 

@@ -17,13 +17,15 @@
  */
 package com.infomaniak.drive.data.models.file
 
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileAction
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ListingFiles(
     val actions: List<FileAction> = emptyList(),
-    @SerializedName("actions_files")
+    @SerialName("actions_files")
     val actionsFiles: List<File> = emptyList(),
     val files: List<File> = emptyList(),
 )

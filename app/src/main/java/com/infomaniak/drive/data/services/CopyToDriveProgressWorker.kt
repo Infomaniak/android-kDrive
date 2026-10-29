@@ -41,7 +41,7 @@ import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
 import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.ImportProgress
 import com.infomaniak.drive.data.models.MqttAction
 import com.infomaniak.drive.data.models.MqttNotification
@@ -52,6 +52,11 @@ import com.infomaniak.drive.utils.ForegroundInfoExt
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.copyToDriveProgressNotification
 import com.infomaniak.drive.utils.copyToDriveResultMessage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -72,12 +77,16 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     private var destFolderId: Int = 0
     private var mqttNotificationsObserver: Observer<MqttNotification>? = null
     private lateinit var timer: CountDownTimer
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var userId: Int = -1
+    private var isReconciling = false
 
     override fun startWork(): ListenableFuture<Result> {
         importId = inputData.getInt(IMPORT_ID_KEY, 0)
         fileName = inputData.getString(FILE_NAME_KEY).orEmpty()
         destDriveId = inputData.getInt(DEST_DRIVE_ID_KEY, -1)
         destFolderId = inputData.getInt(DEST_FOLDER_ID_KEY, -1)
+        userId = inputData.getInt(USER_ID_KEY, AccountUtils.currentUserId)
 
         val notification = buildNotification(progress = null).apply {
             if (SDK_INT >= 31) foregroundServiceBehavior = Notification.FOREGROUND_SERVICE_IMMEDIATE
@@ -88,31 +97,43 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         }
         setForegroundAsync(foregroundInfo)
 
-        MqttClientWrapper.start(externalImportId = importId)
-
         return CallbackToFutureAdapter.getFuture { completer ->
             timer = createRefreshTimer(milliseconds = COPY_TO_DRIVE_TIMEOUT) {
-                finish(completer = completer, isSuccess = false)
+                if (!isReconciling && !isFinished.get()) {
+                    isReconciling = true
+                    scope.launch {
+                        val client = AccountUtils.getHttpClient(userId).newBuilder().cache(null).build()
+                        val outcome = reconcileCopyToDrive(importId) { page ->
+                            ApiRepository.getExternalImports(destDriveId, page, client)
+                        }
+                        finish(completer, outcome)
+                    }
+                }
             }
             timer.start()
 
-            launchObserver { isSuccess -> finish(completer, isSuccess) }
+            launchObserver { isSuccess ->
+                finish(completer, if (isSuccess) CopyToDriveOutcome.SUCCESS else CopyToDriveOutcome.FAILURE)
+            }
+            if (!isFinished.get()) MqttClientWrapper.start(externalImportId = importId)
         }
     }
 
-    private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, isSuccess: Boolean) {
+    private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, outcome: CopyToDriveOutcome) {
         if (!isFinished.compareAndSet(false, true)) return
-        releaseResources()
-        showResultNotification(isSuccess)
+        completeCopyToDrive(outcome, ::releaseResources, ::showResultNotification)
+        // WorkManager success means monitoring finished, not that the remote transfer succeeded.
         completer.set(Result.success())
     }
 
     override fun onStopped() {
         super.onStopped()
+        isFinished.set(true)
         releaseResources()
     }
 
     private fun releaseResources() {
+        scope.cancel()
         if (::timer.isInitialized) timer.cancel()
         mqttNotificationsObserver?.let { MqttClientWrapper.removeObserver(it) }
         mqttNotificationsObserver = null
@@ -122,14 +143,15 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
 
     private fun launchObserver(onOperationFinished: (isSuccess: Boolean) -> Unit) {
         mqttNotificationsObserver = Observer { notification ->
+            if (isFinished.get()) return@Observer
             if (notification.importId != importId) return@Observer
 
             restartTimeout()
-            when (notification.action) {
-                MqttAction.EXTERNAL_IMPORT_FINISHED -> onOperationFinished(true)
-                MqttAction.EXTERNAL_IMPORT_ERROR -> onOperationFinished(false)
-                MqttAction.EXTERNAL_IMPORT_CANCELED -> onOperationFinished(false)
-                else -> notification.importProgress?.let { progress ->
+            val terminalResult = terminalImportResult(notification, importId)
+            if (terminalResult != null) {
+                onOperationFinished(terminalResult)
+            } else {
+                notification.importProgress?.let { progress ->
                     notificationManagerCompat.notifyCompat(importId, buildNotification(progress))
                 }
             }
@@ -139,6 +161,7 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     }
 
     private fun restartTimeout() {
+        if (isReconciling) return
         timer.cancel()
         timer.start()
     }
@@ -157,9 +180,8 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     }
 
     private fun destinationPendingIntent(): PendingIntent {
-        val destUserId = DriveInfosController.getDrive(driveId = destDriveId)?.userId ?: AccountUtils.currentUserId
         val args = LaunchActivityArgs(
-            destinationUserId = destUserId,
+            destinationUserId = userId,
             destinationDriveId = destDriveId,
             destinationRemoteFolderId = destFolderId,
         )
@@ -178,10 +200,20 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     }
 
     companion object {
+        internal fun terminalImportResult(notification: MqttNotification, importId: Int): Boolean? {
+            if (notification.importId != importId) return null
+            return when (notification.action) {
+                MqttAction.EXTERNAL_IMPORT_FINISHED -> true
+                MqttAction.EXTERNAL_IMPORT_ERROR, MqttAction.EXTERNAL_IMPORT_CANCELED -> false
+                else -> null
+            }
+        }
+
         private const val IMPORT_ID_KEY = "import_id_key"
         private const val FILE_NAME_KEY = "file_name_key"
         private const val DEST_DRIVE_ID_KEY = "dest_drive_id_key"
         private const val DEST_FOLDER_ID_KEY = "dest_folder_id_key"
+        private const val USER_ID_KEY = "user_id_key"
         private const val COPY_TO_DRIVE_TIMEOUT = 30_000L
 
         fun scheduleWork(context: Context, importId: Int, fileName: String, destDriveId: Int, destFolderId: Int) {
@@ -194,6 +226,7 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
                         FILE_NAME_KEY to fileName,
                         DEST_DRIVE_ID_KEY to destDriveId,
                         DEST_FOLDER_ID_KEY to destFolderId,
+                        USER_ID_KEY to AccountUtils.currentUserId,
                     )
                 )
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())

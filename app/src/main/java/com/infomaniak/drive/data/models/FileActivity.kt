@@ -18,28 +18,33 @@
 package com.infomaniak.drive.data.models
 
 import android.content.Context
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.core.common.utils.FORMAT_FULL_DATE
 import com.infomaniak.core.common.utils.FORMAT_HOUR_MINUTES
 import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.R
+import com.infomaniak.drive.utils.serialization.ApiTimestampDateSerializer
 import io.realm.RealmObject
 import io.realm.annotations.Ignore
 import io.realm.annotations.PrimaryKey
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
+@Serializable
 open class FileActivity(
     @PrimaryKey var id: Int = 0,
     var action: String = "",
-    @SerializedName("created_at")
+    @Serializable(with = ApiTimestampDateSerializer::class)
+    @SerialName("created_at")
     var createdAt: Date = Date(),
     var file: File? = null,
-    @SerializedName("file_id")
+    @SerialName("file_id")
     var fileId: Int = 0,
-    @SerializedName("new_path")
+    @SerialName("new_path")
     var newPath: String = "",
-    @SerializedName("old_path")
+    @SerialName("old_path")
     var oldPath: String = "",
 
     /**
@@ -52,6 +57,7 @@ open class FileActivity(
     var user: DriveUser? = null
 
     @Ignore
+    @Transient
     var mergedFileActivities: ArrayList<FileActivity> = arrayListOf()
 
     val homeTranslation: Int

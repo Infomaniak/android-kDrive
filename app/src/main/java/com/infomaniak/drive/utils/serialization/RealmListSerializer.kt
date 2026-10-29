@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.utils.serialization
 
+import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.TeamDetails
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.MaintenanceType
@@ -27,6 +28,11 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 /** Decodes a JSON array into an unmanaged [RealmList]. It never touches the Realm schema. */
 open class RealmListSerializer<T>(elementSerializer: KSerializer<T>) : KSerializer<RealmList<T>> {
@@ -49,7 +55,58 @@ object RealmIntListSerializer : KSerializer<RealmList<Int>> by RealmListSerializ
 
 object RealmCategoryListSerializer : KSerializer<RealmList<Category>> by RealmListSerializer(Category.serializer())
 
-object RealmMaintenanceTypeListSerializer :
-    KSerializer<RealmList<MaintenanceType>> by RealmListSerializer(MaintenanceType.serializer())
+/**
+ * Lenient: the OpenAPI spec documents `maintenance_types` both as an array of `{name, code, description}` objects and as
+ * an enum of plain codes, so accept objects, plain strings (and a single string/object), skipping anything else.
+ */
+object RealmMaintenanceTypeListSerializer : KSerializer<RealmList<MaintenanceType>> {
+
+    private val delegate = RealmListSerializer(MaintenanceType.serializer())
+
+    override val descriptor: SerialDescriptor = delegate.descriptor
+
+    override fun serialize(encoder: Encoder, value: RealmList<MaintenanceType>) = delegate.serialize(encoder, value)
+
+    override fun deserialize(decoder: Decoder): RealmList<MaintenanceType> {
+        val jsonDecoder = decoder as? JsonDecoder ?: return delegate.deserialize(decoder)
+        val json = jsonDecoder.json
+        val items = when (val element = jsonDecoder.decodeJsonElement()) {
+            is JsonArray -> element
+            JsonNull -> emptyList()
+            else -> listOf(element)
+        }
+        return RealmList<MaintenanceType>().apply {
+            items.forEach { item ->
+                when {
+                    item is JsonObject -> add(json.decodeFromJsonElement(MaintenanceType.serializer(), item))
+                    item is JsonPrimitive && item !is JsonNull && item.isString -> add(MaintenanceType(item.content))
+                }
+            }
+        }
+    }
+}
 
 object RealmTeamDetailsListSerializer : KSerializer<RealmList<TeamDetails>> by RealmListSerializer(TeamDetails.serializer())
+
+/** Lenient: the API documents some string lists (e.g. `supported_by`) as either an array of strings or a single string. */
+object RealmStringListSerializer : KSerializer<RealmList<String>> {
+
+    private val delegate = RealmListSerializer(String.serializer())
+
+    override val descriptor: SerialDescriptor = delegate.descriptor
+
+    override fun serialize(encoder: Encoder, value: RealmList<String>) = delegate.serialize(encoder, value)
+
+    override fun deserialize(decoder: Decoder): RealmList<String> {
+        val jsonDecoder = decoder as? JsonDecoder ?: return delegate.deserialize(decoder)
+        return RealmList<String>().apply {
+            when (val element = jsonDecoder.decodeJsonElement()) {
+                is JsonArray -> element.forEach { item -> (item as? JsonPrimitive)?.takeUnless { it is JsonNull }?.let { add(it.content) } }
+                is JsonPrimitive -> if (element !is JsonNull) add(element.content)
+                else -> Unit
+            }
+        }
+    }
+}
+
+object RealmFileCategoryListSerializer : KSerializer<RealmList<FileCategory>> by RealmListSerializer(FileCategory.serializer())
