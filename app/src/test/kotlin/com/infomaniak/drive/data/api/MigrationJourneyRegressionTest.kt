@@ -21,13 +21,17 @@ import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.buildShareLinkSettingsJsonElement
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockkObject
+import io.mockk.Runs
 import io.mockk.spyk
 import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
@@ -46,6 +50,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.io.IOException
 
 @OptIn(ManualAuthorizationRequired::class)
 class MigrationJourneyRegressionTest {
@@ -53,10 +58,19 @@ class MigrationJourneyRegressionTest {
     private lateinit var request: Request
     private var responseBody = ""
     private var responseCode = 200
+    private var activeUserId = 101
+    private var failTransport = false
+    private val diagnosticMessages = mutableListOf<String>()
 
     @BeforeEach
     fun configureHttp() {
+        // Fake the account/token boundary; no Android account database or real credentials are involved.
         val client = OkHttpClient.Builder().addInterceptor { chain ->
+            chain.proceed(
+                chain.request().newBuilder().header("Authorization", "Bearer fixture-user-$activeUserId").build()
+            )
+        }.addInterceptor { chain ->
+            if (failTransport) throw IOException("private-fixture transport detail")
             request = chain.request()
             Response.Builder()
                 .request(request)
@@ -70,6 +84,9 @@ class MigrationJourneyRegressionTest {
         every { AuthHttpClientProvider.authOkHttpClient } returns client
         mockkObject(HttpUtils)
         every { HttpUtils.getHeaders(any()) } returns Headers.Builder().build()
+        mockkObject(SentryLog)
+        every { SentryLog.i(any(), capture(diagnosticMessages), any()) } just Runs
+        every { SentryLog.w(any(), capture(diagnosticMessages), any()) } just Runs
     }
 
     @AfterEach
@@ -151,6 +168,8 @@ class MigrationJourneyRegressionTest {
         assertEquals("false", response.data!!.single().hasSharedFiles)
         assertEquals("POST", request.method)
         assertTrue(request.url.encodedPath.endsWith("/10/imports/kdrive"))
+        verify { SentryLog.i("CopyToDrive", "stage=request_started", null) }
+        verify { SentryLog.i("CopyToDrive", "stage=response outcome=accepted http_status=200 result=ASYNCHRONOUS", null) }
     }
 
     @Test
@@ -187,5 +206,52 @@ class MigrationJourneyRegressionTest {
         assertTrue(response.isSuccess())
         assertEquals("12_9", response.data?.uid)
         assertEquals("/Documents/report.pdf", response.data?.path)
+    }
+
+    @Test
+    fun `copy uses the active login not a destination owner's separate login`() {
+        val sourceUserId = 101
+        val destinationUserId = 202
+        activeUserId = sourceUserId
+        responseCode = 403
+        responseBody = """{"result":"error","error":{"code":"access_denied","description":"Destination denied"}}"""
+
+        val denied = ApiRepository.copyFileToAnotherDrive(9, "/private-fixture/source.txt", 10, 99)
+        assertEquals("Bearer fixture-user-$sourceUserId", request.header("Authorization"))
+        assertEquals(ApiResponseStatus.ERROR, denied.result)
+        assertEquals("access_denied", denied.error?.code)
+        verify { SentryLog.w("CopyToDrive", "stage=response outcome=http_error http_status=403 result=ERROR", null) }
+
+        // Changing the active login changes the supplied HTTP client's token, not the import request fields.
+        activeUserId = destinationUserId
+        ApiRepository.copyFileToAnotherDrive(9, "/private-fixture/source.txt", 10, 99)
+        assertEquals("Bearer fixture-user-$destinationUserId", request.header("Authorization"))
+        assertEquals(JsonPrimitive("9"), requestJson()["application_drive_id"])
+        assertFalse(diagnosticMessages.any { it.contains("fixture-user") || it.contains("source.txt") })
+    }
+
+    @Test
+    fun `copy diagnostics distinguish decoder failure without forwarding private exception content`() {
+        responseBody = """{"result":"success","data":{"private-fixture":"not an import array"}}"""
+        val response = ApiRepository.copyFileToAnotherDrive(9, "/private-fixture/source.txt", 10, 99)
+        assertEquals(ApiResponseStatus.ERROR, response.result)
+        verify { SentryLog.w("CopyToDrive", "stage=response outcome=decoder_failure http_status=200 result=ERROR", null) }
+        assertFalse(diagnosticMessages.any { it.contains("private-fixture") || it.contains("fixture-user") })
+    }
+
+    @Test
+    fun `copy diagnostics identify API error on HTTP success`() {
+        responseBody = """{"result":"error","error":{"code":"access_denied"}}"""
+        ApiRepository.copyFileToAnotherDrive(9, "/private-fixture/source.txt", 10, 99)
+        verify { SentryLog.w("CopyToDrive", "stage=response outcome=api_or_client_error http_status=200 result=ERROR", null) }
+    }
+
+    @Test
+    fun `copy diagnostics identify transport failure without a received HTTP response`() {
+        failTransport = true
+        val response = ApiRepository.copyFileToAnotherDrive(9, "/private-fixture/source.txt", 10, 99)
+        assertEquals(ApiResponseStatus.ERROR, response.result)
+        verify { SentryLog.w("CopyToDrive", "stage=response outcome=transport_failure http_status=none result=ERROR", null) }
+        assertFalse(diagnosticMessages.any { it.contains("private-fixture") || it.contains("fixture-user") })
     }
 }
