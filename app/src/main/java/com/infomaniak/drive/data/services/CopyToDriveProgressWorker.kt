@@ -126,8 +126,7 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, outcome: CopyToDriveOutcome, reason: String) {
         if (!isFinished.compareAndSet(false, true)) return
         SentryLog.i("CopyToDrive", "stage=tracking_finished outcome=${outcome.name} reason=$reason")
-        releaseResources()
-        showResultNotification(outcome)
+        completeCopyToDrive(outcome, ::releaseResources, ::showResultNotification)
         // WorkManager success means monitoring finished, not that the remote transfer succeeded.
         completer.set(Result.success())
     }
@@ -177,17 +176,14 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     }
 
 
-    private fun showResultNotification(outcome: CopyToDriveOutcome) {
-        val description = when (outcome) {
-            CopyToDriveOutcome.UNKNOWN -> applicationContext.getString(R.string.copyToDriveStatusUnknown)
-            else -> applicationContext.copyToDriveResultMessage(outcome == CopyToDriveOutcome.SUCCESS, fileName)
-        }
+    private fun showResultNotification(isSuccess: Boolean) {
+        val description = applicationContext.copyToDriveResultMessage(isSuccess, fileName)
         val builder = applicationContext.buildGeneralNotification(
             title = applicationContext.getString(R.string.buttonCopyToDrive),
             description = description,
         ).apply {
             setAutoCancel(true)
-            if (outcome != CopyToDriveOutcome.FAILURE) setContentIntent(destinationPendingIntent())
+            if (isSuccess) setContentIntent(destinationPendingIntent())
         }
         notificationManagerCompat.notifyCompat(resultNotificationId, builder)
     }

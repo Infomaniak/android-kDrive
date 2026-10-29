@@ -203,7 +203,6 @@
     <string name="convertToDropboxTitle">Convertir en boîte de dépôt %s</string>
     <string name="copyToDriveStarted">%s est en cours de copie vers un autre drive</string>
     <string name="copyToDriveSuccess">%s a été copié vers un autre drive</string>
-    <string name="copyToDriveStatusUnknown">Le statut du transfert n’a pas pu être confirmé. Vérifiez le drive de destination.</string>
     <string name="createCategoryTitle">Créer une catégorie</string>
     <string name="createCommonFolderAllUsersDescription">Tous les utilisateurs du kDrive %s auront automatiquement accès à ce dossier.</string>
     <string name="createCommonFolderSuccess">Dossier d’organisation créé avec succès</string>

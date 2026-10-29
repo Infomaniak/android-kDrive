@@ -23,6 +23,19 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 internal enum class CopyToDriveOutcome { SUCCESS, FAILURE, UNKNOWN }
 
+internal fun completeCopyToDrive(
+    outcome: CopyToDriveOutcome,
+    releaseResources: () -> Unit,
+    notifyResult: (Boolean) -> Unit,
+) {
+    releaseResources()
+    when (outcome) {
+        CopyToDriveOutcome.SUCCESS -> notifyResult(true)
+        CopyToDriveOutcome.FAILURE -> notifyResult(false)
+        CopyToDriveOutcome.UNKNOWN -> Unit
+    }
+}
+
 /** Silence on MQTT says nothing about the remote import. Only a matching terminal server status is authoritative. */
 internal suspend fun reconcileCopyToDrive(
     importId: Int,
