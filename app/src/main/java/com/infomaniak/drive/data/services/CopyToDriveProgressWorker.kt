@@ -40,6 +40,7 @@ import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_
 import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
 import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.core.notifications.notifyCompat
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.ImportProgress
@@ -88,27 +89,31 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         }
         setForegroundAsync(foregroundInfo)
 
+        SentryLog.i("CopyToDrive", "stage=tracking_started")
         MqttClientWrapper.start(externalImportId = importId)
 
         return CallbackToFutureAdapter.getFuture { completer ->
             timer = createRefreshTimer(milliseconds = COPY_TO_DRIVE_TIMEOUT) {
-                finish(completer = completer, isSuccess = false)
+                finish(completer = completer, isSuccess = false, reason = "inactivity_timeout")
             }
             timer.start()
 
-            launchObserver { isSuccess -> finish(completer, isSuccess) }
+            launchObserver { isSuccess, reason -> finish(completer, isSuccess, reason) }
         }
     }
 
-    private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, isSuccess: Boolean) {
+    private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, isSuccess: Boolean, reason: String) {
         if (!isFinished.compareAndSet(false, true)) return
+        SentryLog.i("CopyToDrive", "stage=tracking_finished transfer_success=$isSuccess reason=$reason")
         releaseResources()
         showResultNotification(isSuccess)
+        // WorkManager success means monitoring finished, not that the remote transfer succeeded.
         completer.set(Result.success())
     }
 
     override fun onStopped() {
         super.onStopped()
+        SentryLog.i("CopyToDrive", "stage=tracking_stopped")
         releaseResources()
     }
 
@@ -120,16 +125,19 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         notificationManagerCompat.cancel(importId)
     }
 
-    private fun launchObserver(onOperationFinished: (isSuccess: Boolean) -> Unit) {
+    private fun launchObserver(onOperationFinished: (isSuccess: Boolean, reason: String) -> Unit) {
         mqttNotificationsObserver = Observer { notification ->
+            if (notification.importId != null) {
+                SentryLog.i("CopyToDrive", "stage=tracking_event import_matches=${notification.importId == importId}")
+            }
             if (notification.importId != importId) return@Observer
 
             restartTimeout()
-            when (notification.action) {
-                MqttAction.EXTERNAL_IMPORT_FINISHED -> onOperationFinished(true)
-                MqttAction.EXTERNAL_IMPORT_ERROR -> onOperationFinished(false)
-                MqttAction.EXTERNAL_IMPORT_CANCELED -> onOperationFinished(false)
-                else -> notification.importProgress?.let { progress ->
+            val terminalResult = terminalImportResult(notification, importId)
+            if (terminalResult != null) {
+                onOperationFinished(terminalResult, notification.action!!.name)
+            } else {
+                notification.importProgress?.let { progress ->
                     notificationManagerCompat.notifyCompat(importId, buildNotification(progress))
                 }
             }
@@ -178,6 +186,15 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     }
 
     companion object {
+        internal fun terminalImportResult(notification: MqttNotification, importId: Int): Boolean? {
+            if (notification.importId != importId) return null
+            return when (notification.action) {
+                MqttAction.EXTERNAL_IMPORT_FINISHED -> true
+                MqttAction.EXTERNAL_IMPORT_ERROR, MqttAction.EXTERNAL_IMPORT_CANCELED -> false
+                else -> null
+            }
+        }
+
         private const val IMPORT_ID_KEY = "import_id_key"
         private const val FILE_NAME_KEY = "file_name_key"
         private const val DEST_DRIVE_ID_KEY = "dest_drive_id_key"
