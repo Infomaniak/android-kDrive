@@ -28,7 +28,6 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.gson.JsonParser
 import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.extensions.lightStatusBar
@@ -48,10 +47,12 @@ import com.infomaniak.drive.ui.fileList.DownloadProgressViewModel.Companion.PROG
 import com.infomaniak.drive.ui.fileList.preview.BitmapPrintDocumentAdapter
 import com.infomaniak.drive.ui.fileList.preview.PDFDocumentAdapter
 import com.infomaniak.drive.utils.PreviewPDFUtils.PasswordProtectedException
+import com.infomaniak.drive.utils.SerializationUtils.getStringOrNull
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntentExceptkDrive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
+import kotlinx.serialization.json.jsonObject
 import okhttp3.Response
 import java.io.BufferedInputStream
 import com.infomaniak.core.network.networking.DefaultHttpClientProvider.okHttpClient as unauthenticatedHttpClient
@@ -203,7 +204,7 @@ suspend fun downloadFile(
         okHttpClient = okHttpClient,
     ).use {
         if (!it.isSuccessful) {
-            val errorCode = JsonParser.parseString(it.bodyAsStringOrNull()).asJsonObject.getAsJsonPrimitive("error").asString
+            val errorCode = SerializationUtils.parseToJsonElement(it.bodyAsStringOrNull().orEmpty()).jsonObject.getStringOrNull("error")
             if (errorCode == "password_protected_error") {
                 throw PasswordProtectedException()
             } else {

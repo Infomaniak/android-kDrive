@@ -22,11 +22,11 @@ import android.os.CountDownTimer
 import androidx.lifecycle.LiveData
 import com.infomaniak.core.legacy.utils.Utils
 import com.infomaniak.core.network.ApiEnvironment
-import com.infomaniak.core.network.api.ApiController.gson
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.models.IpsToken
 import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.utils.BulkOperationsUtils.isBulkOperationActive
+import com.infomaniak.drive.utils.SerializationUtils
 import com.infomaniak.drive.utils.isPositive
 import info.mqtt.android.service.MqttAndroidClient
 import kotlinx.coroutines.CoroutineScope
@@ -162,7 +162,11 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
     }
 
     override fun messageArrived(topic: String?, message: MqttMessage?) {
-        with(gson.fromJson(message.toString(), MqttNotification::class.java)) {
+        val notification = runCatching { SerializationUtils.decodeFromString<MqttNotification>(message.toString()) }
+            .onFailure { SentryLog.e(TAG, "Unable to parse MQTT notification", it) }
+            .getOrNull() ?: return
+
+        with(notification) {
             if (action == null) {
                 val unknownAction = message.toString().substringAfter("\"action\":")
                 SentryLog.e(TAG, "Unknown MQTT action") { scope -> scope.setTag("actionName", unknownAction) }

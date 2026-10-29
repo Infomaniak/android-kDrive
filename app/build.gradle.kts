@@ -196,6 +196,8 @@ dependencies {
     implementation(core.infomaniak.core.ui.view.edgetoedge)
     implementation(core.infomaniak.core.webview)
 
+    implementation(core.kotlinx.serialization.json)
+
     implementation(project(":Core:Legacy"))
 
     // Compose
