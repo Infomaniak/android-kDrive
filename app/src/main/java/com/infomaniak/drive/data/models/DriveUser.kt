@@ -26,14 +26,19 @@ import com.infomaniak.drive.data.models.drive.Drive
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 open class DriveUser(
     @PrimaryKey final override var id: Int = -1,
+    @SerialName("display_name")
     @SerializedName("display_name")
     var displayName: String = "",
     var avatar: String? = "",
     var email: String = "",
+    @SerialName("role")
     @SerializedName("role")
     private var _role: String = "",
     /** Never used */
@@ -61,13 +66,17 @@ open class DriveUser(
     /**
      * Role for [DriveUser] or Role of the current user in [Drive]
      */
+    @Serializable
     enum class Role {
+        @SerialName("admin")
         @SerializedName("admin")
         ADMIN,
 
+        @SerialName("user")
         @SerializedName("user")
         USER,
 
+        @SerialName("external")
         @SerializedName("external")
         EXTERNAL,
 
