@@ -40,7 +40,6 @@ import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_
 import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
 import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.core.notifications.notifyCompat
-import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.ImportProgress
@@ -98,34 +97,30 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         }
         setForegroundAsync(foregroundInfo)
 
-        SentryLog.i("CopyToDrive", "stage=tracking_started")
-
         return CallbackToFutureAdapter.getFuture { completer ->
             timer = createRefreshTimer(milliseconds = COPY_TO_DRIVE_TIMEOUT) {
                 if (!isReconciling && !isFinished.get()) {
                     isReconciling = true
                     scope.launch {
-                        SentryLog.i("CopyToDrive", "stage=reconciliation_started reason=inactivity_timeout")
                         val client = AccountUtils.getHttpClient(userId).newBuilder().cache(null).build()
                         val outcome = reconcileCopyToDrive(importId) { page ->
                             ApiRepository.getExternalImports(destDriveId, page, client)
                         }
-                        finish(completer, outcome, "server_reconciliation")
+                        finish(completer, outcome)
                     }
                 }
             }
             timer.start()
 
-            launchObserver { isSuccess, reason ->
-                finish(completer, if (isSuccess) CopyToDriveOutcome.SUCCESS else CopyToDriveOutcome.FAILURE, reason)
+            launchObserver { isSuccess ->
+                finish(completer, if (isSuccess) CopyToDriveOutcome.SUCCESS else CopyToDriveOutcome.FAILURE)
             }
             if (!isFinished.get()) MqttClientWrapper.start(externalImportId = importId)
         }
     }
 
-    private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, outcome: CopyToDriveOutcome, reason: String) {
+    private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, outcome: CopyToDriveOutcome) {
         if (!isFinished.compareAndSet(false, true)) return
-        SentryLog.i("CopyToDrive", "stage=tracking_finished outcome=${outcome.name} reason=$reason")
         completeCopyToDrive(outcome, ::releaseResources, ::showResultNotification)
         // WorkManager success means monitoring finished, not that the remote transfer succeeded.
         completer.set(Result.success())
@@ -134,7 +129,6 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     override fun onStopped() {
         super.onStopped()
         isFinished.set(true)
-        SentryLog.i("CopyToDrive", "stage=tracking_stopped")
         releaseResources()
     }
 
@@ -147,18 +141,15 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         notificationManagerCompat.cancel(importId)
     }
 
-    private fun launchObserver(onOperationFinished: (isSuccess: Boolean, reason: String) -> Unit) {
+    private fun launchObserver(onOperationFinished: (isSuccess: Boolean) -> Unit) {
         mqttNotificationsObserver = Observer { notification ->
             if (isFinished.get()) return@Observer
-            if (notification.importId != null) {
-                SentryLog.i("CopyToDrive", "stage=tracking_event import_matches=${notification.importId == importId}")
-            }
             if (notification.importId != importId) return@Observer
 
             restartTimeout()
             val terminalResult = terminalImportResult(notification, importId)
             if (terminalResult != null) {
-                onOperationFinished(terminalResult, notification.action!!.name)
+                onOperationFinished(terminalResult)
             } else {
                 notification.importProgress?.let { progress ->
                     notificationManagerCompat.notifyCompat(importId, buildNotification(progress))

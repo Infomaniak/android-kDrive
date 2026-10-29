@@ -97,12 +97,6 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
         completion: () -> Unit = {},
     ) {
         externalImportId?.let { runningExternalImportIds.add(it) }
-        if (externalImportId != null) {
-            SentryLog.i(
-                "CopyToDrive",
-                "stage=mqtt_start connected=${client.isConnected} token_available=${currentToken != null} subscribed=$isSubscribed",
-            )
-        }
 
         // If we are already connected, just run the BulkOperation immediately
         if (client.isConnected) {
@@ -116,9 +110,6 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
             client.connect(options, userContext = null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
                     SentryLog.i("MQTT connection", "Success : true")
-                    if (runningExternalImportIds.isNotEmpty()) {
-                        SentryLog.i("CopyToDrive", "stage=mqtt_connected token_available=${currentToken != null}")
-                    }
                     coroutineScope.launch {
                         currentToken?.let {
                             subscribe(topicFor(it))
@@ -140,37 +131,19 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
                 }
 
                 override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
-                    if (runningExternalImportIds.isNotEmpty()) {
-                        SentryLog.w("CopyToDrive", "stage=mqtt_connection_failed")
-                    }
                     exception?.printStackTrace()
                     SentryLog.i("MQTT connection", "Success : false")
                 }
 
             })
         } catch (e: MqttException) {
-            if (runningExternalImportIds.isNotEmpty()) {
-                SentryLog.w("CopyToDrive", "stage=mqtt_connection_failed")
-            }
             e.printStackTrace()
         }
     }
 
     // QoS 0 to have auto-delete queues
     private fun subscribe(topic: String, qos: Int = 0) {
-        client.subscribe(topic, qos, userContext = null, callback = object : IMqttActionListener {
-            override fun onSuccess(asyncActionToken: IMqttToken?) {
-                if (runningExternalImportIds.isNotEmpty()) {
-                    SentryLog.i("CopyToDrive", "stage=mqtt_subscription outcome=acknowledged")
-                }
-            }
-
-            override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
-                if (runningExternalImportIds.isNotEmpty()) {
-                    SentryLog.w("CopyToDrive", "stage=mqtt_subscription outcome=failed")
-                }
-            }
-        })
+        client.subscribe(topic, qos, userContext = null, callback = null)
         isSubscribed = true
     }
 
@@ -184,32 +157,16 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
     }
 
     override fun connectionLost(cause: Throwable?) {
-        if (runningExternalImportIds.isNotEmpty()) {
-            SentryLog.w("CopyToDrive", "stage=mqtt_connection_lost")
-        }
         SentryLog.i("MQTT Error", "Connection has been lost. Stacktrace below.", cause)
         cause?.printStackTrace()
     }
 
     override fun messageArrived(topic: String?, message: MqttMessage?) {
         val notification = runCatching { SerializationUtils.decodeFromString<MqttNotification>(message.toString()) }
-            .onFailure {
-                val shape = MqttPayloadDiagnostics.describe(message.toString())
-                SentryLog.e(TAG, "Unable to parse MQTT notification: $shape")
-                if (runningExternalImportIds.isNotEmpty()) {
-                    SentryLog.w("CopyToDrive", "stage=mqtt_decode_failed $shape")
-                }
-            }
+            .onFailure { SentryLog.e(TAG, "Unable to parse MQTT notification") }
             .getOrNull() ?: return
 
         with(notification) {
-            if (runningExternalImportIds.isNotEmpty()) {
-                SentryLog.i(
-                    "CopyToDrive",
-                    "stage=mqtt_decoded action=${action?.name ?: "unknown"} import_present=${importId != null} " +
-                            "import_tracked=${importId in runningExternalImportIds} progress_present=${importProgress != null}",
-                )
-            }
             if (action == null) {
                 SentryLog.e(TAG, "Unknown MQTT action")
             }

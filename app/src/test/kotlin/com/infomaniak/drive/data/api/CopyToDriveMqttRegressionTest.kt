@@ -20,7 +20,6 @@ package com.infomaniak.drive.data.api
 import com.infomaniak.drive.data.models.MqttAction
 import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.data.services.CopyToDriveProgressWorker
-import com.infomaniak.drive.data.services.MqttPayloadDiagnostics
 import com.infomaniak.drive.utils.SerializationUtils
 import kotlinx.serialization.MissingFieldException
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -100,18 +99,4 @@ class CopyToDriveMqttRegressionTest {
         }
     }
 
-    @Test
-    fun `MQTT diagnostic reports shapes only including missing metadata and invalid progress`() {
-        val description = MqttPayloadDiagnostics.describe(
-            """{"action":"private-action","import_id":45,"user_id":"private-user","private-field":"private-value",
-                "import_progress":{"total_files":true,"total_errors":"private-error"}}"""
-        )
-        assertTrue(description.contains("uid=missing drive_id=missing action=string"))
-        assertTrue(description.contains("import_id=number_or_literal"))
-        assertTrue(description.contains("import_progress.total_files=boolean"))
-        assertFalse(description.contains("private"))
-        assertFalse(description.contains("45"))
-        assertEquals("payload=invalid_json", MqttPayloadDiagnostics.describe("{"))
-        assertEquals("payload=array", MqttPayloadDiagnostics.describe("[]"))
-    }
 }

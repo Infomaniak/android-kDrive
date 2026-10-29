@@ -21,19 +21,15 @@ import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
-import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.buildShareLinkSettingsJsonElement
 import com.infomaniak.drive.data.services.CopyToDriveOutcome
 import com.infomaniak.drive.data.services.reconcileCopyToDrive
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockkObject
-import io.mockk.Runs
 import io.mockk.spyk
 import io.mockk.unmockkAll
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
@@ -63,7 +59,6 @@ class MigrationJourneyRegressionTest {
     private var responseCode = 200
     private var activeUserId = 101
     private var failTransport = false
-    private val diagnosticMessages = mutableListOf<String>()
 
     @BeforeEach
     fun configureHttp() {
@@ -87,9 +82,6 @@ class MigrationJourneyRegressionTest {
         every { AuthHttpClientProvider.authOkHttpClient } returns client
         mockkObject(HttpUtils)
         every { HttpUtils.getHeaders(any()) } returns Headers.Builder().build()
-        mockkObject(SentryLog)
-        every { SentryLog.i(any(), capture(diagnosticMessages), any()) } just Runs
-        every { SentryLog.w(any(), capture(diagnosticMessages), any()) } just Runs
     }
 
     @AfterEach
@@ -171,8 +163,6 @@ class MigrationJourneyRegressionTest {
         assertEquals("false", response.data!!.single().hasSharedFiles)
         assertEquals("POST", request.method)
         assertTrue(request.url.encodedPath.endsWith("/10/imports/kdrive"))
-        verify { SentryLog.i("CopyToDrive", "stage=request_started", null) }
-        verify { SentryLog.i("CopyToDrive", "stage=response outcome=accepted http_status=200 result=ASYNCHRONOUS", null) }
     }
 
     @Test
@@ -223,56 +213,46 @@ class MigrationJourneyRegressionTest {
         assertEquals("Bearer fixture-user-$sourceUserId", request.header("Authorization"))
         assertEquals(ApiResponseStatus.ERROR, denied.result)
         assertEquals("access_denied", denied.error?.code)
-        verify { SentryLog.w("CopyToDrive", "stage=response outcome=http_error http_status=403 result=ERROR", null) }
 
         // Changing the active login changes the supplied HTTP client's token, not the import request fields.
         activeUserId = destinationUserId
         ApiRepository.copyFileToAnotherDrive(9, "/private-fixture/source.txt", 10, 99)
         assertEquals("Bearer fixture-user-$destinationUserId", request.header("Authorization"))
         assertEquals(JsonPrimitive("9"), requestJson()["application_drive_id"])
-        assertFalse(diagnosticMessages.any { it.contains("fixture-user") || it.contains("source.txt") })
     }
 
     @Test
-    fun `copy diagnostics distinguish decoder failure without forwarding private exception content`() {
+    fun `copy malformed import envelope remains a decoder error`() {
         responseBody = """{"result":"success","data":{"private-fixture":"not an import array"}}"""
         val response = ApiRepository.copyFileToAnotherDrive(9, "/private-fixture/source.txt", 10, 99)
         assertEquals(ApiResponseStatus.ERROR, response.result)
-        verify { SentryLog.w("CopyToDrive", "stage=response outcome=decoder_failure http_status=200 result=ERROR", null) }
-        assertFalse(diagnosticMessages.any { it.contains("private-fixture") || it.contains("fixture-user") })
+        assertNotNull(response.error?.exception)
     }
 
     @Test
-    fun `copy diagnostics identify API error on HTTP success`() {
+    fun `copy preserves API error on HTTP success`() {
         responseBody = """{"result":"error","error":{"code":"access_denied"}}"""
-        ApiRepository.copyFileToAnotherDrive(9, "/private-fixture/source.txt", 10, 99)
-        verify { SentryLog.w("CopyToDrive", "stage=response outcome=api_or_client_error http_status=200 result=ERROR", null) }
+        val response = ApiRepository.copyFileToAnotherDrive(9, "/private-fixture/source.txt", 10, 99)
+        assertEquals(ApiResponseStatus.ERROR, response.result)
+        assertEquals("access_denied", response.error?.code)
     }
 
     @Test
-    fun `copy diagnostics identify transport failure without a received HTTP response`() {
+    fun `copy transport failure remains an error`() {
         failTransport = true
         val response = ApiRepository.copyFileToAnotherDrive(9, "/private-fixture/source.txt", 10, 99)
         assertEquals(ApiResponseStatus.ERROR, response.result)
-        verify { SentryLog.w("CopyToDrive", "stage=response outcome=transport_failure http_status=none result=ERROR", null) }
-        assertFalse(diagnosticMessages.any { it.contains("private-fixture") || it.contains("fixture-user") })
+        assertNotNull(response.error?.exception)
     }
 
     @Test
-    fun `drive init preserves every decoded drive and reports refresh count`() {
+    fun `drive init preserves every decoded drive`() {
         responseBody = """{"result":"success","data":{"ips":{"uuid":"fixture","valid_until":1792675175},
             "drives":[{"id":1,"role":"admin"},{"id":2,"role":"user"},{"id":3,"role":"user"},
             {"id":4,"role":"external"},{"id":5,"role":"none"}]}}"""
         val response = ApiRepository.getAllDrivesData(AuthHttpClientProvider.authOkHttpClient)
         assertTrue(response.isSuccess())
         assertEquals(listOf(1, 2, 3, 4, 5), response.data!!.drives.map { it.id })
-        verify {
-            SentryLog.i(
-                "CopyToDrive",
-                "stage=drive_api_refresh result=SUCCESS data_present=true drive_count=5 failure=none_or_api",
-                null,
-            )
-        }
     }
 
     @Test
@@ -282,13 +262,6 @@ class MigrationJourneyRegressionTest {
         val response = ApiRepository.getAllDrivesData(AuthHttpClientProvider.authOkHttpClient)
         assertEquals(ApiResponseStatus.ERROR, response.result)
         assertEquals(null, response.data)
-        verify {
-            SentryLog.i(
-                "CopyToDrive",
-                "stage=drive_api_refresh result=ERROR data_present=false drive_count=0 failure=decoder",
-                null,
-            )
-        }
     }
 
     @Test

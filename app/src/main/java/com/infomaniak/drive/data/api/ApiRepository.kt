@@ -128,18 +128,7 @@ object ApiRepository : ApiRepositoryCore() {
         okHttpClient: OkHttpClient
     ): ApiResponse<DriveInfo> {
         val url = ApiRoutes.getAllDrivesData()
-        return callApi<ApiResponse<DriveInfo>>(url, GET, okHttpClient = okHttpClient, useKotlinxSerialization = true).also {
-            val failure = when (it.error?.exception) {
-                is kotlinx.serialization.SerializationException -> "decoder"
-                null -> "none_or_api"
-                else -> "client_or_transport"
-            }
-            SentryLog.i(
-                "CopyToDrive",
-                "stage=drive_api_refresh result=${it.result.name} data_present=${it.data != null} " +
-                        "drive_count=${it.data?.drives?.size ?: 0} failure=$failure",
-            )
-        }
+        return callApi(url, GET, okHttpClient = okHttpClient, useKotlinxSerialization = true)
     }
 
     fun getFavoriteFiles(
@@ -353,14 +342,7 @@ object ApiRepository : ApiRepositoryCore() {
             "directory_id" to destinationFolderId,
             "source_path" to sourcePath,
         )
-        val diagnostics = CopyToDriveDiagnostics()
-        val client = AuthHttpClientProvider.authOkHttpClient.newBuilder().apply {
-            interceptors().add(0, diagnostics)
-        }.build()
-        SentryLog.i(CopyToDriveDiagnostics.TAG, "stage=request_started")
-        return callApi<ApiResponse<List<FileExternalImport>>>(
-            ApiRoutes.importKDrive(destinationDriveId), POST, body, okHttpClient = client,
-        ).also(diagnostics::report)
+        return callApi(ApiRoutes.importKDrive(destinationDriveId), POST, body)
     }
 
     suspend fun getExternalImports(

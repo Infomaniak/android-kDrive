@@ -25,7 +25,6 @@ import com.infomaniak.core.common.DynamicLazyMap
 import com.infomaniak.core.common.flowForKey
 import com.infomaniak.core.common.maxElements
 import com.infomaniak.core.common.sharedFlow
-import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Team
@@ -97,13 +96,6 @@ object DriveInfosController {
     }
 
     fun storeDriveInfos(userId: Int, driveInfo: DriveInfo): List<Drive> {
-        SentryLog.i(
-            "CopyToDrive",
-            "stage=drive_cache_input count=${driveInfo.drives.size} " +
-                    "external_count=${driveInfo.drives.count { it.role == DriveUser.Role.EXTERNAL }} " +
-                    "no_role_count=${driveInfo.drives.count { it.role == DriveUser.Role.NONE }} " +
-                    "unknown_role_count=${driveInfo.drives.count { it.role == null }}",
-        )
         val driveList = arrayListOf<Drive>()
         for (drive in driveInfo.drives.filter { drive -> drive.role != DriveUser.Role.NONE }) {
             driveList.initDriveForRealm(drive, userId, sharedWithMe = drive.role == DriveUser.Role.EXTERNAL)
@@ -127,7 +119,6 @@ object DriveInfosController {
             }
         }
 
-        SentryLog.i("CopyToDrive", "stage=drive_cache_written count=${getDrives(userId, sharedWithMe = null).size}")
         return driveRemoved
     }
 
@@ -198,26 +189,7 @@ object DriveInfosController {
 
     fun getEligibleDestinationDrives(userId: Int?, excludedDriveId: Int?, sharedWithMe: Boolean? = null): List<Drive> {
         val drives = getDrives(userId = userId, sharedWithMe = sharedWithMe)
-        return drives.filterEligibleDestinations(excludedDriveId).also { eligible ->
-            if (excludedDriveId != null) {
-                val accountDrives = getDrives(userId = userId, sharedWithMe = null)
-                SentryLog.i(
-                    "CopyToDrive",
-                    "stage=destination_filter account_scoped=${userId != null} " +
-                            "shared_excluded=${sharedWithMe == false} cached_scope_count=${drives.size} " +
-                            "source_count=${drives.count { it.id == excludedDriveId }} " +
-                            "maintenance_count=${drives.count { it.maintenance }} eligible_count=${eligible.size}",
-                )
-                SentryLog.i(
-                    "CopyToDrive",
-                    "stage=destination_account_cache count=${accountDrives.size} " +
-                            "shared_count=${accountDrives.count { it.sharedWithMe }} " +
-                            "external_role_count=${accountDrives.count { it.role == DriveUser.Role.EXTERNAL }} " +
-                            "unknown_role_count=${accountDrives.count { it.role == null }} " +
-                            "maintenance_count=${accountDrives.count { it.maintenance }}",
-                )
-            }
-        }
+        return drives.filterEligibleDestinations(excludedDriveId)
     }
 
     fun hasEligibleDestinationDrives(userId: Int, sharedWithMe: Boolean? = null): Boolean {
