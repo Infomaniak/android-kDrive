@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -105,10 +104,6 @@ class CopyFileToDriveViewModel(val savedStateHandle: SavedStateHandle) : ViewMod
                     userId = userId,
                     excludedDriveId = sourceDriveId,
                     sharedWithMe = false,
-                )
-                SentryLog.i(
-                    "CopyToDrive",
-                    "stage=destination_selection eligible_count=${eligibleDrives.size} switch_enabled=${eligibleDrives.size > 1}",
                 )
                 hasMultipleDrives.emit(eligibleDrives.size > 1)
                 _selectedDrive.emit(eligibleDrives.firstOrNull())
