@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.menu.settings
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.drive.Drive
 
@@ -35,6 +36,10 @@ class SelectDriveViewModel : ViewModel() {
             userId = selectedUserId.value,
             excludedDriveId = excludedDriveId,
             sharedWithMe = if (showSharedWithMe) null else false, // null contains shared with me and non-shared drives
-        )
+        ).also {
+            if (excludedDriveId != null) {
+                SentryLog.i("CopyToDrive", "stage=destination_dialog eligible_count=${it.size}")
+            }
+        }
     }
 }
