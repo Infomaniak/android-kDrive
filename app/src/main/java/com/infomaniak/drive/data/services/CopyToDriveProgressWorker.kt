@@ -42,7 +42,7 @@ import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.ImportProgress
 import com.infomaniak.drive.data.models.MqttAction
 import com.infomaniak.drive.data.models.MqttNotification
@@ -53,6 +53,11 @@ import com.infomaniak.drive.utils.ForegroundInfoExt
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.copyToDriveProgressNotification
 import com.infomaniak.drive.utils.copyToDriveResultMessage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -73,12 +78,16 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     private var destFolderId: Int = 0
     private var mqttNotificationsObserver: Observer<MqttNotification>? = null
     private lateinit var timer: CountDownTimer
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var userId: Int = -1
+    private var isReconciling = false
 
     override fun startWork(): ListenableFuture<Result> {
         importId = inputData.getInt(IMPORT_ID_KEY, 0)
         fileName = inputData.getString(FILE_NAME_KEY).orEmpty()
         destDriveId = inputData.getInt(DEST_DRIVE_ID_KEY, -1)
         destFolderId = inputData.getInt(DEST_FOLDER_ID_KEY, -1)
+        userId = inputData.getInt(USER_ID_KEY, AccountUtils.currentUserId)
 
         val notification = buildNotification(progress = null).apply {
             if (SDK_INT >= 31) foregroundServiceBehavior = Notification.FOREGROUND_SERVICE_IMMEDIATE
@@ -90,34 +99,48 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         setForegroundAsync(foregroundInfo)
 
         SentryLog.i("CopyToDrive", "stage=tracking_started")
-        MqttClientWrapper.start(externalImportId = importId)
 
         return CallbackToFutureAdapter.getFuture { completer ->
             timer = createRefreshTimer(milliseconds = COPY_TO_DRIVE_TIMEOUT) {
-                finish(completer = completer, isSuccess = false, reason = "inactivity_timeout")
+                if (!isReconciling && !isFinished.get()) {
+                    isReconciling = true
+                    scope.launch {
+                        SentryLog.i("CopyToDrive", "stage=reconciliation_started reason=inactivity_timeout")
+                        val client = AccountUtils.getHttpClient(userId).newBuilder().cache(null).build()
+                        val outcome = reconcileCopyToDrive(importId) { page ->
+                            ApiRepository.getExternalImports(destDriveId, page, client)
+                        }
+                        finish(completer, outcome, "server_reconciliation")
+                    }
+                }
             }
             timer.start()
 
-            launchObserver { isSuccess, reason -> finish(completer, isSuccess, reason) }
+            launchObserver { isSuccess, reason ->
+                finish(completer, if (isSuccess) CopyToDriveOutcome.SUCCESS else CopyToDriveOutcome.FAILURE, reason)
+            }
+            if (!isFinished.get()) MqttClientWrapper.start(externalImportId = importId)
         }
     }
 
-    private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, isSuccess: Boolean, reason: String) {
+    private fun finish(completer: CallbackToFutureAdapter.Completer<Result>, outcome: CopyToDriveOutcome, reason: String) {
         if (!isFinished.compareAndSet(false, true)) return
-        SentryLog.i("CopyToDrive", "stage=tracking_finished transfer_success=$isSuccess reason=$reason")
+        SentryLog.i("CopyToDrive", "stage=tracking_finished outcome=${outcome.name} reason=$reason")
         releaseResources()
-        showResultNotification(isSuccess)
+        showResultNotification(outcome)
         // WorkManager success means monitoring finished, not that the remote transfer succeeded.
         completer.set(Result.success())
     }
 
     override fun onStopped() {
         super.onStopped()
+        isFinished.set(true)
         SentryLog.i("CopyToDrive", "stage=tracking_stopped")
         releaseResources()
     }
 
     private fun releaseResources() {
+        scope.cancel()
         if (::timer.isInitialized) timer.cancel()
         mqttNotificationsObserver?.let { MqttClientWrapper.removeObserver(it) }
         mqttNotificationsObserver = null
@@ -127,6 +150,7 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
 
     private fun launchObserver(onOperationFinished: (isSuccess: Boolean, reason: String) -> Unit) {
         mqttNotificationsObserver = Observer { notification ->
+            if (isFinished.get()) return@Observer
             if (notification.importId != null) {
                 SentryLog.i("CopyToDrive", "stage=tracking_event import_matches=${notification.importId == importId}")
             }
@@ -147,27 +171,30 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     }
 
     private fun restartTimeout() {
+        if (isReconciling) return
         timer.cancel()
         timer.start()
     }
 
 
-    private fun showResultNotification(isSuccess: Boolean) {
-        val description = applicationContext.copyToDriveResultMessage(isSuccess, fileName)
+    private fun showResultNotification(outcome: CopyToDriveOutcome) {
+        val description = when (outcome) {
+            CopyToDriveOutcome.UNKNOWN -> applicationContext.getString(R.string.copyToDriveStatusUnknown)
+            else -> applicationContext.copyToDriveResultMessage(outcome == CopyToDriveOutcome.SUCCESS, fileName)
+        }
         val builder = applicationContext.buildGeneralNotification(
             title = applicationContext.getString(R.string.buttonCopyToDrive),
             description = description,
         ).apply {
             setAutoCancel(true)
-            if (isSuccess) setContentIntent(destinationPendingIntent())
+            if (outcome != CopyToDriveOutcome.FAILURE) setContentIntent(destinationPendingIntent())
         }
         notificationManagerCompat.notifyCompat(resultNotificationId, builder)
     }
 
     private fun destinationPendingIntent(): PendingIntent {
-        val destUserId = DriveInfosController.getDrive(driveId = destDriveId)?.userId ?: AccountUtils.currentUserId
         val args = LaunchActivityArgs(
-            destinationUserId = destUserId,
+            destinationUserId = userId,
             destinationDriveId = destDriveId,
             destinationRemoteFolderId = destFolderId,
         )
@@ -199,6 +226,7 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         private const val FILE_NAME_KEY = "file_name_key"
         private const val DEST_DRIVE_ID_KEY = "dest_drive_id_key"
         private const val DEST_FOLDER_ID_KEY = "dest_folder_id_key"
+        private const val USER_ID_KEY = "user_id_key"
         private const val COPY_TO_DRIVE_TIMEOUT = 30_000L
 
         fun scheduleWork(context: Context, importId: Int, fileName: String, destDriveId: Int, destFolderId: Int) {
@@ -211,6 +239,7 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
                         FILE_NAME_KEY to fileName,
                         DEST_DRIVE_ID_KEY to destDriveId,
                         DEST_FOLDER_ID_KEY to destFolderId,
+                        USER_ID_KEY to AccountUtils.currentUserId,
                     )
                 )
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())

@@ -363,6 +363,13 @@ object ApiRepository : ApiRepositoryCore() {
         ).also(diagnostics::report)
     }
 
+    suspend fun getExternalImports(
+        driveId: Int,
+        page: Int,
+        okHttpClient: OkHttpClient,
+    ): ApiResponse<List<FileExternalImport>> =
+        callApiSuspend(ApiRoutes.getExternalImports(driveId, page), GET, okHttpClient = okHttpClient)
+
     fun moveFile(file: File, newParent: File): ApiResponse<CancellableAction> {
         return callApi(ApiRoutes.moveFile(file, newParent.id), POST, useKotlinxSerialization = true)
     }
