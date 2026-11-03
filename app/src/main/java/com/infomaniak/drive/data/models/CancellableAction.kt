@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -28,10 +27,8 @@ import kotlinx.serialization.Transient as KotlinxTransient
 @Parcelize
 data class CancellableAction(
     @SerialName("cancel_id")
-    @SerializedName("cancel_id")
     val cancelId: String = "",
     @SerialName("cancel_valid_until")
-    @SerializedName("cancel_valid_until")
     val cancelValidUntil: Long = 0,
     @KotlinxTransient
     @kotlin.jvm.Transient

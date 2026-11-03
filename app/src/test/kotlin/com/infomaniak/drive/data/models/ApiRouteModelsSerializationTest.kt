@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.models
 
-import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.drive.data.models.drive.Category
@@ -80,27 +79,17 @@ class ApiRouteModelsSerializationTest {
         assertEquals(0, action.driveId)
         assertEquals(9, action.setDriveAndReturn(9).driveId)
 
-        val gsonAction = ApiController.gson.fromJson(wireData, CancellableAction::class.java)
-        assertEquals("abc", gsonAction.cancelId)
-        assertEquals(1_792_675_175L, gsonAction.cancelValidUntil)
-
-        val kotlinxJson = ApiController.json.parseToJsonElement(SerializationUtils.encodeToString(action)).jsonObject
-        val gsonJson = ApiController.gson.toJsonTree(gsonAction).asJsonObject
+        val kotlinxJson = SerializationUtils.parseToJsonElement(SerializationUtils.encodeToString(action)).jsonObject
         assertEquals("1792675175", kotlinxJson["cancel_valid_until"]?.jsonPrimitive?.content)
         assertFalse(kotlinxJson.containsKey("valid_until"))
-        assertEquals(1_792_675_175L, gsonJson["cancel_valid_until"].asLong)
-        assertFalse(gsonJson.has("valid_until"))
     }
 
     @Test
     fun `does not serialize or decode the local drive id`() {
         val action = CancellableAction("abc", 1_792_675_175L, driveId = 9)
 
-        val kotlinxJson = ApiController.json.parseToJsonElement(SerializationUtils.encodeToString(action))
-        val gsonJson = ApiController.gson.toJsonTree(action).asJsonObject
-
+        val kotlinxJson = SerializationUtils.parseToJsonElement(SerializationUtils.encodeToString(action))
         assertNull(kotlinxJson.jsonObject["driveId"])
-        assertFalse(gsonJson.has("driveId"))
 
         val decoded = SerializationUtils.decodeFromString<CancellableAction>(
             """{"cancel_id":"abc","cancel_valid_until":1792675175,"driveId":9}"""
