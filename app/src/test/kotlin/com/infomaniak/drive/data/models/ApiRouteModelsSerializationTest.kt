@@ -23,6 +23,7 @@ import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.utils.SerializationUtils
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -82,6 +83,13 @@ class ApiRouteModelsSerializationTest {
         val gsonAction = ApiController.gson.fromJson(wireData, CancellableAction::class.java)
         assertEquals("abc", gsonAction.cancelId)
         assertEquals(1_792_675_175L, gsonAction.cancelValidUntil)
+
+        val kotlinxJson = ApiController.json.parseToJsonElement(SerializationUtils.encodeToString(action)).jsonObject
+        val gsonJson = ApiController.gson.toJsonTree(gsonAction).asJsonObject
+        assertEquals("1792675175", kotlinxJson["cancel_valid_until"]?.jsonPrimitive?.content)
+        assertFalse(kotlinxJson.containsKey("valid_until"))
+        assertEquals(1_792_675_175L, gsonJson["cancel_valid_until"].asLong)
+        assertFalse(gsonJson.has("valid_until"))
     }
 
     @Test
