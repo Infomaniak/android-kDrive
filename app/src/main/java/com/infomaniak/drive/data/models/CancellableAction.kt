@@ -22,6 +22,7 @@ import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient as KotlinxTransient
 
 @Serializable
 @Parcelize
@@ -32,6 +33,8 @@ data class CancellableAction(
     @SerialName("cancel_valid_until")
     @SerializedName("cancel_valid_until")
     val cancelValidUntil: Long,
+    @KotlinxTransient
+    @kotlin.jvm.Transient
     var driveId: Int = 0
 ) : Parcelable {
 

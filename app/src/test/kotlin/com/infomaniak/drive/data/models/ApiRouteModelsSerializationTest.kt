@@ -17,10 +17,12 @@
  */
 package com.infomaniak.drive.data.models
 
+import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.utils.SerializationUtils
+import kotlinx.serialization.json.jsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -69,14 +71,33 @@ class ApiRouteModelsSerializationTest {
     }
 
     @Test
-    fun `decodes cancellable action and defaults the local drive id`() {
-        val action = decode<CancellableAction>(
-            """{"result":"success","data":{"cancel_id":"abc","cancel_valid_until":1792675175}}"""
-        ).data!!
+    fun `decodes cancellable action with the existing wire names and defaults the local drive id`() {
+        val wireData = """{"cancel_id":"abc","cancel_valid_until":1792675175}"""
+        val action = decode<CancellableAction>("""{"result":"success","data":$wireData}""").data!!
         assertEquals("abc", action.cancelId)
         assertEquals(1_792_675_175L, action.cancelValidUntil)
         assertEquals(0, action.driveId)
         assertEquals(9, action.setDriveAndReturn(9).driveId)
+
+        val gsonAction = ApiController.gson.fromJson(wireData, CancellableAction::class.java)
+        assertEquals("abc", gsonAction.cancelId)
+        assertEquals(1_792_675_175L, gsonAction.cancelValidUntil)
+    }
+
+    @Test
+    fun `does not serialize or decode the local drive id`() {
+        val action = CancellableAction("abc", 1_792_675_175L, driveId = 9)
+
+        val kotlinxJson = ApiController.json.parseToJsonElement(SerializationUtils.encodeToString(action))
+        val gsonJson = ApiController.gson.toJsonTree(action).asJsonObject
+
+        assertNull(kotlinxJson.jsonObject["driveId"])
+        assertFalse(gsonJson.has("driveId"))
+
+        val decoded = SerializationUtils.decodeFromString<CancellableAction>(
+            """{"cancel_id":"abc","cancel_valid_until":1792675175,"driveId":9}"""
+        )
+        assertEquals(0, decoded.driveId)
     }
 
     @Test
