@@ -40,6 +40,7 @@ import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_
 import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
 import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.core.notifications.notifyCompat
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.ImportProgress
@@ -53,10 +54,12 @@ import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.copyToDriveProgressNotification
 import com.infomaniak.drive.utils.copyToDriveResultMessage
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -77,7 +80,7 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     private var destFolderId: Int = 0
     private var mqttNotificationsObserver: Observer<MqttNotification>? = null
     private lateinit var timer: CountDownTimer
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var userId: Int = -1
     private var isReconciling = false
 
@@ -102,11 +105,23 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
                 if (!isReconciling && !isFinished.get()) {
                     isReconciling = true
                     scope.launch {
-                        val client = AccountUtils.getHttpClient(userId).newBuilder().cache(null).build()
-                        val outcome = reconcileCopyToDrive(importId) { page ->
-                            ApiRepository.getExternalImports(destDriveId, page, client)
+                        val outcome = try {
+                            val client = AccountUtils.getHttpClient(userId).newBuilder().cache(null).build()
+                            reconcileCopyToDrive(
+                                importId = importId,
+                                onException = { SentryLog.w("CopyToDrive", "Could not reconcile copy status") },
+                            ) { page ->
+                                ApiRepository.getExternalImports(destDriveId, page, client)
+                            }
+                        } catch (cancellationException: CancellationException) {
+                            throw cancellationException
+                        } catch (_: Exception) {
+                            SentryLog.w("CopyToDrive", "Could not reconcile copy status")
+                            CopyToDriveOutcome.UNKNOWN
                         }
-                        finish(completer, outcome)
+                        withContext(Dispatchers.Main.immediate) {
+                            finish(completer, outcome)
+                        }
                     }
                 }
             }

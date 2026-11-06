@@ -32,7 +32,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.SHARE_URL_V1
 import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
-import com.infomaniak.drive.data.api.publicshare.PublicShareToken
 import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderArgs
 import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderResult
 import com.infomaniak.drive.data.models.ArchiveUUID
@@ -50,6 +49,8 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+
+internal fun ApiResponse<Boolean>.isPublicSharePasswordAccepted(): Boolean = isSuccess() && data == true
 
 class PublicShareViewModel(application: Application, val savedStateHandle: SavedStateHandle) : AndroidViewModel(application) {
 
@@ -96,8 +97,8 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         super.onCleared()
     }
 
-    fun initPublicShare(authToken: String? = null) = viewModelScope.launch {
-        val apiResponse = PublicShareApiRepository.getPublicShareInfo(driveId, publicShareUuid, authToken)
+    fun initPublicShare() = viewModelScope.launch {
+        val apiResponse = PublicShareApiRepository.getPublicShareInfo(driveId, publicShareUuid)
         initPublicShareResult.postValue(apiResponse)
     }
 
@@ -110,8 +111,8 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
 
         val result = when {
             !apiResponse.isSuccess() -> PublicShareSubmitPasswordResult.Error.ApiError(apiResponse.translateError())
-            apiResponse.data?.token.isNullOrBlank() -> PublicShareSubmitPasswordResult.Error.Unknown
-            else -> PublicShareSubmitPasswordResult.ValidPassword(authToken = (apiResponse.data as PublicShareToken).token)
+            !apiResponse.isPublicSharePasswordAccepted() -> PublicShareSubmitPasswordResult.Error.Unknown
+            else -> PublicShareSubmitPasswordResult.ValidPassword
         }
 
         submitPasswordResult.postValue(result)
@@ -139,7 +140,6 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
             destinationFolderId = destinationFolderId,
             fileIds = fileIds,
             exceptedFileIds = exceptedFileIds,
-            authToken = submitPasswordResult.value?.takeToken(),
         )
         val error = if (apiResponse.isSuccess()) null else apiResponse.translateError()
         val destinationPath = "$SHARE_URL_V1/drive/$destinationDriveId/files/$destinationFolderId"
@@ -156,7 +156,6 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
             driveId = driveId,
             linkUuid = publicShareUuid,
             archiveBody = archiveBody,
-            authToken = submitPasswordResult.value?.takeToken(),
         )
         val result = apiResponse.data?.let { archiveUuid -> null to archiveUuid } ?: (apiResponse.translateError() to null)
 
@@ -236,7 +235,6 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
                 driveId = driveId,
                 linkUuid = publicShareUuid,
                 fileId = rootFileId,
-                authToken = submitPasswordResult.value?.takeToken(),
             )
             if (!apiResponse.isSuccess()) SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
             apiResponse.data
@@ -244,7 +242,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
 
         val publicShareFile = file?.apply {
             publicShareUuid = this@PublicShareViewModel.publicShareUuid
-            publicShareAuthToken = submitPasswordResult.value?.takeToken()
+            publicShareAuthToken = null
         }
         rootSharedFile.postValue(publicShareFile)
     }
@@ -256,7 +254,6 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
             folderId = folderFilesProviderArgs.folderId,
             sortType = folderFilesProviderArgs.order,
             cursor = currentCursor,
-            authToken = submitPasswordResult.value?.takeToken(),
         ).let {
             CursorApiResponse(
                 result = it.result,
@@ -293,7 +290,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     private fun List<File>.addPublicShareInfo() = map {
         it.apply {
             publicShareUuid = this@PublicShareViewModel.publicShareUuid
-            publicShareAuthToken = submitPasswordResult.value?.takeToken()
+            publicShareAuthToken = null
         }
     }
 
@@ -311,9 +308,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
 
     sealed interface PublicShareSubmitPasswordResult {
 
-        fun takeToken() = (this as? ValidPassword)?.authToken?.takeIf(String::isNotBlank)
-
-        data class ValidPassword(val authToken: String) : PublicShareSubmitPasswordResult
+        data object ValidPassword : PublicShareSubmitPasswordResult
 
         sealed class Error(@StringRes open val errorRes: Int) : PublicShareSubmitPasswordResult {
             data class ApiError(override val errorRes: Int) : Error(errorRes)

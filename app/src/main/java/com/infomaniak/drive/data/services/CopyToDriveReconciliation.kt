@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.services
 
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.drive.data.models.file.FileExternalImport
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withTimeoutOrNull
 
 internal enum class CopyToDriveOutcome { SUCCESS, FAILURE, UNKNOWN }
@@ -40,23 +41,33 @@ internal fun completeCopyToDrive(
 internal suspend fun reconcileCopyToDrive(
     importId: Int,
     timeoutMillis: Long = 30_000L,
+    onException: (Exception) -> Unit = {},
     loadPage: suspend (Int) -> ApiResponse<List<FileExternalImport>>,
-): CopyToDriveOutcome = withTimeoutOrNull(timeoutMillis) {
-    var page = 1
-    while (true) {
-        val response = loadPage(page)
-        if (!response.isSuccess()) return@withTimeoutOrNull CopyToDriveOutcome.UNKNOWN
-        val imports = response.data ?: return@withTimeoutOrNull CopyToDriveOutcome.UNKNOWN
-        val matchingImport = imports.firstOrNull { it.id == importId }
-        if (matchingImport != null) {
-            return@withTimeoutOrNull when (matchingImport.status) {
-                "done" -> CopyToDriveOutcome.SUCCESS
-                "failed", "canceled" -> CopyToDriveOutcome.FAILURE
-                else -> CopyToDriveOutcome.UNKNOWN
+): CopyToDriveOutcome {
+    return try {
+        withTimeoutOrNull(timeoutMillis) {
+            var page = 1
+            while (true) {
+                val response = loadPage(page)
+                if (!response.isSuccess()) return@withTimeoutOrNull CopyToDriveOutcome.UNKNOWN
+                val imports = response.data ?: return@withTimeoutOrNull CopyToDriveOutcome.UNKNOWN
+                val matchingImport = imports.firstOrNull { it.id == importId }
+                if (matchingImport != null) {
+                    return@withTimeoutOrNull when (matchingImport.status) {
+                        "done" -> CopyToDriveOutcome.SUCCESS
+                        "failed", "canceled" -> CopyToDriveOutcome.FAILURE
+                        else -> CopyToDriveOutcome.UNKNOWN
+                    }
+                }
+                if (imports.isEmpty() || page >= response.pages) break
+                page++
             }
-        }
-        if (imports.isEmpty() || page >= response.pages) break
-        page++
+            CopyToDriveOutcome.UNKNOWN
+        } ?: CopyToDriveOutcome.UNKNOWN
+    } catch (cancellationException: CancellationException) {
+        throw cancellationException
+    } catch (exception: Exception) {
+        onException(exception)
+        CopyToDriveOutcome.UNKNOWN
     }
-    CopyToDriveOutcome.UNKNOWN
-} ?: CopyToDriveOutcome.UNKNOWN
+}

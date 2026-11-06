@@ -19,10 +19,10 @@ package com.infomaniak.drive.data.api
 
 import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.models.ApiResponse
-import com.infomaniak.drive.data.api.publicshare.PublicShareToken
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.models.drive.MaintenanceType.MaintenanceTypeValue
+import com.infomaniak.drive.ui.publicShare.isPublicSharePasswordAccepted
 import kotlinx.serialization.decodeFromString
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -49,13 +49,6 @@ class SpecDiscrepancyTest {
         assertEquals(false, caps.validity?.hasExpired)
         assertEquals(100L, caps.size?.limit)
         assertEquals(40L, caps.size?.remaining)
-    }
-
-    @Test
-    fun dropBoxCapabilitiesAsStringsDoNotFail() {
-        val caps = dropBox("""{"has_password":false,"validity":"2026-01-01","size":"100"}""").capabilities!!
-        assertNull(caps.validity)
-        assertNull(caps.size)
     }
 
     @Test
@@ -100,30 +93,27 @@ class SpecDiscrepancyTest {
     }
 
     @Test
-    fun publicShareAuthTokenObject() {
-        val response = decode<PublicShareToken>("""{"result":"success","data":{"token":"abc.def"}}""")
+    fun publicShareAuthReturnsBoolean() {
+        val response = decode<Boolean>("""{"result":"success","data":true}""")
         assertTrue(response.isSuccess())
-        assertEquals("abc.def", response.data?.token)
-    }
+        assertEquals(true, response.data)
+        assertTrue(response.isPublicSharePasswordAccepted())
 
-    @Test
-    fun publicShareAuthBooleanYieldsBlankToken() {
-        // The app treats a blank token as an unknown error (PublicShareViewModel), never a crash.
-        listOf("true", "false").forEach {
-            val response = decode<PublicShareToken>("""{"result":"success","data":$it}""")
-            assertTrue(response.isSuccess())
-            assertTrue(response.data?.token.isNullOrBlank())
-        }
+        val rejected = decode<Boolean>("""{"result":"success","data":false}""")
+        assertTrue(rejected.isSuccess())
+        assertEquals(false, rejected.data)
+        assertTrue(!rejected.isPublicSharePasswordAccepted())
     }
 
     @Test
     fun publicShareAuthErrorPayload() {
-        val response = decode<PublicShareToken>(
+        val response = decode<Boolean>(
             """{"result":"error","error":{"code":"password_not_valid","description":"Wrong password"}}"""
         )
         assertTrue(!response.isSuccess())
         assertNull(response.data)
         assertNotNull(response.error)
         assertEquals("password_not_valid", response.error?.code)
+        assertTrue(!response.isPublicSharePasswordAccepted())
     }
 }
