@@ -20,11 +20,15 @@ package com.infomaniak.drive.data.models.drive
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @RealmClass(embedded = true)
 open class DriveAccount(
     var id: Int = 0,
     var name: String = "",
+    @SerialName("legal_entity_type")
     @SerializedName("legal_entity_type")
     private var _legalEntityType: String = LegalEntityType.UNKNOWN.value
 ) : RealmObject() {
