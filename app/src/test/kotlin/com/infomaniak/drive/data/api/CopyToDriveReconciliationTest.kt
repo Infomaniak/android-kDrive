@@ -28,6 +28,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
+import java.io.IOException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -123,6 +124,20 @@ class CopyToDriveReconciliationTest {
             CopyToDriveOutcome.UNKNOWN,
             reconcileCopyToDrive(45, timeoutMillis = 20) { awaitCancellation() },
         )
+    }
+
+    @Test
+    fun `status lookup exception leaves outcome unknown instead of leaving tracking unresolved`() = runBlocking {
+        var reportedException: Exception? = null
+        assertEquals(
+            CopyToDriveOutcome.UNKNOWN,
+            reconcileCopyToDrive(
+                importId = 45,
+                onException = { reportedException = it },
+                loadPage = { _: Int -> throw IOException("synthetic transport failure") },
+            ),
+        )
+        assertEquals(IOException::class.java, reportedException?.javaClass)
     }
 
     @Test

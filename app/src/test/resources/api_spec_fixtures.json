@@ -444,7 +444,7 @@
 "json": "{\"result\":\"success\",\"data\":{\"url\":\"str\",\"file_id\":7,\"right\":\"inherit\",\"valid_until\":7,\"created_by\":7,\"created_at\":7,\"updated_at\":7,\"capabilities\":{\"can_edit\":true,\"can_see_stats\":true,\"can_see_info\":true,\"can_download\":true,\"can_comment\":true,\"can_request_access\":true},\"access_blocked\":true,\"views\":null}}"
 },
 {
-"model": "PublicShareToken",
+"model": "Boolean",
 "route": "POST /2/app/{drive_id}/share/{sharelink_uuid}/auth",
 "variant": "full",
 "json": "{\"result\":\"success\",\"data\":true}"

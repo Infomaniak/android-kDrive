@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.api
 
 import com.infomaniak.core.network.models.ApiResponse
-import com.infomaniak.drive.data.api.publicshare.PublicShareToken
 import com.infomaniak.drive.data.models.ArchiveUUID
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.DropBox
@@ -83,7 +82,6 @@ class ApiSpecCompatibilityTest {
         "ArchiveUUID" to { SerializationUtils.decodeFromString<ApiResponse<ArchiveUUID>>(it) },
         "FileExternalImports" to { SerializationUtils.decodeFromString<ApiResponse<List<FileExternalImport>>>(it) },
         "PublicShareImport" to { SerializationUtils.decodeFromString<ApiResponse<List<FileExternalImport>>>(it) },
-        "PublicShareToken" to { SerializationUtils.decodeFromString<ApiResponse<PublicShareToken>>(it) },
         "Invitations" to { SerializationUtils.decodeFromString<ApiResponse<ArrayList<Invitation>>>(it) },
         "Boolean" to { SerializationUtils.decodeFromString<ApiResponse<Boolean>>(it) },
     )

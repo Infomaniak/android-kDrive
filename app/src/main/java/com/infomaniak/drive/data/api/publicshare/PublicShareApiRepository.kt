@@ -50,7 +50,7 @@ object PublicShareApiRepository {
         )
     }
 
-    suspend fun submitPublicSharePassword(driveId: Int, linkUuid: String, password: String): ApiResponse<PublicShareToken> {
+    suspend fun submitPublicSharePassword(driveId: Int, linkUuid: String, password: String): ApiResponse<Boolean> {
         return callPublicShareApi(
             url = ApiRoutes.submitPublicSharePassword(driveId, linkUuid),
             method = POST,
