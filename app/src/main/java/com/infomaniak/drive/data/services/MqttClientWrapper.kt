@@ -163,13 +163,12 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
 
     override fun messageArrived(topic: String?, message: MqttMessage?) {
         val notification = runCatching { SerializationUtils.decodeFromString<MqttNotification>(message.toString()) }
-            .onFailure { SentryLog.e(TAG, "Unable to parse MQTT notification", it) }
+            .onFailure { SentryLog.e(TAG, "Unable to parse MQTT notification") }
             .getOrNull() ?: return
 
         with(notification) {
             if (action == null) {
-                val unknownAction = message.toString().substringAfter("\"action\":")
-                SentryLog.e(TAG, "Unknown MQTT action") { scope -> scope.setTag("actionName", unknownAction) }
+                SentryLog.e(TAG, "Unknown MQTT action")
             }
 
             if (isImportTerminated()) runningExternalImportIds.remove(importId)

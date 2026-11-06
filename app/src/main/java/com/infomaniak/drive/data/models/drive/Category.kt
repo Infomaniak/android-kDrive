@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.models.drive
 
-import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import com.infomaniak.drive.utils.serialization.ApiTimestampDateSerializer
@@ -32,13 +31,10 @@ open class Category(
     var color: String = "#000000",
     @Serializable(with = ApiTimestampDateSerializer::class)
     @SerialName("created_at")
-    @SerializedName("created_at")
     var createdAt: Date = Date(),
     @SerialName("is_predefined")
-    @SerializedName("is_predefined")
     var isPredefined: Boolean = true,
     var name: String = "",
     @SerialName("user_usage_count")
-    @SerializedName("user_usage_count")
     var userUsageCount: Int = 0,
 ) : RealmObject()

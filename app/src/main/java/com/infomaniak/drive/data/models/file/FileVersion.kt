@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.models.file
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import kotlinx.parcelize.Parcelize
@@ -30,10 +29,8 @@ import kotlinx.serialization.Serializable
 @RealmClass(embedded = true)
 open class FileVersion(
     @SerialName("is_multiple")
-    @SerializedName("is_multiple")
     var isMultiple: Boolean = false,
     var number: Int = 0,
     @SerialName("total_size")
-    @SerializedName("total_size")
     var totalSize: Long = 0,
 ) : RealmObject(), Parcelable
