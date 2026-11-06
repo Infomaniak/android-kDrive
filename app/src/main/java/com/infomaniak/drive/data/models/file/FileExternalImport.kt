@@ -33,7 +33,7 @@ open class FileExternalImport(
     var status: String = "",
     var path: String = "",
     @SerializedName("directory_id")
-    var directoryId: Int = 0,
+    var directoryId: Int? = null,
     @SerializedName("has_shared_files")
     var hasSharedFiles: String = "",
     @SerializedName("created_at")
@@ -45,6 +45,9 @@ open class FileExternalImport(
     @SerializedName("count_failed_files")
     var countFailedFiles: Int = 0,
 ) : RealmObject(), Parcelable {
+
+    fun destinationDirectoryIdOr(fallbackDirectoryId: Int): Int =
+        directoryId?.takeIf { it > 0 } ?: fallbackDirectoryId
 
     enum class FileExternalImportStatus(val value: String) {
         WAITING("waiting"),
