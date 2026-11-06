@@ -24,6 +24,8 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build.VERSION.SDK_INT
 import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -53,10 +55,9 @@ import com.infomaniak.drive.utils.ForegroundInfoExt
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.copyToDriveProgressNotification
 import com.infomaniak.drive.utils.copyToDriveResultMessage
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -80,7 +81,8 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
     private var destFolderId: Int = 0
     private var mqttNotificationsObserver: Observer<MqttNotification>? = null
     private lateinit var timer: CountDownTimer
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val scope = CoroutineScope(Dispatchers.Default)
+    private val mainHandler = Handler(Looper.getMainLooper())
     private var userId: Int = -1
     private var isReconciling = false
 
@@ -101,6 +103,15 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
         setForegroundAsync(foregroundInfo)
 
         return CallbackToFutureAdapter.getFuture { completer ->
+            completer.addCancellationListener(
+                {
+                    if (isFinished.compareAndSet(false, true)) {
+                        scope.cancel()
+                        mainHandler.post { releaseResources() }
+                    }
+                },
+                { command -> command.run() },
+            )
             timer = createRefreshTimer(milliseconds = COPY_TO_DRIVE_TIMEOUT) {
                 if (!isReconciling && !isFinished.get()) {
                     isReconciling = true
@@ -110,6 +121,9 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
                             reconcileCopyToDrive(
                                 importId = importId,
                                 onException = { SentryLog.w("CopyToDrive", "Could not reconcile copy status") },
+                                onMissingData = {
+                                    SentryLog.e("CopyToDrive", "External imports API returned success without data")
+                                },
                             ) { page ->
                                 ApiRepository.getExternalImports(destDriveId, page, client)
                             }
@@ -121,6 +135,17 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
                         }
                         withContext(Dispatchers.Main.immediate) {
                             finish(completer, outcome)
+                        }
+                    }.invokeOnCompletion { cause ->
+                        // Covers cancellation before launch or during the main-thread handoff, too.
+                        if (cause != null) {
+                            failCopyToDriveTracking(
+                                isFinished = isFinished,
+                                isStopped = isStopped,
+                                cause = cause,
+                                releaseResources = { mainHandler.post { releaseResources() } },
+                                setException = { completer.setException(it) },
+                            )
                         }
                     }
                 }
@@ -143,8 +168,10 @@ class CopyToDriveProgressWorker(context: Context, workerParams: WorkerParameters
 
     override fun onStopped() {
         super.onStopped()
-        isFinished.set(true)
-        releaseResources()
+        if (isFinished.compareAndSet(false, true)) {
+            scope.cancel()
+            mainHandler.post { releaseResources() }
+        }
     }
 
     private fun releaseResources() {

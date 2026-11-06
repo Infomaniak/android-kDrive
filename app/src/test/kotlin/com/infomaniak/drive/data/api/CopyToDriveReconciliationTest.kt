@@ -17,19 +17,29 @@
  */
 package com.infomaniak.drive.data.api
 
+import androidx.concurrent.futures.CallbackToFutureAdapter
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.services.CopyToDriveOutcome
 import com.infomaniak.drive.data.services.completeCopyToDrive
+import com.infomaniak.drive.data.services.failCopyToDriveTracking
 import com.infomaniak.drive.data.services.reconcileCopyToDrive
 import com.infomaniak.drive.utils.SerializationUtils
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
 import java.io.IOException
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertSame
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class CopyToDriveReconciliationTest {
@@ -138,6 +148,118 @@ class CopyToDriveReconciliationTest {
             ),
         )
         assertEquals(IOException::class.java, reportedException?.javaClass)
+    }
+
+    @Test
+    fun `successful response without data is reported but empty lists and API errors are not`() = runBlocking {
+        listOf(
+            """{"result":"success"}""" to 1,
+            """{"result":"success","data":null}""" to 1,
+            """{"result":"success","data":[]}""" to 0,
+            """{"result":"error","error":{"code":"access_denied"}}""" to 0,
+        ).forEach { (json, expectedReports) ->
+            var reports = 0
+            assertEquals(
+                CopyToDriveOutcome.UNKNOWN,
+                reconcileCopyToDrive(45, onMissingData = { reports++ }) { response(json) },
+            )
+            assertEquals(expectedReports, reports)
+        }
+    }
+
+    @Test
+    fun `external cancellation completes the future exceptionally and cleans up exactly once`() = runBlocking {
+        listOf(CoroutineStart.DEFAULT, CoroutineStart.LAZY).forEach { start ->
+            val isFinished = AtomicBoolean(false)
+            val cancellation = CancellationException("external cancellation")
+            var cleanups = 0
+            val job = launch(start = start) { reconcileCopyToDrive(45) { awaitCancellation() } }
+            val future = CallbackToFutureAdapter.getFuture<Unit> { completer ->
+                job.invokeOnCompletion { cause ->
+                    if (cause != null) {
+                        failCopyToDriveTracking(
+                            isFinished, false, cause,
+                            releaseResources = { cleanups++ },
+                            setException = { completer.setException(it) },
+                        )
+                    }
+                }
+                "copy tracking"
+            }
+            yield()
+            job.cancel(cancellation)
+            job.join()
+            val failure = assertThrows(ExecutionException::class.java) { future.get(1, TimeUnit.SECONDS) }
+            assertSame(cancellation, failure.cause)
+            failCopyToDriveTracking(isFinished, false, cancellation, { cleanups++ }, { error("completed twice") })
+            assertEquals(1, cleanups)
+        }
+    }
+
+    @Test
+    fun `worker owned cancellation suppresses exceptional completion of active reconciliation`() = runBlocking {
+        val isFinished = AtomicBoolean(false)
+        var stopped = false
+        var completions = 0
+        val job = launch { reconcileCopyToDrive(45) { awaitCancellation() } }
+        job.invokeOnCompletion { cause ->
+            if (cause != null) {
+                failCopyToDriveTracking(
+                    isFinished, stopped, cause,
+                    releaseResources = { error("worker already cleaned up") },
+                    setException = { completions++ },
+                )
+            }
+        }
+        yield()
+        stopped = true
+        isFinished.set(true)
+        job.cancelAndJoin()
+        assertEquals(0, completions)
+    }
+
+    @Test
+    fun `worker stop and already completed tracking suppress cancellation completion`() {
+        listOf(false to true, true to false, true to true).forEach { (finished, stopped) ->
+            var actions = 0
+            failCopyToDriveTracking(
+                AtomicBoolean(finished), stopped, CancellationException(),
+                releaseResources = { actions++ },
+                setException = { actions++ },
+            )
+            assertEquals(0, actions)
+        }
+    }
+
+    @Test
+    fun `future cancellation cancels reconciliation without exceptional or late completion`() = runBlocking {
+        val isFinished = AtomicBoolean(false)
+        var exceptionalCompletions = 0
+        val job = launch { reconcileCopyToDrive(45) { awaitCancellation() } }
+        val future = CallbackToFutureAdapter.getFuture<Unit> { completer ->
+            completer.addCancellationListener(
+                {
+                    isFinished.set(true)
+                    job.cancel()
+                },
+                { command -> command.run() },
+            )
+            job.invokeOnCompletion { cause ->
+                if (cause != null) {
+                    failCopyToDriveTracking(
+                        isFinished, false, cause,
+                        releaseResources = {},
+                        setException = { exceptionalCompletions++; completer.setException(it) },
+                    )
+                }
+            }
+            "copy tracking"
+        }
+        yield()
+        assertTrue(future.cancel(true))
+        job.join()
+        assertTrue(future.isCancelled)
+        assertEquals(0, exceptionalCompletions)
     }
 
     @Test

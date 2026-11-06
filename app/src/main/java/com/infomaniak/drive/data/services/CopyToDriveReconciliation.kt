@@ -21,8 +21,24 @@ import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.drive.data.models.file.FileExternalImport
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withTimeoutOrNull
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal enum class CopyToDriveOutcome { SUCCESS, FAILURE, UNKNOWN }
+
+internal fun failCopyToDriveTracking(
+    isFinished: AtomicBoolean,
+    isStopped: Boolean,
+    cause: Throwable,
+    releaseResources: () -> Unit,
+    setException: (Throwable) -> Unit,
+) {
+    if (isStopped || !isFinished.compareAndSet(false, true)) return
+    try {
+        releaseResources()
+    } finally {
+        setException(cause)
+    }
+}
 
 internal fun completeCopyToDrive(
     outcome: CopyToDriveOutcome,
@@ -42,6 +58,7 @@ internal suspend fun reconcileCopyToDrive(
     importId: Int,
     timeoutMillis: Long = 30_000L,
     onException: (Exception) -> Unit = {},
+    onMissingData: () -> Unit = {},
     loadPage: suspend (Int) -> ApiResponse<List<FileExternalImport>>,
 ): CopyToDriveOutcome {
     return try {
@@ -50,7 +67,10 @@ internal suspend fun reconcileCopyToDrive(
             while (true) {
                 val response = loadPage(page)
                 if (!response.isSuccess()) return@withTimeoutOrNull CopyToDriveOutcome.UNKNOWN
-                val imports = response.data ?: return@withTimeoutOrNull CopyToDriveOutcome.UNKNOWN
+                val imports = response.data ?: run {
+                    onMissingData()
+                    return@withTimeoutOrNull CopyToDriveOutcome.UNKNOWN
+                }
                 val matchingImport = imports.firstOrNull { it.id == importId }
                 if (matchingImport != null) {
                     return@withTimeoutOrNull when (matchingImport.status) {
