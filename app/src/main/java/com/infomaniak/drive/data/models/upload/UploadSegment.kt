@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.models.upload
 
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.utils.serialization.ApiTimestampDateSerializer
 import java.util.Date
 import kotlinx.serialization.SerialName
@@ -28,7 +27,6 @@ data class UploadSegment(
     val number: Int,
     val status: ChunkStatus,
     @Serializable(with = ApiTimestampDateSerializer::class)
-    @SerializedName("created_at")
     @SerialName("created_at")
     val createdAt: Date,
     val size: Int,
@@ -39,15 +37,12 @@ data class UploadSegment(
     @Serializable
     enum class ChunkStatus {
         @SerialName("error")
-        @SerializedName("error")
         ERROR,
 
         @SerialName("ok")
-        @SerializedName("ok")
         OK,
 
         @SerialName("uploading")
-        @SerializedName("uploading")
         UPLOADING;
 
         override fun toString() = name.lowercase()

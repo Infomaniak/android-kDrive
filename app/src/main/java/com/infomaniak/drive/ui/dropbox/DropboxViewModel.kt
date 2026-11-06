@@ -21,7 +21,6 @@ import androidx.collection.arrayMapOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
-import com.google.gson.JsonObject
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.drive.data.api.ApiRepository
@@ -30,6 +29,10 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import kotlinx.coroutines.Dispatchers
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 class DropboxViewModel : ViewModel() {
 
@@ -63,16 +66,15 @@ class DropboxViewModel : ViewModel() {
     }
 
     fun updateDropBox(file: File, newDropBox: DropBox) = liveData(Dispatchers.IO) {
-        val data = JsonObject().apply {
-            addProperty("email_when_finished", newDropBox.newHasNotification)
-            addProperty("valid_until", newDropBox.newValidUntil?.time?.let { it / 1000 })
-            addProperty("limit_file_size", newDropBox.newLimitFileSize)
+        val data = buildJsonObject {
+            put("email_when_finished", JsonPrimitive(newDropBox.newHasNotification))
+            put("valid_until", newDropBox.newValidUntil?.time?.div(1_000L)?.let(::JsonPrimitive) ?: JsonNull)
+            put("limit_file_size", newDropBox.newLimitFileSize?.let(::JsonPrimitive) ?: JsonNull)
 
-            if (newDropBox.newPassword && !newDropBox.newPasswordValue.isNullOrBlank()) {
-                addProperty("password", newDropBox.newPasswordValue)
-            } else if (!newDropBox.newPassword) {
-                val password: String? = null
-                addProperty("password", password)
+            when {
+                newDropBox.newPassword && !newDropBox.newPasswordValue.isNullOrBlank() ->
+                    newDropBox.newPasswordValue?.let(::JsonPrimitive)?.let { put("password", it) }
+                !newDropBox.newPassword -> put("password", JsonNull)
             }
         }
         with(ApiRepository.updateDropBox(file, data)) {
