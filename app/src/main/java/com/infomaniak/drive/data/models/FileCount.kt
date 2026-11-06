@@ -18,10 +18,14 @@
 package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class FileCount(
-    val files: Int,
-    val count: Int,
+    val files: Int = 0,
+    val count: Int = 0,
+    @SerialName("directories")
     @SerializedName("directories")
-    val folders: Int,
+    val folders: Int = 0,
 )

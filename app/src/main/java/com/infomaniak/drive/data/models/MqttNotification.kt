@@ -18,33 +18,44 @@
 package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class MqttNotification(
     val uid: String,
     val action: MqttAction? = null,
+    @SerialName("drive_id")
     @SerializedName("drive_id")
     val driveId: Int,
 
     // Only for File Action notification
+    @SerialName("file_id")
     @SerializedName("file_id")
     val fileId: Int? = null,
+    @SerialName("parent_id")
     @SerializedName("parent_id")
     val parentId: Int? = null,
+    @SerialName("simple_action")
     @SerializedName("simple_action")
     val simpleAction: String? = null,
 
     // Only for external import notification
+    @SerialName("user_id")
     @SerializedName("user_id")
     val userId: Int? = null,
+    @SerialName("import_id")
     @SerializedName("import_id")
     val importId: Int? = null,
 
     // Only for action progress notification
+    @SerialName("action_uuid")
     @SerializedName("action_uuid")
     val actionUuid: String? = null,
     val progress: ActionProgress? = null,
 
     // Only for external import progress notification
+    @SerialName("import_progress")
     @SerializedName("import_progress")
     val importProgress: ImportProgress? = null,
 ) {

@@ -17,6 +17,9 @@
  */
 package com.infomaniak.drive.data.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ActionProgress(
     val todo: Int,
     val success: Int,
