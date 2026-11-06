@@ -384,6 +384,14 @@ class FileMigration : RealmMigration {
             schema[File::class.java.simpleName]?.removeField("isFromSearch")
             oldVersionTemp++
         }
+
+        // Migrated to version 12:
+        // - Made FileExternalImport.directoryId nullable
+        if (oldVersionTemp == 11L) {
+            schema[FileExternalImport::class.java.simpleName]
+                ?.setNullable(FileExternalImport::directoryId.name, true)
+            oldVersionTemp++
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -411,7 +419,7 @@ class FileMigration : RealmMigration {
     }
 
     companion object {
-        const val DB_VERSION = 11L // Must be bumped when the schema changes
+        const val DB_VERSION = 12L // Must be bumped when the schema changes
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 }

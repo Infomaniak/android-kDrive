@@ -444,7 +444,7 @@ class MainViewModel(
 
         apiResponse.data?.firstOrNull()?.let { externalImport ->
             pendingCopyToDriveImport = externalImport.id to fileName
-            val realDestFolderId = externalImport.directoryId.takeIf { it > 0 } ?: destinationFolderId
+            val realDestFolderId = externalImport.destinationDirectoryIdOr(destinationFolderId)
             CopyToDriveProgressWorker.scheduleWork(
                 getContext(),
                 externalImport.id,
