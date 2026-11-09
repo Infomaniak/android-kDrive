@@ -93,8 +93,9 @@ object ApiRepository : ApiRepositoryCore() {
         method: ApiController.ApiMethod,
         body: Any? = null,
         okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
+        useKotlinxSerialization: Boolean = false,
     ): T {
-        return callApiBlocking(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
+        return callApiBlocking(url, method, body, okHttpClient, useKotlinxSerialization, buildErrorResult = { apiError, translatedErrorRes ->
             CursorApiResponse<Any>(
                 result = ApiResponseStatus.ERROR,
                 error = apiError
@@ -109,8 +110,9 @@ object ApiRepository : ApiRepositoryCore() {
         method: ApiController.ApiMethod,
         body: Any? = null,
         okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
+        useKotlinxSerialization: Boolean = false,
     ): T {
-        return ApiController.callApi(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
+        return ApiController.callApi(url, method, body, okHttpClient, useKotlinxSerialization, buildErrorResult = { apiError, translatedErrorRes ->
             CursorApiResponse<Any>(
                 result = ApiResponseStatus.ERROR,
                 error = apiError
@@ -124,7 +126,7 @@ object ApiRepository : ApiRepositoryCore() {
         okHttpClient: OkHttpClient
     ): ApiResponse<DriveInfo> {
         val url = ApiRoutes.getAllDrivesData()
-        return callApi(url, GET, okHttpClient = okHttpClient)
+        return callApi(url, GET, okHttpClient = okHttpClient, useKotlinxSerialization = true)
     }
 
     fun getFavoriteFiles(
@@ -341,7 +343,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun getFileShare(okHttpClient: OkHttpClient, file: File): ApiResponse<Share> {
-        return callApi(ApiRoutes.getFileShare(file), GET, okHttpClient = okHttpClient)
+        return callApi(ApiRoutes.getFileShare(file), GET, okHttpClient = okHttpClient, useKotlinxSerialization = true)
     }
 
     fun getFileDetails(file: File, okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient): ApiResponse<File> {
@@ -354,7 +356,7 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun getFileComments(file: File, cursor: String?): CursorApiResponse<ArrayList<FileComment>> {
         val url = "${ApiRoutes.fileComments(file)}&${loadCursor(cursor)}"
-        return callApiWithCursor(url, GET)
+        return callApiWithCursor(url, GET, useKotlinxSerialization = true)
     }
 
     fun postFileComment(file: File, body: String): ApiResponse<FileComment> {
@@ -407,7 +409,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun addMultiAccess(file: File, body: Map<String, Any?>): ApiResponse<ShareableItems> {
-        return callApi(ApiRoutes.accessUrl(file), POST, body)
+        return callApi(ApiRoutes.accessUrl(file), POST, body, useKotlinxSerialization = true)
     }
 
     fun deleteFileShare(file: File, shareableItem: Shareable): ApiResponse<Boolean> {
@@ -457,12 +459,15 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun addCategory(file: File, categoryId: Int): ApiResponse<ShareableItems.FeedbackAccessResource<Int, Unit>> {
-        return callApi(ApiRoutes.fileCategory(file, categoryId), POST)
+        return callApi(ApiRoutes.fileCategory(file, categoryId), POST, useKotlinxSerialization = true)
     }
 
     fun addCategory(files: List<File>, categoryId: Int): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
         val driveId = files.firstOrNull()?.driveId ?: AccountUtils.currentDriveId
-        return callApi(ApiRoutes.fileCategory(driveId, categoryId), POST, mapOf("file_ids" to files.map { it.id }))
+        return callApi(
+            ApiRoutes.fileCategory(driveId, categoryId), POST, mapOf("file_ids" to files.map { it.id }),
+            useKotlinxSerialization = true,
+        )
     }
 
     fun removeCategory(file: File, categoryId: Int): ApiResponse<Boolean> {
@@ -474,7 +479,10 @@ object ApiRepository : ApiRepositoryCore() {
         categoryId: Int,
     ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
         val driveId = files.firstOrNull()?.driveId ?: AccountUtils.currentDriveId
-        return callApi(ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to files.map { it.id }))
+        return callApi(
+            ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to files.map { it.id }),
+            useKotlinxSerialization = true,
+        )
     }
 
     fun getLastActivities(driveId: Int, cursor: String?): CursorApiResponse<ArrayList<FileActivity>> {

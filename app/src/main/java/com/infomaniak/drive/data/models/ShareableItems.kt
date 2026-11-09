@@ -17,20 +17,24 @@
  */
 package com.infomaniak.drive.data.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ShareableItems(
     val emails: ArrayList<FeedbackAccessResource<String, Invitation>> = ArrayList(),
     val teams: ArrayList<FeedbackAccessResource<Int, Team>> = ArrayList(),
     val users: ArrayList<FeedbackAccessResource<Int, DriveUser>> = ArrayList(),
 ) {
 
+    @Serializable
     data class FeedbackAccessResource<IdType, AccessType>(
         /** The email,team or user identifier filled in the parameters */
         var id: IdType,
         /** The invitation send */
-        var result: Boolean,
+        var result: Boolean = false,
         /**  The invitation send, null if access was not found */
-        var access: AccessType?,
+        var access: AccessType? = null,
         /** Additional message about why email fail to be sent */
-        var message: String
+        var message: String = "",
     )
 }

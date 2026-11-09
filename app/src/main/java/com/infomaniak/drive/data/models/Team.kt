@@ -22,12 +22,16 @@ import androidx.core.graphics.toColorInt
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.TeamDetailsRealmListParceler
+import com.infomaniak.drive.utils.serialization.RealmIntListSerializer
+import com.infomaniak.drive.utils.serialization.RealmTeamDetailsListSerializer
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 open class Team(
     /** Team File Access */
@@ -37,7 +41,9 @@ open class Team(
     var color: Int = -1,
     var status: String = "",
     /** Only team */
+    @Serializable(with = RealmIntListSerializer::class)
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
+    @Serializable(with = RealmTeamDetailsListSerializer::class)
     var details: @WriteWith<TeamDetailsRealmListParceler> RealmList<TeamDetails> = RealmList(),
 ) : RealmObject(), Parcelable, Shareable, Comparable<Team> {
 
