@@ -17,26 +17,20 @@
  */
 package com.infomaniak.drive.data.models.upload
 
-import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ValidChunks(
     @SerialName("expected_chunks")
-    @SerializedName("expected_chunks")
     val expectedChunksCount: Int,
     @SerialName("uploading_chunks")
-    @SerializedName("uploading_chunks")
     val uploadedChunkCount: Int,
     @SerialName("failed_chunks")
-    @SerializedName("failed_chunks")
     val failedChunks: Long,
     @SerialName("expected_size")
-    @SerializedName("expected_size")
     val expectedSize: Long,
     @SerialName("uploaded_size")
-    @SerializedName("uploaded_size")
     val uploadedSize: Long,
     val chunks: ArrayList<UploadSegment>
 ) {

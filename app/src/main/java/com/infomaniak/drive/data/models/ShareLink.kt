@@ -18,10 +18,7 @@
 package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.core.network.api.ApiController.gson
 import com.infomaniak.core.common.utils.enumValueOfOrNull
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.file.sharelink.ShareLinkCapabilities
@@ -30,6 +27,10 @@ import io.realm.RealmObject
 import io.realm.annotations.Ignore
 import io.realm.annotations.RealmClass
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import java.util.Date
 
 @Parcelize
@@ -189,14 +190,41 @@ open class ShareLink(
         @SerializedName("valid_until")
         var validUntil: Date? = this@ShareLink.validUntil,
     ) {
-        fun toJsonElement(): JsonObject {
-            return with(gson.newBuilder().serializeNulls().create()) {
-                JsonParser.parseString(toJson(this@ShareLinkSettings)).asJsonObject.apply {
-                    if (password == null) remove(ShareLinkSettings::password.name)
-                    if (right == null) remove(ShareLinkSettings::right.name)
-                    if (AccountUtils.getCurrentDrive()?.isKSuiteFreeTier == true) remove("valid_until")
-                }
-            }
-        }
+        fun toJsonElement() = buildShareLinkSettingsJsonElement(
+            canDownload = canDownload,
+            canEdit = canEdit,
+            canSeeStats = canSeeStats,
+            password = password,
+            right = right,
+            validUntil = validUntil,
+            isKSuiteFreeTier = AccountUtils.getCurrentDrive()?.isKSuiteFreeTier == true,
+        )
     }
 }
+
+internal fun buildShareLinkSettingsJsonElement(
+    canDownload: Boolean?,
+    canEdit: Boolean?,
+    canSeeStats: Boolean?,
+    password: String?,
+    right: ShareLink.ShareLinkFilePermission?,
+    validUntil: Date?,
+    isKSuiteFreeTier: Boolean,
+) = buildJsonObject {
+    put("can_download", canDownload?.let(::JsonPrimitive) ?: JsonNull)
+    put("can_edit", canEdit?.let(::JsonPrimitive) ?: JsonNull)
+    put("can_see_stats", canSeeStats?.let(::JsonPrimitive) ?: JsonNull)
+    password?.let { put("password", JsonPrimitive(it)) }
+    right?.let { put("right", JsonPrimitive(it.apiValue)) }
+
+    if (!isKSuiteFreeTier) {
+        put("valid_until", validUntil?.time?.div(1_000L)?.let(::JsonPrimitive) ?: JsonNull)
+    }
+}
+
+private val ShareLink.ShareLinkFilePermission.apiValue: String
+    get() = when (this) {
+        ShareLink.ShareLinkFilePermission.PUBLIC -> "public"
+        ShareLink.ShareLinkFilePermission.RESTRICTED -> "inherit"
+        ShareLink.ShareLinkFilePermission.PASSWORD -> "password"
+    }
