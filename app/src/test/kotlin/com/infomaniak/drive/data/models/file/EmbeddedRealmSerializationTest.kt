@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.models.file.sharelink.ShareLinkCapabilities
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxSize
 import com.infomaniak.drive.utils.SerializationUtils
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class EmbeddedRealmSerializationTest {
@@ -206,7 +207,7 @@ class EmbeddedRealmSerializationTest {
         assertEquals("", externalImport.accountName)
         assertEquals("", externalImport.status)
         assertEquals("", externalImport.path)
-        assertEquals(0, externalImport.directoryId)
+        assertNull(externalImport.directoryId)
         assertEquals("", externalImport.hasSharedFiles)
         assertEquals(0L, externalImport.createdAt)
         assertEquals(0L, externalImport.updatedAt)
