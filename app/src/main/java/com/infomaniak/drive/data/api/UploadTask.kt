@@ -26,11 +26,10 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
 import androidx.work.Data
 import androidx.work.workDataOf
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.core.common.io.skipExactly
 import com.infomaniak.core.common.rateLimit
 import com.infomaniak.core.ktor.toOutgoingContent
-import com.infomaniak.core.network.api.ApiController.gson
+import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.networking.HttpUtils.applyDefaultHeaders
@@ -47,6 +46,7 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications.progressPendingIntent
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
+import com.infomaniak.drive.utils.SerializationUtils
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.onUpload
@@ -72,6 +72,11 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import splitties.coroutines.raceOf
 import splitties.experimental.ExperimentalSplittiesApi
 import java.io.FileNotFoundException
@@ -401,9 +406,9 @@ class UploadTask(
             }
             val bodyResponse = String(bytes)
             val apiResponse = try {
-                gson.fromJson(bodyResponse, ApiResponse::class.java)!! // Might be empty when http 502 Bad gateway happens
+                ApiController.json.decodeFromString<ApiResponse<JsonElement>>(bodyResponse) // Might be empty when http 502 Bad gateway happens
             } catch (_: Exception) {
-                ApiResponse<Any>(error = ApiError(description = bodyResponse))
+                ApiResponse<JsonElement>(error = ApiError(description = bodyResponse))
             }
             apiResponse.manageUploadErrors()
         }
@@ -480,7 +485,7 @@ class UploadTask(
             "lock_error" -> throw LockErrorException()
             "not_authorized" -> throw NotAuthorizedException()
             "product_maintenance" -> {
-                if (error?.contextGson?.getAsJsonPrimitive("reason")?.asString == MaintenanceReason.TECHNICAL.value) {
+                if (error?.contextJson?.get("reason")?.jsonPrimitive?.contentOrNull == MaintenanceReason.TECHNICAL.value) {
                     throw ProductMaintenanceException()
                 } else {
                     throw ProductBlockedException()
@@ -509,7 +514,7 @@ class UploadTask(
                     uploadFile.resetUploadTokenAndCancelSession()
                     throw UploadErrorException()
                 } else {
-                    val responseJson = gson.toJson(this)
+                    val responseJson = SerializationUtils.describeForReport(this)
                     throw Exception("$responseJson translateError: ${context.getString(translateError())}")
                 }
             }
@@ -547,14 +552,15 @@ class UploadTask(
 
         private const val MIN_FILE_SIZE_FOR_CHUNKING = 5 * 1024 * 1024 // Mb
 
+        @Serializable
         enum class ConflictOption {
-            @SerializedName("error")
+            @SerialName("error")
             ERROR,
 
-            @SerializedName("version")
+            @SerialName("version")
             VERSION,
 
-            @SerializedName("rename")
+            @SerialName("rename")
             RENAME;
 
             override fun toString(): String = name.lowercase()

@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.models.drive
 
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.core.common.utils.ApiEnum
 import com.infomaniak.core.common.utils.apiEnum
 import io.realm.RealmObject
@@ -30,7 +29,6 @@ import kotlinx.serialization.Serializable
 @RealmClass(embedded = true)
 open class MaintenanceType(
     @SerialName("code")
-    @SerializedName("code")
     private var _code: String? = null,
 ) : RealmObject() {
     @delegate:Ignore

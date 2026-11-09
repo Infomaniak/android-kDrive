@@ -49,6 +49,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.job
 
+internal fun List<Drive>.filterEligibleDestinations(excludedDriveId: Int?): List<Drive> =
+    filter { it.id != excludedDriveId && !it.maintenance }
+
 object DriveInfosController {
 
     private const val DB_NAME = "DrivesInfos.realm"
@@ -185,7 +188,8 @@ object DriveInfosController {
     fun hasSingleDrive(userId: Int): Boolean = getDrivesCount(userId) == 1L
 
     fun getEligibleDestinationDrives(userId: Int?, excludedDriveId: Int?, sharedWithMe: Boolean? = null): List<Drive> {
-        return getDrives(userId = userId, sharedWithMe = sharedWithMe).filter { it.id != excludedDriveId && !it.maintenance }
+        val drives = getDrives(userId = userId, sharedWithMe = sharedWithMe)
+        return drives.filterEligibleDestinations(excludedDriveId)
     }
 
     fun hasEligibleDestinationDrives(userId: Int, sharedWithMe: Boolean? = null): Boolean {

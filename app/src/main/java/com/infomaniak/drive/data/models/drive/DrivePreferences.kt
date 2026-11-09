@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.models.drive
 
-import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import kotlinx.serialization.SerialName
@@ -27,7 +26,6 @@ import kotlinx.serialization.Serializable
 @RealmClass(embedded = true)
 open class DrivePreferences(
     @SerialName("color")
-    @SerializedName("color")
     private var _color: String = "#0098FF",
     var hide: Boolean = false,
 ) : RealmObject() {

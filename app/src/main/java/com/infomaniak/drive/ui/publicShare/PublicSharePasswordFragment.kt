@@ -91,9 +91,9 @@ class PublicSharePasswordFragment : Fragment() {
     private fun observeSubmitPasswordResult() = with(binding) {
         publicShareViewModel.submitPasswordResult.observe(viewLifecycleOwner) { submitPasswordResult ->
             when (submitPasswordResult) {
-                is PublicShareSubmitPasswordResult.ValidPassword -> {
+                PublicShareSubmitPasswordResult.ValidPassword -> {
                     publicShareViewModel.hasBeenAuthenticated = true
-                    publicShareViewModel.initPublicShare(submitPasswordResult.authToken)
+                    publicShareViewModel.initPublicShare()
                 }
                 is PublicShareSubmitPasswordResult.Error -> {
                     passwordValidateButton.hideProgressCatching(R.string.buttonValid)
