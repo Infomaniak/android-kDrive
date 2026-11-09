@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.models.file.sharelink.ShareLinkCapabilities
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxSize
 import com.infomaniak.drive.utils.SerializationUtils
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class EmbeddedRealmSerializationTest {
