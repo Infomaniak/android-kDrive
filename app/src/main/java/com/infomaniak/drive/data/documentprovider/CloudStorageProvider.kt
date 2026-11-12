@@ -664,7 +664,8 @@ class CloudStorageProvider : DocumentsProvider() {
         val apiResponse = ApiController.callApiBlocking<ApiResponse<File>>(
             uploadUrl,
             ApiController.ApiMethod.POST,
-            okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId, 120) }
+            okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId, 120) },
+            useKotlinxSerialization = true,
         )
         val file = apiResponse.data
 
