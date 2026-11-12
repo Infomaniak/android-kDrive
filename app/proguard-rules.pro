@@ -34,6 +34,9 @@
     <init>();
 }
 
+# Realm derives mediator names from nested modules' canonical names.
+-keep class com.infomaniak.drive.utils.RealmModules
+
 # DynamicRealm migrations use model simple names to look up persisted tables.
 -keepnames class com.infomaniak.drive.** extends io.realm.RealmObject
 
