@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
+import androidx.core.view.WindowCompat
 import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.extensions.lightStatusBar
 import com.infomaniak.core.inappupdate.BaseInAppUpdateManager.Companion.checkUpdateIsRequired
@@ -63,6 +64,7 @@ open class BaseActivity : EdgeToEdgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.lightStatusBar(!isNightModeEnabled())
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = !isNightModeEnabled()
 
         if (AccountUtils.currentUser == null) {
             runBlocking { AccountUtils.requestCurrentUser() }
