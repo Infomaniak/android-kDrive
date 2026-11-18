@@ -62,15 +62,6 @@
     !static !transient <fields>;
 }
 
-# Core/Sentry/consumer-rules.pro is not exported by the Core convention plugin.
--keep class com.infomaniak.drive.BuildConfig {
-    public static final java.lang.String FLAVOR;
-}
--keep class com.google.android.gms.common.GoogleApiAvailability {
-    public static com.google.android.gms.common.GoogleApiAvailability getInstance();
-    public int isGooglePlayServicesAvailable(android.content.Context);
-}
-
 # Paho's LoggerFactory instantiates its logger using a dynamically computed name.
 -keep class org.eclipse.paho.client.mqttv3.logging.JSR47Logger {
     public <init>();
