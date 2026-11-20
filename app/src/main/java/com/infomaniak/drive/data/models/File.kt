@@ -278,7 +278,7 @@ open class File(
     }
 
     fun getConvertedPdfCache(context: Context, userDrive: UserDrive): IOFile {
-        val folder = IOFile(context.cacheDir, "converted_pdf/${userDrive.userId}/${userDrive.driveId}")
+        val folder = IOFile(context.cacheDir, "$PREVIEW_CACHE_DIRECTORY/${userDrive.userId}/${userDrive.driveId}")
         if (!folder.exists()) folder.mkdirs()
         return IOFile(folder, id.toString())
     }
@@ -298,7 +298,7 @@ open class File(
     }
 
     fun getCacheFile(context: Context, userDrive: UserDrive = UserDrive()): IOFile {
-        val folder = IOFile(context.cacheDir, "cloud_storage/${userDrive.userId}/${userDrive.driveId}")
+        val folder = IOFile(context.cacheDir, "$DOWNLOAD_CACHE_DIRECTORY/${userDrive.userId}/${userDrive.driveId}")
         if (!folder.exists()) folder.mkdirs()
         return IOFile(folder, id.toString())
     }
@@ -514,6 +514,8 @@ open class File(
 
     companion object {
         const val IS_PRIVATE_SPACE = "is_private_space"
+        const val DOWNLOAD_CACHE_DIRECTORY = "cloud_storage"
+        const val PREVIEW_CACHE_DIRECTORY = "converted_pdf"
 
         /**
          * This method is here, and not directly a class method in the File class, because of a supposed Realm bug.
