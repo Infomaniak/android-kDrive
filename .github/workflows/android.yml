@@ -55,4 +55,4 @@ jobs:
           ./gradlew buildStandardDebug
 
       - name: Run unit tests
-        run: ./gradlew testDebugUnitTest --stacktrace
+        run: ./gradlew testStandardDebugUnitTest --stacktrace
