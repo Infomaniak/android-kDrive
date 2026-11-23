@@ -67,6 +67,7 @@ import com.infomaniak.drive.ui.theme.DriveTheme
 import com.infomaniak.drive.ui.theme.Typography
 import com.infomaniak.drive.utils.StorageCategory
 import dagger.hilt.android.AndroidEntryPoint
+import com.infomaniak.core.applock.R as RAppLock
 import com.infomaniak.core.common.R as RCommon
 
 @AndroidEntryPoint
@@ -144,10 +145,10 @@ private fun LocalStorageScreen(
     if (locked || usage == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             when {
-                locked -> TextButton(onClick = onUnlock) { Text(stringResource(R.string.localStorageUnlock)) }
+                locked -> TextButton(onClick = onUnlock) { Text(stringResource(RAppLock.string.buttonUnlock)) }
                 state.busy -> CircularProgressIndicator()
                 else -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(stringResource(R.string.localStorageReadError))
+                    Text(stringResource(R.string.errorCache))
                     TextButton(onClick = onRetry) { Text(stringResource(R.string.buttonRetry)) }
                 }
             }
@@ -165,7 +166,7 @@ private fun LocalStorageScreen(
     ) {
         if (state.busy) item { LinearProgressIndicator(Modifier.fillMaxWidth()) }
         if (state.cleanupFailed) item {
-            Text(stringResource(R.string.localStorageCleanupError), color = MaterialTheme.colorScheme.error)
+            Text(stringResource(R.string.errorDelete), color = MaterialTheme.colorScheme.error)
         }
         item {
             Card(
@@ -183,14 +184,14 @@ private fun LocalStorageScreen(
                 shape = RoundedCornerShape(radius),
                 colors = CardDefaults.cardColors(containerColor = cardBackground),
             ) {
-                StorageCategory.entries.forEachIndexed { index, category ->
+                StorageCategory.entries.groupBy { it.title }.entries.forEachIndexed { index, (titleRes, categories) ->
                     if (index > 0) StorageDivider()
-                    val bytes = usage.sizes[category] ?: 0L
-                    val title = stringResource(category.title)
-                    val cleanup: (() -> Unit)? = when (category) {
-                        StorageCategory.ImageCache -> onClearImages
-                        StorageCategory.CachedDownloads, StorageCategory.CachedPreviews -> {
-                            { onClearFiles(usage.files.filter { it.category == category }) }
+                    val bytes = categories.sumOf { usage.sizes[it] ?: 0L }
+                    val title = stringResource(titleRes)
+                    val cleanup: (() -> Unit)? = when {
+                        StorageCategory.ImageCache in categories -> onClearImages
+                        categories.all { it == StorageCategory.CachedDownloads || it == StorageCategory.CachedPreviews } -> {
+                            { onClearFiles(usage.files.filter { it.category in categories }) }
                         }
                         else -> null
                     }
@@ -202,13 +203,8 @@ private fun LocalStorageScreen(
             }
         }
         item { StorageHeading(stringResource(R.string.cachedFileTitle), Modifier.padding(top = margin, bottom = sectionGap)) }
-        if (usage.files.isEmpty()) item {
-            Text(stringResource(R.string.localStorageNoCachedFiles), color = colorResource(R.color.secondaryText))
-        }
         itemsIndexed(usage.files, key = { _, file -> file.file.path.toString() }) { index, file ->
-            val title = file.name
-                ?: file.id?.let { stringResource(R.string.localStorageFileId, it) }
-                ?: file.file.path.fileName.toString()
+            val title = file.name ?: file.file.path.fileName.toString()
             val top = if (index == 0) radius else 0.dp
             val bottom = if (index == usage.files.lastIndex) radius else 0.dp
             Column(
@@ -278,12 +274,11 @@ private val settingsTitleStyle = Typography.subtitle2.copy(fontFamily = FontFami
 
 private val StorageCategory.title: Int
     get() = when (this) {
-        StorageCategory.OfflineFiles -> R.string.localStorageOfflineFiles
-        StorageCategory.Imports -> R.string.localStorageImports
-        StorageCategory.DocumentProvider -> R.string.localStorageDocumentProvider
-        StorageCategory.CachedDownloads -> R.string.localStorageCachedDownloads
-        StorageCategory.CachedPreviews -> R.string.localStorageCachedPreviews
+        StorageCategory.OfflineFiles -> R.string.offlineFileTitle
+        StorageCategory.Imports -> R.string.importDirectory
+        StorageCategory.DocumentProvider -> R.string.openInPlaceDirectory
+        StorageCategory.CachedDownloads, StorageCategory.CachedPreviews -> R.string.cacheDirectory
         StorageCategory.ImageCache -> R.string.imageCache
-        StorageCategory.OtherCache -> R.string.localStorageOtherCache
-        StorageCategory.OtherData -> R.string.localStorageOtherData
+        StorageCategory.OtherCache -> R.string.tempDirectory
+        StorageCategory.OtherData -> R.string.documentsDirectory
     }
