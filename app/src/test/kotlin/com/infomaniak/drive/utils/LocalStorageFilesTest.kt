@@ -5,7 +5,12 @@
  */
 package com.infomaniak.drive.utils
 
+import com.infomaniak.drive.data.cache.PublicShareCache
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -66,5 +71,76 @@ class LocalStorageFilesTest {
         assertFalse(Files.exists(unchanged))
         assertEquals(7L, Files.size(updated))
         assertTrue(Files.exists(offline))
+    }
+
+    @Test
+    fun `cleanup waits for a cache writer and detects its changed file`() = runBlocking {
+        val cache = Files.createDirectory(temp.resolve("cache")).toRealPath()
+        val file = Files.write(cache.resolve("1"), ByteArray(3))
+        val cacheAlias = Files.createSymbolicLink(temp.resolve("cache-alias"), cache)
+        val snapshot = scanLocalStorage(listOf(cache), mapOf(cache to StorageCategory.CachedDownloads)).cachedFiles.single()
+        val started = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+        val writer = launch {
+            CacheFileLocks.withLock(cacheAlias.resolve("1").toFile()) {
+                started.complete(Unit)
+                release.await()
+                Files.write(file, ByteArray(7))
+            }
+        }
+        started.await()
+        val cleanup = async {
+            CacheFileLocks.withLock(file.toFile()) {
+                runCatching { deleteUnchangedCacheFile(cache, snapshot) }
+            }
+        }
+        yield()
+        assertFalse(cleanup.isCompleted)
+        assertFalse(CacheFileLocks.tryWithLock(file.toFile()) { true })
+        release.complete(Unit)
+        writer.join()
+        assertTrue(cleanup.await().exceptionOrNull() is IOException)
+        assertEquals(7L, Files.size(file))
+    }
+
+    @Test
+    fun `failed cache promotion preserves the previous offline file`() {
+        val offline = Files.write(temp.resolve("offline"), byteArrayOf(1, 2, 3))
+        assertThrows(IOException::class.java) {
+            promoteCachedFile(temp.resolve("missing").toFile(), offline.toFile(), 1_000)
+        }
+
+        @Test
+        fun `scan includes public share files and provider thumbnails in their categories`() = runBlocking {
+            val publicCache = Files.createDirectory(temp.resolve("public"))
+            val thumbnails = Files.createDirectory(temp.resolve("thumbnails"))
+            val publicFile = Files.write(publicCache.resolve("shared.pdf"), ByteArray(12))
+            val thumbnail = Files.write(thumbnails.resolve("thumb"), ByteArray(8))
+            val scan = scanLocalStorage(
+                listOf(temp),
+                mapOf(publicCache to StorageCategory.CachedPublicShare, thumbnails to StorageCategory.ProviderThumbnail),
+            )
+            assertEquals(12L, scan.sizes[StorageCategory.CachedPublicShare])
+            assertEquals(8L, scan.sizes[StorageCategory.ProviderThumbnail])
+            assertEquals(setOf(publicFile, thumbnail), scan.cachedFiles.map { it.path }.toSet())
+        }
+        assertEquals(listOf<Byte>(1, 2, 3), Files.readAllBytes(offline).toList())
+        assertEquals(listOf(offline), Files.list(temp).use { it.toList() })
+    }
+
+    @Test
+    fun `public share cleanup is rejected until the last activity closes`() {
+        PublicShareCache.opened()
+        PublicShareCache.opened()
+        try {
+            assertThrows(IOException::class.java) { PublicShareCache.deleteIfInactive {} }
+            PublicShareCache.closed()
+            assertThrows(IOException::class.java) { PublicShareCache.deleteIfInactive {} }
+        } finally {
+            PublicShareCache.closed()
+        }
+        var deleted = false
+        PublicShareCache.deleteIfInactive { deleted = true }
+        assertTrue(deleted)
     }
 }

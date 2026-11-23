@@ -9,12 +9,14 @@ import android.content.Context
 import android.util.Log
 import coil3.imageLoader
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.utils.StorageCategory
 import com.infomaniak.drive.utils.StorageFile
+import com.infomaniak.drive.utils.CacheFileLocks
 import com.infomaniak.drive.utils.deleteUnchangedCacheFile
 import com.infomaniak.drive.utils.scanLocalStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -41,6 +43,8 @@ internal class LocalStorageRepository @Inject constructor(@param:ApplicationCont
         val files = context.filesDir.canonicalFile.toPath()
         val downloadCache = cache.resolve(File.DOWNLOAD_CACHE_DIRECTORY)
         val previewCache = cache.resolve(File.PREVIEW_CACHE_DIRECTORY)
+        val publicCache = files.resolve(context.getString(R.string.EXPOSED_PUBLIC_SHARE_DIR))
+        val thumbnails = cache.resolve(CloudStorageProvider.THUMBNAIL_CACHE_DIRECTORY)
         val externalCaches = context.externalCacheDirs.filterNotNull().map { it.canonicalFile.toPath() }
         val externalFiles = context.getExternalFilesDirs(null).filterNotNull().map { it.canonicalFile.toPath() }
         val media = context.externalMediaDirs.filterNotNull().map { it.canonicalFile.toPath() }
@@ -54,6 +58,8 @@ internal class LocalStorageRepository @Inject constructor(@param:ApplicationCont
             put(files.resolve("cloud_storage_temp_files"), StorageCategory.DocumentProvider)
             put(downloadCache, StorageCategory.CachedDownloads)
             put(previewCache, StorageCategory.CachedPreviews)
+            put(publicCache, StorageCategory.CachedPublicShare)
+            put(thumbnails, StorageCategory.ProviderThumbnail)
             context.imageLoader.diskCache?.let { put(cache.resolve(it.directory.name), StorageCategory.ImageCache) }
             put(cache, StorageCategory.OtherCache)
             put(data.resolve("code_cache"), StorageCategory.OtherCache)
@@ -61,7 +67,10 @@ internal class LocalStorageRepository @Inject constructor(@param:ApplicationCont
         }
         val scan = scanLocalStorage(listOf(data) + externalCaches + externalFiles + media, categories)
 
-        val cacheEntries = scan.cachedFiles.map { file ->
+        val cacheEntries = scan.cachedFiles.filterNot { it.path.startsWith(thumbnails) }.map { file ->
+            if (file.path.startsWith(publicCache)) {
+                return@map null to CachedStorageFile(file, file.path.fileName.toString(), id = null, StorageCategory.CachedPublicShare)
+            }
             val isDownload = file.path.startsWith(downloadCache)
             val relative = (if (isDownload) downloadCache else previewCache).relativize(file.path)
             val category = if (isDownload) StorageCategory.CachedDownloads else StorageCategory.CachedPreviews
@@ -81,7 +90,9 @@ internal class LocalStorageRepository @Inject constructor(@param:ApplicationCont
                 Realm.getInstance(configuration).use { realm ->
                     for (entry in entries) {
                         ensureActive()
-                        FileController.getFileById(realm, checkNotNull(entry.id))?.name?.let { names[entry.file.path] = it }
+                        realm.where(File::class.java)
+                            .equalTo(File::uid.name, "${checkNotNull(entry.id)}_${drive.driveId}")
+                            .findFirst()?.name?.let { names[entry.file.path] = it }
                     }
                 }
             } catch (exception: RealmFileException) {
@@ -89,7 +100,7 @@ internal class LocalStorageRepository @Inject constructor(@param:ApplicationCont
             }
         }
 
-        LocalStorageUsage(scan.sizes, cacheEntries.map { (_, entry) -> entry.copy(name = names[entry.file.path]) })
+        LocalStorageUsage(scan.sizes, cacheEntries.map { (_, entry) -> entry.copy(name = names[entry.file.path] ?: entry.name) })
     }
 
     suspend fun clearFiles(files: List<CachedStorageFile>): Unit = withContext(Dispatchers.IO) {
@@ -98,12 +109,19 @@ internal class LocalStorageRepository @Inject constructor(@param:ApplicationCont
         for (entry in files) {
             ensureActive()
             val folder = when (entry.category) {
-                StorageCategory.CachedDownloads -> File.DOWNLOAD_CACHE_DIRECTORY
-                StorageCategory.CachedPreviews -> File.PREVIEW_CACHE_DIRECTORY
+                StorageCategory.CachedDownloads -> cache.resolve(File.DOWNLOAD_CACHE_DIRECTORY)
+                StorageCategory.CachedPreviews -> cache.resolve(File.PREVIEW_CACHE_DIRECTORY)
+                StorageCategory.CachedPublicShare -> context.filesDir.canonicalFile.toPath().resolve(context.getString(R.string.EXPOSED_PUBLIC_SHARE_DIR))
                 else -> error("Only reconstructible cached files can be removed")
             }
             try {
-                deleteUnchangedCacheFile(cache.resolve(folder), entry.file)
+                CacheFileLocks.withLock(entry.file.path.toFile()) {
+                    if (entry.category == StorageCategory.CachedPublicShare) {
+                        PublicShareCache.deleteIfInactive { deleteUnchangedCacheFile(folder, entry.file) }
+                    } else {
+                        deleteUnchangedCacheFile(folder, entry.file)
+                    }
+                }
             } catch (exception: IOException) {
                 if (firstFailure == null) firstFailure = exception
             }
@@ -115,6 +133,12 @@ internal class LocalStorageRepository @Inject constructor(@param:ApplicationCont
         val imageLoader = context.imageLoader
         imageLoader.diskCache?.clear()
         imageLoader.memoryCache?.clear()
+        val root = context.cacheDir.canonicalFile.toPath().resolve(CloudStorageProvider.THUMBNAIL_CACHE_DIRECTORY)
+        val thumbnails = scanLocalStorage(listOf(root), mapOf(root to StorageCategory.ProviderThumbnail)).cachedFiles
+        thumbnails.forEach { file ->
+            ensureActive()
+            CacheFileLocks.withLock(file.path.toFile()) { deleteUnchangedCacheFile(root, file) }
+        }
     }
 
     private companion object {

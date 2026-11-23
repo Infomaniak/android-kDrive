@@ -15,6 +15,7 @@ import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.NoSuchFileException
 import java.nio.file.Path
 import java.nio.file.SimpleFileVisitor
+import java.nio.file.StandardCopyOption
 import java.nio.file.attribute.BasicFileAttributes
 
 internal enum class StorageCategory {
@@ -23,7 +24,9 @@ internal enum class StorageCategory {
     DocumentProvider,
     CachedDownloads,
     CachedPreviews,
+    CachedPublicShare,
     ImageCache,
+    ProviderThumbnail,
     OtherCache,
     OtherData,
 }
@@ -54,7 +57,8 @@ internal suspend fun scanLocalStorage(
 
                 val category = categoryRoots.firstOrNull { file.startsWith(it.key) }?.value ?: StorageCategory.OtherData
                 sizes[category] = sizes.getOrDefault(category, 0) + attrs.size()
-                if (category == StorageCategory.CachedDownloads || category == StorageCategory.CachedPreviews) {
+                if (category in setOf(StorageCategory.CachedDownloads, StorageCategory.CachedPreviews,
+                        StorageCategory.CachedPublicShare, StorageCategory.ProviderThumbnail)) {
                     cachedFiles += StorageFile(file, attrs.size(), attrs.lastModifiedTime().toMillis())
                 }
             }
@@ -84,4 +88,16 @@ internal fun deleteUnchangedCacheFile(root: Path, file: StorageFile) {
         throw IOException("The cache entry changed during cleanup")
     }
     Files.deleteIfExists(path)
+}
+
+internal fun promoteCachedFile(cacheFile: java.io.File, offlineFile: java.io.File, lastModifiedMillis: Long) {
+    val tempFile = Files.createTempFile(offlineFile.parentFile!!.toPath(), ".offline-", ".tmp").toFile()
+    try {
+        cacheFile.copyTo(tempFile, overwrite = true)
+        if (!tempFile.setLastModified(lastModifiedMillis)) throw IOException("Could not set offline file timestamp")
+        Files.move(tempFile.toPath(), offlineFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+        cacheFile.delete()
+    } finally {
+        tempFile.delete()
+    }
 }

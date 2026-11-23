@@ -56,6 +56,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import java.io.IOException
 import java.util.UUID
 
 class DownloadOfflineFileManager(
@@ -85,7 +86,12 @@ class DownloadOfflineFileManager(
             return ListenableWorker.Result.failure()
         }
 
-        if (moveCacheFileIfIntact(context, file, cacheFile, offlineFile)) return ListenableWorker.Result.success()
+        try {
+            if (moveCacheFileIfIntact(context, file, cacheFile, offlineFile)) return ListenableWorker.Result.success()
+        } catch (exception: IOException) {
+            SentryLog.e(TAG, "Could not move cached file offline", exception)
+            return ListenableWorker.Result.failure()
+        }
 
         if (file.isOfflineAndIntact(offlineFile)) {
             // We can have this case for example when we try to put a lot of files at once in offline mode
@@ -98,7 +104,7 @@ class DownloadOfflineFileManager(
         onProgress(0, file.id)
 
         if (offlineFile.exists()) offlineFile.delete()
-        if (cacheFile.exists()) cacheFile.delete()
+        CacheFileLocks.withLock(cacheFile) { if (cacheFile.exists()) cacheFile.delete() }
 
         lastDownloadedFile = offlineFile
 
@@ -125,13 +131,16 @@ class DownloadOfflineFileManager(
         cacheFile: IOFile,
         offlineFile: IOFile,
     ): Boolean = withContext(Dispatchers.IO) {
-        if (!file.isObsoleteOrNotIntact(cacheFile)) {
-            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-            notifyCompleted(file, offlineFile, context)
-            lastDownloadedFile = offlineFile
-            return@withContext true
+        CacheFileLocks.withLock(cacheFile) {
+            if (!file.isObsoleteOrNotIntact(cacheFile)) {
+                Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
+                notifyCompleted(file, offlineFile, context)
+                lastDownloadedFile = offlineFile
+                true
+            } else {
+                false
+            }
         }
-        return@withContext false
     }
 
     private suspend fun getFileFromRemote(

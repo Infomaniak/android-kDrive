@@ -83,7 +83,8 @@ class LocalStorageActivity : EdgeToEdgeActivity() {
         binding.root.enableEdgeToEdge()
         binding.toolbar.setNavigationOnClickListener { finish() }
         // The system can open this screen without first passing through MainActivity's app lock.
-        locked = AppSettings.appSecurityLock && (intent.action == Intent.ACTION_DEFAULT || callingPackage != null)
+        locked = AppSettings.appSecurityLock && AppLockManager.hasBiometrics() &&
+                (intent.action == Intent.ACTION_DEFAULT || callingPackage != null)
         if (!locked) scheduleAppLock()
 
         binding.storageContent.setContent {
@@ -190,7 +191,10 @@ private fun LocalStorageScreen(
                     val title = stringResource(titleRes)
                     val cleanup: (() -> Unit)? = when {
                         StorageCategory.ImageCache in categories -> onClearImages
-                        categories.all { it == StorageCategory.CachedDownloads || it == StorageCategory.CachedPreviews } -> {
+                        categories.all {
+                            it == StorageCategory.CachedDownloads || it == StorageCategory.CachedPreviews ||
+                                    it == StorageCategory.CachedPublicShare
+                        } -> {
                             { onClearFiles(usage.files.filter { it.category in categories }) }
                         }
                         else -> null
@@ -277,8 +281,8 @@ private val StorageCategory.title: Int
         StorageCategory.OfflineFiles -> R.string.offlineFileTitle
         StorageCategory.Imports -> R.string.importDirectory
         StorageCategory.DocumentProvider -> R.string.openInPlaceDirectory
-        StorageCategory.CachedDownloads, StorageCategory.CachedPreviews -> R.string.cacheDirectory
-        StorageCategory.ImageCache -> R.string.imageCache
+        StorageCategory.CachedDownloads, StorageCategory.CachedPreviews, StorageCategory.CachedPublicShare -> R.string.cacheDirectory
+        StorageCategory.ImageCache, StorageCategory.ProviderThumbnail -> R.string.imageCache
         StorageCategory.OtherCache -> R.string.tempDirectory
         StorageCategory.OtherData -> R.string.documentsDirectory
     }

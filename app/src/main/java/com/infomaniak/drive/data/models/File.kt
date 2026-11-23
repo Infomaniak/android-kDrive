@@ -35,6 +35,7 @@ import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.CacheFileLocks
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmListParceler.FileCategoryRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
@@ -487,26 +488,25 @@ open class File(
         onProgress: (progress: Int) -> Unit,
         navigateToDownloadDialog: (suspend () -> Unit)? = null,
     ): IOFile {
-        val fileNeedDownload: Boolean
-        val cacheFile: IOFile
-        val isPublicShared: Boolean
-
-        withContext(Dispatchers.IO) {
-            isPublicShared = isPublicShared()
-            cacheFile = when {
+        val isPublicShared = isPublicShared()
+        val cacheFile = withContext(Dispatchers.IO) {
+            when {
                 isPublicShared -> getPublicShareCache(context)
                 isOnlyOfficePreview() -> getConvertedPdfCache(context, userDrive)
                 isOffline -> getOfflineFile(context, userDrive.userId)!!
                 else -> getCacheFile(context, userDrive)
             }
-
-            fileNeedDownload = if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
         }
 
-        if (fileNeedDownload) {
-            navigateToDownloadDialog?.invoke()
-            downloadFile(cacheFile, file = this, shouldBePdf, onProgress, isPublicShared)
-            Dispatchers.IO { cacheFile.setLastModified(getLastModifiedInMilliSecond()) }
+        CacheFileLocks.withLock(cacheFile) {
+            val fileNeedDownload = withContext(Dispatchers.IO) {
+                if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
+            }
+            if (fileNeedDownload) {
+                navigateToDownloadDialog?.invoke()
+                downloadFile(cacheFile, file = this, shouldBePdf, onProgress, isPublicShared)
+                Dispatchers.IO { cacheFile.setLastModified(getLastModifiedInMilliSecond()) }
+            }
         }
 
         return cacheFile

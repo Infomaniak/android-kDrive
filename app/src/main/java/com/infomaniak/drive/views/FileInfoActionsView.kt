@@ -68,6 +68,7 @@ import com.infomaniak.drive.ui.fileList.FolderNavigationRestrictions
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.CacheFileLocks
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.SingleOperation
@@ -87,6 +88,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 class FileInfoActionsView @JvmOverloads constructor(
     context: Context,
@@ -368,14 +370,25 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         val cacheFile = getCacheFile(context)
 
-        if (cacheFile.exists() && path.isNotEmpty() && !isObsoleteOrNotIntact(cacheFile)) {
-            getOfflineFile(context)?.let { offlineFile ->
-                Utils.moveCacheFileToOffline(file = this, cacheFile, offlineFile)
-                CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(id, isOffline = true) }
-                isOffline = true
-                onItemClickListener.onCacheAddedToOffline()
+        val moved = try {
+            CacheFileLocks.tryWithLock(cacheFile) {
+                if (cacheFile.exists() && path.isNotEmpty() && !isObsoleteOrNotIntact(cacheFile)) {
+                    val offlineFile = getOfflineFile(context) ?: return@tryWithLock false
+                    Utils.moveCacheFileToOffline(file = this, cacheFile, offlineFile)
+                    CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(id, isOffline = true) }
+                    isOffline = true
+                    onItemClickListener.onCacheAddedToOffline()
+                    true
+                } else {
+                    false
+                }
             }
-        } else {
+        } catch (exception: IOException) {
+            SentryLog.e("FileInfoActionsView", "Could not move cached file offline", exception)
+            context.showToast(title = context.getString(R.string.errorMove))
+            return@with true
+        }
+        if (!moved) {
             Utils.downloadAsOfflineFile(context, file = this)
             if (isMarkedAsOffline) mainViewModel.updateOfflineFile.value = id
         }

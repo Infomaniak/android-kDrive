@@ -314,10 +314,7 @@ object Utils {
     }
 
     fun moveCacheFileToOffline(file: File, cacheFile: IOFile, offlineFile: IOFile) {
-        if (offlineFile.exists()) offlineFile.delete()
-        cacheFile.copyTo(offlineFile)
-        cacheFile.delete()
-        offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
+        promoteCachedFile(cacheFile, offlineFile, file.getLastModifiedInMilliSecond())
     }
 
     fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()) {

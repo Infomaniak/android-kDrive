@@ -12,10 +12,8 @@ import com.infomaniak.drive.data.cache.CachedStorageFile
 import com.infomaniak.drive.data.cache.LocalStorageRepository
 import com.infomaniak.drive.data.cache.LocalStorageUsage
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import java.io.IOException
 import javax.inject.Inject
 
@@ -26,7 +24,7 @@ internal class LocalStorageViewModel @Inject constructor(private val repository:
 
     private val _state = MutableStateFlow(State())
     val state = _state.asStateFlow()
-    private var operation: Job? = null
+    private val operations = StorageOperationQueue(viewModelScope)
 
     fun refresh() = update()
 
@@ -35,9 +33,8 @@ internal class LocalStorageViewModel @Inject constructor(private val repository:
     fun clearImages() = update { repository.clearImageCache() }
 
     private fun update(cleanup: (suspend () -> Unit)? = null) {
-        if (operation?.isActive == true) return
-
-        operation = viewModelScope.launch {
+        _state.value = _state.value.copy(busy = true)
+        operations.submit(skipIfBusy = cleanup == null) { hasPendingAfter ->
             _state.value = _state.value.copy(busy = true, cleanupFailed = false)
             var cleanupFailed = false
             try {
@@ -53,7 +50,7 @@ internal class LocalStorageViewModel @Inject constructor(private val repository:
                 Log.w(TAG, "Could not measure local storage", exception)
                 null
             }
-            _state.value = State(usage, busy = false, cleanupFailed)
+            _state.value = State(usage, busy = hasPendingAfter(), cleanupFailed)
         }
     }
 
