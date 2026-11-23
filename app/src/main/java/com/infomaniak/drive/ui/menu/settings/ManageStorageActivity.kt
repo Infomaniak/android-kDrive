@@ -61,7 +61,7 @@ import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.CachedStorageFile
 import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.databinding.ActivityLocalStorageBinding
+import com.infomaniak.drive.databinding.ActivityManageStorageBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.theme.DriveTheme
 import com.infomaniak.drive.ui.theme.Typography
@@ -71,14 +71,14 @@ import com.infomaniak.core.applock.R as RAppLock
 import com.infomaniak.core.common.R as RCommon
 
 @AndroidEntryPoint
-class LocalStorageActivity : EdgeToEdgeActivity() {
+class ManageStorageActivity : EdgeToEdgeActivity() {
 
-    private val viewModel: LocalStorageViewModel by viewModels()
+    private val viewModel: ManageStorageViewModel by viewModels()
     private var locked by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = ActivityLocalStorageBinding.inflate(layoutInflater)
+        val binding = ActivityManageStorageBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.root.enableEdgeToEdge()
         binding.toolbar.setNavigationOnClickListener { finish() }
@@ -90,7 +90,7 @@ class LocalStorageActivity : EdgeToEdgeActivity() {
         binding.storageContent.setContent {
             DriveTheme {
                 val state by viewModel.state.collectAsStateWithLifecycle()
-                LocalStorageScreen(
+                ManageStorageScreen(
                     state = state,
                     locked = locked,
                     onUnlock = ::unlock,
@@ -133,8 +133,8 @@ class LocalStorageActivity : EdgeToEdgeActivity() {
 }
 
 @Composable
-private fun LocalStorageScreen(
-    state: LocalStorageViewModel.State,
+private fun ManageStorageScreen(
+    state: ManageStorageViewModel.State,
     locked: Boolean,
     onUnlock: () -> Unit,
     onConfirmCleanup: (String, Boolean, () -> Unit) -> Unit,

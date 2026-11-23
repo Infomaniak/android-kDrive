@@ -21,7 +21,7 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 
-class LocalStorageFilesTest {
+class ManageStorageFilesTest {
 
     @TempDir
     lateinit var temp: Path
@@ -41,7 +41,7 @@ class LocalStorageFilesTest {
         Files.createSymbolicLink(downloads.resolve("offline-link"), offline)
 
         val scan = runBlocking {
-            scanLocalStorage(
+            scanManageStorage(
                 listOf(data, cache, media, temp.resolve("missing")),
                 mapOf(cache to StorageCategory.OtherCache, downloads to StorageCategory.CachedDownloads, offline to StorageCategory.OfflineFiles),
             )
@@ -60,7 +60,7 @@ class LocalStorageFilesTest {
         val unchanged = Files.write(cache.resolve("1"), ByteArray(3))
         val updated = Files.write(cache.resolve("2"), ByteArray(3))
         val offline = Files.write(temp.resolve("offline.pdf"), ByteArray(11))
-        val scan = runBlocking { scanLocalStorage(listOf(cache), mapOf(cache to StorageCategory.CachedDownloads)) }
+        val scan = runBlocking { scanManageStorage(listOf(cache), mapOf(cache to StorageCategory.CachedDownloads)) }
         val entries = scan.cachedFiles.associateBy(StorageFile::path)
 
         Files.write(updated, ByteArray(7))
@@ -78,7 +78,7 @@ class LocalStorageFilesTest {
         val cache = Files.createDirectory(temp.resolve("cache")).toRealPath()
         val file = Files.write(cache.resolve("1"), ByteArray(3))
         val cacheAlias = Files.createSymbolicLink(temp.resolve("cache-alias"), cache)
-        val snapshot = scanLocalStorage(listOf(cache), mapOf(cache to StorageCategory.CachedDownloads)).cachedFiles.single()
+        val snapshot = scanManageStorage(listOf(cache), mapOf(cache to StorageCategory.CachedDownloads)).cachedFiles.single()
         val started = CompletableDeferred<Unit>()
         val release = CompletableDeferred<Unit>()
         val writer = launch {
@@ -116,7 +116,7 @@ class LocalStorageFilesTest {
             val thumbnails = Files.createDirectory(temp.resolve("thumbnails"))
             val publicFile = Files.write(publicCache.resolve("shared.pdf"), ByteArray(12))
             val thumbnail = Files.write(thumbnails.resolve("thumb"), ByteArray(8))
-            val scan = scanLocalStorage(
+            val scan = scanManageStorage(
                 listOf(temp),
                 mapOf(publicCache to StorageCategory.CachedPublicShare, thumbnails to StorageCategory.ProviderThumbnail),
             )

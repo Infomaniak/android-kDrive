@@ -94,7 +94,7 @@ class SettingsFragment : Fragment() {
         security.setOnClickListener { safelyNavigate(R.id.securitySettingsFragment) }
 
         initFileSync()
-        localStorage.setOnClickListener { startActivity(Intent(requireContext(), LocalStorageActivity::class.java)) }
+        manageStorage.setOnClickListener { startActivity(Intent(requireContext(), ManageStorageActivity::class.java)) }
         about.setOnClickListener { safelyNavigate(R.id.aboutSettingsFragment) }
         feedback.setOnClickListener { navigateToFeedback() }
         setDeleteAccountClickListener()

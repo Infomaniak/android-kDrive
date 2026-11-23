@@ -9,8 +9,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.cache.CachedStorageFile
-import com.infomaniak.drive.data.cache.LocalStorageRepository
-import com.infomaniak.drive.data.cache.LocalStorageUsage
+import com.infomaniak.drive.data.cache.ManageStorageRepository
+import com.infomaniak.drive.data.cache.ManageStorageUsage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,9 +18,9 @@ import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
-internal class LocalStorageViewModel @Inject constructor(private val repository: LocalStorageRepository) : ViewModel() {
+internal class ManageStorageViewModel @Inject constructor(private val repository: ManageStorageRepository) : ViewModel() {
 
-    data class State(val usage: LocalStorageUsage? = null, val busy: Boolean = true, val cleanupFailed: Boolean = false)
+    data class State(val usage: ManageStorageUsage? = null, val busy: Boolean = true, val cleanupFailed: Boolean = false)
 
     private val _state = MutableStateFlow(State())
     val state = _state.asStateFlow()
@@ -55,6 +55,6 @@ internal class LocalStorageViewModel @Inject constructor(private val repository:
     }
 
     private companion object {
-        const val TAG = "LocalStorageViewModel"
+        const val TAG = "ManageStorageViewModel"
     }
 }

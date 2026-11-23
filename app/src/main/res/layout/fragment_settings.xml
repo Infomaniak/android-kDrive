@@ -157,7 +157,7 @@
                         tools:description="@string/syncOnlyWifiTitle" />
 
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
-                        android:id="@+id/localStorage"
+                        android:id="@+id/manageStorage"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:itemAction="chevron"

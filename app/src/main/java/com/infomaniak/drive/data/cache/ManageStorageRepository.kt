@@ -18,7 +18,7 @@ import com.infomaniak.drive.utils.StorageCategory
 import com.infomaniak.drive.utils.StorageFile
 import com.infomaniak.drive.utils.CacheFileLocks
 import com.infomaniak.drive.utils.deleteUnchangedCacheFile
-import com.infomaniak.drive.utils.scanLocalStorage
+import com.infomaniak.drive.utils.scanManageStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.realm.Realm
 import io.realm.exceptions.RealmFileException
@@ -31,13 +31,13 @@ import javax.inject.Inject
 
 internal data class CachedStorageFile(val file: StorageFile, val name: String?, val id: Int?, val category: StorageCategory)
 
-internal data class LocalStorageUsage(val sizes: Map<StorageCategory, Long>, val files: List<CachedStorageFile>) {
+internal data class ManageStorageUsage(val sizes: Map<StorageCategory, Long>, val files: List<CachedStorageFile>) {
     val totalBytes: Long get() = sizes.values.sum()
 }
 
-internal class LocalStorageRepository @Inject constructor(@param:ApplicationContext private val context: Context) {
+internal class ManageStorageRepository @Inject constructor(@param:ApplicationContext private val context: Context) {
 
-    suspend fun measure(): LocalStorageUsage = withContext(Dispatchers.IO) {
+    suspend fun measure(): ManageStorageUsage = withContext(Dispatchers.IO) {
         val cache = context.cacheDir.canonicalFile.toPath()
         val data = context.dataDir.canonicalFile.toPath()
         val files = context.filesDir.canonicalFile.toPath()
@@ -65,7 +65,7 @@ internal class LocalStorageRepository @Inject constructor(@param:ApplicationCont
             put(data.resolve("code_cache"), StorageCategory.OtherCache)
             externalCaches.forEach { put(it, StorageCategory.OtherCache) }
         }
-        val scan = scanLocalStorage(listOf(data) + externalCaches + externalFiles + media, categories)
+        val scan = scanManageStorage(listOf(data) + externalCaches + externalFiles + media, categories)
 
         val cacheEntries = scan.cachedFiles.filterNot { it.path.startsWith(thumbnails) }.map { file ->
             if (file.path.startsWith(publicCache)) {
@@ -100,7 +100,7 @@ internal class LocalStorageRepository @Inject constructor(@param:ApplicationCont
             }
         }
 
-        LocalStorageUsage(scan.sizes, cacheEntries.map { (_, entry) -> entry.copy(name = names[entry.file.path] ?: entry.name) })
+        ManageStorageUsage(scan.sizes, cacheEntries.map { (_, entry) -> entry.copy(name = names[entry.file.path] ?: entry.name) })
     }
 
     suspend fun clearFiles(files: List<CachedStorageFile>): Unit = withContext(Dispatchers.IO) {
@@ -134,7 +134,7 @@ internal class LocalStorageRepository @Inject constructor(@param:ApplicationCont
         imageLoader.diskCache?.clear()
         imageLoader.memoryCache?.clear()
         val root = context.cacheDir.canonicalFile.toPath().resolve(CloudStorageProvider.THUMBNAIL_CACHE_DIRECTORY)
-        val thumbnails = scanLocalStorage(listOf(root), mapOf(root to StorageCategory.ProviderThumbnail)).cachedFiles
+        val thumbnails = scanManageStorage(listOf(root), mapOf(root to StorageCategory.ProviderThumbnail)).cachedFiles
         thumbnails.forEach { file ->
             ensureActive()
             CacheFileLocks.withLock(file.path.toFile()) { deleteUnchangedCacheFile(root, file) }
@@ -142,6 +142,6 @@ internal class LocalStorageRepository @Inject constructor(@param:ApplicationCont
     }
 
     private companion object {
-        const val TAG = "LocalStorageRepository"
+        const val TAG = "ManageStorageRepository"
     }
 }

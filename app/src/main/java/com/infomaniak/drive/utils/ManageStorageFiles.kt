@@ -38,7 +38,7 @@ internal data class StorageScan(
     val cachedFiles: List<StorageFile>,
 )
 
-internal suspend fun scanLocalStorage(
+internal suspend fun scanManageStorage(
     roots: List<Path>,
     categories: Map<Path, StorageCategory>,
 ): StorageScan {
