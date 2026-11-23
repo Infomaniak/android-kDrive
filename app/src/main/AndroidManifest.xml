@@ -134,7 +134,7 @@
             android:name=".ui.menu.settings.LocalStorageActivity"
             android:excludeFromRecents="true"
             android:exported="true"
-            android:label="@string/localStorageTitle"
+            android:label="@string/manageStorageTitle"
             android:permission="android.permission.CLEAR_APP_USER_DATA"
             android:theme="@style/AppTheme.LocalStorage" />
 

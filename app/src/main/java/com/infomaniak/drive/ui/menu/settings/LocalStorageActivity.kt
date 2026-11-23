@@ -119,10 +119,11 @@ class LocalStorageActivity : EdgeToEdgeActivity() {
         AppLockManager.scheduleLockIfNeeded(this, AppLockViewActivity::class, isAppLockEnabled = { AppSettings.appSecurityLock })
     }
 
-    private fun confirmCleanup(title: String, cleanup: () -> Unit) {
+    private fun confirmCleanup(title: String, isFile: Boolean, cleanup: () -> Unit) {
+        val description = if (isFile) R.string.modalClearCacheFileDescription else R.string.modalClearCacheDirectoryDescription
         MaterialAlertDialogBuilder(this, R.style.DialogStyle)
-            .setTitle(R.string.localStorageClearTitle)
-            .setMessage(getString(R.string.localStorageClearConfirmation, title))
+            .setTitle(R.string.modalClearCacheTitle)
+            .setMessage(getString(description, title))
             .setNegativeButton(RCommon.string.buttonCancel, null)
             .setPositiveButton(R.string.buttonClear) { _, _ -> cleanup() }
             .show()
@@ -134,7 +135,7 @@ private fun LocalStorageScreen(
     state: LocalStorageViewModel.State,
     locked: Boolean,
     onUnlock: () -> Unit,
-    onConfirmCleanup: (String, () -> Unit) -> Unit,
+    onConfirmCleanup: (String, Boolean, () -> Unit) -> Unit,
     onRetry: () -> Unit,
     onClearImages: () -> Unit,
     onClearFiles: (List<CachedStorageFile>) -> Unit,
@@ -172,10 +173,10 @@ private fun LocalStorageScreen(
                 shape = RoundedCornerShape(radius),
                 colors = CardDefaults.cardColors(containerColor = cardBackground),
             ) {
-                StorageRow(stringResource(R.string.localStorageTotal), usage.totalBytes)
+                StorageRow(stringResource(R.string.totalStorageUsedTitle), usage.totalBytes)
             }
         }
-        item { StorageHeading(stringResource(R.string.localStorageData), Modifier.padding(top = margin, bottom = sectionGap)) }
+        item { StorageHeading(stringResource(R.string.directoriesTitle), Modifier.padding(top = margin, bottom = sectionGap)) }
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -194,13 +195,13 @@ private fun LocalStorageScreen(
                         else -> null
                     }
                     val onClear: (() -> Unit)? = if (state.busy || bytes == 0L || cleanup == null) null else {
-                        { onConfirmCleanup(title, cleanup) }
+                        { onConfirmCleanup(title, false, cleanup) }
                     }
                     StorageRow(title, bytes, onClear)
                 }
             }
         }
-        item { StorageHeading(stringResource(R.string.localStorageCachedFiles), Modifier.padding(top = margin, bottom = sectionGap)) }
+        item { StorageHeading(stringResource(R.string.cachedFileTitle), Modifier.padding(top = margin, bottom = sectionGap)) }
         if (usage.files.isEmpty()) item {
             Text(stringResource(R.string.localStorageNoCachedFiles), color = colorResource(R.color.secondaryText))
         }
@@ -220,7 +221,7 @@ private fun LocalStorageScreen(
                     name = title,
                     bytes = file.file.bytes,
                     onClear = if (state.busy) null else {
-                        { onConfirmCleanup(title) { onClearFiles(listOf(file)) } }
+                        { onConfirmCleanup(title, true) { onClearFiles(listOf(file)) } }
                     },
                 )
             }
@@ -282,7 +283,7 @@ private val StorageCategory.title: Int
         StorageCategory.DocumentProvider -> R.string.localStorageDocumentProvider
         StorageCategory.CachedDownloads -> R.string.localStorageCachedDownloads
         StorageCategory.CachedPreviews -> R.string.localStorageCachedPreviews
-        StorageCategory.ImageCache -> R.string.localStorageImageCache
+        StorageCategory.ImageCache -> R.string.imageCache
         StorageCategory.OtherCache -> R.string.localStorageOtherCache
         StorageCategory.OtherData -> R.string.localStorageOtherData
     }
