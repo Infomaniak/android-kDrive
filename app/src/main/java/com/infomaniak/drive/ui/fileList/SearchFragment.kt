@@ -372,6 +372,8 @@ class SearchFragment : FileListFragment() {
                 return
             }
 
+            if (isNewSort) searchViewModel.resetSearchPagination()
+
             swipeRefreshLayout.isRefreshing = true
             isDownloading = true
             searchViewModel.searchFileByName.value = currentQuery to fileListViewModel.sortType
