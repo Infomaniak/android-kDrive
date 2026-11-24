@@ -109,23 +109,23 @@ class ManageStorageFilesTest {
         assertThrows(IOException::class.java) {
             promoteCachedFile(temp.resolve("missing").toFile(), offline.toFile(), 1_000)
         }
-
-        @Test
-        fun `scan includes public share files and provider thumbnails in their categories`() = runBlocking {
-            val publicCache = Files.createDirectory(temp.resolve("public"))
-            val thumbnails = Files.createDirectory(temp.resolve("thumbnails"))
-            val publicFile = Files.write(publicCache.resolve("shared.pdf"), ByteArray(12))
-            val thumbnail = Files.write(thumbnails.resolve("thumb"), ByteArray(8))
-            val scan = scanManageStorage(
-                listOf(temp),
-                mapOf(publicCache to StorageCategory.CachedPublicShare, thumbnails to StorageCategory.ProviderThumbnail),
-            )
-            assertEquals(12L, scan.sizes[StorageCategory.CachedPublicShare])
-            assertEquals(8L, scan.sizes[StorageCategory.ProviderThumbnail])
-            assertEquals(setOf(publicFile, thumbnail), scan.cachedFiles.map { it.path }.toSet())
-        }
         assertEquals(listOf<Byte>(1, 2, 3), Files.readAllBytes(offline).toList())
         assertEquals(listOf(offline), Files.list(temp).use { it.toList() })
+    }
+
+    @Test
+    fun `scan includes public share files and provider thumbnails in their categories`() = runBlocking {
+        val publicCache = Files.createDirectory(temp.resolve("public"))
+        val thumbnails = Files.createDirectory(temp.resolve("thumbnails"))
+        val publicFile = Files.write(publicCache.resolve("shared.pdf"), ByteArray(12))
+        val thumbnail = Files.write(thumbnails.resolve("thumb"), ByteArray(8))
+        val scan = scanManageStorage(
+            listOf(temp),
+            mapOf(publicCache to StorageCategory.CachedPublicShare, thumbnails to StorageCategory.ProviderThumbnail),
+        )
+        assertEquals(12L, scan.sizes[StorageCategory.CachedPublicShare])
+        assertEquals(8L, scan.sizes[StorageCategory.ProviderThumbnail])
+        assertEquals(setOf(publicFile, thumbnail), scan.cachedFiles.map { it.path }.toSet())
     }
 
     @Test

@@ -386,6 +386,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         } catch (exception: IOException) {
             SentryLog.e("FileInfoActionsView", "Could not move cached file offline", exception)
             context.showToast(title = context.getString(R.string.errorMove))
+            refreshBottomSheetUi(file = this)
             return@with true
         }
         if (!moved) {
