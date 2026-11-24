@@ -87,7 +87,9 @@ internal fun deleteUnchangedCacheFile(root: Path, file: StorageFile) {
     if (!attrs.isRegularFile || attrs.size() != file.bytes || attrs.lastModifiedTime().toMillis() != file.lastModifiedMillis) {
         throw IOException("The cache entry changed during cleanup")
     }
-    Files.deleteIfExists(path)
+    if (!Files.deleteIfExists(path) && Files.exists(path, NOFOLLOW_LINKS)) {
+        throw IOException("The cache entry could not be deleted")
+    }
 }
 
 internal fun promoteCachedFile(cacheFile: java.io.File, offlineFile: java.io.File, lastModifiedMillis: Long) {
@@ -96,8 +98,12 @@ internal fun promoteCachedFile(cacheFile: java.io.File, offlineFile: java.io.Fil
         cacheFile.copyTo(tempFile, overwrite = true)
         if (!tempFile.setLastModified(lastModifiedMillis)) throw IOException("Could not set offline file timestamp")
         Files.move(tempFile.toPath(), offlineFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
-        cacheFile.delete()
+        if (!cacheFile.delete() && cacheFile.exists()) {
+            throw IOException("The promoted cache file could not be deleted")
+        }
     } finally {
-        tempFile.delete()
+        if (!tempFile.delete() && tempFile.exists()) {
+            throw IOException("The temporary offline file could not be deleted")
+        }
     }
 }
