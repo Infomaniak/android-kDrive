@@ -237,9 +237,8 @@ object PlaybackUtils {
     }
 
     private fun Context.getBitmapLoader(isPublicShared: Boolean): DataSourceBitmapLoader {
-        return DataSourceBitmapLoader(
-            DataSourceBitmapLoader.DEFAULT_EXECUTOR_SERVICE.get(),
-            getDataSourceFactory(isPublicShared),
-        )
+        return DataSourceBitmapLoader.Builder(this)
+            .setDataSourceFactory(getDataSourceFactory(isPublicShared))
+            .build()
     }
 }
