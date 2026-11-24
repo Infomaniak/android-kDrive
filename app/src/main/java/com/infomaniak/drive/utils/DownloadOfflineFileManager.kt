@@ -56,7 +56,6 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import java.io.IOException
 import java.util.UUID
 
 class DownloadOfflineFileManager(
@@ -76,7 +75,7 @@ class DownloadOfflineFileManager(
         file: File,
         onProgress: (progress: Int, fileId: Int) -> Unit,
     ): ListenableWorker.Result {
-
+        lastDownloadedFile = null
         val file = getFileFromRemote(context, file.id, userDrive)
         currentFile = file
         val cacheFile = file.getCacheFile(context, userDrive)
@@ -86,12 +85,7 @@ class DownloadOfflineFileManager(
             return ListenableWorker.Result.failure()
         }
 
-        try {
-            if (moveCacheFileIfIntact(context, file, cacheFile, offlineFile)) return ListenableWorker.Result.success()
-        } catch (exception: IOException) {
-            SentryLog.e(TAG, "Could not move cached file offline", exception)
-            return ListenableWorker.Result.failure()
-        }
+        if (moveCacheFileIfIntact(context, file, cacheFile, offlineFile)) return ListenableWorker.Result.success()
 
         if (file.isOfflineAndIntact(offlineFile)) {
             // We can have this case for example when we try to put a lot of files at once in offline mode

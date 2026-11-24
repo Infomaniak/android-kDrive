@@ -10,19 +10,40 @@ import kotlinx.coroutines.sync.withLock
 import java.io.File
 
 internal object CacheFileLocks {
-    private val locks = Array(64) { Mutex() }
+    private data class Entry(val mutex: Mutex = Mutex(), var references: Int = 0)
 
-    private fun lock(file: File): Mutex = locks[(file.canonicalFile.path.hashCode() and Int.MAX_VALUE) % locks.size]
+    private val locks = mutableMapOf<String, Entry>()
 
-    suspend fun <T> withLock(file: File, action: suspend () -> T): T = lock(file).withLock { action() }
+    private fun acquire(path: String): Entry = synchronized(locks) {
+        locks.getOrPut(path) { Entry() }.also { it.references++ }
+    }
+
+    private fun release(path: String, entry: Entry) = synchronized(locks) {
+        if (--entry.references == 0) locks.remove(path)
+    }
+
+    suspend fun <T> withLock(file: File, action: suspend () -> T): T {
+        val path = file.canonicalPath
+        val entry = acquire(path)
+        try {
+            return entry.mutex.withLock { action() }
+        } finally {
+            release(path, entry)
+        }
+    }
 
     fun tryWithLock(file: File, action: () -> Boolean): Boolean {
-        val mutex = lock(file)
-        if (!mutex.tryLock()) return false
+        val path = file.canonicalPath
+        val entry = acquire(path)
         return try {
-            action()
+            if (!entry.mutex.tryLock()) return false
+            try {
+                action()
+            } finally {
+                entry.mutex.unlock()
+            }
         } finally {
-            mutex.unlock()
+            release(path, entry)
         }
     }
 }

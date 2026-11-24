@@ -18,6 +18,7 @@ import com.infomaniak.drive.utils.CacheFileLocks
 import com.infomaniak.drive.utils.StorageCategory
 import com.infomaniak.drive.utils.StorageFile
 import com.infomaniak.drive.utils.deleteUnchangedCacheFile
+import com.infomaniak.drive.utils.deleteUnchangedCacheFiles
 import com.infomaniak.drive.utils.scanManageStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.realm.Realm
@@ -76,10 +77,7 @@ internal class ManageStorageRepository @Inject constructor(@param:ApplicationCon
         imageLoader.memoryCache?.clear()
         val root = context.cacheDir.canonicalFile.toPath().resolve(CloudStorageProvider.THUMBNAIL_CACHE_DIRECTORY)
         val thumbnails = scanManageStorage(listOf(root), mapOf(root to StorageCategory.ProviderThumbnail)).cachedFiles
-        thumbnails.forEach { file ->
-            ensureActive()
-            CacheFileLocks.withLock(file.path.toFile()) { deleteUnchangedCacheFile(root, file) }
-        }
+        deleteUnchangedCacheFiles(root, thumbnails)
     }
 
     private fun cacheFolderFor(category: StorageCategory, cache: Path): Path = when (category) {
@@ -91,27 +89,39 @@ internal class ManageStorageRepository @Inject constructor(@param:ApplicationCon
     }
 
     private suspend fun loadCachedFileNames(cacheEntries: List<Pair<UserDrive?, CachedStorageFile>>): Map<Path, String> {
-        val coroutineContext = currentCoroutineContext()
         val names = mutableMapOf<Path, String>()
         for ((drive, entries) in cacheEntries.groupBy({ it.first }, { it.second })) {
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             if (drive == null) continue
-            val configuration = FileController.getRealmConfiguration(drive)
-            if (!java.io.File(configuration.path).isFile) continue
-            try {
-                Realm.getInstance(configuration).use { realm ->
-                    entries.forEach { entry ->
-                        coroutineContext.ensureActive()
+            for (realmDrive in listOf(drive, drive.copy(sharedWithMe = true))) {
+                loadNamesFromRealm(realmDrive, entries, names)
+            }
+        }
+        return names
+    }
+
+    private suspend fun loadNamesFromRealm(
+        drive: UserDrive,
+        entries: List<CachedStorageFile>,
+        names: MutableMap<Path, String>,
+    ) {
+        val configuration = FileController.getRealmConfiguration(drive)
+        if (!java.io.File(configuration.path).isFile) return
+        val coroutineContext = currentCoroutineContext()
+        try {
+            Realm.getInstance(configuration).use { realm ->
+                entries.forEach { entry ->
+                    coroutineContext.ensureActive()
+                    if (entry.file.path !in names) {
                         realm.where(File::class.java)
                             .equalTo(File::uid.name, "${checkNotNull(entry.id)}_${drive.driveId}")
                             .findFirst()?.name?.let { names[entry.file.path] = it }
                     }
                 }
-            } catch (exception: RealmFileException) {
-                Log.w(TAG, "Cached file names could not be loaded", exception)
             }
+        } catch (exception: RealmFileException) {
+            Log.w(TAG, "Cached file names could not be loaded", exception)
         }
-        return names
     }
 
     private data class StoragePaths(

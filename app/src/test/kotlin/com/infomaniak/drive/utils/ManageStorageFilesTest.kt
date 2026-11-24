@@ -8,6 +8,7 @@ package com.infomaniak.drive.utils
 import com.infomaniak.drive.data.cache.PublicShareCache
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
@@ -101,6 +102,47 @@ class ManageStorageFilesTest {
         writer.join()
         assertTrue(cleanup.await().exceptionOrNull() is IOException)
         assertEquals(7L, Files.size(file))
+    }
+
+    @Test
+    fun `unrelated cache paths with the same old stripe do not block and cancelled waiters release their reference`() = runBlocking {
+        val first = temp.resolve("10").toFile()
+        val second = temp.resolve("32").toFile()
+        assertEquals(first.canonicalPath.hashCode() and 63, second.canonicalPath.hashCode() and 63)
+        val started = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+        val owner = launch {
+            CacheFileLocks.withLock(first) {
+                started.complete(Unit)
+                release.await()
+            }
+        }
+        started.await()
+        val waiter = launch { CacheFileLocks.withLock(first) { error("Cancelled waiter must not acquire the lock") } }
+        yield()
+        assertFalse(CacheFileLocks.tryWithLock(first) { true })
+        assertTrue(CacheFileLocks.tryWithLock(second) { true })
+        waiter.cancelAndJoin()
+        assertFalse(CacheFileLocks.tryWithLock(first) { true })
+        release.complete(Unit)
+        owner.join()
+        assertTrue(CacheFileLocks.tryWithLock(first) { true })
+    }
+
+    @Test
+    fun `thumbnail cleanup continues after an entry changes and reports the failure`() = runBlocking {
+        val cache = Files.createDirectory(temp.resolve("thumbnails")).toRealPath()
+        val changed = Files.write(cache.resolve("changed"), ByteArray(3))
+        val unchanged = Files.write(cache.resolve("unchanged"), ByteArray(4))
+        val files = scanManageStorage(listOf(cache), mapOf(cache to StorageCategory.ProviderThumbnail))
+            .cachedFiles.associateBy { it.path }
+        Files.write(changed, ByteArray(8))
+
+        assertThrows(IOException::class.java) {
+            runBlocking { deleteUnchangedCacheFiles(cache, listOf(files.getValue(changed), files.getValue(unchanged))) }
+        }
+        assertTrue(Files.exists(changed))
+        assertFalse(Files.exists(unchanged))
     }
 
     @Test

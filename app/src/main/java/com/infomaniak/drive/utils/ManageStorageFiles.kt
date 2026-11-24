@@ -92,6 +92,20 @@ internal fun deleteUnchangedCacheFile(root: Path, file: StorageFile) {
     }
 }
 
+internal suspend fun deleteUnchangedCacheFiles(root: Path, files: List<StorageFile>) {
+    val coroutineContext = currentCoroutineContext()
+    var firstFailure: IOException? = null
+    for (file in files) {
+        coroutineContext.ensureActive()
+        try {
+            CacheFileLocks.withLock(file.path.toFile()) { deleteUnchangedCacheFile(root, file) }
+        } catch (exception: IOException) {
+            if (firstFailure == null) firstFailure = exception else firstFailure.addSuppressed(exception)
+        }
+    }
+    firstFailure?.let { throw it }
+}
+
 internal fun promoteCachedFile(cacheFile: java.io.File, offlineFile: java.io.File, lastModifiedMillis: Long) {
     val tempFile = Files.createTempFile(offlineFile.parentFile!!.toPath(), ".offline-", ".tmp").toFile()
     var operationFailure: Throwable? = null
