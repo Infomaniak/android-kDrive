@@ -131,9 +131,6 @@
 
         <activity
             android:name=".ui.menu.settings.ManageStorageActivity"
-            android:excludeFromRecents="true"
-            android:exported="false"
-            android:label="@string/manageStorageTitle"
             android:theme="@style/AppTheme.ManageStorage" />
 
         <activity android:name=".ui.MaintenanceActivity" />
