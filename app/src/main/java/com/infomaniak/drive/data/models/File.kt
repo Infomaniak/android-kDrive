@@ -35,6 +35,7 @@ import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.CacheFileLocks
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmListParceler.FileCategoryRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
@@ -278,7 +279,7 @@ open class File(
     }
 
     fun getConvertedPdfCache(context: Context, userDrive: UserDrive): IOFile {
-        val folder = IOFile(context.cacheDir, "converted_pdf/${userDrive.userId}/${userDrive.driveId}")
+        val folder = IOFile(context.cacheDir, "$PREVIEW_CACHE_DIRECTORY/${userDrive.userId}/${userDrive.driveId}")
         if (!folder.exists()) folder.mkdirs()
         return IOFile(folder, id.toString())
     }
@@ -298,7 +299,7 @@ open class File(
     }
 
     fun getCacheFile(context: Context, userDrive: UserDrive = UserDrive()): IOFile {
-        val folder = IOFile(context.cacheDir, "cloud_storage/${userDrive.userId}/${userDrive.driveId}")
+        val folder = IOFile(context.cacheDir, "$DOWNLOAD_CACHE_DIRECTORY/${userDrive.userId}/${userDrive.driveId}")
         if (!folder.exists()) folder.mkdirs()
         return IOFile(folder, id.toString())
     }
@@ -487,26 +488,25 @@ open class File(
         onProgress: (progress: Int) -> Unit,
         navigateToDownloadDialog: (suspend () -> Unit)? = null,
     ): IOFile {
-        val fileNeedDownload: Boolean
-        val cacheFile: IOFile
-        val isPublicShared: Boolean
-
-        withContext(Dispatchers.IO) {
-            isPublicShared = isPublicShared()
-            cacheFile = when {
+        val isPublicShared = isPublicShared()
+        val cacheFile = withContext(Dispatchers.IO) {
+            when {
                 isPublicShared -> getPublicShareCache(context)
                 isOnlyOfficePreview() -> getConvertedPdfCache(context, userDrive)
                 isOffline -> getOfflineFile(context, userDrive.userId)!!
                 else -> getCacheFile(context, userDrive)
             }
-
-            fileNeedDownload = if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
         }
 
-        if (fileNeedDownload) {
-            navigateToDownloadDialog?.invoke()
-            downloadFile(cacheFile, file = this, shouldBePdf, onProgress, isPublicShared)
-            Dispatchers.IO { cacheFile.setLastModified(getLastModifiedInMilliSecond()) }
+        CacheFileLocks.withLock(cacheFile) {
+            val fileNeedDownload = withContext(Dispatchers.IO) {
+                if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
+            }
+            if (fileNeedDownload) {
+                navigateToDownloadDialog?.invoke()
+                downloadFile(cacheFile, file = this, shouldBePdf, onProgress, isPublicShared)
+                Dispatchers.IO { cacheFile.setLastModified(getLastModifiedInMilliSecond()) }
+            }
         }
 
         return cacheFile
@@ -514,6 +514,8 @@ open class File(
 
     companion object {
         const val IS_PRIVATE_SPACE = "is_private_space"
+        const val DOWNLOAD_CACHE_DIRECTORY = "cloud_storage"
+        const val PREVIEW_CACHE_DIRECTORY = "converted_pdf"
 
         /**
          * This method is here, and not directly a class method in the File class, because of a supposed Realm bug.

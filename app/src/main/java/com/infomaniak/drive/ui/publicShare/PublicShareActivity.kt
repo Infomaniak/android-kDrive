@@ -31,6 +31,7 @@ import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.core.ui.view.extension.setMargins
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.PublicShareCache
 import com.infomaniak.drive.databinding.ActivityPublicShareBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
@@ -49,6 +50,7 @@ class PublicShareActivity : EdgeToEdgeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        PublicShareCache.opened()
         setContentView(binding.root)
         addComposeOverlay {
             TwoFactorAuthApprovalAutoManagedBottomSheet(
@@ -69,6 +71,7 @@ class PublicShareActivity : EdgeToEdgeActivity() {
 
     override fun onDestroy() {
         IOFile(filesDir, getString(R.string.EXPOSED_PUBLIC_SHARE_DIR)).apply { if (exists()) deleteRecursively() }
+        PublicShareCache.closed()
         super.onDestroy()
     }
 

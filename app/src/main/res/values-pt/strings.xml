@@ -491,6 +491,19 @@
     <string name="manageCategoriesNoCategory">Sem categoria</string>
     <string name="manageCategoriesTitle">Gerir categorias</string>
     <string name="manageDropboxTitle">Gerir a caixa de depósito %s</string>
+    <string name="manageStorageCacheDirectory">Cache</string>
+    <string name="manageStorageCachedFileTitle">Ficheiros em cache</string>
+    <string name="manageStorageDirectoriesTitle">Dados</string>
+    <string name="manageStorageDocumentsDirectory">Outros documentos</string>
+    <string name="manageStorageImageCache">Cache de imagens</string>
+    <string name="manageStorageImportDirectory">Importações</string>
+    <string name="manageStorageModalClearCacheDirectoryDescription">Pretende limpar o conteúdo de \"%1$s\"?</string>
+    <string name="manageStorageModalClearCacheFileDescription">Pretende remover o ficheiro \"%1$s\" do cache local? Não será removido do seu kDrive.</string>
+    <string name="manageStorageModalClearCacheTitle">Limpar cache</string>
+    <string name="manageStorageOpenInPlaceDirectory">Abrir no local</string>
+    <string name="manageStorageTempDirectory">Ficheiros temporários</string>
+    <string name="manageStorageTitle">Gerir o armazenamento local</string>
+    <string name="manageStorageTotalStorageUsedTitle">Armazenamento total utilizado</string>
     <plurals name="mediaFoldersSelected" tools:ignore="ImpliedQuantity">
         <item quantity="one">Uma pasta selecionada</item>
         <item quantity="other">%d pastas selecionadas</item>

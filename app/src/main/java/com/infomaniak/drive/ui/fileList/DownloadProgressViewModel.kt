@@ -29,6 +29,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
+import com.infomaniak.drive.utils.CacheFileLocks
 import com.infomaniak.drive.utils.IOFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -50,26 +51,28 @@ class DownloadProgressViewModel : ViewModel() {
             return@launch
         }
 
-        if (file.isObsoleteOrNotIntact(outputFile)) {
-            runCatching {
-                val apiResponse = DownloadOfflineFileManager.downloadFileResponse(
-                    fileUrl = ApiRoutes.downloadFile(file),
-                    downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor { progress ->
-                        downloadProgressLiveData.postValue(progress)
-                    }
-                )
+        CacheFileLocks.withLock(outputFile) {
+            if (file.isObsoleteOrNotIntact(outputFile)) {
+                runCatching {
+                    val apiResponse = DownloadOfflineFileManager.downloadFileResponse(
+                        fileUrl = ApiRoutes.downloadFile(file),
+                        downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor { progress ->
+                            downloadProgressLiveData.postValue(progress)
+                        }
+                    )
 
-                if (apiResponse.isSuccessful) {
-                    saveData(file, outputFile, apiResponse)
-                } else {
+                    if (apiResponse.isSuccessful) {
+                        saveData(file, outputFile, apiResponse)
+                    } else {
+                        downloadProgressLiveData.postValue(null)
+                    }
+                }.cancellable().onFailure { exception ->
+                    if (exception !is java.io.IOException) SentryLog.e(TAG, "downloadFile failed", exception)
                     downloadProgressLiveData.postValue(null)
                 }
-            }.cancellable().onFailure { exception ->
-                if (exception !is java.io.IOException) SentryLog.e(TAG, "downloadFile failed", exception)
-                downloadProgressLiveData.postValue(null)
+            } else {
+                downloadProgressLiveData.postValue(PROGRESS_COMPLETE)
             }
-        } else {
-            downloadProgressLiveData.postValue(PROGRESS_COMPLETE)
         }
     }
 

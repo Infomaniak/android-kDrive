@@ -32,6 +32,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -68,6 +69,7 @@ import com.infomaniak.drive.ui.fileList.FolderNavigationRestrictions
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.CacheFileLocks
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.SingleOperation
@@ -87,6 +89,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.IOException
 
 class FileInfoActionsView @JvmOverloads constructor(
     context: Context,
@@ -366,21 +370,48 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         if (Utils.getInvalidFileNameCharacter(name) != null) return@with false
 
-        val cacheFile = getCacheFile(context)
-
-        if (cacheFile.exists() && path.isNotEmpty() && !isObsoleteOrNotIntact(cacheFile)) {
-            getOfflineFile(context)?.let { offlineFile ->
-                Utils.moveCacheFileToOffline(file = this, cacheFile, offlineFile)
-                CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(id, isOffline = true) }
-                isOffline = true
-                onItemClickListener.onCacheAddedToOffline()
+        val original = this
+        val snapshot = File(
+            id = id, driveId = driveId, name = name, path = path, type = type,
+            lastModifiedAt = lastModifiedAt, size = size, isMarkedAsOffline = isMarkedAsOffline,
+        )
+        val userDrive = UserDrive(driveId = driveId)
+        val appContext = context.applicationContext
+        setOfflineControlsEnabled(false)
+        mainViewModel.viewModelScope.launch {
+            val moved = try {
+                withContext(Dispatchers.IO) {
+                    val cacheFile = snapshot.getCacheFile(appContext, userDrive)
+                    CacheFileLocks.tryWithLock(cacheFile) {
+                        if (cacheFile.exists() && snapshot.path.isNotEmpty() && !snapshot.isObsoleteOrNotIntact(cacheFile)) {
+                            val offlineFile = snapshot.getOfflineFile(appContext, userDrive.userId) ?: return@tryWithLock false
+                            Utils.moveCacheFileToOffline(snapshot, cacheFile, offlineFile)
+                            FileController.updateFile(snapshot.id, userDrive = userDrive) { it.isOffline = true }
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                }
+            } catch (exception: IOException) {
+                SentryLog.e("FileInfoActionsView", "Could not move cached file offline", exception)
+                appContext.showToast(title = appContext.getString(R.string.errorMove))
+                if (isAttachedToWindow && currentFile === original) refreshBottomSheetUi(original)
+                return@launch
             }
-        } else {
-            Utils.downloadAsOfflineFile(context, file = this)
-            if (isMarkedAsOffline) mainViewModel.updateOfflineFile.value = id
+            if (moved) {
+                if (isAttachedToWindow && currentFile === original) {
+                    original.isOffline = true
+                    onItemClickListener.onCacheAddedToOffline()
+                } else {
+                    mainViewModel.updateOfflineFile.value = snapshot.id
+                }
+            } else {
+                Utils.downloadAsOfflineFile(appContext, snapshot, userDrive)
+                if (snapshot.isMarkedAsOffline) mainViewModel.updateOfflineFile.value = snapshot.id
+            }
+            if (isAttachedToWindow && currentFile === original) refreshBottomSheetUi(original)
         }
-        refreshBottomSheetUi(file = this)
-
         return@with true
     }
 

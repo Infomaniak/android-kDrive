@@ -47,6 +47,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.common.utils.DownloadManagerUtils
 import com.infomaniak.core.legacy.utils.showKeyboard
 import com.infomaniak.core.legacy.utils.showToast
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.BulkOperationType
@@ -314,10 +315,9 @@ object Utils {
     }
 
     fun moveCacheFileToOffline(file: File, cacheFile: IOFile, offlineFile: IOFile) {
-        if (offlineFile.exists()) offlineFile.delete()
-        cacheFile.copyTo(offlineFile)
-        cacheFile.delete()
-        offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
+        if (!promoteCachedFile(cacheFile, offlineFile, file.getLastModifiedInMilliSecond())) {
+            SentryLog.e("Utils", "The promoted cache file could not be deleted")
+        }
     }
 
     fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()) {

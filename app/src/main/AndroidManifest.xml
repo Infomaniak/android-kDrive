@@ -129,6 +129,10 @@
 
         <activity android:name=".ui.menu.settings.SyncSettingsActivity" />
 
+        <activity
+            android:name=".ui.menu.settings.ManageStorageActivity"
+            android:theme="@style/AppTheme.ManageStorage" />
+
         <activity android:name=".ui.MaintenanceActivity" />
 
         <activity android:name=".ui.SwitchUserActivity" />

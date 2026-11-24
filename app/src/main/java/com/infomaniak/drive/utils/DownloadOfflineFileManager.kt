@@ -75,7 +75,7 @@ class DownloadOfflineFileManager(
         file: File,
         onProgress: (progress: Int, fileId: Int) -> Unit,
     ): ListenableWorker.Result {
-
+        lastDownloadedFile = null
         val file = getFileFromRemote(context, file.id, userDrive)
         currentFile = file
         val cacheFile = file.getCacheFile(context, userDrive)
@@ -98,7 +98,7 @@ class DownloadOfflineFileManager(
         onProgress(0, file.id)
 
         if (offlineFile.exists()) offlineFile.delete()
-        if (cacheFile.exists()) cacheFile.delete()
+        CacheFileLocks.withLock(cacheFile) { if (cacheFile.exists()) cacheFile.delete() }
 
         lastDownloadedFile = offlineFile
 
@@ -125,13 +125,16 @@ class DownloadOfflineFileManager(
         cacheFile: IOFile,
         offlineFile: IOFile,
     ): Boolean = withContext(Dispatchers.IO) {
-        if (!file.isObsoleteOrNotIntact(cacheFile)) {
-            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-            notifyCompleted(file, offlineFile, context)
-            lastDownloadedFile = offlineFile
-            return@withContext true
+        CacheFileLocks.withLock(cacheFile) {
+            if (!file.isObsoleteOrNotIntact(cacheFile)) {
+                Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
+                notifyCompleted(file, offlineFile, context)
+                lastDownloadedFile = offlineFile
+                true
+            } else {
+                false
+            }
         }
-        return@withContext false
     }
 
     private suspend fun getFileFromRemote(

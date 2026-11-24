@@ -63,6 +63,16 @@
 
     <style name="AppTheme" parent="AppThemeBase" />
 
+    <!-- The Compose storage screen needs Material 3 surface roles that AppTheme does not supply. -->
+    <style name="AppTheme.ManageStorage" parent="AppTheme">
+        <item name="colorSurface">@color/appBar</item>
+        <item name="colorSurfaceContainer">@color/appBar</item>
+        <item name="colorSurfaceContainerHigh">@color/appBar</item>
+        <item name="colorSurfaceContainerHighest">@color/appBar</item>
+        <item name="colorOnSurfaceVariant">@color/secondaryText</item>
+        <item name="colorOutlineVariant">@color/border</item>
+    </style>
+
     <style name="AppTheme.Video" parent="AppTheme">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowDisablePreview">true</item>
