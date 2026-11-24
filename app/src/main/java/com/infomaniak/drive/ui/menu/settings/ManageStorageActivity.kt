@@ -122,9 +122,13 @@ class ManageStorageActivity : EdgeToEdgeActivity() {
     }
 
     private fun confirmCleanup(title: String, isFile: Boolean, cleanup: () -> Unit) {
-        val description = if (isFile) R.string.modalClearCacheFileDescription else R.string.modalClearCacheDirectoryDescription
+        val description = if (isFile) {
+            R.string.manageStorageModalClearCacheFileDescription
+        } else {
+            R.string.manageStorageModalClearCacheDirectoryDescription
+        }
         MaterialAlertDialogBuilder(this, R.style.DialogStyle)
-            .setTitle(R.string.modalClearCacheTitle)
+            .setTitle(R.string.manageStorageModalClearCacheTitle)
             .setMessage(getString(description, title))
             .setNegativeButton(RCommon.string.buttonCancel, null)
             .setPositiveButton(R.string.buttonClear) { _, _ -> cleanup() }
@@ -175,10 +179,10 @@ private fun ManageStorageScreen(
                 shape = RoundedCornerShape(radius),
                 colors = CardDefaults.cardColors(containerColor = cardBackground),
             ) {
-                StorageRow(stringResource(R.string.totalStorageUsedTitle), usage.totalBytes)
+                StorageRow(stringResource(R.string.manageStorageTotalStorageUsedTitle), usage.totalBytes)
             }
         }
-        item { StorageHeading(stringResource(R.string.directoriesTitle), Modifier.padding(top = margin, bottom = sectionGap)) }
+        item { StorageHeading(stringResource(R.string.manageStorageDirectoriesTitle), Modifier.padding(top = margin, bottom = sectionGap)) }
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -206,7 +210,7 @@ private fun ManageStorageScreen(
                 }
             }
         }
-        item { StorageHeading(stringResource(R.string.cachedFileTitle), Modifier.padding(top = margin, bottom = sectionGap)) }
+        item { StorageHeading(stringResource(R.string.manageStorageCachedFileTitle), Modifier.padding(top = margin, bottom = sectionGap)) }
         itemsIndexed(usage.files, key = { _, file -> file.file.path.toString() }) { index, file ->
             val title = file.name ?: file.file.path.fileName.toString()
             val top = if (index == 0) radius else 0.dp
@@ -279,10 +283,11 @@ private val settingsTitleStyle = Typography.subtitle2.copy(fontFamily = FontFami
 private val StorageCategory.title: Int
     get() = when (this) {
         StorageCategory.OfflineFiles -> R.string.offlineFileTitle
-        StorageCategory.Imports -> R.string.importDirectory
-        StorageCategory.DocumentProvider -> R.string.openInPlaceDirectory
-        StorageCategory.CachedDownloads, StorageCategory.CachedPreviews, StorageCategory.CachedPublicShare -> R.string.cacheDirectory
-        StorageCategory.ImageCache, StorageCategory.ProviderThumbnail -> R.string.imageCache
-        StorageCategory.OtherCache -> R.string.tempDirectory
-        StorageCategory.OtherData -> R.string.documentsDirectory
+        StorageCategory.Imports -> R.string.manageStorageImportDirectory
+        StorageCategory.DocumentProvider -> R.string.manageStorageOpenInPlaceDirectory
+        StorageCategory.CachedDownloads, StorageCategory.CachedPreviews, StorageCategory.CachedPublicShare ->
+            R.string.manageStorageCacheDirectory
+        StorageCategory.ImageCache, StorageCategory.ProviderThumbnail -> R.string.manageStorageImageCache
+        StorageCategory.OtherCache -> R.string.manageStorageTempDirectory
+        StorageCategory.OtherData -> R.string.manageStorageDocumentsDirectory
     }
