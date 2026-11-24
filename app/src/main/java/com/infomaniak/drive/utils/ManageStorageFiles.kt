@@ -94,6 +94,7 @@ internal fun deleteUnchangedCacheFile(root: Path, file: StorageFile) {
 
 internal fun promoteCachedFile(cacheFile: java.io.File, offlineFile: java.io.File, lastModifiedMillis: Long) {
     val tempFile = Files.createTempFile(offlineFile.parentFile!!.toPath(), ".offline-", ".tmp").toFile()
+    var operationFailure: Throwable? = null
     try {
         cacheFile.copyTo(tempFile, overwrite = true)
         if (!tempFile.setLastModified(lastModifiedMillis)) throw IOException("Could not set offline file timestamp")
@@ -101,9 +102,18 @@ internal fun promoteCachedFile(cacheFile: java.io.File, offlineFile: java.io.Fil
         if (!cacheFile.delete() && cacheFile.exists()) {
             throw IOException("The promoted cache file could not be deleted")
         }
-    } finally {
-        if (!tempFile.delete() && tempFile.exists()) {
-            throw IOException("The temporary offline file could not be deleted")
-        }
+    } catch (exception: Throwable) {
+        operationFailure = exception
     }
+
+    val cleanupFailure = if (!tempFile.delete() && tempFile.exists()) {
+        IOException("The temporary offline file could not be deleted")
+    } else {
+        null
+    }
+    operationFailure?.let { failure ->
+        cleanupFailure?.let(failure::addSuppressed)
+        throw failure
+    }
+    cleanupFailure?.let { throw it }
 }
