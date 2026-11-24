@@ -6,7 +6,7 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 
 class StorageOperationQueueTest {
     @Test
-    fun `cleanup is queued after refresh while redundant refresh is skipped`() = runBlocking {
+    fun `cleanup is queued after refresh while redundant refresh is skipped`() = runTest {
         val queue = StorageOperationQueue(this)
         val started = CompletableDeferred<Unit>()
         val release = CompletableDeferred<Unit>()

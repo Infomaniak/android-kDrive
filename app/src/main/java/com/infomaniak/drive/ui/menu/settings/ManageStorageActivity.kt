@@ -172,6 +172,9 @@ private fun ManageStorageScreen(
         if (state.busy) item { LinearProgressIndicator(Modifier.fillMaxWidth()) }
         if (state.cleanupFailed) item {
             Text(stringResource(R.string.errorDelete), color = MaterialTheme.colorScheme.error)
+            if (state.failedFiles.isNotEmpty()) {
+                Text(state.failedFiles.joinToString("\n"), color = MaterialTheme.colorScheme.error)
+            }
         }
         item {
             Card(

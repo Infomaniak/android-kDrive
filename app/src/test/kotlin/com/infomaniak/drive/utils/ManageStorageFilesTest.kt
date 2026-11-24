@@ -146,6 +146,22 @@ class ManageStorageFilesTest {
     }
 
     @Test
+    fun `thumbnail cleanup skips locked files and continues with unlocked files`() = runBlocking {
+        val cache = Files.createDirectory(temp.resolve("thumbnails")).toRealPath()
+        val busy = Files.write(cache.resolve("busy"), ByteArray(3))
+        val available = Files.write(cache.resolve("available"), ByteArray(4))
+        val files = scanManageStorage(listOf(cache), mapOf(cache to StorageCategory.ProviderThumbnail))
+            .cachedFiles.associateBy { it.path }
+        CacheFileLocks.withLock(busy.toFile()) {
+            assertThrows(IOException::class.java) {
+                runBlocking { deleteUnchangedCacheFiles(cache, listOf(files.getValue(busy), files.getValue(available))) }
+            }
+        }
+        assertTrue(Files.exists(busy))
+        assertFalse(Files.exists(available))
+    }
+
+    @Test
     fun `failed cache promotion preserves the previous offline file`() {
         val offline = Files.write(temp.resolve("offline"), byteArrayOf(1, 2, 3))
         assertThrows(IOException::class.java) {
@@ -153,6 +169,28 @@ class ManageStorageFilesTest {
         }
         assertEquals(listOf<Byte>(1, 2, 3), Files.readAllBytes(offline).toList())
         assertEquals(listOf(offline), Files.list(temp).use { it.toList() })
+    }
+
+    @Test
+    fun `successful promotion survives failure to delete the cache`() {
+        val cache = Files.write(temp.resolve("cache"), byteArrayOf(1, 2, 3))
+        val offline = temp.resolve("offline")
+        val cacheDeleted = promoteCachedFile(cache.toFile(), offline.toFile(), 1_000) { false }
+
+        assertFalse(cacheDeleted)
+        assertTrue(Files.exists(cache))
+        assertEquals(listOf<Byte>(1, 2, 3), Files.readAllBytes(offline).toList())
+    }
+
+    @Test
+    fun `successful promotion survives denied cache deletion`() {
+        val cache = Files.write(temp.resolve("cache"), byteArrayOf(1, 2, 3))
+        val offline = temp.resolve("offline")
+        val cacheDeleted = promoteCachedFile(cache.toFile(), offline.toFile(), 1_000) { throw SecurityException() }
+
+        assertFalse(cacheDeleted)
+        assertTrue(Files.exists(cache))
+        assertEquals(listOf<Byte>(1, 2, 3), Files.readAllBytes(offline).toList())
     }
 
     @Test

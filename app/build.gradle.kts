@@ -253,6 +253,7 @@ dependencies {
 
     testImplementation(libs.kotlin.faker)
     testImplementation(libs.mock.web.server)
+    testImplementation(core.kotlinx.coroutines.test)
     testImplementation(core.mockk.android)
     androidTestImplementation(libs.androidx.ui.automator)
 

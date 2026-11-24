@@ -38,6 +38,13 @@ internal data class StorageScan(
     val cachedFiles: List<StorageFile>,
 )
 
+private val listedCacheCategories = setOf(
+    StorageCategory.CachedDownloads,
+    StorageCategory.CachedPreviews,
+    StorageCategory.CachedPublicShare,
+    StorageCategory.ProviderThumbnail,
+)
+
 internal suspend fun scanManageStorage(
     roots: List<Path>,
     categories: Map<Path, StorageCategory>,
@@ -57,8 +64,7 @@ internal suspend fun scanManageStorage(
 
                 val category = categoryRoots.firstOrNull { file.startsWith(it.key) }?.value ?: StorageCategory.OtherData
                 sizes[category] = sizes.getOrDefault(category, 0) + attrs.size()
-                if (category in setOf(StorageCategory.CachedDownloads, StorageCategory.CachedPreviews,
-                        StorageCategory.CachedPublicShare, StorageCategory.ProviderThumbnail)) {
+                if (category in listedCacheCategories) {
                     cachedFiles += StorageFile(file, attrs.size(), attrs.lastModifiedTime().toMillis())
                 }
             }
@@ -98,7 +104,11 @@ internal suspend fun deleteUnchangedCacheFiles(root: Path, files: List<StorageFi
     for (file in files) {
         coroutineContext.ensureActive()
         try {
-            CacheFileLocks.withLock(file.path.toFile()) { deleteUnchangedCacheFile(root, file) }
+            val deleted = CacheFileLocks.tryWithLock(file.path.toFile()) {
+                deleteUnchangedCacheFile(root, file)
+                true
+            }
+            if (!deleted) throw IOException("A cache entry is in use")
         } catch (exception: IOException) {
             if (firstFailure == null) firstFailure = exception else firstFailure.addSuppressed(exception)
         }
@@ -106,16 +116,18 @@ internal suspend fun deleteUnchangedCacheFiles(root: Path, files: List<StorageFi
     firstFailure?.let { throw it }
 }
 
-internal fun promoteCachedFile(cacheFile: java.io.File, offlineFile: java.io.File, lastModifiedMillis: Long) {
+internal fun promoteCachedFile(
+    cacheFile: java.io.File,
+    offlineFile: java.io.File,
+    lastModifiedMillis: Long,
+    deleteCache: (java.io.File) -> Boolean = java.io.File::delete,
+): Boolean {
     val tempFile = Files.createTempFile(offlineFile.parentFile!!.toPath(), ".offline-", ".tmp").toFile()
     var operationFailure: Throwable? = null
     try {
         cacheFile.copyTo(tempFile, overwrite = true)
         if (!tempFile.setLastModified(lastModifiedMillis)) throw IOException("Could not set offline file timestamp")
         Files.move(tempFile.toPath(), offlineFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
-        if (!cacheFile.delete() && cacheFile.exists()) {
-            throw IOException("The promoted cache file could not be deleted")
-        }
     } catch (exception: Throwable) {
         operationFailure = exception
     }
@@ -130,4 +142,9 @@ internal fun promoteCachedFile(cacheFile: java.io.File, offlineFile: java.io.Fil
         throw failure
     }
     cleanupFailure?.let { throw it }
+    return try {
+        deleteCache(cacheFile) || !cacheFile.exists()
+    } catch (_: SecurityException) {
+        false
+    }
 }

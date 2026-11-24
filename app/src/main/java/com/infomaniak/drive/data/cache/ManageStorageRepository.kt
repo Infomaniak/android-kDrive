@@ -33,6 +33,9 @@ import javax.inject.Inject
 
 internal data class CachedStorageFile(val file: StorageFile, val name: String?, val id: Int?, val category: StorageCategory)
 
+internal class CacheCleanupException(val failedFiles: List<CachedStorageFile>, cause: IOException) :
+    IOException("Some cache files could not be removed", cause)
+
 internal data class ManageStorageUsage(val sizes: Map<StorageCategory, Long>, val files: List<CachedStorageFile>) {
     val totalBytes: Long get() = sizes.values.sum()
 }
@@ -53,22 +56,26 @@ internal class ManageStorageRepository @Inject constructor(@param:ApplicationCon
     suspend fun clearFiles(files: List<CachedStorageFile>): Unit = withContext(Dispatchers.IO) {
         val cache = context.cacheDir.canonicalFile.toPath()
         var firstFailure: IOException? = null
+        val failedFiles = mutableListOf<CachedStorageFile>()
         for (entry in files) {
             ensureActive()
             val folder = cacheFolderFor(entry.category, cache)
             try {
-                CacheFileLocks.withLock(entry.file.path.toFile()) {
+                val deleted = CacheFileLocks.tryWithLock(entry.file.path.toFile()) {
                     if (entry.category == StorageCategory.CachedPublicShare) {
                         PublicShareCache.deleteIfInactive { deleteUnchangedCacheFile(folder, entry.file) }
                     } else {
                         deleteUnchangedCacheFile(folder, entry.file)
                     }
+                    true
                 }
+                if (!deleted) throw IOException("A cache entry is in use")
             } catch (exception: IOException) {
-                if (firstFailure == null) firstFailure = exception
+                failedFiles += entry
+                if (firstFailure == null) firstFailure = exception else firstFailure.addSuppressed(exception)
             }
         }
-        firstFailure?.let { throw it }
+        firstFailure?.let { throw CacheCleanupException(failedFiles, it) }
     }
 
     suspend fun clearImageCache(): Unit = withContext(Dispatchers.IO) {
@@ -110,12 +117,12 @@ internal class ManageStorageRepository @Inject constructor(@param:ApplicationCon
         val coroutineContext = currentCoroutineContext()
         try {
             Realm.getInstance(configuration).use { realm ->
-                entries.forEach { entry ->
+                val unresolved = entries.filter { it.file.path !in names }.groupBy { checkNotNull(it.id) }
+                unresolved.keys.chunked(500).forEach { ids ->
                     coroutineContext.ensureActive()
-                    if (entry.file.path !in names) {
-                        realm.where(File::class.java)
-                            .equalTo(File::uid.name, "${checkNotNull(entry.id)}_${drive.driveId}")
-                            .findFirst()?.name?.let { names[entry.file.path] = it }
+                    val uids = ids.map { "${it}_${drive.driveId}" }.toTypedArray()
+                    realm.where(File::class.java).`in`(File::uid.name, uids).findAll().forEach { file ->
+                        unresolved[file.id]?.forEach { entry -> names[entry.file.path] = file.name }
                     }
                 }
             }

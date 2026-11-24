@@ -10,19 +10,19 @@ import kotlinx.coroutines.sync.withLock
 import java.io.File
 
 internal object CacheFileLocks {
-    private data class Entry(val mutex: Mutex = Mutex(), var references: Int = 0)
+    internal data class Entry(val mutex: Mutex = Mutex(), var references: Int = 0)
 
     private val locks = mutableMapOf<String, Entry>()
 
-    private fun acquire(path: String): Entry = synchronized(locks) {
+    internal fun acquire(path: String): Entry = synchronized(locks) {
         locks.getOrPut(path) { Entry() }.also { it.references++ }
     }
 
-    private fun release(path: String, entry: Entry) = synchronized(locks) {
+    internal fun release(path: String, entry: Entry) = synchronized(locks) {
         if (--entry.references == 0) locks.remove(path)
     }
 
-    suspend fun <T> withLock(file: File, action: suspend () -> T): T {
+    suspend inline fun <T> withLock(file: File, action: () -> T): T {
         val path = file.canonicalPath
         val entry = acquire(path)
         try {
@@ -32,7 +32,7 @@ internal object CacheFileLocks {
         }
     }
 
-    fun tryWithLock(file: File, action: () -> Boolean): Boolean {
+    inline fun tryWithLock(file: File, action: () -> Boolean): Boolean {
         val path = file.canonicalPath
         val entry = acquire(path)
         return try {
