@@ -38,7 +38,7 @@ import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.RenderersFactory
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.util.EventLogger
 import androidx.media3.session.MediaController
@@ -129,7 +129,7 @@ object PlaybackUtils {
 
     fun Context.getExoPlayer(isPublicShared: Boolean = false): ExoPlayer {
         return ExoPlayer.Builder(this, getRenderersFactory())
-            .setMediaSourceFactory(DefaultMediaSourceFactory(getDataSourceFactory(isPublicShared)))
+            .setMediaSourceFactory(ProgressiveMediaSource.Factory(getDataSourceFactory(isPublicShared)))
             .setTrackSelector(getTrackSelector())
             .build()
             .apply {
@@ -237,9 +237,8 @@ object PlaybackUtils {
     }
 
     private fun Context.getBitmapLoader(isPublicShared: Boolean): DataSourceBitmapLoader {
-        return DataSourceBitmapLoader(
-            DataSourceBitmapLoader.DEFAULT_EXECUTOR_SERVICE.get(),
-            getDataSourceFactory(isPublicShared),
-        )
+        return DataSourceBitmapLoader.Builder(this)
+            .setDataSourceFactory(getDataSourceFactory(isPublicShared))
+            .build()
     }
 }
