@@ -75,6 +75,19 @@ object FileController {
         return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()
     }
 
+    fun refreshOfflineStates(realm: Realm, files: List<File>) {
+        val detachedFiles = files.filterNot { it.isManaged }
+        val filesByUid = detachedFiles.groupBy { "${it.id}_${it.driveId}" }
+        filesByUid.keys.chunked(500).forEach { uids ->
+            realm.where(File::class.java).`in`(File::uid.name, uids.toTypedArray()).findAll().forEach { persistedFile ->
+                filesByUid[persistedFile.uid]?.forEach { file ->
+                    file.isOffline = persistedFile.isOffline
+                    file.isMarkedAsOffline = persistedFile.isMarkedAsOffline
+                }
+            }
+        }
+    }
+
     fun getSharedDrive(userId: Int, fileId: Int): File? {
         getRealmInstance(UserDrive(userId = userId, sharedWithMe = true)).use { realm ->
             return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()?.let {

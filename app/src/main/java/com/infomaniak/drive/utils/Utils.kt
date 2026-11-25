@@ -204,7 +204,9 @@ object Utils {
         fileList: List<File>,
         isSharedWithMe: Boolean = false,
     ) {
-        mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
+        mainViewModel.currentPreviewFileList = fileList.map { file ->
+            if (file.isManaged) file.realm.copyFromRealm(file, 1) else file
+        }.associateBy { it.id } as LinkedHashMap<Int, File>
 
         val navOptions = NavOptions.Builder()
             .setEnterAnim(R.anim.fragment_open_enter)

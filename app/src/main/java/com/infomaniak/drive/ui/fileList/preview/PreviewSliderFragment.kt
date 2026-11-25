@@ -144,12 +144,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
 
     private fun refreshPersistedOfflineStates(files: List<File>) {
         FileController.getRealmInstance(userDrive).use { realm ->
-            files.forEach { file ->
-                FileController.getFileProxyById(file.id, customRealm = realm)?.let { persistedFile ->
-                    file.isOffline = persistedFile.isOffline
-                    file.isMarkedAsOffline = persistedFile.isMarkedAsOffline
-                }
-            }
+            FileController.refreshOfflineStates(realm, files)
         }
     }
 
