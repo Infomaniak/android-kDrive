@@ -119,45 +119,57 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
                 previewSliderViewModel.previewListToken?.let { PreviewListStore(requireContext()).read(it) }
                     ?: previewSliderViewModel.fileKeys(navigationArgs.fileId, navigationArgs.driveId)
             }
-            val (folderFiles, requestedIds, cachedFiles) = FileController.getRealmInstance(userDrive).use { realm ->
-                val folderFiles = if (parentFolderId >= 0) {
-                    val folder = realm.where(File::class.java)
-                        .equalTo(File::uid.name, "${parentFolderId}_${navigationArgs.driveId}").findFirst()
-                    FileController.getLocalSortedFolderFiles(folder, sortType)
-                        .filterNot { it.id in removedIds || (it.id to it.driveId) in ids }
-                } else {
-                    emptyList()
-                }
-                val idsToLoad = if (
-                    parentFolderId >= 0 && selectedKey.first !in removedIds && selectedKey !in ids &&
-                    folderFiles.none { (it.id to it.driveId) == selectedKey }
-                ) ids + selectedKey else ids
-                val cachedFiles = idsToLoad.mapNotNull { (id, driveId) ->
-                    realm.where(File::class.java).equalTo(File::uid.name, "${id}_$driveId").findFirst()
-                        ?.let { realm.copyFromRealm(it, 1) }
-                }.associateBy { it.id to it.driveId }
-                Triple(folderFiles, idsToLoad, cachedFiles)
-            }
+            val (folderFiles, requestedIds, cachedFiles) =
+                loadCachedPreviewFiles(parentFolderId, ids, removedIds, selectedKey, sortType)
             val missingIds = requestedIds.filterNot { it in cachedFiles }
-            val remoteFiles = if (missingIds.isEmpty()) {
-                emptyMap()
-            } else {
-                val client = AccountUtils.getHttpClient(userDrive.userId)
-                val semaphore = Semaphore(6)
-                coroutineScope {
-                    missingIds.map { (id, driveId) ->
-                        async {
-                            semaphore.withPermit {
-                                ApiRepository.getFileDetails(File(id = id, driveId = driveId), client).let { response ->
-                                    if (!response.isSuccess()) Sentry.captureMessage("Unable to load preview file $id")
-                                    response.data.takeIf { response.isSuccess() && it?.id == id && it.driveId == driveId }
-                                }
-                            }
-                        }
-                    }.awaitAll().filterNotNull().associateBy { it.id to it.driveId }
-                }
-            }
+            val remoteFiles = loadRemotePreviewFiles(missingIds)
             folderFiles + requestedIds.mapNotNull { cachedFiles[it] ?: remoteFiles[it] }
+        }
+    }
+
+    private fun loadCachedPreviewFiles(
+        parentFolderId: Int,
+        ids: List<Pair<Int, Int>>,
+        removedIds: Set<Int>,
+        selectedKey: Pair<Int, Int>,
+        sortType: File.SortType,
+    ): Triple<List<File>, List<Pair<Int, Int>>, Map<Pair<Int, Int>, File>> {
+        return FileController.getRealmInstance(userDrive).use { realm ->
+            val folderFiles = if (parentFolderId >= 0) {
+                val folder = realm.where(File::class.java)
+                    .equalTo(File::uid.name, "${parentFolderId}_${navigationArgs.driveId}").findFirst()
+                FileController.getLocalSortedFolderFiles(folder, sortType)
+                    .filterNot { it.id in removedIds || (it.id to it.driveId) in ids }
+            } else {
+                emptyList()
+            }
+            val idsToLoad = if (
+                parentFolderId >= 0 && selectedKey.first !in removedIds && selectedKey !in ids &&
+                folderFiles.none { (it.id to it.driveId) == selectedKey }
+            ) ids + selectedKey else ids
+            val cachedFiles = idsToLoad.mapNotNull { (id, driveId) ->
+                realm.where(File::class.java).equalTo(File::uid.name, "${id}_$driveId").findFirst()
+                    ?.let { realm.copyFromRealm(it, 1) }
+            }.associateBy { it.id to it.driveId }
+            Triple(folderFiles, idsToLoad, cachedFiles)
+        }
+    }
+
+    private suspend fun loadRemotePreviewFiles(missingIds: List<Pair<Int, Int>>): Map<Pair<Int, Int>, File> {
+        if (missingIds.isEmpty()) return emptyMap()
+        val client = AccountUtils.getHttpClient(userDrive.userId)
+        val semaphore = Semaphore(6)
+        return coroutineScope {
+            missingIds.map { (id, driveId) ->
+                async {
+                    semaphore.withPermit {
+                        ApiRepository.getFileDetails(File(id = id, driveId = driveId), client).let { response ->
+                            if (!response.isSuccess()) Sentry.captureMessage("Unable to load preview file $id")
+                            response.data.takeIf { response.isSuccess() && it?.id == id && it.driveId == driveId }
+                        }
+                    }
+                }
+            }.awaitAll().filterNotNull().associateBy { it.id to it.driveId }
         }
     }
 
@@ -364,8 +376,8 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         mainViewModel.duplicateFile(currentFile, destinationFolder.id).observe(viewLifecycleOwner) { fileResult ->
             if (fileResult.isSuccess) {
                 (fileResult.data as? File)?.let { file ->
-                    if (currentFile.parentId == destinationFolder.id) {
-                        if (addPreviewFile(file)) previewSliderAdapter.addFile(file)
+                    if (currentFile.parentId == destinationFolder.id && addPreviewFile(file)) {
+                        previewSliderAdapter.addFile(file)
                     }
 
                     showSnackbar(getString(R.string.allFileDuplicate, currentFile.name))

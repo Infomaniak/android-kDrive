@@ -37,7 +37,10 @@ class PreviewListStore(context: Context) {
         val atomicFile = file(token)
         val output = atomicFile.startWrite()
         try {
-            DataOutputStream(BufferedOutputStream(output)).apply { writeKeys(this, keys); flush() }
+            DataOutputStream(BufferedOutputStream(output)).apply {
+                writeKeys(this, keys)
+                flush()
+            }
             atomicFile.finishWrite(output)
         } catch (exception: Exception) {
             atomicFile.failWrite(output)
