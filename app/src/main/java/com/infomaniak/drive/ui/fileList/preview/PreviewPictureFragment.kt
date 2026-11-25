@@ -183,7 +183,7 @@ class PreviewPictureFragment : PreviewFragment() {
     }
 
     private fun getOfflineFile(): IOFile? {
-        return file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)?.let {
+        return file.getOfflineFile(requireContext(), pageUserDrive.userId)?.let {
             if (file.isOfflineAndIntact(it)) it else null
         }
     }

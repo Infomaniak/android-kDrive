@@ -211,9 +211,10 @@ object Utils {
             .setExitAnim(R.anim.fragment_open_exit)
             .build()
 
-        val fileIds = fileList.filterNot(File::isFolder).map(File::id).distinct().let {
-            (if (selectedFile.id in it) it else it + selectedFile.id).toIntArray()
-        }
+        val fileKeys = fileList.filterNot(File::isFolder).map { it.id to it.driveId }.distinct()
+        val selectedKey = selectedFile.id to selectedFile.driveId
+        val previewKeys = if (selectedKey in fileKeys) fileKeys else fileKeys + selectedKey
+        val fileIds = previewKeys.map { it.first }.toIntArray()
         val (destinationClass, bundle) = if (selectedFile.isPublicShared()) {
             R.id.publicSharePreviewSliderFragment to PublicSharePreviewSliderFragmentArgs(
                 fileId = selectedFile.id,
@@ -228,6 +229,7 @@ object Utils {
                 parentFolderId = parentFolderId,
                 sortType = sortType.name,
                 fileIds = if (parentFolderId < 0) fileIds else null,
+                fileDriveIds = if (parentFolderId < 0) previewKeys.map { it.second }.toIntArray() else null,
             )
 
             R.id.previewSliderFragment to args.toBundle()

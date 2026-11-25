@@ -60,7 +60,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     private val offlineFile: IOFile? by lazy {
         if (file.isOffline) {
-            file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)
+            file.getOfflineFile(requireContext(), pageUserDrive.userId)
         } else {
             null
         }
@@ -206,7 +206,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
         exoPlayer.setMediaItem(
             getMediaItem(file, offlineFile, offlineIsComplete),
-            (parentFragment as BasePreviewSliderFragment).mediaPositionsMap[file.id] ?: 0L,
+            (parentFragment as BasePreviewSliderFragment).mediaPositionsMap[file.id to file.driveId] ?: 0L,
         )
         exoPlayer.prepare()
 
@@ -245,7 +245,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     private fun persistCurrentPlaybackPosition() {
         if (exoPlayer.currentMediaItem?.mediaId?.toInt() == file.id) {
-            (parentFragment as BasePreviewSliderFragment).mediaPositionsMap[file.id] = exoPlayer.currentPosition
+            (parentFragment as BasePreviewSliderFragment).mediaPositionsMap[file.id to file.driveId] = exoPlayer.currentPosition
         }
     }
 

@@ -42,6 +42,7 @@ import com.infomaniak.drive.data.models.file.SpecialFolder.Favorites
 import com.infomaniak.drive.data.models.file.SpecialFolder.Gallery
 import com.infomaniak.drive.data.models.file.SpecialFolder.MyShares
 import com.infomaniak.drive.data.models.file.SpecialFolder.RecentChanges
+import com.infomaniak.drive.data.models.file.SpecialFolder.Search
 import com.infomaniak.drive.data.models.file.SpecialFolder.SharedWithMe
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.AccountUtils
@@ -120,6 +121,13 @@ object FileController {
             }
         }
         return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
+    }
+
+    fun getParentFileByUid(fileId: Int, userDrive: UserDrive): File? {
+        return getRealmInstance(userDrive).use { realm ->
+            realm.where(File::class.java).equalTo(File::uid.name, "${fileId}_${userDrive.driveId}").findFirst()
+                ?.localParent?.firstOrNull { it.id > 0 }?.let { realm.copyFromRealm(it, 0) }
+        }
     }
 
     fun getIdOfChildrenFileWithName(folderId: Int, name: String): List<Int> {
@@ -481,6 +489,24 @@ object FileController {
 
     fun saveFavoritesFiles(files: List<File>, replaceOldData: Boolean = false, realm: Realm? = null) {
         saveFiles(Favorites.file, files, replaceOldData, realm)
+    }
+
+    fun cacheSearchFiles(files: List<File>, userDrive: UserDrive, isFirstPage: Boolean) {
+        getRealmInstance(userDrive).use { realm ->
+            realm.executeTransaction {
+                val searchFolder = getFileById(realm, Search.id) ?: realm.copyToRealm(Search.file)
+                if (isFirstPage) searchFolder.children.clear()
+                val cachedIds = searchFolder.children.mapTo(mutableSetOf()) { it.uid }
+                files.filterNot(File::isFolder).forEach { file ->
+                    val uid = "${file.id}_${file.driveId}"
+                    realm.where(File::class.java).equalTo(File::uid.name, uid).findFirst()?.let {
+                        file.keepOldLocalFilesData(realm.copyFromRealm(it, 1))
+                    }
+                    val cached = realm.copyToRealmOrUpdate(file)
+                    if (cachedIds.add(uid)) searchFolder.children.add(cached)
+                }
+            }
+        }
     }
 
     private fun saveMySharesFiles(userDrive: UserDrive, files: ArrayList<File>, replaceOldData: Boolean) {

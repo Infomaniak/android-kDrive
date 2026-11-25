@@ -143,6 +143,11 @@
             android:defaultValue="@null"
             app:argType="integer[]"
             app:nullable="true" />
+        <argument
+            android:name="fileDriveIds"
+            android:defaultValue="@null"
+            app:argType="integer[]"
+            app:nullable="true" />
     </fragment>
 
     <fragment

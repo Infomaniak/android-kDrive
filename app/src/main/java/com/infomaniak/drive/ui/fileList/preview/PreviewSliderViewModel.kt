@@ -29,9 +29,37 @@ class PreviewSliderViewModel(private val savedStateHandle: SavedStateHandle) : V
         get() = savedStateHandle[CURRENT_FILE_ID] ?: requireNotNull(savedStateHandle["fileId"])
         set(value) { savedStateHandle[CURRENT_FILE_ID] = value }
 
+    var currentDriveId: Int?
+        get() = savedStateHandle[CURRENT_DRIVE_ID] ?: savedStateHandle["driveId"]
+        set(value) { savedStateHandle[CURRENT_DRIVE_ID] = value }
+
     var fileIds: IntArray?
         get() = savedStateHandle["fileIds"]
         set(value) { savedStateHandle["fileIds"] = value }
+
+    var fileDriveIds: IntArray?
+        get() = savedStateHandle["fileDriveIds"]
+        set(value) { savedStateHandle["fileDriveIds"] = value }
+
+    fun fileKeys(defaultFileId: Int, defaultDriveId: Int): List<Pair<Int, Int>> {
+        val ids = fileIds ?: intArrayOf(defaultFileId)
+        val drives = fileDriveIds ?: IntArray(ids.size) { defaultDriveId }
+        require(ids.size == drives.size) { "Preview file and drive lists have different sizes" }
+        return ids.indices.map { ids[it] to drives[it] }
+    }
+
+    fun removeFile(fileId: Int, driveId: Int) {
+        val ids = fileIds ?: return
+        val drives = fileDriveIds
+        if (drives == null) {
+            fileIds = ids.filterNot { it == fileId }.toIntArray()
+        } else {
+            require(ids.size == drives.size) { "Preview file and drive lists have different sizes" }
+            val retained = ids.indices.filterNot { ids[it] == fileId && drives[it] == driveId }
+            fileIds = retained.map { ids[it] }.toIntArray()
+            fileDriveIds = retained.map { drives[it] }.toIntArray()
+        }
+    }
 
     val parentFolderId: Int
         get() = savedStateHandle["parentFolderId"] ?: -1
@@ -49,5 +77,6 @@ class PreviewSliderViewModel(private val savedStateHandle: SavedStateHandle) : V
 
     private companion object {
         const val CURRENT_FILE_ID = "currentPreviewFileId"
+        const val CURRENT_DRIVE_ID = "currentPreviewDriveId"
     }
 }

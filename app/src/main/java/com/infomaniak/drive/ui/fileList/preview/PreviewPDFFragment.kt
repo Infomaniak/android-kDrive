@@ -350,7 +350,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
             previewPDFViewModel.downloadPdfFile(
                 context = requireContext(),
                 file = file,
-                userDrive = previewSliderViewModel.userDrive,
+                userDrive = pageUserDrive,
             ).observe(viewLifecycleOwner) { apiResponse ->
                 apiResponse.data?.let { pdfFile ->
                     this@PreviewPDFFragment.pdfFile = pdfFile

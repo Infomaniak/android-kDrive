@@ -103,7 +103,8 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     protected abstract fun onPreviewReady()
     protected open fun onPreviewDisplayed() = Unit
 
-    fun getPreviewFile(fileId: Int): File? = previewFiles.firstOrNull { it.id == fileId }
+    fun getPreviewFile(fileId: Int, driveId: Int?): File? =
+        previewFiles.firstOrNull { it.id == fileId && (driveId == null || it.driveId == driveId) }
 
     suspend fun awaitPreviewFiles() {
         previewReady.first { it }
@@ -115,20 +116,21 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             previewSliderViewModel.addedFileIds += file.id
         } else {
             previewSliderViewModel.fileIds = previewSliderViewModel.fileIds?.plus(file.id)
+            previewSliderViewModel.fileDriveIds = previewSliderViewModel.fileDriveIds?.plus(file.driveId)
         }
     }
 
-    protected fun removePreviewFile(fileId: Int) {
-        previewFiles.removeAll { it.id == fileId }
+    protected fun removePreviewFile(fileId: Int, driveId: Int) {
+        previewFiles.removeAll { it.id == fileId && it.driveId == driveId }
         if (previewSliderViewModel.parentFolderId >= 0) {
             previewSliderViewModel.addedFileIds = previewSliderViewModel.addedFileIds.filterNot { it == fileId }.toIntArray()
             previewSliderViewModel.removedFileIds += fileId
         } else {
-            previewSliderViewModel.fileIds = previewSliderViewModel.fileIds?.filterNot { it == fileId }?.toIntArray()
+            previewSliderViewModel.removeFile(fileId, driveId)
         }
     }
 
-    val mediaPositionsMap: MutableMap<Int, Long> = mutableMapOf()
+    val mediaPositionsMap: MutableMap<Pair<Int, Int>, Long> = mutableMapOf()
 
     // This is not protected, otherwise it won't build because PublicSharePreviewSliderFragment needs it public for the interface
     // it implements
@@ -156,7 +158,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                 previewFiles.clear()
                 previewFiles.addAll(loadPreviewFiles().filterNot(File::isFolder))
                 val selectedId = previewSliderViewModel.currentFileId
-                val selectedFile = getPreviewFile(selectedId)
+                val selectedFile = getPreviewFile(selectedId, if (isPublicShared) null else previewSliderViewModel.currentDriveId)
                 if (selectedFile == null) {
                     Sentry.captureMessage("Preview file $selectedId is unavailable")
                     showSnackbar(R.string.errorFileNotFound)
@@ -167,6 +169,10 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     showSnackbar(R.string.anErrorHasOccurred)
                 }
                 currentFile = selectedFile
+                if (!isPublicShared) {
+                    userDrive = userDrive.copy(driveId = selectedFile.driveId)
+                    previewSliderViewModel.userDrive = userDrive
+                }
                 onPreviewReady()
                 setupPreview()
                 binding.previewLoading.isGone = true
@@ -290,6 +296,9 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         val file = previewSliderAdapter.getFile(position)
         currentFile = file
         previewSliderViewModel.currentFileId = file.id
+        previewSliderViewModel.currentDriveId = file.driveId
+        if (!isPublicShared) userDrive = userDrive.copy(driveId = file.driveId)
+        previewSliderViewModel.userDrive = userDrive
 
         var shouldDisplayPageNumber = false
         val selectedFragment = childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {

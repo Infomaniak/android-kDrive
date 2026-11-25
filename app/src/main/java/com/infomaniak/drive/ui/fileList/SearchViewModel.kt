@@ -30,9 +30,9 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.SearchDateFilter
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.fileList.SearchFragment.VisibilityMode
-import com.infomaniak.drive.utils.AccountUtils
 import io.realm.OrderedRealmCollection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -70,8 +70,9 @@ class SearchViewModel : ViewModel() {
         searchFilesJob.cancel()
         searchFilesJob = Job()
         return liveData(Dispatchers.IO + searchFilesJob) {
+            val userDrive = UserDrive()
             val apiResponse = ApiRepository.searchFiles(
-                driveId = AccountUtils.currentDriveId,
+                driveId = userDrive.driveId,
                 query = query,
                 sortType = order,
                 cursor = currentCursor,
@@ -80,6 +81,9 @@ class SearchViewModel : ViewModel() {
                 categories = formatCategories(),
             )
 
+            if (apiResponse.isSuccess()) {
+                FileController.cacheSearchFiles(apiResponse.data.orEmpty(), userDrive, isFirstPage = currentCursor == null)
+            }
             if (apiResponse.isSuccess() || currentCursor != null) {
                 emit(
                     FileListFragment.FolderFilesResult(

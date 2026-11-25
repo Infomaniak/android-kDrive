@@ -62,7 +62,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
     override val ownerFragment = this
 
     override fun initCurrentFile() {
-        currentFile = getPreviewFile(previewSliderViewModel.currentFileId)
+        currentFile = getPreviewFile(previewSliderViewModel.currentFileId, null)
             ?: throw Exception("No current preview found")
     }
 
@@ -79,7 +79,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
     }
 
     override suspend fun loadPreviewFiles(): List<File> {
-        val cachedFiles = publicShareViewModel.childrenLiveData.value?.files.orEmpty()
+        val cachedFiles = publicShareViewModel.childrenLiveData.value?.files.orEmpty().associateBy(File::id)
         val rootFile = publicShareViewModel.rootSharedFile.value
         val driveId = publicShareViewModel.driveId
         val uuid = publicShareViewModel.publicShareUuid
@@ -87,7 +87,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
         return coroutineScope {
             (previewSliderViewModel.fileIds ?: intArrayOf()).asList().map { id ->
                 async {
-                    cachedFiles.firstOrNull { it.id == id } ?: rootFile?.takeIf { it.id == id }
+                    cachedFiles[id] ?: rootFile?.takeIf { it.id == id }
                         ?: semaphore.withPermit {
                             withContext(Dispatchers.IO) {
                                 PublicShareApiRepository.getPublicShareRootFile(driveId, uuid, id).let { response ->

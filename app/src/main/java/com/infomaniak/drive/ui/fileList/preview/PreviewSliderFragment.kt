@@ -102,27 +102,33 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         )
         previewSliderViewModel.userDrive = userDrive
         val parentFolderId = previewSliderViewModel.parentFolderId
-        val ids = if (parentFolderId >= 0) previewSliderViewModel.addedFileIds
-        else previewSliderViewModel.fileIds ?: intArrayOf(navigationArgs.fileId)
+        val ids = if (parentFolderId >= 0) {
+            previewSliderViewModel.addedFileIds.map { it to navigationArgs.driveId }
+        } else {
+            previewSliderViewModel.fileKeys(navigationArgs.fileId, navigationArgs.driveId)
+        }
         val removedIds = previewSliderViewModel.removedFileIds.toSet()
-        val selectedId = previewSliderViewModel.currentFileId
+        val selectedKey = previewSliderViewModel.currentFileId to
+                (previewSliderViewModel.currentDriveId ?: navigationArgs.driveId)
         val sortType = File.SortType.valueOf(navigationArgs.sortType)
         return withContext(Dispatchers.IO) {
             val (folderFiles, requestedIds, cachedFiles) = FileController.getRealmInstance(userDrive).use { realm ->
                 val folderFiles = if (parentFolderId >= 0) {
-                    val folder = FileController.getFileById(realm, parentFolderId)
+                    val folder = realm.where(File::class.java)
+                        .equalTo(File::uid.name, "${parentFolderId}_${navigationArgs.driveId}").findFirst()
                     FileController.getLocalSortedFolderFiles(folder, sortType)
-                        .filterNot { it.id in removedIds || it.id in ids }
+                        .filterNot { it.id in removedIds || (it.id to it.driveId) in ids }
                 } else {
                     emptyList()
                 }
                 val idsToLoad = if (
-                    parentFolderId >= 0 && selectedId !in removedIds && selectedId !in ids &&
-                    folderFiles.none { it.id == selectedId }
-                ) ids + selectedId else ids
-                val cachedFiles = idsToLoad.asList().mapNotNull { id ->
-                    FileController.getFileById(realm, id)?.let { realm.copyFromRealm(it, 1) }
-                }.associateBy(File::id)
+                    parentFolderId >= 0 && selectedKey.first !in removedIds && selectedKey !in ids &&
+                    folderFiles.none { (it.id to it.driveId) == selectedKey }
+                ) ids + selectedKey else ids
+                val cachedFiles = idsToLoad.mapNotNull { (id, driveId) ->
+                    realm.where(File::class.java).equalTo(File::uid.name, "${id}_$driveId").findFirst()
+                        ?.let { realm.copyFromRealm(it, 1) }
+                }.associateBy { it.id to it.driveId }
                 Triple(folderFiles, idsToLoad, cachedFiles)
             }
             val missingIds = requestedIds.filterNot { it in cachedFiles }
@@ -132,19 +138,19 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
                 val client = AccountUtils.getHttpClient(userDrive.userId)
                 val semaphore = Semaphore(6)
                 coroutineScope {
-                    missingIds.map { id ->
+                    missingIds.map { (id, driveId) ->
                         async {
                             semaphore.withPermit {
-                                ApiRepository.getFileDetails(File(id = id, driveId = userDrive.driveId), client).let { response ->
+                                ApiRepository.getFileDetails(File(id = id, driveId = driveId), client).let { response ->
                                     if (!response.isSuccess()) Sentry.captureMessage("Unable to load preview file $id")
-                                    response.data.takeIf { response.isSuccess() }
+                                    response.data.takeIf { response.isSuccess() && it?.id == id && it.driveId == driveId }
                                 }
                             }
                         }
-                    }.awaitAll().filterNotNull().associateBy(File::id)
+                    }.awaitAll().filterNotNull().associateBy { it.id to it.driveId }
                 }
             }
-            folderFiles + requestedIds.asList().mapNotNull { cachedFiles[it] ?: remoteFiles[it] }
+            folderFiles + requestedIds.mapNotNull { cachedFiles[it] ?: remoteFiles[it] }
         }
     }
 
@@ -188,7 +194,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             refreshPersistedOfflineStates(adapterFiles + currentFile)
             fileInfoActionView.updateCurrentFile(currentFile, mainViewModel.hasEligibleDestinationDrives(currentFile))
             fileInfoActionView.observeOfflineProgression(this@PreviewSliderFragment) { fileId ->
-                previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
+                previewSliderAdapter.updateFile(fileId, currentFile.driveId) { file -> file.isOffline = true }
             }
         }
     }
@@ -234,7 +240,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     override fun goToFolder() {
-        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
+        FileController.getParentFileByUid(currentFile.id, userDrive)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
     }
 
     override fun sharePublicLink(onActionFinished: () -> Unit) {
@@ -298,7 +304,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             file.isOffline = false
             mainViewModel.updateOfflineFile.value = file.id
             if (_binding != null) {
-                previewSliderAdapter.updateFile(file.id) { it.isOffline = false }
+                previewSliderAdapter.updateFile(file.id, file.driveId) { it.isOffline = false }
                 if (currentFile.id == file.id && currentFile.driveId == file.driveId) currentFile.isOffline = false
                 binding.bottomSheetFileInfos.onOfflineRemovalFinished(file)
             }
@@ -418,7 +424,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     private fun removeFileInSlider() {
-        removePreviewFile(currentFile.id)
+        removePreviewFile(currentFile.id, currentFile.driveId)
         if (previewSliderAdapter.deleteFile(currentFile)) {
             findNavController().popBackStack()
         } else {
@@ -429,7 +435,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override fun shareFile() = Unit
     override fun saveToKDrive() = Unit
     override fun onCacheAddedToOffline() {
-        previewSliderAdapter.updateFile(currentFile.id) { it.isOffline = true }
+        previewSliderAdapter.updateFile(currentFile.id, currentFile.driveId) { it.isOffline = true }
     }
 
     override fun printClicked() {
