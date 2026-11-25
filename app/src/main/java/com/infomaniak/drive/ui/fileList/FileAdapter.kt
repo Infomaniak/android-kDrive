@@ -287,7 +287,7 @@ open class FileAdapter(
         if (this !is FileItemViewHolder) return super.onBindViewHolder(holder, position, payloads)
 
         if (payloads.firstOrNull() is Int) {
-            val progress = payloads.first() as Int
+            val progress = payloads.filterIsInstance<Int>().last()
             val file = getFile(position).apply { currentProgress = progress }
             if (progress != Utils.INDETERMINATE_PROGRESS || !file.isMarkedAsOffline) {
                 progressLayoutView.setupFileProgress(file, true)

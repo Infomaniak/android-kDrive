@@ -98,6 +98,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             previewSliderViewModel.currentPreview?.let { currentFile = it }
             userDrive = previewSliderViewModel.userDrive
         }
+        refreshPersistedOfflineStates(listOf(currentFile))
 
         return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
@@ -132,9 +133,22 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         super.onResume()
 
         _binding?.bottomSheetFileInfos?.let { fileInfoActionView ->
-            fileInfoActionView.updateAvailableOfflineItem()
+            val adapterFiles = (0 until previewSliderAdapter.itemCount).map(previewSliderAdapter::getFile)
+            refreshPersistedOfflineStates(adapterFiles + currentFile)
+            fileInfoActionView.updateCurrentFile(currentFile, mainViewModel.hasEligibleDestinationDrives(currentFile))
             fileInfoActionView.observeOfflineProgression(this@PreviewSliderFragment) { fileId ->
                 previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
+            }
+        }
+    }
+
+    private fun refreshPersistedOfflineStates(files: List<File>) {
+        FileController.getRealmInstance(userDrive).use { realm ->
+            files.forEach { file ->
+                FileController.getFileProxyById(file.id, customRealm = realm)?.let { persistedFile ->
+                    file.isOffline = persistedFile.isOffline
+                    file.isMarkedAsOffline = persistedFile.isMarkedAsOffline
+                }
             }
         }
     }
