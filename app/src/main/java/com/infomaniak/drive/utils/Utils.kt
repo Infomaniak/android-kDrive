@@ -35,6 +35,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.liveData
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.work.Constraints
@@ -66,10 +67,16 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
+import com.infomaniak.drive.ui.fileList.preview.PreviewListStore
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
 import com.infomaniak.drive.ui.publicShare.PublicSharePreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.views.FileInfoActionsView.Companion.SINGLE_OPERATION_CUSTOM_TAG
+import io.sentry.Sentry
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.util.Date
 import kotlin.math.pow
 
@@ -214,28 +221,46 @@ object Utils {
         val fileKeys = fileList.filterNot(File::isFolder).map { it.id to it.driveId }.distinct()
         val selectedKey = selectedFile.id to selectedFile.driveId
         val previewKeys = if (selectedKey in fileKeys) fileKeys else fileKeys + selectedKey
-        val fileIds = previewKeys.map { it.first }.toIntArray()
-        val (destinationClass, bundle) = if (selectedFile.isPublicShared()) {
-            R.id.publicSharePreviewSliderFragment to PublicSharePreviewSliderFragmentArgs(
-                fileId = selectedFile.id,
-                fileIds = fileIds,
-            ).toBundle()
-        } else {
-            val args = PreviewSliderFragmentArgs(
-                fileId = selectedFile.id,
-                driveId = selectedFile.driveId,
-                userId = AccountUtils.currentUserId,
-                isSharedWithMe = isSharedWithMe,
-                parentFolderId = parentFolderId,
-                sortType = sortType.name,
-                fileIds = if (parentFolderId < 0) fileIds else null,
-                fileDriveIds = if (parentFolderId < 0) previewKeys.map { it.second }.toIntArray() else null,
-            )
-
-            R.id.previewSliderFragment to args.toBundle()
+        val isPublicShare = selectedFile.isPublicShared()
+        val source = navController.currentBackStackEntry ?: return
+        val fileId = selectedFile.id
+        val driveId = selectedFile.driveId
+        val userId = AccountUtils.currentUserId
+        val store = PreviewListStore(navController.context.applicationContext)
+        source.lifecycleScope.launch {
+            var token: String? = null
+            var navigated = false
+            try {
+                if (isPublicShare || parentFolderId < 0) {
+                    withContext(Dispatchers.IO) { token = store.create(previewKeys) }
+                }
+                if (navController.currentBackStackEntry != source) return@launch
+                val (destinationClass, bundle) = if (isPublicShare) {
+                    R.id.publicSharePreviewSliderFragment to PublicSharePreviewSliderFragmentArgs(
+                        fileId = fileId,
+                        fileIds = intArrayOf(),
+                        previewListToken = token,
+                    ).toBundle()
+                } else {
+                    R.id.previewSliderFragment to PreviewSliderFragmentArgs(
+                        fileId = fileId,
+                        driveId = driveId,
+                        userId = userId,
+                        isSharedWithMe = isSharedWithMe,
+                        parentFolderId = parentFolderId,
+                        sortType = sortType.name,
+                        previewListToken = token,
+                    ).toBundle()
+                }
+                navController.navigate(destinationClass, bundle, navOptions)
+                navigated = true
+            } catch (exception: IOException) {
+                Sentry.captureException(exception)
+                navController.context.showToast(title = navController.context.getString(R.string.anErrorHasOccurred))
+            } finally {
+                if (!navigated) token?.let(store::delete)
+            }
         }
-
-        navController.navigate(destinationClass, bundle, navOptions)
     }
 
     fun convertBytesToGigaBytes(bytes: Long) = (bytes / 1024.0.pow(3))

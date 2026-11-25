@@ -51,6 +51,7 @@ import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadActio
 import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
+import com.infomaniak.drive.ui.menu.SharedWithMeFragmentArgs
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.navigateToParentFolder
@@ -87,7 +88,12 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override val ownerFragment = this
 
     override val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
-        it.whenResultIsOk { data -> onSelectFolderResult(data) }
+        it.whenResultIsOk { data ->
+            viewLifecycleOwner.lifecycleScope.launch {
+                awaitPreviewFiles()
+                onSelectFolderResult(data)
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -102,16 +108,17 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         )
         previewSliderViewModel.userDrive = userDrive
         val parentFolderId = previewSliderViewModel.parentFolderId
-        val ids = if (parentFolderId >= 0) {
-            previewSliderViewModel.addedFileIds.map { it to navigationArgs.driveId }
-        } else {
-            previewSliderViewModel.fileKeys(navigationArgs.fileId, navigationArgs.driveId)
-        }
         val removedIds = previewSliderViewModel.removedFileIds.toSet()
         val selectedKey = previewSliderViewModel.currentFileId to
                 (previewSliderViewModel.currentDriveId ?: navigationArgs.driveId)
         val sortType = File.SortType.valueOf(navigationArgs.sortType)
         return withContext(Dispatchers.IO) {
+            val ids = if (parentFolderId >= 0) {
+                previewSliderViewModel.addedFileIds.map { it to navigationArgs.driveId }
+            } else {
+                previewSliderViewModel.previewListToken?.let { PreviewListStore(requireContext()).read(it) }
+                    ?: previewSliderViewModel.fileKeys(navigationArgs.fileId, navigationArgs.driveId)
+            }
             val (folderFiles, requestedIds, cachedFiles) = FileController.getRealmInstance(userDrive).use { realm ->
                 val folderFiles = if (parentFolderId >= 0) {
                     val folder = realm.where(File::class.java)
@@ -240,7 +247,17 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     override fun goToFolder() {
-        FileController.getParentFileByUid(currentFile.id, userDrive)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
+        FileController.getParentFileByUid(currentFile.id, userDrive)?.let { folder ->
+            if (userDrive.sharedWithMe) {
+                safeNavigate(
+                    R.id.sharedWithMeFragment,
+                    SharedWithMeFragmentArgs(folderId = folder.id, folderName = folder.name, driveId = folder.driveId, userDrive = userDrive)
+                        .toBundle(),
+                )
+            } else {
+                navigateToParentFolder(folder.id, mainViewModel, userDrive)
+            }
+        }
     }
 
     override fun sharePublicLink(onActionFinished: () -> Unit) {
@@ -317,10 +334,11 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     override fun onLeaveShare(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { fileRequest ->
+        val file = currentFile
+        mainViewModel.deleteFile(file, userDrive).observe(viewLifecycleOwner) { fileRequest ->
             onApiResponse()
             if (fileRequest.isSuccess) {
-                removeFileInSlider()
+                removeFileInSlider(file)
                 showSnackbar(R.string.snackbarLeaveShareConfirmation)
             } else {
                 fileRequest.errorResId?.let { showSnackbar(it) }
@@ -347,8 +365,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             if (fileResult.isSuccess) {
                 (fileResult.data as? File)?.let { file ->
                     if (currentFile.parentId == destinationFolder.id) {
-                        addPreviewFile(file)
-                        previewSliderAdapter.addFile(file)
+                        if (addPreviewFile(file)) previewSliderAdapter.addFile(file)
                     }
 
                     showSnackbar(getString(R.string.allFileDuplicate, currentFile.name))
@@ -381,14 +398,15 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     override fun onDeleteFile(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { fileRequest ->
+        val file = currentFile
+        mainViewModel.deleteFile(file, userDrive).observe(viewLifecycleOwner) { fileRequest ->
             onApiResponse()
             if (fileRequest.isSuccess) {
-                removeFileInSlider()
-                showSnackbar(getString(R.string.snackbarMoveTrashConfirmation, currentFile.name))
+                removeFileInSlider(file)
+                showSnackbar(getString(R.string.snackbarMoveTrashConfirmation, file.name))
                 mainViewModel.deleteFileFromHome.value = true
                 mainViewModel.deleteFilesFromGallery.postValue(
-                    mainViewModel.deleteFilesFromGallery.value?.plus(currentFile.id) ?: listOf(currentFile.id)
+                    mainViewModel.deleteFilesFromGallery.value?.plus(file.id) ?: listOf(file.id)
                 )
             } else {
                 showSnackbar(R.string.errorDelete)
@@ -409,13 +427,14 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     override fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean) {
-        mainViewModel.moveFile(currentFile, destinationFolder)
+        val file = currentFile
+        mainViewModel.moveFile(file, destinationFolder)
             .observe(viewLifecycleOwner) { fileRequest ->
                 if (fileRequest.isSuccess) {
                     // Because if we are on the favorite view we do not want to remove it for example
-                    if (findNavController().previousBackStackEntry?.destination?.id == R.id.fileListFragment) removeFileInSlider()
+                    if (findNavController().previousBackStackEntry?.destination?.id == R.id.fileListFragment) removeFileInSlider(file)
                     mainViewModel.refreshActivities.value = true
-                    showSnackbar(getString(R.string.allFileMove, currentFile.name, destinationFolder.name))
+                    showSnackbar(getString(R.string.allFileMove, file.name, destinationFolder.name))
                 } else {
                     val messageRes = fileRequest.errorResId ?: R.string.errorMove
                     showSnackbar(messageRes)
@@ -423,12 +442,11 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             }
     }
 
-    private fun removeFileInSlider() {
-        removePreviewFile(currentFile.id, currentFile.driveId)
-        if (previewSliderAdapter.deleteFile(currentFile)) {
-            findNavController().popBackStack()
-        } else {
-            toggleBottomSheet(shouldShow = true)
+    private fun removeFileInSlider(file: File) {
+        when (removeFileFromSlider(file)) {
+            true -> findNavController().popBackStack()
+            false -> toggleBottomSheet(shouldShow = true)
+            null -> Unit
         }
     }
 

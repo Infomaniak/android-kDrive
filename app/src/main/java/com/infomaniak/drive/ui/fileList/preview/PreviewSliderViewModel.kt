@@ -22,6 +22,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.infomaniak.drive.data.models.UserDrive
 
+internal fun previewPositionAfterRemoval(removedPosition: Int, selectedPosition: Int, remainingCount: Int): Int {
+    require(remainingCount > 0)
+    return selectedPosition.takeIf { it >= 0 } ?: removedPosition.coerceAtMost(remainingCount - 1)
+}
+
 class PreviewSliderViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
 
     val pdfIsDownloading = MutableLiveData<Boolean>()
@@ -40,6 +45,9 @@ class PreviewSliderViewModel(private val savedStateHandle: SavedStateHandle) : V
     var fileDriveIds: IntArray?
         get() = savedStateHandle["fileDriveIds"]
         set(value) { savedStateHandle["fileDriveIds"] = value }
+
+    val previewListToken: String?
+        get() = savedStateHandle["previewListToken"]
 
     fun fileKeys(defaultFileId: Int, defaultDriveId: Int): List<Pair<Int, Int>> {
         val ids = fileIds ?: intArrayOf(defaultFileId)
@@ -74,6 +82,12 @@ class PreviewSliderViewModel(private val savedStateHandle: SavedStateHandle) : V
 
     lateinit var userDrive: UserDrive
     var publicShareCanDownload = true
+    var onPreviewClosed: (() -> Unit)? = null
+
+    override fun onCleared() {
+        onPreviewClosed?.invoke()
+        super.onCleared()
+    }
 
     private companion object {
         const val CURRENT_FILE_ID = "currentPreviewFileId"

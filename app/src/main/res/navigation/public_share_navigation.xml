@@ -122,6 +122,11 @@
         <argument
             android:name="fileIds"
             app:argType="integer[]" />
+        <argument
+            android:name="previewListToken"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
         <action
             android:id="@+id/action_publicSharePreviewSliderFragment_to_previewFragment"
             app:destination="@id/previewFragment" />

@@ -50,8 +50,10 @@ import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadActio
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFHandler
+import com.infomaniak.drive.ui.fileList.preview.PreviewListStore
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderAdapter
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
+import com.infomaniak.drive.ui.fileList.preview.previewPositionAfterRemoval
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils
 import com.infomaniak.drive.ui.fileList.preview.playback.PreviewPlaybackFragment
 import com.infomaniak.drive.utils.DrivePermissions
@@ -110,23 +112,42 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         previewReady.first { it }
     }
 
-    protected fun addPreviewFile(file: File) {
+    protected fun addPreviewFile(file: File): Boolean {
+        if (!updateStoredList { it + (file.id to file.driveId) }) return false
         previewFiles.add(file)
         if (previewSliderViewModel.parentFolderId >= 0) {
             previewSliderViewModel.addedFileIds += file.id
-        } else {
+        } else if (previewSliderViewModel.previewListToken == null) {
             previewSliderViewModel.fileIds = previewSliderViewModel.fileIds?.plus(file.id)
             previewSliderViewModel.fileDriveIds = previewSliderViewModel.fileDriveIds?.plus(file.driveId)
         }
+        return true
     }
 
-    protected fun removePreviewFile(fileId: Int, driveId: Int) {
+    private fun removePreviewFile(fileId: Int, driveId: Int): Boolean {
+        if (!updateStoredList { keys -> keys.filterNot { it == (fileId to driveId) } }) return false
         previewFiles.removeAll { it.id == fileId && it.driveId == driveId }
         if (previewSliderViewModel.parentFolderId >= 0) {
             previewSliderViewModel.addedFileIds = previewSliderViewModel.addedFileIds.filterNot { it == fileId }.toIntArray()
             previewSliderViewModel.removedFileIds += fileId
-        } else {
+        } else if (previewSliderViewModel.previewListToken == null) {
             previewSliderViewModel.removeFile(fileId, driveId)
+        }
+        return true
+    }
+
+    private fun updateStoredList(update: (List<Pair<Int, Int>>) -> List<Pair<Int, Int>>): Boolean {
+        val token = previewSliderViewModel.previewListToken ?: return true
+        val store = PreviewListStore(requireContext())
+        return try {
+            store.write(token, update(store.read(token)))
+            true
+        } catch (exception: Exception) {
+            Sentry.captureException(exception)
+            store.delete(token)
+            showSnackbar(R.string.anErrorHasOccurred)
+            findNavController().popBackStack()
+            false
         }
     }
 
@@ -149,8 +170,15 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     @CallSuper
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        previewSliderViewModel.previewListToken?.let { token ->
+            val store = PreviewListStore(requireContext().applicationContext)
+            previewSliderViewModel.onPreviewClosed = { store.delete(token) }
+        }
         downloadPermissions.registerPermissions(this) { authorized ->
-            if (authorized) downloadFileClicked()
+            if (authorized) viewLifecycleOwner.lifecycleScope.launch {
+                awaitPreviewFiles()
+                downloadFileClicked()
+            }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -286,7 +314,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
                 @OptIn(UnstableApi::class)
                 override fun onPageSelected(position: Int) {
-                    if (!restoringInitialPage) onPreviewPageSelected(position)
+                    if (!restoringInitialPage && position < previewSliderAdapter.itemCount) onPreviewPageSelected(position)
                 }
             })
         }
@@ -318,6 +346,24 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         setPrintButtonVisibility(isGone = !file.isPDF() || !canDownloadFiles)
         (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShared
         bottomSheetUpdates.tryEmit(file)
+    }
+
+    protected fun removeFileFromSlider(file: File): Boolean? {
+        val selected = currentFile
+        val removedPosition = previewSliderAdapter.getPosition(file)
+        if (removedPosition < 0) return false
+        if (!removePreviewFile(file.id, file.driveId)) return null
+        restoringInitialPage = true
+        val isEmpty = previewSliderAdapter.deleteFile(file)
+        if (!isEmpty) {
+            val selectedPosition = previewPositionAfterRemoval(
+                removedPosition, previewSliderAdapter.getPosition(selected), previewSliderAdapter.itemCount
+            )
+            binding.viewPager.setCurrentItem(selectedPosition, false)
+            onPreviewPageSelected(selectedPosition)
+        }
+        restoringInitialPage = false
+        return isEmpty
     }
 
     protected open fun setBackActionHandlers() {

@@ -14,6 +14,13 @@ import org.junit.jupiter.api.Test
 class PreviewSliderViewModelTest {
 
     @Test
+    fun `page removal selects the replacement or preserves a different selection`() {
+        assertEquals(1, previewPositionAfterRemoval(1, -1, 2))
+        assertEquals(1, previewPositionAfterRemoval(2, -1, 2))
+        assertEquals(0, previewPositionAfterRemoval(1, 0, 2))
+    }
+
+    @Test
     fun `restores the selected page and parent folder`() {
         val state = SavedStateHandle(mapOf("fileId" to 12, "parentFolderId" to 4))
         val first = PreviewSliderViewModel(state)

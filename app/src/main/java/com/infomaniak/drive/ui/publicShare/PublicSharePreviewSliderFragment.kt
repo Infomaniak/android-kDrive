@@ -33,6 +33,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
+import com.infomaniak.drive.ui.fileList.preview.PreviewListStore
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import io.sentry.Sentry
@@ -84,8 +85,11 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
         val driveId = publicShareViewModel.driveId
         val uuid = publicShareViewModel.publicShareUuid
         val semaphore = Semaphore(6)
+        val ids = previewSliderViewModel.previewListToken?.let { token ->
+            withContext(Dispatchers.IO) { PreviewListStore(requireContext()).read(token).map { it.first } }
+        } ?: (previewSliderViewModel.fileIds ?: intArrayOf()).asList()
         return coroutineScope {
-            (previewSliderViewModel.fileIds ?: intArrayOf()).asList().map { id ->
+            ids.map { id ->
                 async {
                     cachedFiles[id] ?: rootFile?.takeIf { it.id == id }
                         ?: semaphore.withPermit {

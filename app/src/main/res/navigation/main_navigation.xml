@@ -148,6 +148,11 @@
             android:defaultValue="@null"
             app:argType="integer[]"
             app:nullable="true" />
+        <argument
+            android:name="previewListToken"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 
     <fragment
