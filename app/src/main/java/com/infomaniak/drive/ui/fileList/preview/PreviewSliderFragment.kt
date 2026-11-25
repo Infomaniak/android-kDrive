@@ -157,7 +157,16 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         super.setBackActionHandlers()
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            _binding?.bottomSheetFileInfos?.refreshBottomSheetUi(currentFile)
+            val categories = FileController.getFileCategories(currentFile.id, userDrive)
+            if (categories == null) {
+                showSnackbar(R.string.errorFileNotFound)
+            } else {
+                if (!currentFile.isManaged) currentFile.categories = categories
+                previewSliderAdapter.updateFile(currentFile.id) { file ->
+                    if (!file.isManaged) file.categories = categories
+                }
+                _binding?.bottomSheetFileInfos?.refreshBottomSheetUi(currentFile)
+            }
         }
     }
 
