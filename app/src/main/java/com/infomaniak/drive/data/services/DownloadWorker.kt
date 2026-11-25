@@ -67,17 +67,20 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
 
     private suspend fun downloadFile(): Result {
         var result = Result.failure()
-        file?.let {
-            result = downloadOfflineFileManager.execute(applicationContext, it) { progress, downloadedFileId ->
-                setProgressAsync(
-                    workDataOf(PROGRESS to progress, FILE_ID to downloadedFileId)
-                )
+        try {
+            file?.let {
+                result = downloadOfflineFileManager.execute(applicationContext, it) { progress, downloadedFileId ->
+                    setProgressAsync(
+                        workDataOf(PROGRESS to progress, FILE_ID to downloadedFileId)
+                    )
+                }
+
+                if (result == Result.failure() && fileId > 0) notifyDownloadFinished()
+                applicationContext.cancelNotification(fileId)
             }
-
-            if (result == Result.failure() && fileId > 0) notifyDownloadFinished()
-            applicationContext.cancelNotification(fileId)
+        } finally {
+            if (result == Result.failure()) downloadOfflineFileManager.cleanLastDownloadedFile()
         }
-
         return result
     }
 

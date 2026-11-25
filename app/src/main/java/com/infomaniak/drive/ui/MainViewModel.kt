@@ -89,6 +89,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
+import java.io.IOException
 import java.util.Date
 
 class MainViewModel(
@@ -523,7 +524,7 @@ class MainViewModel(
     fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
         WorkQuery.Builder
             .fromUniqueWorkNames(arrayListOf(DownloadWorker.TAG))
-            .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.SUCCEEDED))
+            .addStates(WorkInfo.State.entries)
             .build()
     )
 
@@ -560,13 +561,27 @@ class MainViewModel(
         offlineFile: IOFile,
         cacheFile: IOFile,
         userDrive: UserDrive = UserDrive(),
-        onFileRemovedFromOffline: (() -> Unit)? = null,
+        onResult: (Boolean) -> Unit,
     ) {
-        // We need to call this method outside the UI thread
-        viewModelScope.launch(Dispatchers.IO) {
-            FileController.updateOfflineStatus(file.id, isOffline = false)
+        val snapshot = if (file.isManaged) file.freeze() else file
+        viewModelScope.launch {
+            val success = try {
+                withContext(Dispatchers.IO) {
+                    if (cacheFile.exists() && !cacheFile.delete()) throw IOException("Could not delete cached file")
+                    if (snapshot.isMedia()) snapshot.deleteInMediaScan(getContext(), userDrive)
+                    if (offlineFile.exists() && !offlineFile.delete()) throw IOException("Could not delete offline file")
+                    FileController.updateFile(snapshot.id, userDrive = userDrive) { it.isOffline = false }
+                }
+                true
+            } catch (exception: IOException) {
+                SentryLog.e("MainViewModel", "Could not remove offline file", exception)
+                false
+            } catch (exception: SecurityException) {
+                SentryLog.e("MainViewModel", "Could not remove offline file", exception)
+                false
+            }
+            onResult(success)
         }
-        deleteFile(file, offlineFile, cacheFile, userDrive, onFileRemovedFromOffline)
     }
 
     private fun deleteFile(

@@ -33,6 +33,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.whenResultIsOk
+import com.infomaniak.core.ui.showToast
 import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
@@ -213,14 +214,28 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     override fun removeOfflineFile(offlineLocalPath: IOFile?, cacheFile: IOFile) {
-        lifecycleScope.launch {
-            if (offlineLocalPath != null) {
-                mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile, userDrive)
+        val file = currentFile
+        if (offlineLocalPath == null) {
+            showSnackbar(R.string.errorDelete)
+            binding.bottomSheetFileInfos.onOfflineRemovalFinished(file)
+            return
+        }
+        val appContext = requireContext().applicationContext
+        mainViewModel.removeOfflineFile(file, offlineLocalPath, cacheFile, userDrive) { success ->
+            if (!success) {
+                appContext.showToast(title = appContext.getString(R.string.errorDelete))
+                if (_binding != null) {
+                    binding.bottomSheetFileInfos.onOfflineRemovalFinished(file)
+                }
+                return@removeOfflineFile
             }
-            previewSliderAdapter.updateFile(currentFile.id) { file -> file.isOffline = false }
-
-            currentFile.isOffline = false
-            binding.bottomSheetFileInfos.refreshBottomSheetUi(currentFile)
+            file.isOffline = false
+            mainViewModel.updateOfflineFile.value = file.id
+            if (_binding != null) {
+                previewSliderAdapter.updateFile(file.id) { it.isOffline = false }
+                if (currentFile.id == file.id && currentFile.driveId == file.driveId) currentFile.isOffline = false
+                binding.bottomSheetFileInfos.onOfflineRemovalFinished(file)
+            }
         }
     }
 
@@ -347,7 +362,9 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
 
     override fun shareFile() = Unit
     override fun saveToKDrive() = Unit
-    override fun onCacheAddedToOffline() = Unit
+    override fun onCacheAddedToOffline() {
+        previewSliderAdapter.updateFile(currentFile.id) { it.isOffline = true }
+    }
 
     override fun printClicked() {
         trackFileActionEvent(MatomoName.PrintPdf)

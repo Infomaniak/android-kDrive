@@ -101,6 +101,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.utils.activeOfflineWorkForTag
 import com.infomaniak.drive.utils.getAdjustedColumnNumber
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.utils.observeNavigateFileListTo
@@ -673,26 +674,27 @@ open class FileListFragment : MultiSelectFragment(
         }
     }
 
+    private var offlineProgressFileIds: Set<Int> = emptySet()
+
     private fun updateFileStatus(workInfoList: List<WorkInfo>) {
-        if (workInfoList.isEmpty()) {
-            updateVisibleProgresses()
-            return
-        }
-
-        workInfoList.firstOrNull()?.let { workInfo ->
-            val fileId = workInfo.progress.getInt(BaseDownloadWorker.FILE_ID, 0)
-            if (fileId == 0) return
-
-            val progress = workInfo.progress.getInt(BaseDownloadWorker.PROGRESS, 100)
-            binding.fileRecyclerView.post {
-                fileAdapter.updateFileProgressByFileId(fileId, progress) { _, file ->
-                    val tag = workInfo.tags.firstOrNull { it == file.getWorkerTag() }
-                    if (tag != null) {
-                        file.currentProgress = Utils.INDETERMINATE_PROGRESS
+        val activeWork = workInfoList.filter { !it.state.isFinished }
+        val progressByFileId = fileAdapter.getFiles().mapNotNull { file ->
+            activeWork.activeOfflineWorkForTag(file.getWorkerTag())?.let { workInfo ->
+                file.id to workInfo.progress.getInt(BaseDownloadWorker.PROGRESS, 0).coerceIn(0, 99)
+            }
+        }.toMap()
+        val completedFileIds = offlineProgressFileIds - progressByFileId.keys
+        offlineProgressFileIds = progressByFileId.keys
+        binding.fileRecyclerView.post {
+            completedFileIds.forEach { fileId ->
+                fileAdapter.notifyFileChanged(fileId) { file ->
+                    file.currentProgress = Utils.INDETERMINATE_PROGRESS
+                    if (!file.isManaged) {
+                        FileController.getFileByUidOrId(fileId, userDrive)?.let { file.isOffline = it.isOffline }
                     }
                 }
             }
-            SentryLog.i("isPendingOffline", "progress from fragment $progress% for file $fileId, state:${workInfo.state}")
+            progressByFileId.forEach { (fileId, progress) -> fileAdapter.updateFileProgressByFileId(fileId, progress) }
         }
     }
 
