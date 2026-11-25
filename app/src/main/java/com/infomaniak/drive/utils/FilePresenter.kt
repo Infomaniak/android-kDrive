@@ -107,10 +107,15 @@ object FilePresenter {
         }
     }
 
-    fun Fragment.displayFile(file: File, mainViewModel: MainViewModel, fileAdapter: FileAdapter?) {
+    fun Fragment.displayFile(
+        file: File,
+        fileAdapter: FileAdapter?,
+        parentFolderId: Int = -1,
+        sortType: File.SortType = File.SortType.NAME_AZ,
+    ) {
         trackEvent(MatomoCategory.Preview.value, "preview${file.getFileType().value.capitalizeFirstChar()}")
-        val fileList = fileAdapter?.getFileObjectsList(mainViewModel.realm) ?: listOf(file)
-        Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+        val fileList = if (parentFolderId >= 0) emptyList() else fileAdapter?.getFiles() ?: listOf(file)
+        Utils.displayFile(findNavController(), file, fileList, parentFolderId = parentFolderId, sortType = sortType)
     }
 
     fun Fragment.openBookmark(file: File) {

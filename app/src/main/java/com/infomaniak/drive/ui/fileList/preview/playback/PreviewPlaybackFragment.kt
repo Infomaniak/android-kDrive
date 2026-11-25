@@ -114,9 +114,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         return FragmentPreviewPlaybackBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
-        super.onViewCreated(view, savedInstanceState)
-
+    override fun onPreviewFileReady() = with(binding) {
         if (noCurrentFile()) return
 
         container.layoutTransition?.setAnimateParentHierarchy(false)
@@ -140,11 +138,15 @@ open class PreviewPlaybackFragment : PreviewFragment() {
                 toggleFullscreen()
             }
         }
+        if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) startPlayback()
     }
 
     override fun onResume() {
         super.onResume()
+        if (!noCurrentFile()) startPlayback()
+    }
 
+    private fun startPlayback() {
         //To avoid having the notification when we play a video, we have to avoid using the MediaController
         if (!file.isVideo()) {
             PlaybackUtils.activePlayer = exoPlayer
@@ -214,12 +216,13 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     }
 
     override fun onPause() {
-        persistCurrentPlaybackPosition()
+        if (!noCurrentFile()) persistCurrentPlaybackPosition()
         super.onPause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        if (!hasInitializedFile()) return
         // Compute the percentage of the media the user watched before exiting
         val currentMediaPercentage = exoPlayer.currentPosition.times(100)
         val currentMediaDuration = exoPlayer.contentDuration
@@ -233,6 +236,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     }
 
     fun onFragmentUnselected() {
+        if (noCurrentFile()) return
         persistCurrentPlaybackPosition()
         if (exoPlayer.currentMediaItem?.mediaId?.toInt() == file.id) {
             exoPlayer.pause()

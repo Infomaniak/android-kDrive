@@ -125,8 +125,24 @@
             android:name="driveId"
             app:argType="integer" />
         <argument
+            android:name="userId"
+            app:argType="integer" />
+        <argument
             android:name="isSharedWithMe"
             app:argType="boolean" />
+        <argument
+            android:name="parentFolderId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="sortType"
+            android:defaultValue="NAME_AZ"
+            app:argType="string" />
+        <argument
+            android:name="fileIds"
+            android:defaultValue="@null"
+            app:argType="integer[]"
+            app:nullable="true" />
     </fragment>
 
     <fragment

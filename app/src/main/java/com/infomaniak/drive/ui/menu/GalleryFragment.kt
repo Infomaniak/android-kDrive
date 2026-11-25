@@ -111,7 +111,7 @@ class GalleryFragment : MultiSelectFragment(
                 multiSelectManager = multiSelectManager,
                 period = galleryViewModel.period.value,
                 onFileClicked = { file ->
-                    Utils.displayFile(mainViewModel, findNavController(), file, galleryAdapter.galleryList)
+                    Utils.displayFile(findNavController(), file, galleryAdapter.galleryList)
                 },
             ).apply {
                 numberItemLoader = NUMBER_ITEMS_LOADER

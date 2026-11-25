@@ -608,7 +608,7 @@ open class FileListFragment : MultiSelectFragment(
                     fileListViewModel,
                 )
                 file.isBookmark() -> openBookmark(file)
-                else -> displayFile(file, mainViewModel, fileAdapter)
+                else -> displayFile(file, fileAdapter, folderId, fileListViewModel.sortType)
             }
         } else {
             refreshActivities()
@@ -992,7 +992,7 @@ open class FileListFragment : MultiSelectFragment(
     open fun previewFile(fileId: Int) {
         FileController.getRealmInstance().use { realm ->
             FileController.getFileById(realm = realm, fileId = fileId)?.let {
-                Utils.displayFile(mainViewModel, findNavController(), it, listOf(it))
+                Utils.displayFile(findNavController(), it, listOf(it))
             }
         }
         fileListViewModel.isPreviewManaged = true

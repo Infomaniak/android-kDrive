@@ -482,7 +482,7 @@ fun Fragment.observeNavigateFileListTo(mainViewModel: MainViewModel, fileListVie
                         fileListViewModel = fileListViewModel,
                     )
                 } else {
-                    displayFile(file.file, mainViewModel, fileAdapter = null)
+                    displayFile(file.file, fileAdapter = null)
                 }
             }
             is FileListNavigationType.Subfolder -> {

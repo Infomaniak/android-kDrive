@@ -116,6 +116,12 @@
         android:name="com.infomaniak.drive.ui.publicShare.PublicSharePreviewSliderFragment"
         android:label="PublicSharePreviewSliderFragment"
         tools:layout="@layout/fragment_preview_slider">
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
+        <argument
+            android:name="fileIds"
+            app:argType="integer[]" />
         <action
             android:id="@+id/action_publicSharePreviewSliderFragment_to_previewFragment"
             app:destination="@id/previewFragment" />

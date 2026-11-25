@@ -18,14 +18,36 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 
-class PreviewSliderViewModel : ViewModel() {
+class PreviewSliderViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
 
     val pdfIsDownloading = MutableLiveData<Boolean>()
-    var currentPreview: File? = null
-    var userDrive = UserDrive()
+    var currentFileId: Int
+        get() = savedStateHandle[CURRENT_FILE_ID] ?: requireNotNull(savedStateHandle["fileId"])
+        set(value) { savedStateHandle[CURRENT_FILE_ID] = value }
+
+    var fileIds: IntArray?
+        get() = savedStateHandle["fileIds"]
+        set(value) { savedStateHandle["fileIds"] = value }
+
+    val parentFolderId: Int
+        get() = savedStateHandle["parentFolderId"] ?: -1
+
+    var addedFileIds: IntArray
+        get() = savedStateHandle["addedPreviewFileIds"] ?: intArrayOf()
+        set(value) { savedStateHandle["addedPreviewFileIds"] = value }
+
+    var removedFileIds: IntArray
+        get() = savedStateHandle["removedPreviewFileIds"] ?: intArrayOf()
+        set(value) { savedStateHandle["removedPreviewFileIds"] = value }
+
+    lateinit var userDrive: UserDrive
     var publicShareCanDownload = true
+
+    private companion object {
+        const val CURRENT_FILE_ID = "currentPreviewFileId"
+    }
 }

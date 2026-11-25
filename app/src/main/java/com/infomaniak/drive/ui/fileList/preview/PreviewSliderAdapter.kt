@@ -74,10 +74,11 @@ class PreviewSliderAdapter(
     }
 
     fun deleteFile(file: File): Boolean {
-        files.find { it.id == file.id }?.let {
-            files.remove(it)
-            filePagesIds.remove(it.hashCode().toLong())
-            notifyItemRemoved(files.indexOf(it))
+        val index = files.indexOfFirst { it.id == file.id }
+        if (index >= 0) {
+            val removed = files.removeAt(index)
+            filePagesIds.remove(removed.hashCode().toLong())
+            notifyItemRemoved(index)
         }
         return files.isEmpty()
     }

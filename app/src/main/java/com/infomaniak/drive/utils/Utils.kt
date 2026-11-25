@@ -67,6 +67,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
+import com.infomaniak.drive.ui.publicShare.PublicSharePreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.views.FileInfoActionsView.Companion.SINGLE_OPERATION_CUSTOM_TAG
 import java.util.Date
@@ -198,28 +199,35 @@ object Utils {
     }
 
     fun displayFile(
-        mainViewModel: MainViewModel,
         navController: NavController,
         selectedFile: File,
         fileList: List<File>,
         isSharedWithMe: Boolean = false,
+        parentFolderId: Int = -1,
+        sortType: File.SortType = File.SortType.NAME_AZ,
     ) {
-        mainViewModel.currentPreviewFileList = fileList.map { file ->
-            if (file.isManaged) file.realm.copyFromRealm(file, 1) else file
-        }.associateBy { it.id } as LinkedHashMap<Int, File>
-
         val navOptions = NavOptions.Builder()
             .setEnterAnim(R.anim.fragment_open_enter)
             .setExitAnim(R.anim.fragment_open_exit)
             .build()
 
+        val fileIds = fileList.filterNot(File::isFolder).map(File::id).distinct().let {
+            (if (selectedFile.id in it) it else it + selectedFile.id).toIntArray()
+        }
         val (destinationClass, bundle) = if (selectedFile.isPublicShared()) {
-            R.id.publicSharePreviewSliderFragment to null
+            R.id.publicSharePreviewSliderFragment to PublicSharePreviewSliderFragmentArgs(
+                fileId = selectedFile.id,
+                fileIds = fileIds,
+            ).toBundle()
         } else {
             val args = PreviewSliderFragmentArgs(
                 fileId = selectedFile.id,
                 driveId = selectedFile.driveId,
+                userId = AccountUtils.currentUserId,
                 isSharedWithMe = isSharedWithMe,
+                parentFolderId = parentFolderId,
+                sortType = sortType.name,
+                fileIds = if (parentFolderId < 0) fileIds else null,
             )
 
             R.id.previewSliderFragment to args.toBundle()

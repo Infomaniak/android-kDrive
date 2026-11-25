@@ -99,9 +99,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         return FragmentPreviewPdfBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding.downloadLayout) {
-        super.onViewCreated(view, savedInstanceState)
-
+    override fun onPreviewFileReady() = with(binding.downloadLayout) {
         val isExternalFile = previewPDFHandler.isExternalFile()
         if (noCurrentFile() && !isExternalFile) return@with
 
@@ -120,6 +118,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
             isGone = true
             setOnClickListener { onBigOpenWithClicked() }
         }
+        if (!isExternalFile && isMenuVisible) setMenuVisibility(true)
     }
 
     private fun setupExternalPdf() = with(binding.downloadLayout) {
@@ -148,6 +147,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
     override fun setMenuVisibility(menuVisible: Boolean) {
         super.setMenuVisibility(menuVisible)
         if (menuVisible) {
+            if (!previewPDFHandler.isExternalFile() && noCurrentFile()) return
             when {
                 !previewPDFHandler.isExternalFile() && isFileUnavailableOffline() -> showNoNetwork()
                 isDownloading -> previewSliderViewModel.pdfIsDownloading.value = isDownloading

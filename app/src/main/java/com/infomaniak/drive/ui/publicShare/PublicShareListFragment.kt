@@ -184,7 +184,7 @@ class PublicShareListFragment : FileListFragment() {
             when {
                 file.isFolder() -> openFolder(file)
                 file.isBookmark() -> openBookmark(file)
-                else -> displayFile(file, mainViewModel, fileAdapter)
+                else -> displayFile(file, fileAdapter)
             }
         }
     }

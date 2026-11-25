@@ -23,21 +23,32 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
+import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
+import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
 
 class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicShareItemClickListener {
 
-    override val previewSliderViewModel: PreviewSliderViewModel by activityViewModels()
+    override val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.publicSharePreviewSliderFragment)
     override val publicShareViewModel: PublicShareViewModel by activityViewModels()
 
     override val bottomSheetView: ExternalFileInfoActionsView
@@ -51,7 +62,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
     override val ownerFragment = this
 
     override fun initCurrentFile() {
-        currentFile = mainViewModel.currentPreviewFileList[publicShareViewModel.fileClicked?.id]
+        currentFile = getPreviewFile(previewSliderViewModel.currentFileId)
             ?: throw Exception("No current preview found")
     }
 
@@ -63,27 +74,40 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
         showSnackbar(errorMessage, anchor = bottomSheetView)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-
-        runCatching { initCurrentFile() }.onFailure {
-            findNavController().popBackStack()
-            return null
-        }
-
-        initPreviewSliderViewModel()
-
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
-    private fun initPreviewSliderViewModel() = with(previewSliderViewModel) {
-        currentPreview = currentFile
-        userDrive = UserDrive(driveId = publicShareViewModel.driveId)
-        publicShareCanDownload = publicShareViewModel.canDownloadFiles
+    override suspend fun loadPreviewFiles(): List<File> {
+        val cachedFiles = publicShareViewModel.childrenLiveData.value?.files.orEmpty()
+        val rootFile = publicShareViewModel.rootSharedFile.value
+        val driveId = publicShareViewModel.driveId
+        val uuid = publicShareViewModel.publicShareUuid
+        val semaphore = Semaphore(6)
+        return coroutineScope {
+            (previewSliderViewModel.fileIds ?: intArrayOf()).asList().map { id ->
+                async {
+                    cachedFiles.firstOrNull { it.id == id } ?: rootFile?.takeIf { it.id == id }
+                        ?: semaphore.withPermit {
+                            withContext(Dispatchers.IO) {
+                                PublicShareApiRepository.getPublicShareRootFile(driveId, uuid, id).let { response ->
+                                    if (!response.isSuccess()) Sentry.captureMessage("Unable to load public preview file $id")
+                                    response.data.takeIf { response.isSuccess() }?.apply {
+                                        publicShareUuid = uuid
+                                        publicShareAuthToken = null
+                                    }
+                                }
+                            }
+                        }
+                }
+            }.awaitAll().filterNotNull()
+        }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
+    override fun onPreviewReady() = with(previewSliderViewModel) {
+        userDrive = UserDrive(driveId = publicShareViewModel.driveId)
+        this@PublicSharePreviewSliderFragment.userDrive = userDrive
+        publicShareCanDownload = publicShareViewModel.canDownloadFiles
         initBottomSheet()
         observeCacheFileForAction(viewLifecycleOwner)
     }

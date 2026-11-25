@@ -39,6 +39,7 @@ import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.extensions.lightStatusBar
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.ui.view.extension.setMargins
+import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -62,8 +63,11 @@ import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.PreviewHeaderView
 import io.sentry.Sentry
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @OptIn(UnstableApi::class)
@@ -73,6 +77,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     protected val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
     protected val mainViewModel: MainViewModel by activityViewModels()
     protected abstract val previewSliderViewModel: PreviewSliderViewModel
+    val sharedPreviewSliderViewModel get() = previewSliderViewModel
 
     protected abstract val bottomSheetView: View
     protected abstract val bottomSheetBehavior: BottomSheetBehavior<View>
@@ -88,6 +93,40 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     private val bottomSheetUpdates = MutableSharedFlow<File>(extraBufferCapacity = 1)
 
     override lateinit var currentFile: File
+    private val previewFiles = mutableListOf<File>()
+    private var restoringInitialPage = false
+    protected var isPreviewReady = false
+        private set
+    private val previewReady = MutableStateFlow(false)
+
+    protected abstract suspend fun loadPreviewFiles(): List<File>
+    protected abstract fun onPreviewReady()
+    protected open fun onPreviewDisplayed() = Unit
+
+    fun getPreviewFile(fileId: Int): File? = previewFiles.firstOrNull { it.id == fileId }
+
+    suspend fun awaitPreviewFiles() {
+        previewReady.first { it }
+    }
+
+    protected fun addPreviewFile(file: File) {
+        previewFiles.add(file)
+        if (previewSliderViewModel.parentFolderId >= 0) {
+            previewSliderViewModel.addedFileIds += file.id
+        } else {
+            previewSliderViewModel.fileIds = previewSliderViewModel.fileIds?.plus(file.id)
+        }
+    }
+
+    protected fun removePreviewFile(fileId: Int) {
+        previewFiles.removeAll { it.id == fileId }
+        if (previewSliderViewModel.parentFolderId >= 0) {
+            previewSliderViewModel.addedFileIds = previewSliderViewModel.addedFileIds.filterNot { it == fileId }.toIntArray()
+            previewSliderViewModel.removedFileIds += fileId
+        } else {
+            previewSliderViewModel.fileIds = previewSliderViewModel.fileIds?.filterNot { it == fileId }?.toIntArray()
+        }
+    }
 
     val mediaPositionsMap: MutableMap<Int, Long> = mutableMapOf()
 
@@ -105,17 +144,50 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         )
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     @CallSuper
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        downloadPermissions.registerPermissions(this) { authorized ->
+            if (authorized) downloadFileClicked()
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                previewFiles.clear()
+                previewFiles.addAll(loadPreviewFiles().filterNot(File::isFolder))
+                val selectedId = previewSliderViewModel.currentFileId
+                val selectedFile = getPreviewFile(selectedId)
+                if (selectedFile == null) {
+                    Sentry.captureMessage("Preview file $selectedId is unavailable")
+                    showSnackbar(R.string.errorFileNotFound)
+                    findNavController().popBackStack()
+                    return@launch
+                }
+                if (previewSliderViewModel.fileIds?.size?.let { it > previewFiles.size } == true) {
+                    showSnackbar(R.string.anErrorHasOccurred)
+                }
+                currentFile = selectedFile
+                onPreviewReady()
+                setupPreview()
+                binding.previewLoading.isGone = true
+                isPreviewReady = true
+                previewReady.value = true
+                onPreviewDisplayed()
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                Sentry.captureException(exception)
+                showSnackbar(R.string.anErrorHasOccurred)
+                findNavController().popBackStack()
+            }
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupPreview(): Unit = with(binding) {
         requireActivity().window.lightStatusBar(false)
 
         setBackActionHandlers()
-
-        downloadPermissions.registerPermissions(this@BasePreviewSliderFragment) { authorized ->
-            if (authorized) downloadFileClicked()
-        }
 
         header.apply {
             setupWindowInsetsListener(root, bottomSheetView) { pdfContainer.setMargins(right = it?.right ?: 0) }
@@ -138,25 +210,15 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             isPublicShared = isPublicShared,
         )
 
+        previewSliderAdapter.setFiles(ArrayList(previewFiles))
+        restoringInitialPage = true
         initViewPager()
+        viewPager.setCurrentItem(previewSliderAdapter.getPosition(currentFile), false)
+        restoringInitialPage = false
+        onPreviewPageSelected(previewSliderAdapter.getPosition(currentFile))
 
         previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
             if (!currentFile.isOnlyOfficePreview()) header.toggleOpenWithVisibility(isVisible = !isDownloading)
-        }
-
-        mainViewModel.currentPreviewFileList.let { files ->
-            previewSliderAdapter.setFiles(ArrayList(files.values))
-            val position = previewSliderAdapter.getPosition(currentFile)
-            runCatching {
-                viewPager.setCurrentItem(position, false)
-            }.onFailure { exception ->
-                Sentry.captureException(exception) { scope ->
-                    scope.setExtra("currentFile", "id: ${currentFile.id}")
-                    scope.setExtra("files.values", files.values.joinToString { "id: ${it.id}" })
-                }
-                currentFile = files.values.first()
-                viewPager.setCurrentItem(0, false)
-            }
         }
 
         binding.header.enableEdgeToEdge(withBottom = false, withRight = false)
@@ -187,12 +249,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        if (noPreviewList()) return
-        previewSliderViewModel.currentPreview = currentFile
-    }
-
     override fun onStop() {
         clearEdgeToEdge()
         super.onStop()
@@ -201,17 +257,14 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     @OptIn(UnstableApi::class)
     override fun onDestroyView() {
         super.onDestroyView()
+        isPreviewReady = false
+        previewReady.value = false
         _binding?.previewSliderParent?.let(TransitionManager::endTransitions)
         _binding = null
         requireActivity().window.lightStatusBar(!requireActivity().isNightModeEnabled())
     }
 
     override fun onDestroy() {
-        // Reset current preview file list
-        if (findNavController().previousBackStackEntry?.destination?.id != R.id.searchFragment) {
-            mainViewModel.currentPreviewFileList = LinkedHashMap()
-        }
-
         // Release Player
         PlaybackUtils.releasePlayer()
 
@@ -227,42 +280,36 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
                 @OptIn(UnstableApi::class)
                 override fun onPageSelected(position: Int) {
-
-                    val file = previewSliderAdapter.getFile(position)
-                    currentFile = file
-                    previewSliderViewModel.currentPreview = file
-
-                    var shouldDisplayPageNumber = false
-
-                    val selectedFragment =
-                        childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
-                            this.trackScreen()
-                            shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
-                        }
-
-                    // Implementation of onFragmentUnselected to handle resume of media to the same position, only
-                    // for PreviewPlaybackFragment.
-                    childFragmentManager.fragments.filterIsInstance<PreviewPlaybackFragment>().forEach { fragment ->
-                        if (fragment != selectedFragment) {
-                            fragment.onFragmentUnselected()
-                        }
-                    }
-
-                    with(binding.header) {
-                        toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
-                        setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
-                        toggleOpenWithVisibility(isVisible = !isPublicShared && !currentFile.isOnlyOfficePreview())
-                    }
-
-                    setPrintButtonVisibility(isGone = !file.isPDF() || !canDownloadFiles)
-                    (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShared
-                    bottomSheetUpdates.tryEmit(file)
+                    if (!restoringInitialPage) onPreviewPageSelected(position)
                 }
             })
         }
     }
 
-    protected fun noPreviewList() = mainViewModel.currentPreviewFileList.isEmpty()
+    private fun onPreviewPageSelected(position: Int) {
+        val file = previewSliderAdapter.getFile(position)
+        currentFile = file
+        previewSliderViewModel.currentFileId = file.id
+
+        var shouldDisplayPageNumber = false
+        val selectedFragment = childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
+            trackScreen()
+            shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
+        }
+
+        childFragmentManager.fragments.filterIsInstance<PreviewPlaybackFragment>().forEach { fragment ->
+            if (fragment != selectedFragment) fragment.onFragmentUnselected()
+        }
+
+        with(binding.header) {
+            toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
+            setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
+            toggleOpenWithVisibility(isVisible = !isPublicShared && !currentFile.isOnlyOfficePreview())
+        }
+        setPrintButtonVisibility(isGone = !file.isPDF() || !canDownloadFiles)
+        (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShared
+        bottomSheetUpdates.tryEmit(file)
+    }
 
     protected open fun setBackActionHandlers() {
         getBackNavigationResult<Int>(DownloadAction.OPEN_WITH.value) { context?.openWith(currentFile, userDrive) }

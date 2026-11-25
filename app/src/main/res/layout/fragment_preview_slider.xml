@@ -39,6 +39,16 @@
             android:saveEnabled="false"
             android:touchscreenBlocksFocus="true" />
 
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/previewLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <com.infomaniak.drive.views.PreviewHeaderView
             android:id="@+id/header"
             android:layout_width="match_parent"
