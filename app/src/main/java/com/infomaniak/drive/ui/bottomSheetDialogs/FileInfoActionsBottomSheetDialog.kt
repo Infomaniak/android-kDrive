@@ -128,10 +128,7 @@ class FileInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), FileInfo
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             lifecycleScope.launchWhenResumed {
-                val categories = FileController.getFileCategories(currentFile.id, navigationArgs.userDrive)
-                if (categories == null) {
-                    showSnackbar(getString(R.string.errorFileNotFound), showAboveFab = true)
-                } else {
+                FileController.getFileCategories(currentFile.id, navigationArgs.userDrive)?.let { categories ->
                     if (!currentFile.isManaged) currentFile.categories = categories
                     binding.fileInfoActionsView.refreshBottomSheetUi(currentFile)
                 }

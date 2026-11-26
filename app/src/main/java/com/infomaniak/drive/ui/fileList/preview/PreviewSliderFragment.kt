@@ -157,10 +157,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         super.setBackActionHandlers()
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            val categories = FileController.getFileCategories(currentFile.id, userDrive)
-            if (categories == null) {
-                showSnackbar(R.string.errorFileNotFound)
-            } else {
+            FileController.getFileCategories(currentFile.id, userDrive)?.let { categories ->
                 if (!currentFile.isManaged) currentFile.categories = categories
                 previewSliderAdapter.updateFile(currentFile.id) { file ->
                     if (!file.isManaged) file.categories = categories
