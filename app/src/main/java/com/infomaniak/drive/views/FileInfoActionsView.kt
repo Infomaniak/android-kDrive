@@ -76,6 +76,7 @@ import com.infomaniak.drive.utils.SingleOperation
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
+import com.infomaniak.drive.utils.activeOfflineWorkForTag
 import com.infomaniak.drive.utils.openOnlyOfficeDocument
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
@@ -86,11 +87,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.util.UUID
 
 class FileInfoActionsView @JvmOverloads constructor(
     context: Context,
@@ -101,6 +104,10 @@ class FileInfoActionsView @JvmOverloads constructor(
     private val binding by lazy { ViewFileInfoActionsBinding.inflate(LayoutInflater.from(context), this, true) }
 
     private var observeDownloadOffline: LiveData<List<WorkInfo>>? = null
+    private var offlineWorkInfos: List<WorkInfo> = emptyList()
+    private val startingOfflineWork = mutableMapOf<String, UUID?>()
+    private val observedOfflineWork = mutableMapOf<UUID, Int>()
+    private val removingOfflineFiles = mutableSetOf<String>()
     private lateinit var currentFile: File
     private lateinit var mainViewModel: MainViewModel
     private lateinit var shareLinkViewModel: ShareLinkViewModel
@@ -189,7 +196,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         sendCopy.isEnabled = canSendCopy
         disabledSendCopy.isGone = canSendCopy
 
-        val isOfflineToggleInteractable = !file.isMarkedAsOffline || file.isOffline
+        val isOfflineToggleInteractable =
+            file.getWorkerTag() !in removingOfflineFiles && (!isOfflinePending(file) || file.isOffline)
         setOfflineControlsEnabled(isOfflineToggleInteractable && (hasNetwork || file.isOffline))
 
         editDocument.isEnabled = hasNetwork
@@ -214,6 +222,10 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     fun updateCurrentFile(file: File, hasOtherDrivesAvailable: Boolean) = with(binding) {
         currentFile = file
+        val workInfo = activeOfflineWork(file)
+        workInfo?.let { observedOfflineWork[it.id] = file.id }
+        file.currentProgress = workInfo?.progress?.getInt(BaseDownloadWorker.PROGRESS, Utils.INDETERMINATE_PROGRESS)
+            ?: Utils.INDETERMINATE_PROGRESS
         refreshBottomSheetUi(currentFile)
         manageCategories.isVisible = DriveInfosController.getCategoryRights(file.driveId).canPutOnFile
                 && !file.isDisabled()
@@ -317,9 +329,13 @@ class FileInfoActionsView @JvmOverloads constructor(
         // Use OnClickListener instead of OnCheckedChangeListener because the latter is unnecessarily called on every
         // refreshBottomSheetUI calls
         availableOfflineSwitch.setOnClickListener { view ->
+            if (!(view as SwitchMaterial).isChecked && currentFile.isOfflineFile(context)) {
+                removingOfflineFiles.add(currentFile.getWorkerTag())
+                setOfflineControlsEnabled(false)
+            }
             val downloadError = !onItemClickListener.availableOfflineSwitched(
                 fileInfoActionsView = this@FileInfoActionsView,
-                isChecked = (view as SwitchMaterial).isChecked,
+                isChecked = view.isChecked,
             )
 
             with(ownerFragment) {
@@ -377,7 +393,10 @@ class FileInfoActionsView @JvmOverloads constructor(
         )
         val userDrive = UserDrive(driveId = driveId)
         val appContext = context.applicationContext
+        val fileTag = original.getWorkerTag()
+        startingOfflineWork[fileTag] = null
         setOfflineControlsEnabled(false)
+        refreshBottomSheetUi(original, isOfflineProgress = true)
         mainViewModel.viewModelScope.launch {
             val moved = try {
                 withContext(Dispatchers.IO) {
@@ -396,10 +415,12 @@ class FileInfoActionsView @JvmOverloads constructor(
             } catch (exception: IOException) {
                 SentryLog.e("FileInfoActionsView", "Could not move cached file offline", exception)
                 appContext.showToast(title = appContext.getString(R.string.errorMove))
+                startingOfflineWork.remove(fileTag)
                 if (isAttachedToWindow && currentFile === original) refreshBottomSheetUi(original)
                 return@launch
             }
             if (moved) {
+                startingOfflineWork.remove(fileTag)
                 if (isAttachedToWindow && currentFile === original) {
                     original.isOffline = true
                     onItemClickListener.onCacheAddedToOffline()
@@ -407,10 +428,11 @@ class FileInfoActionsView @JvmOverloads constructor(
                     mainViewModel.updateOfflineFile.value = snapshot.id
                 }
             } else {
-                Utils.downloadAsOfflineFile(appContext, snapshot, userDrive)
-                if (snapshot.isMarkedAsOffline) mainViewModel.updateOfflineFile.value = snapshot.id
+                val workId = Utils.downloadAsOfflineFile(appContext, snapshot, userDrive)
+                observedOfflineWork[workId] = snapshot.id
+                startingOfflineWork[fileTag] = workId
             }
-            if (isAttachedToWindow && currentFile === original) refreshBottomSheetUi(original)
+            if (isAttachedToWindow && currentFile === original) refreshBottomSheetUi(original, isOfflineProgress = !moved)
         }
         return@with true
     }
@@ -460,10 +482,7 @@ class FileInfoActionsView @JvmOverloads constructor(
      * To be called only in the [Lifecycle.Event.ON_RESUME].
      */
     fun updateAvailableOfflineItem() {
-        if (hasNetwork && !binding.availableOffline.isEnabled && !currentFile.isMarkedAsOffline) {
-            currentFile.isOffline = true
-            refreshBottomSheetUi(currentFile)
-        }
+        refreshBottomSheetUi(currentFile)
     }
 
     private fun setOfflineControlsEnabled(isEnabled: Boolean) = with(binding) {
@@ -472,32 +491,35 @@ class FileInfoActionsView @JvmOverloads constructor(
         availableOffline.alpha = if (isEnabled) ENABLED_ALPHA else DISABLED_ALPHA
     }
 
+    fun onOfflineRemovalFinished(file: File) {
+        removingOfflineFiles.remove(file.getWorkerTag())
+        if (currentFile.id == file.id && currentFile.driveId == file.driveId) refreshBottomSheetUi(currentFile)
+    }
+
     fun observeOfflineProgression(lifecycleOwner: LifecycleOwner, updateFile: ((fileId: Int) -> Unit)? = null) {
         observeDownloadOffline = mainViewModel.observeDownloadOffline(context.applicationContext)
         observeDownloadOffline?.observe(lifecycleOwner) { workInfoList ->
-            if (workInfoList.isEmpty()) return@observe
-
-            val workInfo = workInfoList.firstOrNull { it.state == WorkInfo.State.RUNNING }
-                ?: workInfoList.firstOrNull { workInfo -> workInfo.tags.any { it == currentFile.getWorkerTag() } }
-                ?: return@observe
-
-            val tag = workInfo.tags.firstOrNull { it == currentFile.getWorkerTag() }
-            if (currentFile.getWorkerTag() != tag) return@observe
-
-            val fileId: Int = currentFile.id
-            val progress = workInfo.progress.getInt(BaseDownloadWorker.PROGRESS, 100)
-
-            SentryLog.d("FileInfoActionsView", "observeOfflineProgression> $progress% file:$fileId state:${workInfo.state}")
-
-            currentFile.currentProgress = progress
-            // Check isOffline because progressing to 100 doesn't necessarily mean it's finish
-            if (progress == 100 && workInfo.state.isFinished && currentFile.isOfflineFile(context)) {
-                updateFile?.invoke(fileId)
-                currentFile.isOffline = true
-                refreshBottomSheetUi(currentFile)
-            } else {
-                refreshBottomSheetUi(currentFile, true)
+            offlineWorkInfos = workInfoList
+            workInfoList.filter { !it.state.isFinished && currentFile.getWorkerTag() in it.tags }.forEach {
+                observedOfflineWork[it.id] = currentFile.id
             }
+            startingOfflineWork.entries.removeAll { (_, workId) -> workId != null && workInfoList.any { it.id == workId } }
+            workInfoList.filter { it.state.isFinished }.forEach { workInfo ->
+                val fileId = observedOfflineWork.remove(workInfo.id) ?: return@forEach
+                if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                    updateFile?.invoke(fileId)
+                    if (currentFile.id == fileId) {
+                        currentFile.isOffline = true
+                        currentFile.isMarkedAsOffline = false
+                    }
+                } else if (workInfo.state == WorkInfo.State.FAILED) {
+                    context.applicationContext.showToast(title = context.getString(R.string.errorDownload))
+                }
+            }
+            val workInfo = activeOfflineWork(currentFile)
+            currentFile.currentProgress = workInfo?.progress?.getInt(BaseDownloadWorker.PROGRESS, Utils.INDETERMINATE_PROGRESS)
+                ?: Utils.INDETERMINATE_PROGRESS
+            refreshBottomSheetUi(currentFile, isOfflineProgress = isOfflinePending(currentFile))
         }
 
         mainViewModel.updateVisibleFiles.observe(lifecycleOwner) {
@@ -530,7 +552,10 @@ class FileInfoActionsView @JvmOverloads constructor(
         val scope = findViewTreeLifecycleOwner()!!.lifecycleScope
         viewAddedCoroutine = scope.launch(start = CoroutineStart.UNDISPATCHED) {
             fileToShowFlow.collectLatest { file ->
-                binding.fileView.setFileItem(file)
+                coroutineScope {
+                    launch(start = CoroutineStart.UNDISPATCHED) { binding.fileView.setFileItem(file) }
+                    if (isOfflinePending(file)) showOfflineFileProgress(file)
+                }
             }
         }
     }
@@ -543,25 +568,29 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     private fun setOfflineItemUi(file: File, isOfflineProgress: Boolean): Unit = with(binding) {
         // Update file item progress
-        if (isOfflineProgress) fileView.progressLayout.setupFileProgress(file) else fileToShowFlow.tryEmit(file)
+        if (isOfflineProgress) {
+            showOfflineFileProgress(file)
+        } else {
+            fileToShowFlow.tryEmit(file)
+        }
 
-        val isPendingOffline = file.isMarkedAsOffline
-        val isItemInteractable = !isPendingOffline || file.isOffline
+        val isPendingOffline = isOfflinePending(file)
+        val isRemovingOffline = file.getWorkerTag() in removingOfflineFiles
+        val isItemInteractable = !isRemovingOffline && (!isPendingOffline || file.isOffline)
         val isItemAvailable = hasNetwork || file.isOffline
         setOfflineControlsEnabled(isItemInteractable && isItemAvailable)
 
         val isOfflineFile = file.isOfflineFile(context)
-        if (isItemInteractable) availableOfflineSwitch.isChecked = isOfflineFile
+        availableOfflineSwitch.isChecked = !isRemovingOffline && (isPendingOffline || isOfflineFile)
 
         when {
-            // We can have a currentProgress in [0,99] yet the file is not pending?
-            isPendingOffline && file.currentProgress in 0..99 -> {
+            isPendingOffline -> {
                 availableOfflineComplete.isGone = true
                 availableOfflineIcon.isGone = true
 
                 availableOfflineProgress.apply {
                     isGone = true // We need to hide the view before updating its `isIndeterminate`
-                    if (isOfflineProgress) {
+                    if (file.currentProgress in 0..99) {
                         isIndeterminate = false
                         progress = file.currentProgress
                     } else {
@@ -570,7 +599,8 @@ class FileInfoActionsView @JvmOverloads constructor(
                     isVisible = true
                 }
             }
-            !isOfflineProgress -> {
+
+            else -> {
                 availableOfflineComplete.isVisible = isOfflineFile
                 availableOfflineIcon.isGone = isOfflineFile
 
@@ -578,6 +608,21 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
     }
+
+    private fun showOfflineFileProgress(file: File) = with(binding.fileView.progressLayout) {
+        if (file.currentProgress in 0..99) {
+            setupFileProgress(file, containsProgress = true)
+        } else {
+            setIndeterminateProgress()
+            isVisible = true
+        }
+    }
+
+    private fun activeOfflineWork(file: File): WorkInfo? =
+        offlineWorkInfos.activeOfflineWorkForTag(file.getWorkerTag())
+
+    private fun isOfflinePending(file: File): Boolean =
+        file.isMarkedAsOffline || file.getWorkerTag() in startingOfflineWork || activeOfflineWork(file) != null
 
     fun onRenameFile(
         newName: String,
@@ -670,9 +715,10 @@ class FileInfoActionsView @JvmOverloads constructor(
         @CallSuper
         fun availableOfflineSwitched(fileInfoActionsView: FileInfoActionsView, isChecked: Boolean): Boolean {
             currentFile?.apply {
+                val isAvailableOffline = isOfflineFile(currentContext)
                 when {
-                    isOffline && isChecked -> Unit
-                    !isOffline && !isChecked -> Unit
+                    isAvailableOffline && isChecked -> Unit
+                    !isAvailableOffline && !isChecked -> Unit
                     isChecked -> {
                         trackFileActionEvent(MatomoName.Offline, true)
                         return fileInfoActionsView.downloadAsOfflineFile()
@@ -680,7 +726,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                     else -> {
                         trackFileActionEvent(MatomoName.Offline, false)
                         val offlineLocalPath = getOfflineFile(currentContext)
-                        val cacheFile = getCacheFile(currentContext)
+                        val cacheFile = getCacheFile(currentContext, UserDrive(driveId = driveId))
                         removeOfflineFile(offlineLocalPath, cacheFile)
                     }
                 }

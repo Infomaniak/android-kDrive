@@ -101,6 +101,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.utils.activeOfflineWorkForTag
 import com.infomaniak.drive.utils.getAdjustedColumnNumber
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.utils.observeNavigateFileListTo
@@ -418,6 +419,7 @@ open class FileListFragment : MultiSelectFragment(
     override fun onDestroyView() {
         isDownloading = false
         showLoadingTimer.cancel()
+        fileAdapter.unregisterAdapterDataObserver(offlineProgressObserver)
         super.onDestroyView()
         _binding = null
     }
@@ -564,6 +566,7 @@ open class FileListFragment : MultiSelectFragment(
 
             adapter = this
         }
+        fileAdapter.registerAdapterDataObserver(offlineProgressObserver)
 
         binding.fileRecyclerView.apply {
             setHasFixedSize(true)
@@ -665,7 +668,8 @@ open class FileListFragment : MultiSelectFragment(
 
     private fun observeOfflineDownloadProgress() {
         mainViewModel.observeDownloadOffline(requireContext().applicationContext).observe(viewLifecycleOwner) { workInfoList ->
-            updateFileStatus(workInfoList)
+            offlineWorkInfos = workInfoList
+            reapplyOfflineProgress()
         }
 
         mainViewModel.updateVisibleFiles.observe(viewLifecycleOwner) {
@@ -673,27 +677,52 @@ open class FileListFragment : MultiSelectFragment(
         }
     }
 
-    private fun updateFileStatus(workInfoList: List<WorkInfo>) {
-        if (workInfoList.isEmpty()) {
-            updateVisibleProgresses()
-            return
+    private var offlineProgressFileIds: Set<Int> = emptySet()
+    private var offlineWorkInfos: List<WorkInfo> = emptyList()
+    private var isApplyingOfflineProgress = false
+
+    private val offlineProgressObserver = object : RecyclerView.AdapterDataObserver() {
+        override fun onChanged() = reapplyOfflineProgress()
+        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) = reapplyOfflineProgress()
+        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) = reapplyOfflineProgress()
+        override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) = reapplyOfflineProgress()
+        override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {
+            if (payload !is Int) reapplyOfflineProgress()
         }
+    }
 
-        workInfoList.firstOrNull()?.let { workInfo ->
-            val fileId = workInfo.progress.getInt(BaseDownloadWorker.FILE_ID, 0)
-            if (fileId == 0) return
+    private fun reapplyOfflineProgress() {
+        if (isApplyingOfflineProgress) return
+        val recyclerView = _binding?.fileRecyclerView ?: return
+        recyclerView.post {
+            if (_binding?.fileRecyclerView !== recyclerView) return@post
+            isApplyingOfflineProgress = true
+            try {
+                updateFileStatus()
+            } finally {
+                isApplyingOfflineProgress = false
+            }
+        }
+    }
 
-            val progress = workInfo.progress.getInt(BaseDownloadWorker.PROGRESS, 100)
-            binding.fileRecyclerView.post {
-                fileAdapter.updateFileProgressByFileId(fileId, progress) { _, file ->
-                    val tag = workInfo.tags.firstOrNull { it == file.getWorkerTag() }
-                    if (tag != null) {
-                        file.currentProgress = Utils.INDETERMINATE_PROGRESS
-                    }
+    private fun updateFileStatus() {
+        val activeWork = offlineWorkInfos.filter { !it.state.isFinished }
+        val progressByFileId = fileAdapter.getFiles().mapNotNull { file ->
+            activeWork.activeOfflineWorkForTag(file.getWorkerTag())?.let { workInfo ->
+                file.id to workInfo.progress.getInt(BaseDownloadWorker.PROGRESS, 0).coerceIn(0, 99)
+            }
+        }.toMap()
+        val completedFileIds = offlineProgressFileIds - progressByFileId.keys
+        offlineProgressFileIds = progressByFileId.keys
+        completedFileIds.forEach { fileId ->
+            fileAdapter.notifyFileChanged(fileId) { file ->
+                file.currentProgress = Utils.INDETERMINATE_PROGRESS
+                if (!file.isManaged) {
+                    FileController.getFileByUidOrId(fileId, userDrive)?.let { file.isOffline = it.isOffline }
                 }
             }
-            SentryLog.i("isPendingOffline", "progress from fragment $progress% for file $fileId, state:${workInfo.state}")
         }
+        progressByFileId.forEach { (fileId, progress) -> fileAdapter.updateFileProgressByFileId(fileId, progress) }
     }
 
     override fun onRefresh() {
@@ -785,6 +814,7 @@ open class FileListFragment : MultiSelectFragment(
             val count = layoutManager.findLastVisibleItemPosition() - first + 1
             fileAdapter.notifyItemRangeChanged(first, count, -1)
         }
+        reapplyOfflineProgress()
     }
 
     override fun performBulkOperation(

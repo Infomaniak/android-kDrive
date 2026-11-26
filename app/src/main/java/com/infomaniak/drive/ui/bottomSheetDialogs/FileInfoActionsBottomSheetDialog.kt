@@ -36,6 +36,7 @@ import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.setBackNavigationResult
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.ui.showToast
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
@@ -69,9 +70,6 @@ import com.infomaniak.drive.utils.shareText
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class FileInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), FileInfoActionsView.OnItemClickListener {
 
@@ -272,16 +270,20 @@ class FileInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), FileInfo
     }
 
     override fun removeOfflineFile(offlineLocalPath: IOFile?, cacheFile: IOFile) {
-        lifecycleScope.launch {
-            if (offlineLocalPath != null) mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile)
-            withContext(Dispatchers.Main) {
+        if (offlineLocalPath == null) {
+            showSnackbar(R.string.errorDelete)
+            binding.fileInfoActionsView.onOfflineRemovalFinished(currentFile)
+            return
+        }
+        val appContext = requireContext().applicationContext
+        mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile, navigationArgs.userDrive) { success ->
+            if (success) {
                 currentFile.isOffline = false
-                if (findNavController().previousBackStackEntry?.destination?.id == R.id.offlineFileFragment) {
-                    findNavController().popBackStack()
-                } else {
-                    binding.fileInfoActionsView.refreshBottomSheetUi(currentFile)
-                }
                 mainViewModel.updateOfflineFile.value = currentFile.id
+                if (isAdded && view != null) binding.fileInfoActionsView.onOfflineRemovalFinished(currentFile)
+            } else {
+                appContext.showToast(title = appContext.getString(R.string.errorDelete))
+                if (isAdded && view != null) binding.fileInfoActionsView.onOfflineRemovalFinished(currentFile)
             }
         }
     }

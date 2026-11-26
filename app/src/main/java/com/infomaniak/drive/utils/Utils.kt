@@ -204,7 +204,9 @@ object Utils {
         fileList: List<File>,
         isSharedWithMe: Boolean = false,
     ) {
-        mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
+        mainViewModel.currentPreviewFileList = fileList.map { file ->
+            if (file.isManaged) file.realm.copyFromRealm(file, 1) else file
+        }.associateBy { it.id } as LinkedHashMap<Int, File>
 
         val navOptions = NavOptions.Builder()
             .setEnterAnim(R.anim.fragment_open_enter)
@@ -320,7 +322,7 @@ object Utils {
         }
     }
 
-    fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()) {
+    fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()): java.util.UUID {
         val workManager = WorkManager.getInstance(context)
 
         if (file.isMarkedAsOffline) workManager.cancelAllWorkByTag(file.getWorkerTag())
@@ -343,6 +345,7 @@ object Utils {
             .build()
 
         workManager.enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
+        return downloadRequest.id
     }
 
     fun downloadAsOfflineFiles(context: Context, folderId: Int, userDrive: UserDrive = UserDrive(), onSuccess: () -> Unit) =

@@ -29,6 +29,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.viewbinding.ViewBinding
+import androidx.work.WorkInfo
 import coil3.ImageLoader
 import coil3.imageLoader
 import coil3.load
@@ -171,7 +172,7 @@ private fun ImageView.displayFileIcon(
     }
 
     filePreview?.load(fileType.icon)
-    progressLayout.setupFileProgress(file)
+    progressLayout.setupFileProgress(file, containsProgress = file.currentProgress in 0..99)
 }
 
 fun getTintedDrawable(context: Context, icon: Int, tint: String): Drawable {
@@ -255,6 +256,10 @@ fun ProgressLayoutView.setupFileProgress(file: File, containsProgress: Boolean =
         }
     }
 }
+
+fun List<WorkInfo>.activeOfflineWorkForTag(tag: String): WorkInfo? =
+    firstOrNull { it.state == WorkInfo.State.RUNNING && tag in it.tags }
+        ?: firstOrNull { !it.state.isFinished && tag in it.tags }
 
 enum class TypeFolder(val iconHorizontalMargin: Int) {
     fileList(10.toPx()),

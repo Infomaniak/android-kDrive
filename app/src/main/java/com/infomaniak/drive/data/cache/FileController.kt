@@ -69,10 +69,26 @@ object FileController {
     private const val REALM_DB_FILE = "kDrive-%d-%d.realm"
     private const val REALM_DB_SHARES_WITH_ME = "kDrive-%d-shares.realm"
 
+    // Bound query size for large previews; 500 follows the existing storage repository batching.
+    private const val OFFLINE_STATE_UID_QUERY_BATCH_SIZE = 500
+
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
     fun getFileById(realm: Realm, fileId: Int): File? {
         return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()
+    }
+
+    fun refreshOfflineStates(realm: Realm, files: List<File>) {
+        val detachedFiles = files.filterNot { it.isManaged }
+        val filesByUid = detachedFiles.groupBy { "${it.id}_${it.driveId}" }
+        filesByUid.keys.chunked(OFFLINE_STATE_UID_QUERY_BATCH_SIZE).forEach { uids ->
+            realm.where(File::class.java).`in`(File::uid.name, uids.toTypedArray()).findAll().forEach { persistedFile ->
+                filesByUid[persistedFile.uid]?.forEach { file ->
+                    file.isOffline = persistedFile.isOffline
+                    file.isMarkedAsOffline = persistedFile.isMarkedAsOffline
+                }
+            }
+        }
     }
 
     fun getSharedDrive(userId: Int, fileId: Int): File? {
