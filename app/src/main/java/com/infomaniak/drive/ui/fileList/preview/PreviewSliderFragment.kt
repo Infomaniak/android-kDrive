@@ -157,7 +157,13 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         super.setBackActionHandlers()
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            _binding?.bottomSheetFileInfos?.refreshBottomSheetUi(currentFile)
+            FileController.getFileCategories(currentFile.id, userDrive)?.let { categories ->
+                if (!currentFile.isManaged) currentFile.categories = categories
+                previewSliderAdapter.updateFile(currentFile.id) { file ->
+                    if (!file.isManaged) file.categories = categories
+                }
+                _binding?.bottomSheetFileInfos?.refreshBottomSheetUi(currentFile)
+            }
         }
     }
 

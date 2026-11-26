@@ -127,7 +127,12 @@ class FileInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), FileInfo
         getBackNavigationResult<Int>(DownloadAction.OPEN_WITH.value) { context?.openWith(currentFile, navigationArgs.userDrive) }
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            lifecycleScope.launchWhenResumed { binding.fileInfoActionsView.refreshBottomSheetUi(currentFile) }
+            lifecycleScope.launchWhenResumed {
+                FileController.getFileCategories(currentFile.id, navigationArgs.userDrive)?.let { categories ->
+                    if (!currentFile.isManaged) currentFile.categories = categories
+                    binding.fileInfoActionsView.refreshBottomSheetUi(currentFile)
+                }
+            }
         }
 
         getBackNavigationResult(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY, ::updateFolderColor)

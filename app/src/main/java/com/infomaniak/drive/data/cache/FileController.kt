@@ -33,6 +33,7 @@ import com.infomaniak.drive.data.models.File.Companion.IS_PRIVATE_SPACE
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
 import com.infomaniak.drive.data.models.FileActivity
+import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.MqttAction
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.file.FileExternalImport
@@ -175,6 +176,15 @@ object FileController {
 
     fun getFileByUidOrId(fileId: Int, userDrive: UserDrive? = null): File? {
         return userDrive?.let { getFileByUid(fileId, userDrive = it) } ?: getFileById(fileId)
+    }
+
+    fun getFileCategories(fileId: Int, userDrive: UserDrive): RealmList<FileCategory>? {
+        return getRealmInstance(userDrive).use { realm ->
+            realm.where(File::class.java)
+                .equalTo(File::uid.name, "${fileId}_${userDrive.driveId}")
+                .findFirst()
+                ?.let { RealmList(*realm.copyFromRealm(it.categories, 0).toTypedArray()) }
+        }
     }
 
     private fun getFileById(fileId: Int): File? {
