@@ -114,7 +114,7 @@ object FilePresenter {
         sortType: File.SortType = File.SortType.NAME_AZ,
     ) {
         trackEvent(MatomoCategory.Preview.value, "preview${file.getFileType().value.capitalizeFirstChar()}")
-        val fileList = if (parentFolderId != Utils.NO_PARENT_FOLDER_ID) {
+        val fileList = if (parentFolderId != Utils.NO_PARENT_FOLDER_ID && !file.isPublicShared()) {
             emptyList()
         } else {
             fileAdapter?.getFiles() ?: listOf(file)

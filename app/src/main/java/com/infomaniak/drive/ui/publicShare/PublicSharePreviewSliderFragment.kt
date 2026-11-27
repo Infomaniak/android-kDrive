@@ -24,17 +24,20 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.navGraphViewModels
+import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
 import com.infomaniak.drive.ui.fileList.preview.PreviewListStore
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
+import com.infomaniak.drive.utils.Utils.NO_PARENT_FOLDER_ID
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineStart
@@ -51,6 +54,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
 
     override val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.publicSharePreviewSliderFragment)
     override val publicShareViewModel: PublicShareViewModel by activityViewModels()
+    private val navigationArgs: PublicSharePreviewSliderFragmentArgs by navArgs()
 
     override val bottomSheetView: ExternalFileInfoActionsView
         get() = binding.publicShareBottomSheetFileActions
@@ -80,6 +84,13 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
     }
 
     override suspend fun loadPreviewFiles(): List<File> {
+        if (navigationArgs.parentFolderId != NO_PARENT_FOLDER_ID) {
+            return publicShareViewModel.getPreviewFolderFiles(
+                folderId = navigationArgs.parentFolderId,
+                sortType = navigationArgs.sortType,
+            )
+        }
+
         val cachedFiles = publicShareViewModel.childrenLiveData.value?.files.orEmpty().associateBy(File::id)
         val rootFile = publicShareViewModel.rootSharedFile.value
         val driveId = publicShareViewModel.driveId

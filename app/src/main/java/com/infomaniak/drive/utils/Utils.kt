@@ -232,7 +232,10 @@ object Utils {
             var token: String? = null
             var navigated = false
             try {
-                if (isPublicShare || (parentFolderId == NO_PARENT_FOLDER_ID && previewKeys.size > 1)) {
+                if (
+                    parentFolderId == NO_PARENT_FOLDER_ID &&
+                    (isPublicShare || previewKeys.size > 1)
+                ) {
                     withContext(Dispatchers.IO) { token = store.create(previewKeys) }
                 }
                 if (navController.currentBackStackEntry != source) return@launch
@@ -241,6 +244,8 @@ object Utils {
                         fileId = fileId,
                         fileIds = intArrayOf(),
                         previewListToken = token,
+                        parentFolderId = parentFolderId,
+                        sortType = sortType,
                     ).toBundle()
                 } else {
                     R.id.previewSliderFragment to PreviewSliderFragmentArgs(

@@ -127,6 +127,14 @@
             android:defaultValue="@null"
             app:argType="string"
             app:nullable="true" />
+        <argument
+            android:name="parentFolderId"
+            android:defaultValue="-2147483648"
+            app:argType="integer" />
+        <argument
+            android:name="sortType"
+            android:defaultValue="NAME_AZ"
+            app:argType="com.infomaniak.drive.data.models.File$SortType" />
         <action
             android:id="@+id/action_publicSharePreviewSliderFragment_to_previewFragment"
             app:destination="@id/previewFragment" />

@@ -42,6 +42,7 @@ import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadActio
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
 import com.infomaniak.drive.utils.IOFile
 import io.sentry.Sentry
+import java.io.IOException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.BufferOverflow
@@ -65,7 +66,16 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     val importPublicShareResult = SingleLiveEvent<PublicShareImportResult>()
     val submitPasswordResult = SingleLiveEvent<PublicShareSubmitPasswordResult>()
     var hasBeenAuthenticated = false
-    var canDownloadFiles = canDownload
+    var canDownloadFiles: Boolean
+        get() = if (savedStateHandle.get<String>(CAPABILITIES_SHARE_UUID) == publicShareUuid) {
+            savedStateHandle.get<Boolean>(CAN_DOWNLOAD_FILES) ?: canDownload
+        } else {
+            canDownload
+        }
+        set(value) {
+            savedStateHandle[CAPABILITIES_SHARE_UUID] = publicShareUuid
+            savedStateHandle[CAN_DOWNLOAD_FILES] = value
+        }
     var rootFileId = PUBLIC_SHARE_DEFAULT_ID
 
     private val _fetchCacheFileForActionResult = MutableSharedFlow<Pair<IOFile?, DownloadAction>>(
@@ -89,7 +99,9 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     private val canDownload: Boolean
         inline get() = savedStateHandle[PublicShareActivityArgs::canDownload.name] ?: false
 
-    private var getPublicShareFilesJob: Job = Job()
+    private var getPublicShareFilesJob: Job? = null
+    private var loadedFolderId: Int? = null
+    private var loadedFolderFiles = false
     private var currentCursor: String? = null
 
     override fun onCleared() {
@@ -119,8 +131,8 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     }
 
     fun cancelDownload() {
-        getPublicShareFilesJob.cancel()
-        getPublicShareFilesJob.cancelChildren()
+        getPublicShareFilesJob?.cancel()
+        getPublicShareFilesJob?.cancelChildren()
         currentCursor = null
     }
 
@@ -191,12 +203,45 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         val emptyFilesResult = PublicShareFilesResult(files = emptyList(), shouldUpdate = false, isNewSort = false)
         childrenLiveData.value = emptyFilesResult
         cancelDownload()
+        loadedFolderId = folderId
+        loadedFolderFiles = false
 
         if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile.value?.isFolder() != true) {
-            downloadPublicShareRootFile()
+            getPublicShareFilesJob = downloadPublicShareRootFile()
         } else {
             getFiles(folderId, sortType, isNewSort)
         }
+    }
+
+    suspend fun getPreviewFolderFiles(folderId: Int, sortType: SortType): List<File> {
+        if (loadedFolderId == folderId) {
+            getPublicShareFilesJob?.join()
+            if (loadedFolderFiles) return childrenLiveData.value?.files.orEmpty()
+        }
+
+        var cursor: String? = null
+        val files = mutableListOf<File>()
+        do {
+            val response = PublicShareApiRepository.getPublicShareChildrenFiles(
+                driveId = driveId,
+                linkUuid = publicShareUuid,
+                folderId = folderId,
+                sortType = sortType,
+                cursor = cursor,
+            )
+            val responseData = response.data
+            if (!response.isSuccess() || responseData == null) {
+                Sentry.captureMessage("Unable to load public preview folder $folderId")
+                throw IOException("Unable to load public preview folder $folderId")
+            }
+            files += responseData.addPublicShareInfo()
+            if (response.hasMore && response.cursor == null) {
+                Sentry.captureMessage("Public preview folder $folderId has more files without a cursor")
+                throw IOException("Unable to load all files in public preview folder $folderId")
+            }
+            cursor = response.cursor
+        } while (response.hasMoreAndCursorExists)
+        return files
     }
 
     private fun getFiles(folderId: Int, sortType: SortType, isNewSort: Boolean) {
@@ -224,6 +269,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
             }
 
             recursiveDownload(folderId, isFirstPage = true)
+            loadedFolderFiles = true
         }
     }
 
@@ -319,5 +365,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     companion object {
         const val TAG = "publicShareViewModel"
         const val ROOT_SHARED_FILE_ID = 1
+        private const val CAN_DOWNLOAD_FILES = "publicShareCanDownloadFiles"
+        private const val CAPABILITIES_SHARE_UUID = "publicShareCapabilitiesUuid"
     }
 }
