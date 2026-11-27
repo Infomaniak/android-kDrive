@@ -75,7 +75,12 @@ class MySharesFragment : FileSubTypeListFragment() {
                 )
             ) else {
                 val fileList = fileAdapter.getFiles()
-                Utils.displayFile(findNavController(), file, fileList)
+                Utils.displayFile(
+                    findNavController(),
+                    file,
+                    fileList,
+                    parentFolderId = if (folderId == OTHER_ROOT_ID) MyShares.id else folderId,
+                )
             }
         }
         fileAdapter.isSelectingFolder = requireActivity() is SelectFolderActivity

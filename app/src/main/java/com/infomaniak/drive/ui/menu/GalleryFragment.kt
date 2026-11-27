@@ -42,6 +42,7 @@ import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.file.SpecialFolder.Gallery
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.databinding.FragmentGalleryBinding
 import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
@@ -111,7 +112,12 @@ class GalleryFragment : MultiSelectFragment(
                 multiSelectManager = multiSelectManager,
                 period = galleryViewModel.period.value,
                 onFileClicked = { file ->
-                    Utils.displayFile(findNavController(), file, galleryAdapter.galleryList)
+                    Utils.displayFile(
+                        findNavController(),
+                        file,
+                        galleryAdapter.galleryList,
+                        parentFolderId = Gallery.id,
+                    )
                 },
             ).apply {
                 numberItemLoader = NUMBER_ITEMS_LOADER

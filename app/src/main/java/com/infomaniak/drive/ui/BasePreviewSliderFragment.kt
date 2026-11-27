@@ -57,6 +57,7 @@ import com.infomaniak.drive.ui.fileList.preview.previewPositionAfterRemoval
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils
 import com.infomaniak.drive.ui.fileList.preview.playback.PreviewPlaybackFragment
 import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.Utils.NO_PARENT_FOLDER_ID
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.openOnlyOfficeDocument
 import com.infomaniak.drive.utils.printPdf
@@ -115,7 +116,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     protected fun addPreviewFile(file: File): Boolean {
         if (!updateStoredList { it + (file.id to file.driveId) }) return false
         previewFiles.add(file)
-        if (previewSliderViewModel.parentFolderId >= 0) {
+        if (previewSliderViewModel.parentFolderId != NO_PARENT_FOLDER_ID) {
             previewSliderViewModel.addedFileIds += file.id
         } else if (previewSliderViewModel.previewListToken == null) {
             previewSliderViewModel.fileIds = previewSliderViewModel.fileIds?.plus(file.id)
@@ -127,7 +128,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     private fun removePreviewFile(fileId: Int, driveId: Int): Boolean {
         if (!updateStoredList { keys -> keys.filterNot { it == (fileId to driveId) } }) return false
         previewFiles.removeAll { it.id == fileId && it.driveId == driveId }
-        if (previewSliderViewModel.parentFolderId >= 0) {
+        if (previewSliderViewModel.parentFolderId != NO_PARENT_FOLDER_ID) {
             previewSliderViewModel.addedFileIds = previewSliderViewModel.addedFileIds.filterNot { it == fileId }.toIntArray()
             previewSliderViewModel.removedFileIds += fileId
         } else if (previewSliderViewModel.previewListToken == null) {

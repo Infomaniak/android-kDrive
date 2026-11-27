@@ -21,6 +21,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.utils.Utils
 
 internal fun previewPositionAfterRemoval(removedPosition: Int, selectedPosition: Int, remainingCount: Int): Int {
     require(remainingCount > 0)
@@ -70,7 +71,7 @@ class PreviewSliderViewModel(private val savedStateHandle: SavedStateHandle) : V
     }
 
     val parentFolderId: Int
-        get() = savedStateHandle["parentFolderId"] ?: -1
+        get() = savedStateHandle["parentFolderId"] ?: Utils.NO_PARENT_FOLDER_ID
 
     var addedFileIds: IntArray
         get() = savedStateHandle["addedPreviewFileIds"] ?: intArrayOf()

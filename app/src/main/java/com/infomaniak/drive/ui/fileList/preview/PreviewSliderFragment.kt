@@ -54,6 +54,7 @@ import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.menu.SharedWithMeFragmentArgs
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.Utils.NO_PARENT_FOLDER_ID
 import com.infomaniak.drive.utils.navigateToParentFolder
 import com.infomaniak.drive.utils.observeCopyToDriveResult
 import com.infomaniak.drive.utils.openWith
@@ -113,7 +114,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
                 (previewSliderViewModel.currentDriveId ?: navigationArgs.driveId)
         val sortType = File.SortType.valueOf(navigationArgs.sortType)
         return withContext(Dispatchers.IO) {
-            val ids = if (parentFolderId >= 0) {
+            val ids = if (parentFolderId != NO_PARENT_FOLDER_ID) {
                 previewSliderViewModel.addedFileIds.map { it to navigationArgs.driveId }
             } else {
                 previewSliderViewModel.previewListToken?.let { PreviewListStore(requireContext()).read(it) }
@@ -135,16 +136,20 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         sortType: File.SortType,
     ): Triple<List<File>, List<Pair<Int, Int>>, Map<Pair<Int, Int>, File>> {
         return FileController.getRealmInstance(userDrive).use { realm ->
-            val folderFiles = if (parentFolderId >= 0) {
-                val folder = realm.where(File::class.java)
-                    .equalTo(File::uid.name, "${parentFolderId}_${navigationArgs.driveId}").findFirst()
+            val folderFiles = if (parentFolderId != NO_PARENT_FOLDER_ID) {
+                val folder = if (parentFolderId < 0) {
+                    FileController.getFileById(realm, parentFolderId)
+                } else {
+                    realm.where(File::class.java)
+                        .equalTo(File::uid.name, "${parentFolderId}_${navigationArgs.driveId}").findFirst()
+                }
                 FileController.getLocalSortedFolderFiles(folder, sortType)
                     .filterNot { it.id in removedIds || (it.id to it.driveId) in ids }
             } else {
                 emptyList()
             }
             val idsToLoad = if (
-                parentFolderId >= 0 && selectedKey.first !in removedIds && selectedKey !in ids &&
+                parentFolderId != NO_PARENT_FOLDER_ID && selectedKey.first !in removedIds && selectedKey !in ids &&
                 folderFiles.none { (it.id to it.driveId) == selectedKey }
             ) ids + selectedKey else ids
             val cachedFiles = idsToLoad.mapNotNull { (id, driveId) ->

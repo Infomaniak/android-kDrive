@@ -527,6 +527,14 @@ object FileController {
         }
     }
 
+    fun clearSearchFiles(userDrive: UserDrive = UserDrive()) {
+        getRealmInstance(userDrive).use { realm ->
+            realm.executeTransaction {
+                getFileById(realm, Search.id)?.children?.clear()
+            }
+        }
+    }
+
     private fun saveMySharesFiles(userDrive: UserDrive, files: ArrayList<File>, replaceOldData: Boolean) {
         val keepCaches = arrayListOf<Int>()
         val keepFiles = arrayListOf<Int>()

@@ -140,7 +140,13 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             }
             else -> {
                 val fileList = fileAdapter.getFiles().ifEmpty { listOf(file) }
-                Utils.displayFile(findNavController(), file, fileList, isSharedWithMe = true)
+                Utils.displayFile(
+                    findNavController(),
+                    file,
+                    fileList,
+                    isSharedWithMe = true,
+                    parentFolderId = if (folderId == ROOT_ID) SharedWithMe.id else folderId,
+                )
             }
         }
     }

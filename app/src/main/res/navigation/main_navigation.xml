@@ -132,7 +132,7 @@
             app:argType="boolean" />
         <argument
             android:name="parentFolderId"
-            android:defaultValue="-1"
+            android:defaultValue="-2147483648"
             app:argType="integer" />
         <argument
             android:name="sortType"

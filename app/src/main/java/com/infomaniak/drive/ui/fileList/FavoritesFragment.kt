@@ -78,7 +78,7 @@ class FavoritesFragment : FileListFragment() {
                     file.openFavoriteFolder()
                 } else {
                     val fileList = getFiles()
-                    Utils.displayFile(findNavController(), file, fileList)
+                    Utils.displayFile(findNavController(), file, fileList, parentFolderId = folderId)
                 }
             }
         }

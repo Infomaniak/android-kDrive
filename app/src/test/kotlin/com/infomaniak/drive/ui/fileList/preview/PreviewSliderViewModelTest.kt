@@ -34,6 +34,13 @@ class PreviewSliderViewModelTest {
     }
 
     @Test
+    fun `restores a negative synthetic parent folder id`() {
+        val state = SavedStateHandle(mapOf("fileId" to 12, "parentFolderId" to -7))
+
+        assertEquals(-7, PreviewSliderViewModel(state).parentFolderId)
+    }
+
+    @Test
     fun `restores changed ordered file ids`() {
         val state = SavedStateHandle(mapOf("fileId" to 12, "fileIds" to intArrayOf(12, 15, 20)))
         val first = PreviewSliderViewModel(state)

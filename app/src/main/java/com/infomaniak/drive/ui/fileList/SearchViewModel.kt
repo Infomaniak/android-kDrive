@@ -143,7 +143,8 @@ class SearchViewModel : ViewModel() {
     }
 
     override fun onCleared() {
-        super.onCleared()
         cancelDownloadFiles()
+        FileController.clearSearchFiles()
+        super.onCleared()
     }
 }

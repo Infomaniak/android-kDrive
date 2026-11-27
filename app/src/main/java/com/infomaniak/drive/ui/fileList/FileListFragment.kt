@@ -139,6 +139,9 @@ open class FileListFragment : MultiSelectFragment(
     open val fileIdToPreview: Int
         get() = (navigationArgs.filePath as? DeeplinkFilePath.FilePreviewInFolder)?.fileId ?: 0
 
+    protected open val previewParentFolderId: Int
+        get() = folderId.takeUnless { it == OTHER_ROOT_ID } ?: Utils.NO_PARENT_FOLDER_ID
+
     protected val showLoadingTimer: CountDownTimer by lazy {
         createRefreshTimer { _binding?.let { it.swipeRefreshLayout.isRefreshing = true } }
     }
@@ -608,7 +611,7 @@ open class FileListFragment : MultiSelectFragment(
                     fileListViewModel,
                 )
                 file.isBookmark() -> openBookmark(file)
-                else -> displayFile(file, fileAdapter, folderId, fileListViewModel.sortType)
+                else -> displayFile(file, fileAdapter, previewParentFolderId, fileListViewModel.sortType)
             }
         } else {
             refreshActivities()

@@ -43,6 +43,7 @@ class RecentChangesFragment : FileSubTypeListFragment() {
     private val navArgs by navArgs<RecentChangesFragmentArgs>()
 
     override val fileIdToPreview: Int get() = navArgs.previewFileId
+    override val previewParentFolderId: Int get() = RecentChanges.id
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 

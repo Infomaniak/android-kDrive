@@ -110,11 +110,15 @@ object FilePresenter {
     fun Fragment.displayFile(
         file: File,
         fileAdapter: FileAdapter?,
-        parentFolderId: Int = -1,
+        parentFolderId: Int = Utils.NO_PARENT_FOLDER_ID,
         sortType: File.SortType = File.SortType.NAME_AZ,
     ) {
         trackEvent(MatomoCategory.Preview.value, "preview${file.getFileType().value.capitalizeFirstChar()}")
-        val fileList = if (parentFolderId >= 0) emptyList() else fileAdapter?.getFiles() ?: listOf(file)
+        val fileList = if (parentFolderId != Utils.NO_PARENT_FOLDER_ID) {
+            emptyList()
+        } else {
+            fileAdapter?.getFiles() ?: listOf(file)
+        }
         Utils.displayFile(findNavController(), file, fileList, parentFolderId = parentFolderId, sortType = sortType)
     }
 

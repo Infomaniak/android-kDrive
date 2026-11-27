@@ -84,6 +84,7 @@ object Utils {
 
     const val ROOT_ID = 1
     const val OTHER_ROOT_ID = -1
+    const val NO_PARENT_FOLDER_ID = Int.MIN_VALUE
 
     const val INDETERMINATE_PROGRESS = -1
 
@@ -210,7 +211,7 @@ object Utils {
         selectedFile: File,
         fileList: List<File>,
         isSharedWithMe: Boolean = false,
-        parentFolderId: Int = -1,
+        parentFolderId: Int = NO_PARENT_FOLDER_ID,
         sortType: File.SortType = File.SortType.NAME_AZ,
     ) {
         val navOptions = NavOptions.Builder()
@@ -231,7 +232,7 @@ object Utils {
             var token: String? = null
             var navigated = false
             try {
-                if (isPublicShare || parentFolderId < 0) {
+                if (isPublicShare || (parentFolderId == NO_PARENT_FOLDER_ID && previewKeys.size > 1)) {
                     withContext(Dispatchers.IO) { token = store.create(previewKeys) }
                 }
                 if (navController.currentBackStackEntry != source) return@launch
