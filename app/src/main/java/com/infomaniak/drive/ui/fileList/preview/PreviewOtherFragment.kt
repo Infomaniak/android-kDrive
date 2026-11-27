@@ -38,9 +38,7 @@ class PreviewOtherFragment : PreviewFragment() {
         return FragmentPreviewOthersBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
-        super.onViewCreated(view, savedInstanceState)
-
+    override fun onPreviewFileReady() = with(binding) {
         if (noCurrentFile()) return
 
         container.layoutTransition?.setAnimateParentHierarchy(false)

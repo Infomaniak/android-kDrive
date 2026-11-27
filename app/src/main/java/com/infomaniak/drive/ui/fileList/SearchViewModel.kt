@@ -30,18 +30,21 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.SearchDateFilter
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.fileList.SearchFragment.VisibilityMode
-import com.infomaniak.drive.utils.AccountUtils
 import io.realm.OrderedRealmCollection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.ensureActive
 import java.util.Date
+import kotlin.coroutines.coroutineContext
 
 class SearchViewModel : ViewModel() {
 
     private var searchFilesJob: Job = Job()
+    private val searchLock = Any()
 
     val visibilityMode = MutableLiveData(VisibilityMode.RECENT_SEARCHES)
 
@@ -63,29 +66,46 @@ class SearchViewModel : ViewModel() {
     var searchOldFileList: OrderedRealmCollection<File>? = null
 
     fun resetSearchPagination() {
-        currentCursor = null
+        synchronized(searchLock) {
+            searchFilesJob.cancel()
+            currentCursor = null
+        }
     }
 
     private fun searchFiles(query: String, order: SortType): LiveData<FileListFragment.FolderFilesResult> {
-        searchFilesJob.cancel()
-        searchFilesJob = Job()
-        return liveData(Dispatchers.IO + searchFilesJob) {
+        val (requestJob, requestCursor) = synchronized(searchLock) {
+            searchFilesJob.cancel()
+            searchFilesJob = Job()
+            searchFilesJob to currentCursor
+        }
+        return liveData(Dispatchers.IO + requestJob) {
+            val userDrive = UserDrive()
             val apiResponse = ApiRepository.searchFiles(
-                driveId = AccountUtils.currentDriveId,
+                driveId = userDrive.driveId,
                 query = query,
                 sortType = order,
-                cursor = currentCursor,
+                cursor = requestCursor,
                 date = formatDate(),
                 type = typeFilter?.value,
                 categories = formatCategories(),
             )
 
-            if (apiResponse.isSuccess() || currentCursor != null) {
+            coroutineContext.ensureActive()
+            if (apiResponse.isSuccess()) {
+                FileController.cacheSearchFiles(apiResponse.data.orEmpty(), userDrive, isFirstPage = requestCursor == null) {
+                    requestJob.isActive
+                }
+            }
+            synchronized(searchLock) {
+                if (!requestJob.isActive) return@liveData
+                currentCursor = apiResponse.cursor
+            }
+            if (apiResponse.isSuccess() || requestCursor != null) {
                 emit(
                     FileListFragment.FolderFilesResult(
                         files = apiResponse.data ?: arrayListOf(),
                         isComplete = !apiResponse.hasMore,
-                        isFirstPage = currentCursor == null,
+                        isFirstPage = requestCursor == null,
                         errorRes = if (apiResponse.isSuccess()) null else apiResponse.translateError(),
                         isNewSort = false,
                     )
@@ -101,8 +121,6 @@ class SearchViewModel : ViewModel() {
                     )
                 )
             }
-
-            currentCursor = apiResponse.cursor
         }
     }
 
@@ -118,12 +136,15 @@ class SearchViewModel : ViewModel() {
     }
 
     fun cancelDownloadFiles() {
-        searchFilesJob.cancel()
-        searchFilesJob.cancelChildren()
+        synchronized(searchLock) {
+            searchFilesJob.cancel()
+            searchFilesJob.cancelChildren()
+        }
     }
 
     override fun onCleared() {
-        super.onCleared()
         cancelDownloadFiles()
+        FileController.clearSearchFiles()
+        super.onCleared()
     }
 }

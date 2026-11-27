@@ -184,7 +184,13 @@ class PublicShareListFragment : FileListFragment() {
             when {
                 file.isFolder() -> openFolder(file)
                 file.isBookmark() -> openBookmark(file)
-                else -> displayFile(file, mainViewModel, fileAdapter)
+                else -> displayFile(
+                    file,
+                    fileAdapter,
+                    parentFolderId = folderId.takeIf { publicShareViewModel.rootSharedFile.value?.isFolder() == true }
+                        ?: Utils.NO_PARENT_FOLDER_ID,
+                    sortType = fileListViewModel.sortType,
+                )
             }
         }
     }

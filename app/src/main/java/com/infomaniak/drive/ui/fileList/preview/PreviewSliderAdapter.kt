@@ -43,7 +43,11 @@ class PreviewSliderAdapter(
     @OptIn(UnstableApi::class)
     override fun createFragment(position: Int): Fragment {
         val file = getFile(position)
-        val args = PreviewFragmentArgs(fileId = file.id, userDrive = userDrive, isPublicShared = isPublicShared).toBundle()
+        val args = PreviewFragmentArgs(
+            fileId = file.id,
+            userDrive = if (isPublicShared) userDrive else userDrive.copy(driveId = file.driveId),
+            isPublicShared = isPublicShared,
+        ).toBundle()
 
         return when (file.getFileType()) {
             ExtensionType.IMAGE -> PreviewPictureFragment()
@@ -55,34 +59,37 @@ class PreviewSliderAdapter(
 
     fun setFiles(files: ArrayList<File>) {
         this.files = files.filter { !it.isFolder() } as ArrayList<File>
-        this.filePagesIds = files.map { it.hashCode().toLong() } as ArrayList
+        this.filePagesIds = this.files.map { it.previewItemId() } as ArrayList
     }
 
-    fun getPosition(file: File): Int = files.indexOfFirst { it.id == file.id }
+    fun getPosition(file: File): Int = files.indexOfFirst { it.id == file.id && it.driveId == file.driveId }
 
     fun getFile(position: Int): File = files[position]
 
-    fun updateFile(fileId: Int, transaction: (file: File) -> Unit) {
-        val filePosition = files.indexOfFirst { it.id == fileId }
+    fun updateFile(fileId: Int, driveId: Int, transaction: (file: File) -> Unit) {
+        val filePosition = files.indexOfFirst { it.id == fileId && it.driveId == driveId }
         if (filePosition >= 0) transaction(files[filePosition])
     }
 
     fun addFile(file: File) {
         files.add(file)
-        filePagesIds.add(file.hashCode().toLong())
+        filePagesIds.add(file.previewItemId())
         notifyItemInserted(files.lastIndex)
     }
 
     fun deleteFile(file: File): Boolean {
-        files.find { it.id == file.id }?.let {
-            files.remove(it)
-            filePagesIds.remove(it.hashCode().toLong())
-            notifyItemRemoved(files.indexOf(it))
+        val index = getPosition(file)
+        if (index >= 0) {
+            val removed = files.removeAt(index)
+            filePagesIds.remove(removed.previewItemId())
+            notifyItemRemoved(index)
         }
         return files.isEmpty()
     }
 
-    override fun getItemId(position: Int): Long = files[position].hashCode().toLong()
+    override fun getItemId(position: Int): Long = files[position].previewItemId()
 
     override fun containsItem(itemId: Long): Boolean = filePagesIds.contains(itemId)
+
+    private fun File.previewItemId(): Long = (driveId.toLong() shl 32) or (id.toLong() and 0xffffffffL)
 }

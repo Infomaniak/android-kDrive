@@ -111,7 +111,6 @@ class MainViewModel(
     val currentFolder: LiveData<File?> = _currentFolder // Use `setCurrentFolder` and `postCurrentFolder` to set value on it
 
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
-    var currentPreviewFileList = LinkedHashMap<Int, File>()
 
     val navigateFileListTo = SingleLiveEvent<FileListNavigationType>()
     val navigateDeeplink = MutableStateFlow<DeeplinkAction.Drive?>(null)

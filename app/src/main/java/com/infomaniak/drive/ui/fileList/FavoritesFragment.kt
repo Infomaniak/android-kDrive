@@ -77,8 +77,8 @@ class FavoritesFragment : FileListFragment() {
                 if (file.isFolder()) {
                     file.openFavoriteFolder()
                 } else {
-                    val fileList = getFileObjectsList(mainViewModel.realm)
-                    Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+                    val fileList = getFiles()
+                    Utils.displayFile(findNavController(), file, fileList, parentFolderId = folderId)
                 }
             }
         }

@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.models.File.SortTypeUsage
 import com.infomaniak.drive.data.models.SearchFilter
 import com.infomaniak.drive.data.models.SearchFilter.FilterKey
 import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.drive.data.models.file.SpecialFolder.Search
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getName
 import com.infomaniak.drive.utils.showSnackbar
@@ -198,8 +199,8 @@ class SearchFragment : FileListFragment() {
                         )
                     )
                 } else {
-                    val fileList = getFileObjectsList(null)
-                    Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+                    val fileList = getFiles()
+                    Utils.displayFile(findNavController(), file, fileList, parentFolderId = Search.id)
                 }
             }
         }

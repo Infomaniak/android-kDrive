@@ -39,6 +39,7 @@ sealed class SpecialFolder(val id: Int, val name: String, val onFileInit: (File.
     data object Gallery : SpecialFolder(id = GALLERY_FILE_ID, name = "Gallery")
     data object RecentChanges : SpecialFolder(id = RECENT_CHANGES_FILE_ID, name = "Recent changes")
     data object SharedWithMe : SpecialFolder(id = SHARED_WITH_ME_FILE_ID, name = "Shared with me")
+    data object Search : SpecialFolder(id = SEARCH_FILE_ID, name = "Search")
     data object Trash : SpecialFolder(
         id = TRASH_FILE_ID,
         name = "Trash",
@@ -55,5 +56,6 @@ sealed class SpecialFolder(val id: Int, val name: String, val onFileInit: (File.
         private const val RECENT_CHANGES_FILE_ID = -4
         private const val SHARED_WITH_ME_FILE_ID = -5
         private const val TRASH_FILE_ID = -6
+        private const val SEARCH_FILE_ID = -7
     }
 }

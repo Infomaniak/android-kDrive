@@ -33,6 +33,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewOthersBinding
+import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.MainViewModel
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.collectLatest
@@ -43,29 +44,59 @@ open class PreviewFragment : Fragment() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private val previewViewModel: PreviewViewModel by viewModels()
-    protected val previewSliderViewModel: PreviewSliderViewModel by viewModels(ownerProducer = ::requireParentFragment)
+    private val standalonePreviewSliderViewModel: PreviewSliderViewModel by viewModels(ownerProducer = ::requireParentFragment)
+    protected val previewSliderViewModel: PreviewSliderViewModel
+        get() = (parentFragment as? BasePreviewSliderFragment)?.sharedPreviewSliderViewModel ?: standalonePreviewSliderViewModel
 
     protected val navigationArgs by lazy { arguments?.let(PreviewFragmentArgs.Companion::fromBundle) }
+    protected val pageUserDrive: UserDrive
+        get() = navigationArgs?.userDrive ?: previewSliderViewModel.userDrive
 
     protected open val noNetworkBinding: FragmentPreviewOthersBinding? get() = null
 
     protected lateinit var file: File
+    private var isFileReady = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        isFileReady = false
+        val parent = parentFragment as? BasePreviewSliderFragment
+        val fileId = navigationArgs?.fileId
+        val driveId = navigationArgs?.takeUnless { it.isPublicShared }?.userDrive?.driveId
+        if (parent != null && fileId != null && fileId > 0 && parent.getPreviewFile(fileId, driveId) == null) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                parent.awaitPreviewFiles()
+                initPreviewFile()
+            }
+        } else {
+            initPreviewFile()
+        }
+    }
+
+    private fun initPreviewFile() {
         if (previewViewModel.currentFile == null) {
             navigationArgs?.let {
-                previewSliderViewModel.userDrive = it.userDrive ?: UserDrive()
                 if (it.fileId > 0) previewViewModel.currentFile = getCurrentFile(it.fileId)
             }
         }
 
-        previewViewModel.currentFile?.let { file = it }
-            ?: lifecycleScope.launchWhenResumed { findNavController().popBackStack() }
+        val currentFile = previewViewModel.currentFile
+        if (currentFile != null) {
+            file = currentFile
+            isFileReady = true
+            observeNetworkToReloadPreview()
+        } else if (navigationArgs?.fileId?.let { it > 0 } == true) {
+            viewLifecycleOwner.lifecycleScope.launchWhenResumed { findNavController().popBackStack() }
+            return
+        }
+        onPreviewFileReady()
+    }
 
-        super.onViewCreated(view, savedInstanceState)
+    protected open fun onPreviewFileReady() = Unit
 
-        if (noCurrentFile()) return
-        observeNetworkToReloadPreview()
+    override fun onDestroyView() {
+        isFileReady = false
+        super.onDestroyView()
     }
 
     private fun observeNetworkToReloadPreview() {
@@ -81,7 +112,10 @@ open class PreviewFragment : Fragment() {
     }
 
     private fun getCurrentFile(fileId: Int): File? = runCatching {
-        FileController.getFileByUidOrId(fileId, previewSliderViewModel.userDrive) ?: mainViewModel.currentPreviewFileList[fileId]
+        (parentFragment as? BasePreviewSliderFragment)?.getPreviewFile(
+            fileId, pageUserDrive.driveId.takeUnless { navigationArgs?.isPublicShared == true }
+        )
+            ?: FileController.getFileByUidOrId(fileId, pageUserDrive)
     }.getOrElse { exception ->
         exception.printStackTrace()
         Sentry.captureException(exception) { scope ->
@@ -97,13 +131,14 @@ open class PreviewFragment : Fragment() {
 
     protected open fun reloadPreviewIfNeeded() = Unit
 
-    protected fun noCurrentFile() = previewViewModel.currentFile == null
+    protected fun noCurrentFile() = !isFileReady
+    protected fun hasInitializedFile() = ::file.isInitialized
 
     protected fun isFileUnavailableOffline(): Boolean = !mainViewModel.hasNetwork && !canDisplayFileOffline()
 
     protected open fun canDisplayFileOffline(): Boolean {
         val context = requireContext()
-        val userDrive = previewSliderViewModel.userDrive
+        val userDrive = pageUserDrive
         val storedFile = if (file.isOnlyOfficePreview()) {
             file.getConvertedPdfCache(context, userDrive)
         } else {
@@ -113,7 +148,7 @@ open class PreviewFragment : Fragment() {
     }
 
     protected fun isOfflineCopyIntact(): Boolean {
-        return file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)
+        return file.getOfflineFile(requireContext(), pageUserDrive.userId)
             ?.let { file.isOfflineAndIntact(it) } == true
     }
 

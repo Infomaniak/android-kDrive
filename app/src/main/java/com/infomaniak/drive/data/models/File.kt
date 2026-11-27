@@ -304,9 +304,9 @@ open class File(
         return IOFile(folder, id.toString())
     }
 
-    fun deleteCaches(context: Context) {
-        if (isOffline) getOfflineFile(context)?.apply { if (exists()) delete() }
-        else getCacheFile(context).apply { if (exists()) delete() }
+    fun deleteCaches(context: Context, userDrive: UserDrive = UserDrive()) {
+        if (isOffline) getOfflineFile(context, userDrive.userId)?.apply { if (exists()) delete() }
+        else getCacheFile(context, userDrive).apply { if (exists()) delete() }
     }
 
     private fun getPublicShareCache(context: Context): IOFile {

@@ -60,7 +60,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     private val offlineFile: IOFile? by lazy {
         if (file.isOffline) {
-            file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)
+            file.getOfflineFile(requireContext(), pageUserDrive.userId)
         } else {
             null
         }
@@ -114,9 +114,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         return FragmentPreviewPlaybackBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
-        super.onViewCreated(view, savedInstanceState)
-
+    override fun onPreviewFileReady() = with(binding) {
         if (noCurrentFile()) return
 
         container.layoutTransition?.setAnimateParentHierarchy(false)
@@ -140,11 +138,15 @@ open class PreviewPlaybackFragment : PreviewFragment() {
                 toggleFullscreen()
             }
         }
+        if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) startPlayback()
     }
 
     override fun onResume() {
         super.onResume()
+        if (!noCurrentFile()) startPlayback()
+    }
 
+    private fun startPlayback() {
         //To avoid having the notification when we play a video, we have to avoid using the MediaController
         if (!file.isVideo()) {
             PlaybackUtils.activePlayer = exoPlayer
@@ -204,7 +206,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
         exoPlayer.setMediaItem(
             getMediaItem(file, offlineFile, offlineIsComplete),
-            (parentFragment as BasePreviewSliderFragment).mediaPositionsMap[file.id] ?: 0L,
+            (parentFragment as BasePreviewSliderFragment).mediaPositionsMap[file.id to file.driveId] ?: 0L,
         )
         exoPlayer.prepare()
 
@@ -214,12 +216,13 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     }
 
     override fun onPause() {
-        persistCurrentPlaybackPosition()
+        if (!noCurrentFile()) persistCurrentPlaybackPosition()
         super.onPause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        if (!hasInitializedFile()) return
         // Compute the percentage of the media the user watched before exiting
         val currentMediaPercentage = exoPlayer.currentPosition.times(100)
         val currentMediaDuration = exoPlayer.contentDuration
@@ -233,6 +236,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     }
 
     fun onFragmentUnselected() {
+        if (noCurrentFile()) return
         persistCurrentPlaybackPosition()
         if (exoPlayer.currentMediaItem?.mediaId?.toInt() == file.id) {
             exoPlayer.pause()
@@ -241,7 +245,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     private fun persistCurrentPlaybackPosition() {
         if (exoPlayer.currentMediaItem?.mediaId?.toInt() == file.id) {
-            (parentFragment as BasePreviewSliderFragment).mediaPositionsMap[file.id] = exoPlayer.currentPosition
+            (parentFragment as BasePreviewSliderFragment).mediaPositionsMap[file.id to file.driveId] = exoPlayer.currentPosition
         }
     }
 

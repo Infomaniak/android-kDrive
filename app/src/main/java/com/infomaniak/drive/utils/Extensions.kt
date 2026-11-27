@@ -302,11 +302,10 @@ fun Context.openOnlyOfficeActivity(file: File) {
     })
 }
 
-fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel) {
+fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel, userDrive: UserDrive = UserDrive()) {
     with(findNavController()) {
         popBackStack(R.id.homeFragment, false)
         (requireActivity() as MainActivity).clickOnBottomBarFolders()
-        val userDrive = UserDrive(sharedWithMe = false)
         mainViewModel.navigateFileListTo(this, folderId, userDrive, null)
     }
 }
@@ -482,7 +481,7 @@ fun Fragment.observeNavigateFileListTo(mainViewModel: MainViewModel, fileListVie
                         fileListViewModel = fileListViewModel,
                     )
                 } else {
-                    displayFile(file.file, mainViewModel, fileAdapter = null)
+                    displayFile(file.file, fileAdapter = null)
                 }
             }
             is FileListNavigationType.Subfolder -> {

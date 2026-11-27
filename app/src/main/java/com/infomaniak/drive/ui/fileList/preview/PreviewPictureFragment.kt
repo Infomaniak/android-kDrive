@@ -78,9 +78,7 @@ class PreviewPictureFragment : PreviewFragment() {
         return FragmentPreviewPictureBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
-        super.onViewCreated(view, savedInstanceState)
-
+    override fun onPreviewFileReady() = with(binding) {
         if (noCurrentFile()) return
 
         noThumbnailLayout.apply {
@@ -185,7 +183,7 @@ class PreviewPictureFragment : PreviewFragment() {
     }
 
     private fun getOfflineFile(): IOFile? {
-        return file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)?.let {
+        return file.getOfflineFile(requireContext(), pageUserDrive.userId)?.let {
             if (file.isOfflineAndIntact(it)) it else null
         }
     }

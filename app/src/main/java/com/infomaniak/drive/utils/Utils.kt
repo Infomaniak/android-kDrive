@@ -35,6 +35,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.liveData
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.work.Constraints
@@ -66,9 +67,16 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
+import com.infomaniak.drive.ui.fileList.preview.PreviewListStore
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
+import com.infomaniak.drive.ui.publicShare.PublicSharePreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.views.FileInfoActionsView.Companion.SINGLE_OPERATION_CUSTOM_TAG
+import io.sentry.Sentry
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.util.Date
 import kotlin.math.pow
 
@@ -76,6 +84,7 @@ object Utils {
 
     const val ROOT_ID = 1
     const val OTHER_ROOT_ID = -1
+    const val NO_PARENT_FOLDER_ID = Int.MIN_VALUE
 
     const val INDETERMINATE_PROGRESS = -1
 
@@ -198,34 +207,66 @@ object Utils {
     }
 
     fun displayFile(
-        mainViewModel: MainViewModel,
         navController: NavController,
         selectedFile: File,
         fileList: List<File>,
         isSharedWithMe: Boolean = false,
+        parentFolderId: Int = NO_PARENT_FOLDER_ID,
+        sortType: File.SortType = File.SortType.NAME_AZ,
     ) {
-        mainViewModel.currentPreviewFileList = fileList.map { file ->
-            if (file.isManaged) file.realm.copyFromRealm(file, 1) else file
-        }.associateBy { it.id } as LinkedHashMap<Int, File>
-
         val navOptions = NavOptions.Builder()
             .setEnterAnim(R.anim.fragment_open_enter)
             .setExitAnim(R.anim.fragment_open_exit)
             .build()
 
-        val (destinationClass, bundle) = if (selectedFile.isPublicShared()) {
-            R.id.publicSharePreviewSliderFragment to null
-        } else {
-            val args = PreviewSliderFragmentArgs(
-                fileId = selectedFile.id,
-                driveId = selectedFile.driveId,
-                isSharedWithMe = isSharedWithMe,
-            )
-
-            R.id.previewSliderFragment to args.toBundle()
+        val fileKeys = fileList.filterNot(File::isFolder).map { it.id to it.driveId }.distinct()
+        val selectedKey = selectedFile.id to selectedFile.driveId
+        val previewKeys = if (selectedKey in fileKeys) fileKeys else fileKeys + selectedKey
+        val isPublicShare = selectedFile.isPublicShared()
+        val source = navController.currentBackStackEntry ?: return
+        val fileId = selectedFile.id
+        val driveId = selectedFile.driveId
+        val userId = AccountUtils.currentUserId
+        val store = PreviewListStore(navController.context.applicationContext)
+        source.lifecycleScope.launch {
+            var token: String? = null
+            var navigated = false
+            try {
+                if (
+                    parentFolderId == NO_PARENT_FOLDER_ID &&
+                    (isPublicShare || previewKeys.size > 1)
+                ) {
+                    withContext(Dispatchers.IO) { token = store.create(previewKeys) }
+                }
+                if (navController.currentBackStackEntry != source) return@launch
+                val (destinationClass, bundle) = if (isPublicShare) {
+                    R.id.publicSharePreviewSliderFragment to PublicSharePreviewSliderFragmentArgs(
+                        fileId = fileId,
+                        fileIds = intArrayOf(),
+                        previewListToken = token,
+                        parentFolderId = parentFolderId,
+                        sortType = sortType,
+                    ).toBundle()
+                } else {
+                    R.id.previewSliderFragment to PreviewSliderFragmentArgs(
+                        fileId = fileId,
+                        driveId = driveId,
+                        userId = userId,
+                        isSharedWithMe = isSharedWithMe,
+                        parentFolderId = parentFolderId,
+                        sortType = sortType.name,
+                        previewListToken = token,
+                    ).toBundle()
+                }
+                navController.navigate(destinationClass, bundle, navOptions)
+                navigated = true
+            } catch (exception: IOException) {
+                Sentry.captureException(exception)
+                navController.context.showToast(title = navController.context.getString(R.string.anErrorHasOccurred))
+            } finally {
+                if (!navigated) token?.let(store::delete)
+            }
         }
-
-        navController.navigate(destinationClass, bundle, navOptions)
     }
 
     fun convertBytesToGigaBytes(bytes: Long) = (bytes / 1024.0.pow(3))

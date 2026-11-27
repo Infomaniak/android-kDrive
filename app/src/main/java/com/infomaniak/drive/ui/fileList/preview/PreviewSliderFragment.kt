@@ -24,6 +24,7 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -38,6 +39,7 @@ import com.infomaniak.core.ui.view.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -49,7 +51,10 @@ import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadActio
 import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
+import com.infomaniak.drive.ui.menu.SharedWithMeFragmentArgs
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.Utils.NO_PARENT_FOLDER_ID
 import com.infomaniak.drive.utils.navigateToParentFolder
 import com.infomaniak.drive.utils.observeCopyToDriveResult
 import com.infomaniak.drive.utils.openWith
@@ -58,7 +63,15 @@ import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.utils.shareText
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
+import io.sentry.Sentry
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
 
 class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.OnItemClickListener {
 
@@ -76,34 +89,96 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override val ownerFragment = this
 
     override val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
-        it.whenResultIsOk { data -> onSelectFolderResult(data) }
+        it.whenResultIsOk { data ->
+            viewLifecycleOwner.lifecycleScope.launch {
+                awaitPreviewFiles()
+                onSelectFolderResult(data)
+            }
+        }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-
-        if (noPreviewList()) {
-            findNavController().popBackStack()
-            return null
-        }
-
-        if (previewSliderViewModel.currentPreview == null) {
-            userDrive = UserDrive(driveId = navigationArgs.driveId, sharedWithMe = navigationArgs.isSharedWithMe)
-
-            currentFile = FileController.getFileByUidOrId(navigationArgs.fileId, userDrive)
-                ?: mainViewModel.currentPreviewFileList[navigationArgs.fileId] ?: throw Exception("No current preview found")
-
-            previewSliderViewModel.currentPreview = currentFile
-            previewSliderViewModel.userDrive = userDrive
-        } else {
-            previewSliderViewModel.currentPreview?.let { currentFile = it }
-            userDrive = previewSliderViewModel.userDrive
-        }
-        refreshPersistedOfflineStates(listOf(currentFile))
-
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override suspend fun loadPreviewFiles(): List<File> {
+        userDrive = UserDrive(
+            userId = navigationArgs.userId,
+            driveId = navigationArgs.driveId,
+            sharedWithMe = navigationArgs.isSharedWithMe,
+        )
+        previewSliderViewModel.userDrive = userDrive
+        val parentFolderId = previewSliderViewModel.parentFolderId
+        val removedIds = previewSliderViewModel.removedFileIds.toSet()
+        val selectedKey = previewSliderViewModel.currentFileId to
+                (previewSliderViewModel.currentDriveId ?: navigationArgs.driveId)
+        val sortType = File.SortType.valueOf(navigationArgs.sortType)
+        return withContext(Dispatchers.IO) {
+            val ids = if (parentFolderId != NO_PARENT_FOLDER_ID) {
+                previewSliderViewModel.addedFileIds.map { it to navigationArgs.driveId }
+            } else {
+                previewSliderViewModel.previewListToken?.let { PreviewListStore(requireContext()).read(it) }
+                    ?: previewSliderViewModel.fileKeys(navigationArgs.fileId, navigationArgs.driveId)
+            }
+            val (folderFiles, requestedIds, cachedFiles) =
+                loadCachedPreviewFiles(parentFolderId, ids, removedIds, selectedKey, sortType)
+            val missingIds = requestedIds.filterNot { it in cachedFiles }
+            val remoteFiles = loadRemotePreviewFiles(missingIds)
+            folderFiles + requestedIds.mapNotNull { cachedFiles[it] ?: remoteFiles[it] }
+        }
+    }
+
+    private fun loadCachedPreviewFiles(
+        parentFolderId: Int,
+        ids: List<Pair<Int, Int>>,
+        removedIds: Set<Int>,
+        selectedKey: Pair<Int, Int>,
+        sortType: File.SortType,
+    ): Triple<List<File>, List<Pair<Int, Int>>, Map<Pair<Int, Int>, File>> {
+        return FileController.getRealmInstance(userDrive).use { realm ->
+            val folderFiles = if (parentFolderId != NO_PARENT_FOLDER_ID) {
+                val folder = if (parentFolderId < 0) {
+                    FileController.getFileById(realm, parentFolderId)
+                } else {
+                    realm.where(File::class.java)
+                        .equalTo(File::uid.name, "${parentFolderId}_${navigationArgs.driveId}").findFirst()
+                }
+                FileController.getLocalSortedFolderFiles(folder, sortType)
+                    .filterNot { it.id in removedIds || (it.id to it.driveId) in ids }
+            } else {
+                emptyList()
+            }
+            val idsToLoad = if (
+                parentFolderId != NO_PARENT_FOLDER_ID && selectedKey.first !in removedIds && selectedKey !in ids &&
+                folderFiles.none { (it.id to it.driveId) == selectedKey }
+            ) ids + selectedKey else ids
+            val cachedFiles = idsToLoad.mapNotNull { (id, driveId) ->
+                realm.where(File::class.java).equalTo(File::uid.name, "${id}_$driveId").findFirst()
+                    ?.let { realm.copyFromRealm(it, 1) }
+            }.associateBy { it.id to it.driveId }
+            Triple(folderFiles, idsToLoad, cachedFiles)
+        }
+    }
+
+    private suspend fun loadRemotePreviewFiles(missingIds: List<Pair<Int, Int>>): Map<Pair<Int, Int>, File> {
+        if (missingIds.isEmpty()) return emptyMap()
+        val client = AccountUtils.getHttpClient(userDrive.userId)
+        val semaphore = Semaphore(6)
+        return coroutineScope {
+            missingIds.map { (id, driveId) ->
+                async {
+                    semaphore.withPermit {
+                        ApiRepository.getFileDetails(File(id = id, driveId = driveId), client).let { response ->
+                            if (!response.isSuccess()) Sentry.captureMessage("Unable to load preview file $id")
+                            response.data.takeIf { response.isSuccess() && it?.id == id && it.driveId == driveId }
+                        }
+                    }
+                }
+            }.awaitAll().filterNotNull().associateBy { it.id to it.driveId }
+        }
+    }
+
+    override fun onPreviewReady() {
         bottomSheetView.init(
             ownerFragment = this@PreviewSliderFragment,
             mainViewModel = mainViewModel,
@@ -114,8 +189,6 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             hideActions = false,
         )
         bottomSheetView.updateCurrentFile(currentFile, mainViewModel.hasEligibleDestinationDrives(currentFile))
-
-        super.onViewCreated(view, savedInstanceState)
 
         requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = true)
 
@@ -129,15 +202,23 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         }
     }
 
+    override fun onPreviewDisplayed() {
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) observeOfflineProgress()
+    }
+
     override fun onResume() {
         super.onResume()
 
+        if (isPreviewReady) observeOfflineProgress()
+    }
+
+    private fun observeOfflineProgress() {
         _binding?.bottomSheetFileInfos?.let { fileInfoActionView ->
             val adapterFiles = (0 until previewSliderAdapter.itemCount).map(previewSliderAdapter::getFile)
             refreshPersistedOfflineStates(adapterFiles + currentFile)
             fileInfoActionView.updateCurrentFile(currentFile, mainViewModel.hasEligibleDestinationDrives(currentFile))
             fileInfoActionView.observeOfflineProgression(this@PreviewSliderFragment) { fileId ->
-                previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
+                previewSliderAdapter.updateFile(fileId, currentFile.driveId) { file -> file.isOffline = true }
             }
         }
     }
@@ -159,7 +240,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             FileController.getFileCategories(currentFile.id, userDrive)?.let { categories ->
                 if (!currentFile.isManaged) currentFile.categories = categories
-                previewSliderAdapter.updateFile(currentFile.id) { file ->
+                previewSliderAdapter.updateFile(currentFile.id, currentFile.driveId) { file ->
                     if (!file.isManaged) file.categories = categories
                 }
                 _binding?.bottomSheetFileInfos?.refreshBottomSheetUi(currentFile)
@@ -183,7 +264,17 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     override fun goToFolder() {
-        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
+        FileController.getParentFileByUid(currentFile.id, userDrive)?.let { folder ->
+            if (userDrive.sharedWithMe) {
+                safeNavigate(
+                    R.id.sharedWithMeFragment,
+                    SharedWithMeFragmentArgs(folderId = folder.id, folderName = folder.name, driveId = folder.driveId, userDrive = userDrive)
+                        .toBundle(),
+                )
+            } else {
+                navigateToParentFolder(folder.id, mainViewModel, userDrive)
+            }
+        }
     }
 
     override fun sharePublicLink(onActionFinished: () -> Unit) {
@@ -247,7 +338,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             file.isOffline = false
             mainViewModel.updateOfflineFile.value = file.id
             if (_binding != null) {
-                previewSliderAdapter.updateFile(file.id) { it.isOffline = false }
+                previewSliderAdapter.updateFile(file.id, file.driveId) { it.isOffline = false }
                 if (currentFile.id == file.id && currentFile.driveId == file.driveId) currentFile.isOffline = false
                 binding.bottomSheetFileInfos.onOfflineRemovalFinished(file)
             }
@@ -260,10 +351,11 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     override fun onLeaveShare(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { fileRequest ->
+        val file = currentFile
+        mainViewModel.deleteFile(file, userDrive).observe(viewLifecycleOwner) { fileRequest ->
             onApiResponse()
             if (fileRequest.isSuccess) {
-                removeFileInSlider()
+                removeFileInSlider(file)
                 showSnackbar(R.string.snackbarLeaveShareConfirmation)
             } else {
                 fileRequest.errorResId?.let { showSnackbar(it) }
@@ -289,8 +381,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         mainViewModel.duplicateFile(currentFile, destinationFolder.id).observe(viewLifecycleOwner) { fileResult ->
             if (fileResult.isSuccess) {
                 (fileResult.data as? File)?.let { file ->
-                    if (currentFile.parentId == destinationFolder.id) {
-                        mainViewModel.currentPreviewFileList[file.id] = file
+                    if (currentFile.parentId == destinationFolder.id && addPreviewFile(file)) {
                         previewSliderAdapter.addFile(file)
                     }
 
@@ -324,14 +415,15 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     override fun onDeleteFile(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { fileRequest ->
+        val file = currentFile
+        mainViewModel.deleteFile(file, userDrive).observe(viewLifecycleOwner) { fileRequest ->
             onApiResponse()
             if (fileRequest.isSuccess) {
-                removeFileInSlider()
-                showSnackbar(getString(R.string.snackbarMoveTrashConfirmation, currentFile.name))
+                removeFileInSlider(file)
+                showSnackbar(getString(R.string.snackbarMoveTrashConfirmation, file.name))
                 mainViewModel.deleteFileFromHome.value = true
                 mainViewModel.deleteFilesFromGallery.postValue(
-                    mainViewModel.deleteFilesFromGallery.value?.plus(currentFile.id) ?: listOf(currentFile.id)
+                    mainViewModel.deleteFilesFromGallery.value?.plus(file.id) ?: listOf(file.id)
                 )
             } else {
                 showSnackbar(R.string.errorDelete)
@@ -352,13 +444,14 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     override fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean) {
-        mainViewModel.moveFile(currentFile, destinationFolder)
+        val file = currentFile
+        mainViewModel.moveFile(file, destinationFolder)
             .observe(viewLifecycleOwner) { fileRequest ->
                 if (fileRequest.isSuccess) {
                     // Because if we are on the favorite view we do not want to remove it for example
-                    if (findNavController().previousBackStackEntry?.destination?.id == R.id.fileListFragment) removeFileInSlider()
+                    if (findNavController().previousBackStackEntry?.destination?.id == R.id.fileListFragment) removeFileInSlider(file)
                     mainViewModel.refreshActivities.value = true
-                    showSnackbar(getString(R.string.allFileMove, currentFile.name, destinationFolder.name))
+                    showSnackbar(getString(R.string.allFileMove, file.name, destinationFolder.name))
                 } else {
                     val messageRes = fileRequest.errorResId ?: R.string.errorMove
                     showSnackbar(messageRes)
@@ -366,19 +459,18 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             }
     }
 
-    private fun removeFileInSlider() {
-        mainViewModel.currentPreviewFileList.remove(currentFile.id)
-        if (previewSliderAdapter.deleteFile(currentFile)) {
-            findNavController().popBackStack()
-        } else {
-            toggleBottomSheet(shouldShow = true)
+    private fun removeFileInSlider(file: File) {
+        when (removeFileFromSlider(file)) {
+            true -> findNavController().popBackStack()
+            false -> toggleBottomSheet(shouldShow = true)
+            null -> Unit
         }
     }
 
     override fun shareFile() = Unit
     override fun saveToKDrive() = Unit
     override fun onCacheAddedToOffline() {
-        previewSliderAdapter.updateFile(currentFile.id) { it.isOffline = true }
+        previewSliderAdapter.updateFile(currentFile.id, currentFile.driveId) { it.isOffline = true }
     }
 
     override fun printClicked() {

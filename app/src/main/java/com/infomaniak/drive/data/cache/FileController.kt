@@ -42,6 +42,7 @@ import com.infomaniak.drive.data.models.file.SpecialFolder.Favorites
 import com.infomaniak.drive.data.models.file.SpecialFolder.Gallery
 import com.infomaniak.drive.data.models.file.SpecialFolder.MyShares
 import com.infomaniak.drive.data.models.file.SpecialFolder.RecentChanges
+import com.infomaniak.drive.data.models.file.SpecialFolder.Search
 import com.infomaniak.drive.data.models.file.SpecialFolder.SharedWithMe
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.AccountUtils
@@ -58,6 +59,7 @@ import io.realm.kotlin.oneOf
 import io.realm.kotlin.toFlow
 import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.invoke
@@ -120,6 +122,13 @@ object FileController {
             }
         }
         return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
+    }
+
+    fun getParentFileByUid(fileId: Int, userDrive: UserDrive): File? {
+        return getRealmInstance(userDrive).use { realm ->
+            realm.where(File::class.java).equalTo(File::uid.name, "${fileId}_${userDrive.driveId}").findFirst()
+                ?.localParent?.firstOrNull { it.id > 0 }?.let { realm.copyFromRealm(it, 0) }
+        }
     }
 
     fun getIdOfChildrenFileWithName(folderId: Int, name: String): List<Int> {
@@ -353,11 +362,22 @@ object FileController {
         if (filesToDelete.isEmpty()) return
 
         val file = filesToDelete.removeAt(0)
-        val children = getFileByUidOrId(file.id, userDrive)?.children ?: emptyList()
+        val fileUserDrive = userDrive?.copy(driveId = file.driveId)
+        val children = getFileByUidOrId(file.id, fileUserDrive)?.children ?: emptyList()
 
         filesToDelete.addAll(children)
-        file.deleteCaches(context)
-        updateFile(file.id, realm, userDrive) { localFile -> localFile.deleteFromRealm() }
+        file.deleteCaches(context, fileUserDrive ?: UserDrive())
+        if (fileUserDrive == null) {
+            updateFile(file.id, realm) { localFile -> localFile.deleteFromRealm() }
+        } else {
+            val remove: (Realm) -> Unit = { currentRealm ->
+                currentRealm.executeTransaction {
+                    currentRealm.where(File::class.java).equalTo(File::uid.name, "${file.id}_${file.driveId}")
+                        .findFirst()?.deleteFromRealm()
+                }
+            }
+            if (realm != null) remove(realm) else getRealmInstance(fileUserDrive).use(remove)
+        }
 
         deleteFileAndChildrenRec(filesToDelete, realm, userDrive, context)
     }
@@ -481,6 +501,38 @@ object FileController {
 
     fun saveFavoritesFiles(files: List<File>, replaceOldData: Boolean = false, realm: Realm? = null) {
         saveFiles(Favorites.file, files, replaceOldData, realm)
+    }
+
+    fun cacheSearchFiles(files: List<File>, userDrive: UserDrive, isFirstPage: Boolean, shouldWrite: () -> Boolean) {
+        getRealmInstance(userDrive).use { realm ->
+            realm.executeTransaction {
+                if (!shouldWrite()) return@executeTransaction
+                val searchFolder = getFileById(realm, Search.id) ?: realm.copyToRealm(Search.file)
+                if (isFirstPage) searchFolder.children.clear()
+                val cachedIds = searchFolder.children.mapTo(mutableSetOf()) { it.uid }
+                files.filterNot(File::isFolder).forEach { file ->
+                    val uid = "${file.id}_${file.driveId}"
+                    realm.where(File::class.java).equalTo(File::uid.name, uid).findFirst()?.let {
+                        val existing = realm.copyFromRealm(it, 1)
+                        file.keepOldLocalFilesData(existing)
+                        file.users = existing.users
+                        file.version = existing.version
+                    }
+                    file.sortedName = file.sortedName.lowercase().removeAccents()
+                    val cached = realm.copyToRealmOrUpdate(file)
+                    if (cachedIds.add(uid)) searchFolder.children.add(cached)
+                }
+                if (!shouldWrite()) throw CancellationException("Search was cancelled while caching")
+            }
+        }
+    }
+
+    fun clearSearchFiles(userDrive: UserDrive = UserDrive()) {
+        getRealmInstance(userDrive).use { realm ->
+            realm.executeTransaction {
+                getFileById(realm, Search.id)?.children?.clear()
+            }
+        }
     }
 
     private fun saveMySharesFiles(userDrive: UserDrive, files: ArrayList<File>, replaceOldData: Boolean) {
@@ -917,7 +969,7 @@ object FileController {
         customRealm: Realm? = null
     ): ArrayList<File> {
         val block: (Realm) -> ArrayList<File> = { currentRealm ->
-            currentRealm.where(File::class.java).like(File::name.name, "*$query*").findAll()?.let { files ->
+            currentRealm.where(File::class.java).greaterThan(File::id.name, 0).like(File::name.name, "*$query*").findAll()?.let { files ->
                 getLocalSortedFolderFiles(null, order, files, currentRealm)
             } ?: arrayListOf()
         }
